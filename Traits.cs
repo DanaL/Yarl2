@@ -87,6 +87,48 @@ class AffixedTrait : Trait
   public override string AsText() => $"Affixed";
 }
 
+class AlluringTrait : TemporaryTrait
+{
+  public int DC { get; set; }
+
+  public override string AsText() => $"Alluring#{OwnerID}#{DC}#{ExpiresOn}";
+
+  public override List<string> Apply(GameObj target, GameState gs)
+  {
+    OwnerID = target.ID;
+    target.Traits.Add(this);
+
+    return [];
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (gs.Turn > ExpiresOn || gs.ObjDb.GetObj(OwnerID) is not Actor owner)
+    {
+      Remove(gs);
+      return;
+    }
+
+    if (gs.LastPlayerFoV.ContainsKey(owner.Loc) && gs.Player.AbilityCheck(Attribute.Will, DC, gs.Rng))
+    {
+      TravelCostFunction costFunc;
+      if (gs.Player.HasTrait<FlyingTrait>() || gs.Player.HasTrait<FloatingTrait>())
+        costFunc = DijkstraMap.CostByFlight;
+      else if (gs.Player.HasTrait<SwimmerTrait>())
+        costFunc = DijkstraMap.CostForSwimming;
+      else
+        costFunc = DijkstraMap.Cost;
+      var path = AStar.FindPath(gs.ObjDb, gs.CurrentMap, gs.Player.Loc, owner.Loc, costFunc, true);
+
+      if (path.Count > 0)
+      {
+        gs.UIRef().AlertPlayer($"You feel compelled to move toward the {MsgFactory.CalcName(owner, gs.Player)}!");
+        gs.Player.QueueAction(new MoveAction(gs, gs.Player, path.Pop()));
+      }      
+    }
+  }
+}
+
 class ArtifactTrait : Trait
 {
   public override string AsText() => $"Artifact";
@@ -1563,7 +1605,7 @@ class VulnerableTrait : Trait
 {
   public DamageType Type { get; set; }
 
-  public override string AsText() => $"Vulnerable#{Type}";
+  public override string AsText() => $"Vulnerable#{Type}#{SourceId}";
 }
 
 class ScrollTrait : Trait
@@ -4116,6 +4158,14 @@ class TraitFactory
           ids = [..pieces[1].Split(',').Select(ulong.Parse)];
         return new AlliesTrait() { IDs = ids }; }
       },
+    {
+      "Alluring", (pieces, gameObj) => new AlluringTrait()
+      {
+        OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
+        DC = int.Parse(pieces[2]),
+        ExpiresOn = pieces[3] == "max"? ulong.MaxValue : ulong.Parse(pieces[3])
+      }
+    },
     { "Ammo", (pieces, gameObj) =>
       {
         Enum.TryParse(pieces[3], out DamageType ammoDt);
@@ -4535,8 +4585,9 @@ class TraitFactory
     { "Villager", (pieces, gameObj) => new VillagerTrait() },
     { "Vulnerable", (pieces, gameObj) =>
       {
+        ulong sourceId = pieces.Length > 2 ? ulong.Parse(pieces[2]) : 0;
         Enum.TryParse(pieces[1], out DamageType type);
-        return new VulnerableTrait() { Type = type };
+        return new VulnerableTrait() { Type = type, SourceId = sourceId };
       }
     },
     { "Wand", (pieces, gameObj) => new WandTrait() { Charges = int.Parse(pieces[1]), IDed = bool.Parse(pieces[2]), Effect = pieces[3] } },
