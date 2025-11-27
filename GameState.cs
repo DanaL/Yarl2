@@ -31,7 +31,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   public bool Tutorial { get; set; }
   public bool PlayerAFK { get; set; } = false; // Player is resting at inn, or paralyzed
   public List<(Loc, Colour, Colour, int)> Lights { get; set; } = [];
-
+  public readonly Dictionary<Loc, (Colour, Colour, int, int)> LitSqs = [];
+  
   PerformersStack Performers { get; set; } = new();
 
   public HashSet<ulong> RecentlySeenMonsters { get; set; } = [];
@@ -40,8 +41,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   DijkstraMap? DMapDoors { get; set; }
   DijkstraMap? DMapFlight { get; set; }
   DijkstraMap? DMapSwimming { get; set; }
-  readonly Dictionary<Loc, (Colour, Colour, int, int)> LitSqs = [];
-
+  
   public DijkstraMap? GetDMap(string map = "")
   {
     if (DMap is null || DMapDoors is null || DMapFlight is null)
