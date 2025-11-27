@@ -858,7 +858,7 @@ class DungeonMap(Rng rng)
   {
     for (int j = 0; j < pts.Count - 1; j++)
     {
-      var river = Util.Bresenham(pts[j].Item1, pts[j].Item2, pts[j + 1].Item1, pts[j + 1].Item2);
+      var river = Util.LerpLine(pts[j].Item1, pts[j].Item2, pts[j + 1].Item1, pts[j + 1].Item2);
       foreach ((int r, int c) in river)
       {
         if (!objDb.AnyItemsAt(new Loc(dungeonId, level, r, c)))

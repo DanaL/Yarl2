@@ -72,7 +72,7 @@ internal class Wilderness(Rng rng, int length)
       if (!map.InBounds(nextRow, nextCol))
         break;
 
-      List<(int, int)> nextSegment = Util.Bresenham(row, col, nextRow, nextCol);
+      List<(int, int)> nextSegment = Util.LerpLine(row, col, nextRow, nextCol);
       bool riverCrossing = false;
       foreach (var pt in nextSegment)
       {

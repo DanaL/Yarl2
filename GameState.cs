@@ -253,7 +253,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       return false;
 
     Map map = Campaign.Dungeons[a.DungeonID].LevelMaps[a.Level];
-    foreach (var sq in Util.Bresenham(a.Row, a.Col, b.Row, b.Col))
+    foreach (var sq in Util.LerpLine(a.Row, a.Col, b.Row, b.Col))
     {
       if (!map.InBounds(sq) || map.TileAt(sq).Opaque())
         return false;

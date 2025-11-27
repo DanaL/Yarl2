@@ -289,7 +289,7 @@ class GetOverHereAction(GameState gs, Actor actor, Loc loc, int dmgDie, int numO
   {
     base.Execute();
 
-    List<Loc> sqs = [.. Util.Bresenham(Actor!.Loc.Row, Actor.Loc.Col, Loc.Row, Loc.Col)                            
+    List<Loc> sqs = [.. Util.LerpLine(Actor!.Loc.Row, Actor.Loc.Col, Loc.Row, Loc.Col)                            
                             .Select(l => new Loc(Loc.DungeonID, Loc.Level, l.Item1, l.Item2))];
     sqs = [.. sqs.Skip(1)];
     sqs = [.. sqs.Take(sqs.Count - 1)];
@@ -3723,11 +3723,11 @@ abstract class TargetedAction(GameState gs, Actor actor) : Action(gs, actor)
   protected List<Loc> Trajectory(Loc origin, bool filterBlockers)
   {
     if (filterBlockers)
-      return [.. Util.Bresenham(origin.Row, origin.Col, Target.Row, Target.Col)
+      return [.. Util.LerpLine(origin.Row, origin.Col, Target.Row, Target.Col)
                .Select(p => new Loc(origin.DungeonID, origin.Level, p.Item1, p.Item2))
                .Where(l => ClearTileAt(l))];
     else
-      return [.. Util.Bresenham(origin.Row, origin.Col, Target.Row, Target.Col)
+      return [.. Util.LerpLine(origin.Row, origin.Col, Target.Row, Target.Col)
                  .Select(p => new Loc(origin.DungeonID, origin.Level, p.Item1, p.Item2))];
   }
 

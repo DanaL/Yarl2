@@ -31,7 +31,8 @@ class AimAnimation(UserInterface ui, GameState gs, Loc origin, Loc initialTarget
     if (Expiry < DateTime.UtcNow)
       return;
 
-    foreach (var pt in Util.Bresenham(_start.Row, _start.Col, Target.Row, Target.Col))
+    // foreach (var pt in Util.Bresenham(_start.Row, _start.Col, Target.Row, Target.Col))
+    foreach (var pt in Util.LerpLine(_start.Row, _start.Col, Target.Row, Target.Col))
     {
       var (scrR, scrC) = _ui.LocToScrLoc(pt.Item1, pt.Item2, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
       if (scrR > 0 && scrR < _scrH && scrC > 0 && scrC < _scrW)

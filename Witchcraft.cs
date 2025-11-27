@@ -655,7 +655,7 @@ class CastGustOfWindAction(GameState gs, Actor actor, Item? item) : CastSpellAct
     };
 
     var (r, c) = Util.ExtendLine(origin.Row, origin.Col, item.Loc.Row, item.Loc.Col, distance);
-    List<(int, int)> path = Util.Bresenham(item.Loc.Row, item.Loc.Col, r, c);
+    List<(int, int)> path = Util.LerpLine(item.Loc.Row, item.Loc.Col, r, c);
 
     (int, int) finalSq = path[0];
     Loc landingLoc = item.Loc;
@@ -750,7 +750,7 @@ class CastGustOfWindAction(GameState gs, Actor actor, Item? item) : CastSpellAct
       distance = 3;
 
     var (r, c) = Util.ExtendLine(origin.Row, origin.Col, actor.Loc.Row, actor.Loc.Col, distance);
-    List<(int, int)> path = Util.Bresenham(actor.Loc.Row, actor.Loc.Col, r, c);
+    List<(int, int)> path = Util.LerpLine(actor.Loc.Row, actor.Loc.Col, r, c);
 
     (int, int) finalSq = path[0];
     Loc landingLoc = actor.Loc;

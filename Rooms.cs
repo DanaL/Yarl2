@@ -700,7 +700,7 @@ class Rooms
     foreach (var exit in info.Exits)
     {
       bool blocked = false;
-      List<(int, int)> path = Util.Bresenham(exit.Item1, exit.Item2, triggerSq.Item1, triggerSq.Item2);
+      List<(int, int)> path = Util.LerpLine(exit.Item1, exit.Item2, triggerSq.Item1, triggerSq.Item2);
 
       foreach (var (r, c) in path)
       {

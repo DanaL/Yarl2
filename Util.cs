@@ -424,32 +424,19 @@ static class Util
       return "southwest";
   }
 
-  public static List<(int, int)> Bresenham(int r0, int c0, int r1, int c1)
+  public static int DiagonalDistance(int x1, int y1, int x2, int y2) => int.Max(Math.Abs(x1 - x2), Math.Abs(y1 - y2));
+  static (int, int) RoundPt((float R, float C) pt) => ((int)Math.Round(pt.R), (int)Math.Round(pt.C));  
+  static (float, float) LerpPts(float r0, float c0, float r1, float c1, float t) => (Lerp(r0, r1, t), Lerp(c0, c1, t));
+  static float Lerp(float start, float end, float t) => start * (1.0f - t) + end * t;
+
+  public static List<(int, int)> LerpLine(int r0, int c0, int r1, int c1)
   {
     List<(int, int)> pts = [];
-    int dr = Math.Abs(r0 - r1);
-    int dc = Math.Abs(c0 - c1);
-    int sr = r0 < r1 ? 1 : -1;
-    int sc = c0 < c1 ? 1 : -1;
-    int err = (dc > dr ? dc : -dr) / 2;
-    int e2;
-
-    for (; ; )
+    int n = DiagonalDistance(r0, c0, r1, c1);
+    for (int step = 0; step <= n; step++)
     {
-      pts.Add((r0, c0));
-      if (r0 == r1 && c0 == c1)
-        break;
-      e2 = err;
-      if (e2 > -dc)
-      {
-        err -= dr;
-        c0 += sc;
-      }
-      if (e2 < dr)
-      {
-        err += dc;
-        r0 += sr;
-      }
+      var t = n == 0 ? 0.0f : step / (float)n;
+      pts.Add(RoundPt(LerpPts(r0, c0, r1, c1, t)));
     }
 
     return pts;
@@ -457,7 +444,7 @@ static class Util
 
   public static List<Loc> Trajectory(Loc origin, Loc target)
   {
-    return [..Bresenham(origin.Row, origin.Col, target.Row, target.Col)
+    return [..LerpLine(origin.Row, origin.Col, target.Row, target.Col)
             .Select(sq => origin with { Row = sq.Item1, Col = sq.Item2 })];
   }
 
