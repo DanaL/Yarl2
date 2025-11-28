@@ -296,6 +296,28 @@ abstract class Actor : GameObj, IZLevel
 
     Console.WriteLine($"{FullName.Capitalize()} took {total} damage.");
     
+    if (total > 0 && coldDamage && Traits.OfType<BoolTrait>().Any(t => t.Name == "WaterElemental" && t.Value))
+    {
+      gs.ObjDb.RemoveActor(this);
+      int currHp = Stats[Attribute.HP].Curr;
+      Actor iceElemental = MonsterFactory.Get("ice elemental", gs.ObjDb, gs.Rng);
+      iceElemental.Stats[Attribute.HP].SetMax(currHp);
+      gs.ObjDb.AddNewActor(iceElemental, Loc);
+      gs.UIRef().AlertPlayer("The water elemental freezes solid!", gs, Loc);
+      return (999, "", 0);
+    }
+
+    if (total > 0 && fireDamage && Traits.OfType<BoolTrait>().Any(t => t.Name == "IceElemental" && t.Value))
+    {
+      gs.ObjDb.RemoveActor(this);
+      int currHp = Stats[Attribute.HP].Curr;
+      Actor waterElemental = MonsterFactory.Get("water elemental", gs.ObjDb, gs.Rng);
+      waterElemental.Stats[Attribute.HP].SetMax(currHp);
+      gs.ObjDb.AddNewActor(waterElemental, Loc);
+      gs.UIRef().AlertPlayer("The ice elemental melts!", gs, Loc);
+      return (999, "", 0);
+    }
+    
     if (total > 0 && fireDamage && Name == "mud golem" && this is not Player)
     {
       gs.ObjDb.RemoveActor(this);

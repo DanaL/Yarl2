@@ -592,3 +592,9 @@ An adorable (but enormous) turtle twisted into an undead abomination. Sickly, un
 #
 angler fish
 A deep-dwelling fish noted for its bioluminescence to attract prey and its horrific collection of teeth for biting prey.
+#
+water elemental
+A swirling mass of water animated by magical forces.
+#
+ice elemental
+A vaguely humanoid figure seemingly carved out of ice.

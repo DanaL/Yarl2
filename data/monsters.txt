@@ -88,3 +88,5 @@ cave shark          |»|grey         |darkgrey    |14|45|7| 1.0|10|14|MeleePierc
 giant sea slug      |»|green        |darkgreen   |14|45|7| 1.0|12|12|MeleePiercing#1#1#8#1#0#0#Attack|Swimmer,Poisoner#16#2#20|
 giant squid         |»|pink         |faintpink   |13|60|7| 1.0|14|10|InkCloud#0#0#0#0#0#7#Attack,MeleeBlunt#1#1#8#1#0#0#Attack|Swimmer,Grappler#18|
 death turtle        |ǒ|grey         |darkgrey    |16|50|8| 1.0|10|14|MeleeNecrotic#1#1#4#3#0#0#Attack|Swimmer,Undead,Immunity#Poison,Infectious#16|
+water elemental     |E|blue         |darkblue    |15|60|5| 0.8|14|12|MeleeBlunt#1#1#10#2#0#0#Attack|Amphibious,Resistance#Poison,Construct,Bool#WaterElemental#true,Brainless|
+ice elemental       |E|white        |iceblue     |15|50|5| 1.0|13|12|MeleeCold#1#1#8#2#0#0#Attack|Amphibious,Resistance#Poison,Construct,Bool#IceElemental#true,Vulnerable#Blunt,Brainless|
