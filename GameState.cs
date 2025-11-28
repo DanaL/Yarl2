@@ -2124,12 +2124,13 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       Glyph glyph;
       Tile tile = CurrentMap.TileAt(loc.Row, loc.Col);
       var (objGlyph, z, objId, itemType) = ObjDb.ItemGlyph(loc, Player.Loc);
-      
+      bool illuminateGlyph = false;
+
       if (objGlyph != GameObjectDB.EMPTY && z >= tile.Z())
       {
         glyph = objGlyph;
         if (itemType != ItemType.Ink)
-          glyph = LightUpGlyph(glyph, loc);
+          illuminateGlyph = true;
       }            
       else if (tile.Type == TileType.Chasm)
       {
@@ -2150,18 +2151,19 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       }
       else
       {
-        glyph = LightUpGlyph(Util.TileToGlyph(tile), loc);
+        glyph = Util.TileToGlyph(tile);
+        illuminateGlyph = true;
       }
 
       CurrentDungeon.RememberedLocs[loc] = new(glyph, objId);
-      
+
       if (ObjDb.Occupant(loc) is Actor actor && (actor.Z() > z || playerTelepathic) && Player.GlyphSeen(actor, playerTelepathic, playerSeeInvisible) is Glyph vg)
       {
         LastPlayerFoV[loc] = vg;
       }
       else
       {
-        LastPlayerFoV[loc] = glyph;
+        LastPlayerFoV[loc] = illuminateGlyph ? LightUpGlyph(glyph, loc) : glyph;
       }
     }
 
