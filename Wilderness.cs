@@ -434,7 +434,24 @@ internal class Wilderness(Rng rng, int length)
       map.SetTile(r, Length - 1, TileFactory.Get(TileType.WorldBorder));
     }
 
-    return map;
+    int rotation = Rng.Next(4);
+    Map rotatedMap = new(Length, Length);
+    for (int r = 0; r < Length; r++)
+    {
+      for (int c = 0; c < Length; c++)
+      {
+        var (rotatedR, rotatedC) = rotation switch
+        {
+          0 => (r, c),
+          1 => (c, Length - 1 - r),
+          2 => (Length - 1 - r, Length - 1 - c),
+          _ => (Length - 1 - c, r)
+        };
+        rotatedMap.SetTile(rotatedR, rotatedC, map.TileAt(r, c));
+      }
+    }
+    
+    return rotatedMap;
   }
 
   static List<(int, int)> AddMontainRange(Map map, Town town, Rng rng)
