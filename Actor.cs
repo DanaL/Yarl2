@@ -1205,6 +1205,8 @@ class Power
         return new MeleeAttackAction(gs, mob, loc) { AttackEffect = new BloodDrainTrait() };
       case "ThrowBomb":
         return new ThrowBombAction(gs, mob, loc);
+      case "Whirlpool":
+        return new WhirlpoolAction(gs, mob);
       default:
         return new PassAction();
     }

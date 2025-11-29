@@ -2442,6 +2442,142 @@ class FlareAction(GameState gs, Actor actor, int dmgDie, int numOfDice, DamageTy
   }
 }
 
+class WhirlpoolAction(GameState gs, Actor actor) : Action(gs, actor)
+{
+  public override double Execute()
+  {
+    base.Execute();
+
+    UserInterface ui = GameState!.UIRef();
+    ui.AlertPlayer($"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "create")} a swirling whirlpool!", GameState, Actor.Loc, Actor);
+
+    int strength = int.Max(30, Actor.Stats[Attribute.Strength].Curr * 30);
+    int spiralLength = int.Min(strength, Util.Spiral.Length);
+
+    // Process all locations in the spiral pattern
+    Dictionary<ulong, int> movedObjects = [];
+    List<Loc> affectedLocs = [ Actor.Loc ];
+    
+    // Find the path of the spiral, by moving along the path until the end or 
+    // we reach a non-water tile
+    for (int j = 1; j < spiralLength; j++)
+    {
+      var (dr, dc) = Util.Spiral[j];
+      Loc loc = Actor.Loc with { Row = Actor.Loc.Row + dr, Col = Actor.Loc.Col + dc };
+
+      affectedLocs.Add(loc);
+
+      if (GameState.ObjDb.Occupant(loc) is Actor victim && !victim.HasTrait<HeavyTrait>())
+        movedObjects.Add(victim.ID, j);
+
+      foreach (Item item in GameState.ObjDb.ItemsAt(loc))
+      {
+        if (MoveableItem(item))
+          movedObjects.Add(item.ID, j);
+      }
+
+      if (GameState.TileAt(loc).IsWater()) 
+      {
+        int alpha = int.Min(255, 100 + (j * 2)); // Fades from opaque at center to transparent at edge
+        Colour bg = Colours.BLUE with { Alpha = alpha };
+        Colour fg = Colours.ICE_BLUE with { Alpha = alpha };
+        ui.RegisterAnimation(new SqAnimation(GameState, loc, fg, bg, '~'));
+      }
+    }
+
+    static bool MoveableItem(Item item)
+    {
+      if (item.Type == ItemType.Environment || item.Type == ItemType.Landscape || item.Type == ItemType.Ink || item.Type == ItemType.Fog)
+        return false;
+
+      if (item.HasTrait<AffixedTrait>() || item.HasTrait<HeavyTrait>())
+        return false;
+
+      return true;
+    }
+
+    foreach (ulong objId in movedObjects.Keys) 
+    {
+      MoveObject(objId, movedObjects[objId], affectedLocs, GameState);
+    }
+
+    return 1.0;
+  }
+
+  static void MoveObject(ulong objId, int startIndex, List<Loc> affectedLocs, GameState gs)
+  {
+    if (gs.ObjDb.GetObj(objId) is not GameObj obj)
+      return;
+
+    string blockerName = "";
+    bool collision = false;
+    int j = startIndex - 1;
+    while (j > 0)
+    {
+      Tile tile = gs.TileAt(affectedLocs[j]);
+      if (!tile.IsWater()) 
+      {
+        collision = (startIndex - j > 1) && !(tile.Passable() || tile.PassableByFlight());
+        blockerName = Tile.TileDesc(tile.Type);
+        ++j;
+        break;
+      }
+
+      if (gs.ObjDb.Occupant(affectedLocs[j]) is Actor actor)
+      {
+        ++j;
+        collision = startIndex - j > 1;
+        blockerName = MsgFactory.CalcName(actor, gs.Player, Article.Def);
+        break;
+      }
+
+      List<Item> blockers = [.. gs.ObjDb.BlockersAtLoc(affectedLocs[j])];
+      if (blockers.Count > 0)
+      {
+        ++j;
+        collision = startIndex - j > 1;
+        blockerName = MsgFactory.CalcName(blockers[0], gs.Player, Article.Def);
+        break;
+      }
+
+      --j;
+    }
+
+    if (j == 0)
+      j = 1;
+    
+    Loc finalLoc = affectedLocs[j];
+    string s = $"{obj.FullName.Capitalize()} {Grammar.Conjugate(obj, "is")} caught in the vortex!"; 
+    gs.UIRef().AlertPlayer(s, gs, finalLoc);
+
+    if (collision) 
+    {
+      s = $"{obj.FullName.Capitalize()} {Grammar.Conjugate(obj, "collide")} with {blockerName}!";
+      gs.UIRef().AlertPlayer(s, gs, finalLoc);
+    }
+    
+    if (obj is Actor victim)
+    {
+      gs.ResolveActorMove(victim, victim.Loc, finalLoc);
+
+      if (collision)
+      {
+        int d = gs.Rng.Next(2, 13);
+        var (hpLeft, _, _) = victim.ReceiveDmg([(d, DamageType.Blunt)], 0, gs, null, 1.0);
+        if (hpLeft < 1)
+        {
+          gs.ActorKilled(victim, "a collision", null);
+        }
+      }
+    }
+    else if (obj is Item item)
+    {
+      gs.ObjDb.RemoveItemFromLoc(item.Loc, item);
+      gs.ItemDropped(item, finalLoc);
+    }
+  }
+}
+
 class InduceNudityAction(GameState gs, Actor caster, int range) : Action(gs, caster)
 {
   int Range { get; set; } = range;

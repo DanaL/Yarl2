@@ -101,7 +101,7 @@ abstract class BehaviourNode
     foreach (var loc in trajectory)
     {
       var tile = gs.TileAt(loc);
-      if (!(tile.Passable() || tile.PassableByFlight()))
+      if (!(tile.Passable() || tile.PassableByFlight() || tile.IsWater()))
         return false;
     }
 
@@ -133,6 +133,9 @@ class Selector(List<BehaviourNode> nodes) : BehaviourNode
 
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
+if (Label == "powers")
+      Console.WriteLine();
+
     while (Curr < Children.Count)
     {
       BehaviourNode node = Children[Curr];
@@ -162,7 +165,7 @@ class Sequence(List<BehaviourNode> nodes) : BehaviourNode
   int Curr { get; set; } = 0;
 
   public override PlanStatus Execute(Mob mob, GameState gs)
-  {
+  {    
     while (Curr < Children.Count)
     {
       PlanStatus status = Children[Curr].Execute(mob, gs);
@@ -296,6 +299,16 @@ class SeeToTargetPower(Power power) : UsePower(power)
       return false;
 
     return mob.PickTarget(gs) is not NoOne;
+  }
+}
+
+class UseWhirlpoolPower(Power power) : UsePower(power)
+{
+  protected override bool Available(Mob mob, GameState gs)
+  {
+    Tile tile = gs.TileAt(mob.Loc);
+
+    return tile.IsWater();
   }
 }
 
@@ -1674,7 +1687,7 @@ class Planner
     List<BehaviourNode> passive = [];
     foreach (Power p in mimic.Powers)
     {
-      // Ugh a few of the powers have slightly more complicated ways of
+      // Some of the powers have slightly more complicated ways of
       // calculating if they are available to use so I am doing them as 
       // subclasses of UsePower. If I get too many of them and this gets gross,
       // I'll have to come up with something cleaner. An actual factory or such?
@@ -1685,6 +1698,8 @@ class Planner
         "HealAllies" => new HealAlliesPower(p),
         "TurnIntoBats" => new UseTurnIntoBatsPower(p),
         "Nudity" or "FogCloud" => new SeeToTargetPower(p),
+        "Whirlpool" => 
+          new UseWhirlpoolPower(p),
         _ => new UsePower(p)
       };
 
@@ -1771,7 +1786,7 @@ class Planner
         actions.Add(new KeepDistance());
         actions.Add(new ChaseTarget());
       }
-      plan.Add(new Sequence([new CheckMonsterAttitude(Mob.AGGRESSIVE), new Selector(actions)]) { Label = "aggressive" });
+      plan.Add(new Sequence([new CheckMonsterAttitude(Mob.AGGRESSIVE), new Selector(actions) { Label = "powers" }]) { Label = "aggressive" });
 
       plan.Add(new PassTurn() { Label = "default" });
     }

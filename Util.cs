@@ -134,7 +134,7 @@ static class Colours
     "limegreen" => LIME_GREEN,
     "blue" => BLUE,
     "lightblue" => LIGHT_BLUE,
-    "darkblue" => DARK_BLUE,    
+    "darkblue" => DARK_BLUE,
     "brightred" => BRIGHT_RED,
     "softred" => SOFT_RED,
     "dullred" => DULL_RED,
@@ -177,10 +177,10 @@ static class Colours
 
     return new Colour
     {
-      R = int.Min(255, (int) (a.R * scaleA + b.R * scaleB)),
-      G = int.Min(255, (int) (a.G * scaleA + b.G * scaleB)),
-      B = int.Min(255, (int) (a.B * scaleA + b.B * scaleB)),
-      Alpha = int.Min(255, (int) totalAlpha)
+      R = int.Min(255, (int)(a.R * scaleA + b.R * scaleB)),
+      G = int.Min(255, (int)(a.G * scaleA + b.G * scaleB)),
+      B = int.Min(255, (int)(a.B * scaleA + b.B * scaleB)),
+      Alpha = int.Min(255, (int)totalAlpha)
     };
   }
 }
@@ -193,7 +193,7 @@ static class MetalsExtensions
   {
     Metals.Iron => true,
     Metals.Steel => true,
-    Metals.Bronze => true,    
+    Metals.Bronze => true,
     _ => false
   };
 }
@@ -204,7 +204,7 @@ enum Rust { Rusted, Corroded }
 static class Constants
 {
   public const ulong PLAYER_ID = 1;
-  
+
   public const int BACKSPACE = 8;
   public const int TAB = 9;
   public const int ESC = 27;
@@ -227,7 +227,7 @@ static class Constants
 
   public static int MQ_START_OF_GAME = 0;
   public static int MQ_FIRST_QUEST_GIVEN = 1;
-  
+
   // I need some GameObj IDs for things that don't actually exist in the game
   // I am kind of assuming here that there will never be enough items generated
   // in game to conflict with values this high...
@@ -397,7 +397,7 @@ static class Util
     "south" => '↓',
     "southwest" => '↙',
     "west" => '←',
-    _ => '↖'    
+    _ => '↖'
   };
 
   public static string RelativeDir(Loc a, Loc b)
@@ -425,7 +425,7 @@ static class Util
   }
 
   public static int DiagonalDistance(int x1, int y1, int x2, int y2) => int.Max(Math.Abs(x1 - x2), Math.Abs(y1 - y2));
-  static (int, int) RoundPt((float R, float C) pt) => ((int)Math.Round(pt.R), (int)Math.Round(pt.C));  
+  static (int, int) RoundPt((float R, float C) pt) => ((int)Math.Round(pt.R), (int)Math.Round(pt.C));
   static (float, float) LerpPts(float r0, float c0, float r1, float c1, float t) => (Lerp(r0, r1, t), Lerp(c0, c1, t));
   static float Lerp(float start, float end, float t) => start * (1.0f - t) + end * t;
 
@@ -537,6 +537,42 @@ static class Util
     return (newR, newC);
   }
 
+  public static readonly (int, int)[] Spiral = GenerateSpiral();
+  static (int, int)[] GenerateSpiral()
+  {
+    List<(int, int)> spiral = [];
+    int r = 0, c = 0;
+    int dr = 0, dc = 1;
+    int steps = 1;
+    int stepCount = 0;
+    int turnCount = 0;
+
+    spiral.Add((0, 0));
+
+    for (int i = 0; i < 512; i++)
+    {
+      r += dr;
+      c += dc;
+      spiral.Add((r, c));
+      stepCount++;
+
+      if (stepCount == steps)
+      {
+        stepCount = 0;
+        turnCount++;
+
+        // Turn direction: right -> up -> left -> down -> right...
+        (dr, dc) = (dc, -dr);
+
+        if (turnCount % 2 == 0)
+          steps++;
+      }
+
+    }
+
+    return [.. spiral];
+  }
+
   // I've written floodfill here and there for various effects and noise, etc
   // but I'm hoping I can consolidate on this veresion of the function
   public static HashSet<Loc> FloodFill(GameState gs, Loc origin, int range, HashSet<TileType> exceptions)
@@ -562,9 +598,9 @@ static class Util
         if (gs.ObjDb.AreBlockersAtLoc(adj))
           continue;
         if (tile.Passable() || tile.PassableByFlight() || exceptions.Contains(tile.Type))
-          {
-            q.Enqueue(adj);
-          }
+        {
+          q.Enqueue(adj);
+        }
       }
     }
 
@@ -846,7 +882,7 @@ static class Util
   // Sort of yet another implementation of floodfill...
   public static Loc NearestUnoccupiedLoc(GameState gs, Loc loc)
   {
-    HashSet<Loc> visited = [ loc ];
+    HashSet<Loc> visited = [loc];
     Queue<Loc> q = [];
 
     List<Loc> initial = [.. Adj8Locs(loc)];
@@ -868,10 +904,10 @@ static class Util
           q.Enqueue(adj);
       }
     }
-    
+
     return Loc.Nowhere;
   }
-  
+
   public static string NumToWord(int a) => a switch
   {
     0 => "zero",
@@ -953,8 +989,8 @@ static class StringUtils
       return "half-elves";
     else if (s.EndsWith('s') || s.EndsWith('x') || s.EndsWith("ch"))
       return s + "es";
-    else    
-      return s + "s";    
+    else
+      return s + "s";
   }
 
   public static string Capitalize(this string s)
@@ -1216,8 +1252,8 @@ class MapUtils
 class QuitGameException : Exception { }
 class SaveGameException : Exception { }
 class GameNotLoadedException : Exception { }
-class PlayerKilledException : Exception 
-{ 
+class PlayerKilledException : Exception
+{
   public List<string> Messages { get; set; } = [];
 }
 class VictoryException : Exception { }
@@ -1239,7 +1275,7 @@ class UnknownMonsterException(string name) : Exception
 class ConeCalculator
 {
   public static List<Loc> Affected(int range, Loc origin, Loc target, Map map, GameObjectDB objDb, HashSet<DamageType> damageTypes)
-  {  
+  {
     HashSet<Loc> affected = [];
 
     // even if the target is closer, the cone always covers the full range
@@ -1258,12 +1294,12 @@ class ConeCalculator
 
     while (octantA != octantB)
     {
-      affected = [..affected.Union(CalcOctant(range, origin, map, octantA, objDb, damageTypes))];
+      affected = [.. affected.Union(CalcOctant(range, origin, map, octantA, objDb, damageTypes))];
       --octantA;
       if (octantA < 0)
         octantA = 7;
     }
-    affected = [..affected.Union(CalcOctant(range, origin, map, octantB, objDb, damageTypes))];
+    affected = [.. affected.Union(CalcOctant(range, origin, map, octantB, objDb, damageTypes))];
     double angleA = Util.AngleBetweenLocs(origin, beamA);
     double angleB = Util.AngleBetweenLocs(origin, beamB);
 
@@ -1360,7 +1396,7 @@ class ConeCalculator
           break;
 
         Shadow projection = ProjectTile(row, col);
-        
+
         if (!line.IsInShadow(projection))
         {
           Loc loc = origin with { Row = r, Col = c };
@@ -1406,7 +1442,7 @@ class ConeCalculator
 
     if (blocker)
       return false;
-      
+
     return true;
   }
 }
@@ -1430,10 +1466,10 @@ public static class ResourcePath
 
   static string FindResourcePath(string folder, string filename)
   {
-    string path = string.IsNullOrEmpty(folder) 
-        ? filename 
+    string path = string.IsNullOrEmpty(folder)
+        ? filename
         : Path.Combine(folder, filename);
-    
+
     if (File.Exists(path))
     {
       return path;
@@ -1449,13 +1485,13 @@ public static class ResourcePath
       {
         string baseDir = exePath.TrimEnd(Path.DirectorySeparatorChar);
         string? contentsDir = Path.GetDirectoryName(baseDir);
-        
+
         if (contentsDir != null)
         {
           string resourcePath = string.IsNullOrEmpty(folder)
               ? Path.Combine(contentsDir, "Resources", filename)
               : Path.Combine(contentsDir, "Resources", folder, filename);
-          
+
           if (File.Exists(resourcePath))
           {
             return resourcePath;
