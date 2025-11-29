@@ -85,7 +85,7 @@ class RaylibUserInterface : UserInterface
       EventQ.Enqueue(new(GameEventType.KeyInput, (char)13));
       Delay(50);
     }
-    else if (IsKeyPressed(KeyboardKey.Backspace))
+    else if (IsKeyPressedRepeat(KeyboardKey.Backspace))
     {
       EventQ.Enqueue(new(GameEventType.KeyInput, (char)Constants.BACKSPACE));
       Delay(50);
@@ -95,22 +95,22 @@ class RaylibUserInterface : UserInterface
       EventQ.Enqueue(new(GameEventType.KeyInput, (char)Constants.TAB));
       Delay(50);
     }
-    else if (IsKeyPressed(KeyboardKey.Left))
+    else if (IsKeyPressedRepeat(KeyboardKey.Left))
     {
       EventQ.Enqueue(new(GameEventType.KeyInput, 'h'));
       Delay(50);
     }
-    else if (IsKeyPressed(KeyboardKey.Right))
+    else if (IsKeyPressedRepeat(KeyboardKey.Right))
     {
       EventQ.Enqueue(new(GameEventType.KeyInput, 'l'));
       Delay(50);
     }
-    else if (IsKeyPressed(KeyboardKey.Down))
+    else if (IsKeyPressedRepeat(KeyboardKey.Down))
     {
       EventQ.Enqueue(new(GameEventType.KeyInput, 'j'));
       Delay(50);
     }
-    else if (IsKeyPressed(KeyboardKey.Up))
+    else if (IsKeyPressedRepeat(KeyboardKey.Up))
     {
       EventQ.Enqueue(new(GameEventType.KeyInput, 'k'));
       Delay(50);
