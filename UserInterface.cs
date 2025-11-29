@@ -22,6 +22,8 @@ enum CheatSheetMode
   MvMixed = 3
 }
 
+enum UIState { InMainMenu, InGame }
+
 record struct MsgHistory(string Message, int Count)
 {
   public readonly string Fmt => Count > 1 ? $"{Message} x{Count}" : Message;
@@ -53,6 +55,7 @@ abstract class UserInterface
   public int PlayerScreenRow { get; protected set; }
   public int PlayerScreenCol { get; protected set; }
   protected List<string>? _longMessage;
+  protected UIState State = UIState.InMainMenu;
 
   readonly Queue<string> Messages = [];
 
@@ -1225,10 +1228,12 @@ abstract class UserInterface
   {
     MessageHistory = [];
     _animations = [];
+    State = UIState.InMainMenu;
   }
 
   public RunningState GameLoop(GameState gameState)
   {
+    State = UIState.InGame;
     Options opts = gameState.Options;
 
     if (opts.DefaultMoveHints)
@@ -1290,7 +1295,10 @@ abstract class UserInterface
         }
 
         if (success)
+        {
+          State = UIState.InMainMenu;
           return RunningState.Quitting;
+        }
       }
       catch (QuitGameException)
       {
@@ -1333,6 +1341,7 @@ abstract class UserInterface
       }
     }
 
+    State = UIState.InMainMenu;
     return RunningState.Quitting;
   }
 }

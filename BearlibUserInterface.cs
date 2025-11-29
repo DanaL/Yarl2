@@ -93,7 +93,13 @@ internal class BLUserInterface : UserInterface, IDisposable
     {
       int key = Terminal.Read();
       if (key == (int)TKCodes.InputEvents.TK_CLOSE)
-        return new GameEvent(GameEventType.Quiting, '\0');
+      {
+        return State switch
+        {
+          UIState.InGame =>  new GameEvent(GameEventType.KeyInput, 'S'),
+          _ => new GameEvent(GameEventType.Quiting, '\0')
+        };
+      }
 
       if (KeyToChar.TryGetValue(key, out char value))
       {

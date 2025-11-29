@@ -62,7 +62,11 @@ class RaylibUserInterface : UserInterface
 
     if (WindowShouldClose())
     {
-      return new GameEvent(GameEventType.Quiting, '\0');
+      return State switch
+      {
+        UIState.InGame =>  new GameEvent(GameEventType.KeyInput, 'S'),
+        _ => new GameEvent(GameEventType.Quiting, '\0')
+      };
     }
 
     int ch = GetCharPressed();
