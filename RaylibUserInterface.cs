@@ -21,6 +21,7 @@ class RaylibUserInterface : UserInterface
   readonly int _fontWidth;
   readonly int _fontHeight;
   Dictionary<Colour, Color> _colours = [];
+  Dictionary<char, string> _charCache = [];
   Queue<GameEvent> EventQ { get; set; } = [];
 
   public RaylibUserInterface(string windowTitle, Options opt) : base()
@@ -135,6 +136,17 @@ class RaylibUserInterface : UserInterface
     return value;
   }
 
+  string CharToString(char ch)
+  {
+    if (!_charCache.TryGetValue(ch, out string? value))
+    {
+      value = ch.ToString();
+      _charCache[ch] = value;
+    }
+
+    return value;
+  }
+
   public override void WriteLine(string message, int lineNum, int col, int width, Colour textColour)
   {
     WriteLine(message, lineNum, col, width, textColour, Colours.BLACK);
@@ -153,8 +165,8 @@ class RaylibUserInterface : UserInterface
   {
     Vector2 position = new(col * (FontSize / 2), row * FontSize);
     DrawRectangle((int) position.X, (int) position.Y, FontSize / 2, FontSize, ToRaylibColor(sq.Bg));
-    
-    DrawTextEx(_font, sq.Ch.ToString(), position, FontSize, 0, ToRaylibColor(sq.Fg));
+
+    DrawTextEx(_font, CharToString(sq.Ch), position, FontSize, 0, ToRaylibColor(sq.Fg));
   }
 
   public override void ClearScreen() => ClearBackground(Color.Black);
