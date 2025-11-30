@@ -247,17 +247,18 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
     UserInterface ui = GameState!.UIRef();
     Player player = GameState!.Player;
 
-    if (Actor!.Traits.OfType<SwallowedTrait>().FirstOrDefault() is SwallowedTrait swallowed)
+    // If the destination tile is a MonsterWall, the player attacks the monster
+    if (GameState.TileAt(Loc) is MonsterWall mw)
     {
-      // if the actor is swalled by another creature, any direction they move
+      // if the actor is swallowed by another creature, any direction they move
       // in will attack the monster
-      if (GameState!.ObjDb.GetObj(swallowed.SwallowerID) is Actor target)
+      if (GameState!.ObjDb.GetObj(mw.MonsterId) is Actor target)
       {
-        Actor.QueueAction(new MeleeAttackAction(GameState, Actor, target.Loc));
+        Actor!.QueueAction(new MeleeAttackAction(GameState, Actor, target.Loc));
       }
       else
       {
-        throw new Exception($"{Actor.Name} was swallowed by something that doesn't seem to exist?");
+        throw new Exception($"{Actor!.Name} was swallowed by something that doesn't seem to exist?");
       }      
     }
     // There are corner cases when I want to move the actor onto the sq they're already

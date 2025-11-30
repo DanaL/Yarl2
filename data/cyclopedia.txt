@@ -598,3 +598,6 @@ A swirling mass of water animated by magical forces.
 #
 ice elemental
 A vaguely humanoid figure seemingly carved out of ice.
+#
+umbral whale
+When you're a cave-dwelling whale, pretty much everything looks like krill to you.

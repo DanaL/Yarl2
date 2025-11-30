@@ -27,7 +27,7 @@ enum TileType
   BridgeTrigger, HiddenBridgeCollapseTrap, RevealedBridgeCollapseTrap, 
   BusinessSign, FakeStairs, HiddenSummonsTrap, RevealedSummonsTrap,
   HFence, VFence, CornerFence, MonsterWall, Lever, Crops, IllusoryWall,
-  Underwater, Kelp, MistyPortal, MysteriousMirror
+  Underwater, Kelp, MistyPortal, MysteriousMirror, BellyFloor
 }
 
 interface ITriggerable
@@ -215,6 +215,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.FrozenLake => "ice",
     TileType.Underwater => "water",
     TileType.MistyPortal => "misty portal",
+    TileType.BellyFloor => "soft tissue",
     _ => "unknown"
   };
 
@@ -633,6 +634,7 @@ class TileFactory
   static readonly Tile FrozenLake = new BasicTile(TileType.FrozenLake, true, false, true);
   static readonly Tile Underwater = new BasicTile(TileType.Underwater, false, false, false);
   static readonly Tile MistyPortal = new BasicTile(TileType.MistyPortal, true, false, true);
+  static readonly Tile BellyFloor = new BasicTile(TileType.BellyFloor, true, false, true);
 
   public static Tile Get(TileType type) => type switch
   {
@@ -701,6 +703,7 @@ class TileFactory
     TileType.Underwater => Underwater,
     TileType.Kelp => Kelp,
     TileType.MistyPortal => MistyPortal,
+    TileType.BellyFloor => BellyFloor,
     _ => Unknown
   };
 }
