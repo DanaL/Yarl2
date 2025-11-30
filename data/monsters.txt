@@ -53,7 +53,7 @@ rot grub            |w|white        |grey        |10| 8|3| 1.0|10|10|MeleePierci
 python              |S|grey         |darkgrey    |13|20|4| 1.0|14|12|Crush#1#1#4#1#0#0#Attack,MeleeBlunt#1#1#6#1#0#0#Attack|Grappler#15|
 rum gremlin         |i|lightbrown   |brown       |13|20|4| 1.0|10|10|RumBreath#0#4#0#0#0#5#Attack,MeleeSlashing#1#1#4#1#0#0#Attack|Intelligent|PoorLoot
 flame beetle        |a|brightred    |dullred     |15|30|5| 1.0|12|12|MeleeFire#1#1#6#1#0#0#Attack|Drop#beetle_carapace#33,Immunity#Fire,LightSource#owner#1#dullred#torchred|
-giant toad          |t|green        |darkgreen   |13|30|3| 1.0|10|10|Gulp#1#1#6#1#13#0#Attack|Heavy|
+giant toad          |t|green        |darkgreen   |13|30|3| 1.0|10|10|Gulp#1#1#6#1#13#0#Attack|Heavy,Str#Belly#Small|
 frog                |t|limegreen    |darkgreen   |10| 1|1| 1.0|10|10||Passive|
 zombie frog         |t|grey         |darkgrey    |11|10|2| 1.0|10|10|MeleeNecrotic#1#1#4#1#0#0#Attack|Undead,Brainless,Immunity#Poison|
 cultist             |@|grey         |darkgrey    |13|15|3| 1.0|12|10|MeleeSlashing#1#1#6#1#0#0#Attack|Intelligent|

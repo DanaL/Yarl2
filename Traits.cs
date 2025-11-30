@@ -1132,6 +1132,14 @@ class StressReliefAuraTrait : Trait, IGameEventListener
   public override string AsText() => $"StressReliefAura#{ObjId}#{Radius}";
 }
 
+class StrTrait(string n, string v) : Trait
+{
+  public string Name { get; set; } = n;
+  public string Value { get; set; } = v;
+
+  public override string AsText() => $"Str#{Name}#{Value}";
+}
+
 class DividerTrait : Trait
 {
   public override string AsText() => "Divider";
@@ -4548,6 +4556,7 @@ class TraitFactory
       }
     },
     { "StressReliefAura", (pieces, gameObj) => new StressReliefAuraTrait() { ObjId = ulong.Parse(pieces[1]), Radius = int.Parse(pieces[2]) } },
+    { "Str", (pieces, gameObj) => new StrTrait(pieces[1], pieces[2])},
     { "Swallowed", (pieces, gameObj) => new SwallowedTrait()
       {
         VictimID = ulong.Parse(pieces[1]), SwallowerID = ulong.Parse(pieces[2]),
