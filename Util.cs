@@ -759,7 +759,7 @@ static class Util
     TileType.Underwater => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false),
     TileType.MistyPortal => new Glyph('Ո', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     TileType.MysteriousMirror => new Glyph('Ω', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
-    TileType.BellyFloor => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false),
+    TileType.BellyFloor => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, true),
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
   };
 
