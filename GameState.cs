@@ -406,7 +406,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       return;
     }
 
-
     if (thrown && item.HasTrait<ExplosiveTrait>())
     {
       if (tile.Type == TileType.Water || tile.Type == TileType.DeepWater || tile.Type == TileType.Underwater)
@@ -937,6 +936,11 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         villager = true;
       }
 
+      if (t is PocketDimensionTrait dim)
+      {
+        EmptyPocketDimension(dim, victim.Loc);
+      }
+
       if (t is IGameEventListener el)
         RemoveListener(el);
     }
@@ -998,6 +1002,31 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         break;
       }
     }
+  }
+
+  void EmptyPocketDimension(PocketDimensionTrait dim, Loc loc)
+  {
+    Dungeon pocket = Campaign.Dungeons[dim.ID];
+
+    // I don't know that I'll ever have pocket dimensions with multiple levels
+    // but may as well handle the possibility
+    for (int lvl = 0; lvl < pocket.LevelMaps.Count; lvl++)
+    {
+      Map map = pocket.LevelMaps[lvl];
+      for (int r = 0; r < map.Height; r++)
+      {
+        for (int c = 0; c < map.Width; c++)
+        {
+          Loc sq = new(dim.ID, lvl, r, c);
+          foreach (Item item in ObjDb.ItemsAt(sq))
+          {
+            ItemDropped(item, loc, false);
+          }
+        }
+      }
+    }
+    
+    Campaign.Dungeons.Remove(dim.ID);  
   }
 
   public void RemovePerformerFromGame(Actor performer)
