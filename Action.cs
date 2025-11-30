@@ -115,8 +115,19 @@ class GulpAction(GameState gs, Actor actor, int dc, int dmgDie, int numOfDice) :
 
       // This is where the player will 'enter' the pocket dimension representing
       // the interior of the monster's belly.
-      var (entry, belly) = PocketDimension.MonsterBelly(Actor, GameState);
-      GameState.Campaign.AddDungeon(belly, belly.ID);
+      Loc entry;
+      Dungeon belly;
+      if (Actor.Traits.OfType<PocketDimensionTrait>().FirstOrDefault() is PocketDimensionTrait dim)
+      {
+        entry = dim.Entry;
+        belly = GameState.Campaign.Dungeons[dim.ID];  
+      }
+      else 
+      {
+        (entry, belly) = PocketDimension.MonsterBelly(Actor, GameState);
+        GameState.Campaign.AddDungeon(belly, belly.ID);
+        Actor.Traits.Add(new PocketDimensionTrait() { ID = belly.ID, Entry = entry });
+      }
 
       Loc start = victim.Loc;
       GameState.ActorEntersLevel(victim, belly.ID, 0);      
@@ -126,8 +137,10 @@ class GulpAction(GameState gs, Actor actor, int dc, int dmgDie, int numOfDice) :
       GameState.FlushPerformers();
       GameState.PrepareFieldOfView();
 
-      if (belly.ArrivalMessage != "")
+      if (belly.ArrivalMessage != "") 
+      {
         ui.AlertPlayer(belly.ArrivalMessage);
+      }
     }
 
     return 1.0;

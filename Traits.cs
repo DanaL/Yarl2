@@ -1278,6 +1278,14 @@ class PluralTrait : Trait
   public override string AsText() => "Plural";
 }
 
+class PocketDimensionTrait : Trait
+{
+  public int ID { get; set; }
+  public Loc Entry { get; set; }
+
+  public override string AsText() => $"PocketDimension#{ID}#{Entry}";
+}
+
 class PolearmTrait : Trait
 {
   public override string AsText() => "Polearm";
@@ -4433,6 +4441,7 @@ class TraitFactory
     { "Plant", (pieces, gameObj) => new PlantTrait() },
     { "PlayerRegen", (pieces, gameObj) => new PlayerRegenTrait() { OwnerID = ulong.Parse(pieces[1]) }},
     { "Plural", (pieces, gameObj) => new PluralTrait() },
+    { "PocketDimension", (pieces, gameOjb) => new PocketDimensionTrait() { ID = int.Parse(pieces[1]), Entry = Loc.FromStr(pieces[2])} },
     { "PoisonCoated", (pieces, gameObj) => new PoisonCoatedTrait() },
     { "Poisoned", (pieces, gameObj) => new PoisonedTrait()
       { DC = int.Parse(pieces[1]), Strength = int.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]),
