@@ -2181,7 +2181,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       else
       {
         glyph = Util.TileToGlyph(tile);
-        illuminateGlyph = true;
+        illuminateGlyph = tile.Type != TileType.WorldBorder;
       }
 
       CurrentDungeon.RememberedLocs[loc] = new(glyph, objId);
