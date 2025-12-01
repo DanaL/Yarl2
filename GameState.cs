@@ -355,13 +355,25 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     }
   }
 
+  bool CheckItemDropLoc(Tile tile, Loc loc)
+  {
+    if (tile.PassableByFlight())
+      return true;
+
+    Map map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
+    if ((map.Features & MapFeatures.Submerged) != MapFeatures.None && tile.IsWater())
+      return true;
+
+    return false;
+  }
+
   public void ItemDropped(Item item, Loc loc, bool thrown = false)
   {
     item.ContainedBy = 0;
 
     Tile tile = TileAt(loc);
 
-    if (!tile.PassableByFlight())
+    if (!CheckItemDropLoc(tile, loc))
     {
       loc = Util.NearestOpen(this, loc);
     }
@@ -1020,6 +1032,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
           Loc sq = new(dim.ID, lvl, r, c);
           foreach (Item item in ObjDb.ItemsAt(sq))
           {
+            ObjDb.RemoveItemFromLoc(item.Loc, item);
             ItemDropped(item, loc, false);
           }
         }
