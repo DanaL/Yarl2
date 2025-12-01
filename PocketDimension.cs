@@ -162,6 +162,20 @@ class PocketDimension
     int dungeonId = TempDungeonId(gs);
     Dungeon belly = new(dungeonId, "a monster's belly", $"You've been swallowed by {monster.Name.IndefArticle()}!", true);
     belly.AddMap(map);
+    gs.Campaign.AddDungeon(belly, belly.ID);
+
+    List<Loc> floors = [.. map.SqsOfType(TileType.BellyFloor).Select(sq => new Loc(dungeonId, 0, sq.Item1, sq.Item2))];
+    for (int i = 0; i < gs.Rng.Next(1, 4); i++)
+    {
+      Item item = gs.Rng.Next(3) switch
+      {
+        0 => Treasure.GoodMagicItem(gs.Rng, gs.ObjDb),
+        1 => Treasure.ItemByQuality(TreasureQuality.Good, gs.ObjDb, gs.Rng),
+        _ => Treasure.ItemByQuality(TreasureQuality.Uncommon, gs.ObjDb, gs.Rng)
+      };
+      Loc loc = floors[gs.Rng.Next(floors.Count)];
+      gs.ItemDropped(item, loc);
+    }
 
     return (new Loc(dungeonId, 0, 2, 1), belly);
   }

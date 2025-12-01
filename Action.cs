@@ -132,7 +132,6 @@ class GulpAction(GameState gs, Actor actor, int dc, int dmgDie, int numOfDice) :
           _ => (entry, belly) = PocketDimension.MonsterBelly(Actor, GameState)
         };
 
-        GameState.Campaign.AddDungeon(belly, belly.ID);
         Actor.Traits.Add(new PocketDimensionTrait() { ID = belly.ID, Entry = entry });
       }
 
