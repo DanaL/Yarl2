@@ -103,7 +103,7 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
   {
     if (tile.Passable())    
       return 1;
-    else if (tile.Type == TileType.Lake || tile.Type == TileType.Water || tile.Type == TileType.DeepWater)
+    else if (tile.IsWater())
       return 1;
     else
       return int.MaxValue;

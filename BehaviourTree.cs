@@ -133,9 +133,6 @@ class Selector(List<BehaviourNode> nodes) : BehaviourNode
 
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
-if (Label == "powers")
-      Console.WriteLine();
-
     while (Curr < Children.Count)
     {
       BehaviourNode node = Children[Curr];
