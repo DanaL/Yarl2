@@ -2848,17 +2848,23 @@ class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
     }
 
     List<Loc> sqs = [];
-    var start = Actor!.Loc;
-    for (var r = start.Row - 12; r < start.Row + 12; r++)
+    Loc start = Actor!.Loc;
+    Map map = GameState!.Campaign.Dungeons[start.DungeonID].LevelMaps[start.Level];
+    bool submered = (map.Features & MapFeatures.Submerged) != MapFeatures.None;
+    for (int r = start.Row - 12; r < start.Row + 12; r++)
     {
-      for (var c = start.Col - 12; c < start.Col + 12; c++)
+      for (int c = start.Col - 12; c < start.Col + 12; c++)
       {
-        var loc = start with { Row = r, Col = c };
+        Loc loc = start with { Row = r, Col = c };
         int d = Util.Distance(start, loc);
-        if (d >= 8 && d <= 12 && GameState!.TileAt(loc).Passable() && !GameState.ObjDb.Occupied(loc))
-        {
+        if (d < 8 || d > 12 || GameState.ObjDb.Occupied(loc))
+          continue;
+
+        Tile tile = GameState!.TileAt(loc);
+        if (tile.Passable())
           sqs.Add(loc);
-        }
+        else if (submered && tile.IsWater())
+          sqs.Add(loc);
       }
     }
 
