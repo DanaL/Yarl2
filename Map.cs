@@ -632,7 +632,7 @@ class TileFactory
   static readonly Tile IllusoryWall = new BasicTile(TileType.IllusoryWall, true, true, true);
   static readonly Tile Lake = new BasicTile(TileType.Lake, false, false, true);
   static readonly Tile FrozenLake = new BasicTile(TileType.FrozenLake, true, false, true);
-  static readonly Tile Underwater = new BasicTile(TileType.Underwater, false, false, false);
+  static readonly Tile Underwater = new BasicTile(TileType.Underwater, true, false, false);
   static readonly Tile MistyPortal = new BasicTile(TileType.MistyPortal, true, false, true);
   static readonly Tile BellyFloor = new BasicTile(TileType.BellyFloor, true, false, true);
 
