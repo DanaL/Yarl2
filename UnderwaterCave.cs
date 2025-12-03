@@ -121,6 +121,50 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
     return map;
   }
 
+  void AddShelf(Map map, HashSet<(int, int)> floorSqs, Rng rng)
+  {
+    (int r, int c, int dr, int dc) = rng.Next(4) switch
+    {
+      0 => (rng.Next(3, Height - 3), 0, 0, 1), // Start at west wall
+      1 => (rng.Next(3, Height - 3), Width - 1, 0, -1), // east wall
+      2 => (0, rng.Next(3, Width - 3), 1, 0), // north wall
+      _ => (Height - 1, rng.Next(3, Width - 3), -1, 0) // south wall
+    };
+
+    while (map.InBounds(r, c) && map.TileAt(r, c).Type != TileType.Lake)
+    {
+      r += dr;
+      c += dc;
+    }
+
+    if (map.InBounds(r, c))
+    {
+      Stack<(int, int)> stack = [];
+      stack.Push((r, c));
+
+      int count = 0;
+      int shelfSize = rng.Next(5, 10);
+      while (stack.Count > 0 && count < shelfSize)
+      {
+        ++count;
+        var sq = stack.Pop(); 
+        map.SetTile(sq, TileFactory.Get(TileType.DungeonFloor));
+        floorSqs.Add(sq);
+
+        List<(int, int)> adjTiles = [.. Util.Adj8Sqs(r, c)];
+        adjTiles.Shuffle(rng);
+        foreach (var adj in adjTiles)
+        {
+          if (map.TileAt(adj).Type == TileType.Lake)
+          {
+            map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
+            stack.Push(adj);
+          }
+        } 
+      }      
+    }
+  }
+
   Map TopLevel(int entranceRow, int entranceCol, GameObjectDB objDb, Rng rng)
   {
     Map topLevel = new(Width, Height, TileType.PermWall);
@@ -189,6 +233,12 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
     Upstairs stairs = new("") { Destination = new(0, 0, entranceRow, entranceCol) };
     topLevel.SetTile(exit.Row, exit.Col, stairs);
 
+    HashSet<(int, int)> floorSqs = [];
+    for (int j = 0; j < rng.Next(3, 7); j++) 
+    {
+      AddShelf(topLevel, floorSqs, rng);
+    }
+
     return topLevel;
 
     bool IslandFits(int cr, int cc, bool[,] island)
@@ -221,7 +271,5 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
     cave.AddMap(BottomLevel(objDb, rng));
 
     return cave;
-
-
   }
 }
