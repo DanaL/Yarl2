@@ -208,8 +208,10 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
     }
 
     List<Loc> floorLocs = [];
+    List<Loc> lakes = [];
     foreach ((int Row, int Col) sq in topLevel.SqsOfType(TileType.Lake))
     {
+      lakes.Add(new(DungeonId, 0, sq.Row, sq.Col));
       if (IslandFits(sq.Row, sq.Col, island))
       {
         for (int r = -2; r < 3; r++)
@@ -237,6 +239,13 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
     for (int j = 0; j < rng.Next(3, 7); j++) 
     {
       AddShelf(topLevel, floorSqs, rng);
+    }
+
+    if (rng.Next(4) == 0)
+    {
+      Item seeweed = ItemFactory.Get(ItemNames.SEEWEED, objDb);
+      Loc loc = lakes[rng.Next(lakes.Count)];
+      objDb.SetToLoc(loc, seeweed);
     }
 
     return topLevel;
