@@ -73,6 +73,8 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
   int Width { get; set; } = width + 2;
   int DungeonId { get; set; } = dungeonId;
 
+  protected override bool IsValidMonsterPlacementTile(Tile tile) => tile.Type == TileType.DungeonFloor || tile.IsWater();
+
   Map MidLevel(GameObjectDB objDb, Rng rng)
   {
     Map map = new(Width, Height, TileType.PermWall) { Features = MapFeatures.Submerged };
@@ -259,16 +261,19 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
   }
 
   public Dungeon Generate(int entranceRow, int entranceCol, GameObjectDB objDb, Rng rng)
-  {
-    Dungeon cave = new(DungeonId, "a Flooded Cavern", "A moist, clammy cave. From the distance comes the sound of dripping water.", true);
-
-    MonsterDeck deck = new();
-    deck.Monsters.AddRange(["skeleton", "skeleton", "zombie", "zombie", "dire bat"]);
-    cave.MonsterDecks.Add(deck);
+  {    
+    Dungeon cave = new(DungeonId, "a Flooded Cavern", "A moist, clammy cave. From the distance comes the sound of dripping water.", true)
+    {
+      PopulationLow = 3,
+      PopulationHigh = 5,
+      MonsterDecks = DeckBuilder.ReadDeck("flooded_cave", rng)
+    };
 
     cave.AddMap(TopLevel(entranceRow, entranceCol, objDb, rng));
     cave.AddMap(MidLevel(objDb, rng));
     cave.AddMap(BottomLevel(objDb, rng));
+
+    PopulateDungeon(cave, rng, objDb);
 
     return cave;
   }

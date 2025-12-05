@@ -763,6 +763,30 @@ class Map : ICloneable
     while (true);
   }
 
+  public (int, int) RandomTile(Func<Tile, bool> predicate, Rng rng, int maxAttempts = 1000)
+  {
+    for (int attempt = 0; attempt < maxAttempts; attempt++)
+    {
+      int r = rng.Next(Height);
+      int c = rng.Next(Width);
+
+      if (predicate(TileAt(r, c)))
+        return (r, c);
+    }
+
+    // If we failed to find a tile randomly, do an exhaustive search
+    for (int r = 0; r < Height; r++)
+    {
+      for (int c = 0; c < Width; c++)
+      {
+        if (predicate(TileAt(r, c)))
+          return (r, c);
+      }
+    }
+
+    throw new Exception("Unable to find matching tile in RandomTile()");
+  }
+
   // List of floors that are good spots to place items or mobs. Should be
   // free of other occuptants, rubble/statues, or hazards like campfires
   public List<Loc> ClearFloors(int dungeonId, int level, GameObjectDB objDb)

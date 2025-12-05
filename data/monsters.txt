@@ -30,8 +30,8 @@ cloaker             |v|grey         |darkgrey    |13|20|4| 1.0|12|14|MirrorImage
 shadow              | |black        |black       |13|20|4| 1.0|10|14|MeleeNecrotic#1#1#4#1#0#0#Attack|Weaken#13#1,SilverAllergy,Undead,Immunity#Poison|
 floating eye        |e|lightblue    |blue        |13|20|0|0.25|10|10||ParalyzingGaze#18,Floating,Brainless|
 screech bat         |v|green        |darkgreen   |13|20|6| 1.0|10|16|ConfusingScream#0#0#4#0#14#7#Attack,MeleePiercing#1#1#6#2#0#0#Attack|Flying,Immunity#Confusion|
-deep one            |h|green        |darkgreen   |13|20|5| 1.0|12|12|MeleePiercing#1#1#8#1#0#0#Attack|Intelligent|
-deep one shaman     |h|limegreen    |green       |13|25|4| 1.0|12|12|HealAllies#0#0#0#0#0#05#Passive,MeleePiercing#1#1#8#1#0#0#Attack|Intelligent|
+deep one            |h|green        |darkgreen   |13|20|5| 1.0|12|12|MeleePiercing#1#1#8#1#0#0#Attack|Intelligent,Amphibious|
+deep one shaman     |h|limegreen    |green       |13|25|4| 1.0|12|12|HealAllies#0#0#0#0#0#05#Passive,MeleePiercing#1#1#8#1#0#0#Attack|Intelligent,Amphibious|
 rust monster        |R|dullred      |dullred     |14|25|3| 1.0|10|10|MeleeAcid#1#1#6#1#0#0#Attack|Corrosive|
 will-o-wisp         |ώ|yellow       |yelloworange|15|25|3| 1.0|10|10|DrainTorch#2#6#0#0#0#3#Attack,MeleeFire#1#1#5#2#0#0#Attack|LightSource#owner#2#yellow#torchorange,Retribution#Fire#8#1#1,Flying|
 troll               |T|limegreen    |darkgreen   |13|40|8| 1.0|18|10|MeleeSlashing#1#1#8#2#0#0#Attack|Regeneration#3#owner#false#max,Intelligent,Heavy,Vulnerable#Fire|
@@ -61,7 +61,6 @@ cult leader         |@|grey         |darkgrey    |13|20|3| 1.0|12|10|SummonCenti
 cave lizard         |l|green        |darkgreen   |13|20|2| 1.0|10|10|MeleePiercing#1#1#5#1#0#0#Attack||
 kobold soothsayer   |k|lightblue    |blue        |13|25|2| 1.0|12|10|CastCurse#1#7#0#0#15#10#Attack,SummonCaveLizard#0#0#0#0#0#5#Attack,MeleeSlashing#1#1#5#2#0#0#Attack|Intelligent|
 faint spirit        |p|green        |darkgreen   |14|20|2| 1.0|10|14|MeleeCold#1#1#5#2#0#0#Attack|Undead,Immunity#Poison,LightSource#owner#2#iceblue#mysticaura|
-angler fish         |»|white        |darkgrey    |13|30|8| 1.0|10|12|MeleeSlashing#1#1#6#4#0#0#Attack|Swimmer,Passive,LightSource#owner#1#torchyellow#green,Alluring#owner#15#max|
 gas spore           |e|darkgreen    |darkgrey    |11|20|0|0.75|10|10||Floating,Brainless,Retribution#Blunt#6#4#2|
 imp                 |i|brightred    |dullred     |13|35|3| 1.0|10|10|MeleeFire#1#1#6#2#0#0#Attack,SummonBats#0#0#0#0#0#4#Attack#Destroy them my pretties!,Blink#0#0#0#0#0#11#Movement|Intelligent|PoorLoot
 mud golem           |G|lightbrown   |brown       |14|40|5| 1.0|12|10|MeleeBlunt#1#1#10#1#0#0#Attack|Resistance#Blunt,Immunity#Confusion,Retribution#Mud#0#0#0,Brainless,Construct|
@@ -82,6 +81,7 @@ vampire             |V|blue         |darkblue    |15|50|8| 1.0|14|14|TurnIntoBat
 dancing sword       |)|white        |lightgrey   |16|30|7| 1.0|10|10|MeleeSlashing#1#1#5#2#0#0#Attack|Construct,Drop#SILVER_LONGSWORD#50,Resistance#Piercing,Resistance#Slashing,Resistance#Blunt,LightSource#owner#1#iceblue#mysticaura,Flying|
 dancing greatsword  |)|white        |lightgrey   |16|40|7| 1.0|10|10|MeleeSlashing#1#1#5#3#0#0#Attack|Construct,Drop#GREATSWORD#50,Resistance#Piercing,Resistance#Slashing,Resistance#Blunt,LightSource#owner#1#iceblue#mysticaura,Flying|
 snapping turtle     |ǒ|green        |darkgreen   |15|20|7| 1.0|12|10|MeleePiercing#1#1#6#2#0#0#Attack|Amphibious|
+angler fish         |»|white        |darkgrey    |13|30|8| 1.0|10|12|MeleeSlashing#1#1#6#4#0#0#Attack|Swimmer,Passive,LightSource#owner#1#torchyellow#green,Alluring#owner#15#max|
 piranha             |»|brightred    |dullred     |13|30|7| 1.0|10|14|MeleePiercing#1#1#6#2#0#0#Attack|Swimmer|
 electric eel        |»|yellow       |yelloworange|14|35|7| 1.0|10|14|MeleeElectric#1#1#8#1#0#0#Attack|Swimmer,Electrocutes#15#3|
 cave shark          |»|grey         |darkgrey    |14|45|7| 1.0|10|14|MeleePiercing#1#1#6#2#0#0#Attack|Swimmer|

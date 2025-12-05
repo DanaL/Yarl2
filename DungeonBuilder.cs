@@ -17,6 +17,8 @@ abstract class DungeonBuilder
 {
   public (int, int) ExitLoc { get; set; }
 
+  protected virtual bool IsValidMonsterPlacementTile(Tile tile) => tile.Type == TileType.DungeonFloor;
+
   static bool GoodClosetSpot(Map map, int r, int c)
   {
     if (map.TileAt(r, c).Type != TileType.DungeonFloor)
@@ -235,7 +237,7 @@ abstract class DungeonBuilder
     }
   }
 
-  protected static void PopulateDungeon(Dungeon dungeon, Rng rng, GameObjectDB objDb)
+  protected void PopulateDungeon(Dungeon dungeon, Rng rng, GameObjectDB objDb)
   {
     for (int lvl = 0; lvl < dungeon.LevelMaps.Count; lvl++)
     {
@@ -248,7 +250,8 @@ abstract class DungeonBuilder
         }
 
         MonsterDeck deck = dungeon.MonsterDecks[monsterLvl];
-        (int, int) sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
+        (int, int) sq = dungeon.LevelMaps[lvl].RandomTile(IsValidMonsterPlacementTile, rng);
+        
         Loc loc = new(dungeon.ID, lvl, sq.Item1, sq.Item2);
         if (deck.Indexes.Count == 0)
           deck.Reshuffle(rng);

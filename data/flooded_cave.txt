@@ -1,0 +1,6 @@
+LEVEL 1
+snapping turtle 2,piranha 3,electric eel 1,giant sea slug 1
+LEVEL 2
+piranha 3,cave shark 2,electric eel 1,giant sea slug 2,water elemental 1,giant squid 2,death turtle 1,deep one 1
+LEVEL 3
+piranha 2,cave shark 2,electric eel 1,giant sea slug 1,water elemental 1,giant squid 2,death turtle 1,deep one 3
