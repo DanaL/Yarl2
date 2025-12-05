@@ -1431,6 +1431,30 @@ class ChaseTarget : BehaviourNode
     else if (mob.HasTrait<AmphibiousTrait>())
       costFunc = DijkstraMap.CostForAmphibians;
 
+    // For Swimmers, if the target is on a non-water tile, look for adjacent
+    // water tile instead
+    if (mob.HasTrait<SwimmerTrait>())
+    {
+      Tile targetTile = gs.TileAt(target);
+      if (!targetTile.IsWater())
+      {
+        Loc? adjacentWater = null;
+        foreach (var adj in Util.Adj8Locs(target))
+        {
+          if (gs.CurrentMap.InBounds(adj.Row, adj.Col) && gs.TileAt(adj).IsWater())
+          {
+            adjacentWater = adj;
+            break;
+          }
+        }
+
+        if (adjacentWater is null)
+          return PlanStatus.Failure; // No adjacent water tile, can't reach target
+        
+        target = adjacentWater.Value;          
+      }
+    }
+
     Stack<Loc> path = AStar.FindPath(gs.ObjDb, gs.CurrentMap, mob.Loc, target, costFunc, true);
 
     if (path.Count > 0)    
