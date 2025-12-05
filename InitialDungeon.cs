@@ -670,7 +670,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       ks.Stats[Attribute.AttackBonus] = new Stat(6);
       ks.Stats[Attribute.HP] = new Stat(35);
 
-      var sq = bossLevel.RandomTile(TileType.DungeonFloor, rng);
+      var sq = bossLevel.RandomTile(FindFloor, rng);
       Loc loc = new(dungeon.ID, bossLevelNum, sq.Item1, sq.Item2);
       objDb.AddNewActor(ks, loc);
       factDb.Add(new SimpleFact() { Name = "First Boss", Value = "the Kobold Regional Manager" });
@@ -699,16 +699,18 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     else if (earlyDenizen == "goblin")
     {
       Actor gg = MonsterFactory.Get("the Great Goblin", objDb, rng);
-      var sq = bossLevel.RandomTile(TileType.DungeonFloor, rng);
+      var sq = bossLevel.RandomTile(FindFloor, rng);
       Loc loc = new(dungeon.ID, bossLevelNum, sq.Item1, sq.Item2);
       objDb.AddNewActor(gg, loc);
       factDb.Add(new SimpleFact() { Name = "First Boss", Value = "the Great Goblin" });
     }
+
+    static bool FindFloor(Tile t) => t.Type == TileType.DungeonFloor;
   }
 
   void AddWidowerBeau(GameObjectDB objDb, Map level, int levelNum, FactDb factDb, Rng rng)
   {
-    (int, int) sq = level.RandomTile(TileType.DungeonFloor, rng);
+    (int, int) sq = level.RandomTile(t => t.Type == TileType.DungeonFloor, rng);
     Loc loc = new(DungeonId, levelNum, sq.Item1, sq.Item2);
 
     for (int j = 0; j < 3; j++)

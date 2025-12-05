@@ -746,23 +746,6 @@ class Map : ICloneable
   public bool InBounds(int row, int col) => row >= 0 && row < Height && col >= 0 && col < Width;
   public bool InBounds((int, int) loc) => loc.Item1 >= 0 && loc.Item1 < Height && loc.Item2 >= 0 && loc.Item2 < Width;
 
-  // I'll need to search out a bunch of dungeon floors (the main use for this function) so I 
-  // should build up a list of random floors and pick from among them instead of randomly
-  // trying squares. (And remove from list when I SetTile())...
-  // Potential infinite loop alert D:
-  public (int, int) RandomTile(TileType type, Rng rng)
-  {
-    do
-    {
-      int r = rng.Next(Height);
-      int c = rng.Next(Width);
-
-      if (TileAt(r, c).Type == type)
-        return (r, c);
-    }
-    while (true);
-  }
-
   public (int, int) RandomTile(Func<Tile, bool> predicate, Rng rng, int maxAttempts = 1000)
   {
     for (int attempt = 0; attempt < maxAttempts; attempt++)

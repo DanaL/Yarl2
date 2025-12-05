@@ -664,11 +664,11 @@ abstract class DungeonBuilder
       switch (trap)
       {
         case 0:
-          sq = map.RandomTile(TileType.DungeonFloor, rng);
+          sq = map.RandomTile(FindFloor, rng);
           map.SetTile(sq, TileFactory.Get(TileType.HiddenTeleportTrap));
           break;
         case 1:
-          sq = map.RandomTile(TileType.DungeonFloor, rng);
+          sq = map.RandomTile(FindFloor, rng);
           map.SetTile(sq, TileFactory.Get(TileType.HiddenDartTrap));
           break;
         case 2:
@@ -677,27 +677,29 @@ abstract class DungeonBuilder
           FireJetTrap(map, corner, dir, rng);
           break;
         case 3:
-          sq = map.RandomTile(TileType.DungeonFloor, rng);
+          sq = map.RandomTile(FindFloor, rng);
           map.SetTile(sq, TileFactory.Get(TileType.HiddenPit));
           break;
         case 4:
-          sq = map.RandomTile(TileType.DungeonFloor, rng);
+          sq = map.RandomTile(FindFloor, rng);
           map.SetTile(sq, TileFactory.Get(TileType.HiddenWaterTrap));
           break;
         case 5:
-          sq = map.RandomTile(TileType.DungeonFloor, rng);
+          sq = map.RandomTile(FindFloor, rng);
           map.SetTile(sq, TileFactory.Get(TileType.HiddenTrapDoor));
           break;
         case 6:
-          sq = map.RandomTile(TileType.DungeonFloor, rng);
+          sq = map.RandomTile(FindFloor, rng);
           map.SetTile(sq, TileFactory.Get(TileType.HiddenMagicMouth));
           break;
         case 7:
-          sq = map.RandomTile(TileType.DungeonFloor, rng);
+          sq = map.RandomTile(FindFloor, rng);
           map.SetTile(sq, TileFactory.Get(TileType.HiddenSummonsTrap));
           break;
       }
     }
+
+    static bool FindFloor(Tile t) => t.Type == TileType.DungeonFloor;
   }
 
   static bool CanPlaceJetTrigger(Map map, (int, int) corner, (int, int) delta)
