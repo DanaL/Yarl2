@@ -1421,19 +1421,24 @@ class ChaseTarget : BehaviourNode
     if (mob.HasTrait<ImmobileTrait>())
       return PlanStatus.Failure;
 
+    bool submerged = (gs.MapForLoc(target).Features & MapFeatures.Submerged) != MapFeatures.None;
     TravelCostFunction costFunc = DijkstraMap.Cost;
     if (mob.HasTrait<IntelligentTrait>())
       costFunc = DijkstraMap.CostWithDoors;
     else if (mob.HasTrait<FloatingTrait>() || mob.HasTrait<FlyingTrait>())
       costFunc = DijkstraMap.CostByFlight;
     else if (mob.HasTrait<SwimmerTrait>())
-      costFunc = DijkstraMap.CostForSwimming;
+      // Use amphibian costs if level is submerged, otherwise swimmers can't
+      // move through submerged non-water tiles. (Because I didn't originally
+      // plan on underwater levels early in delve dev sigh...and I don't want
+      // to take time out to clean it all up atm
+      costFunc = submerged ? DijkstraMap.CostForAmphibians : DijkstraMap.CostForSwimming;
     else if (mob.HasTrait<AmphibiousTrait>())
       costFunc = DijkstraMap.CostForAmphibians;
 
-    // For Swimmers, if the target is on a non-water tile, look for adjacent
-    // water tile instead
-    if (mob.HasTrait<SwimmerTrait>())
+    // For Swimmers, if the target is on a non-water tile on a non-submerged
+    // level, look for adjacent water tile instead
+    if (mob.HasTrait<SwimmerTrait>() && !submerged)
     {
       Tile targetTile = gs.TileAt(target);
       if (!targetTile.IsWater())
