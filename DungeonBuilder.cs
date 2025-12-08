@@ -252,6 +252,7 @@ abstract class DungeonBuilder
         MonsterDeck deck = dungeon.MonsterDecks[monsterLvl];
         (int, int) sq = dungeon.LevelMaps[lvl].RandomTile(IsValidMonsterPlacementTile, rng);
         
+        // I'm not actually checking to see if the square is not occupied???
         Loc loc = new(dungeon.ID, lvl, sq.Item1, sq.Item2);
         if (deck.Indexes.Count == 0)
           deck.Reshuffle(rng);

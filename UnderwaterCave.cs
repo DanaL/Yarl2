@@ -269,6 +269,25 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
     }
   }
 
+  static void AddWhale(Map map, int dungeonID, int level, GameObjectDB objDb, Rng rng)
+  {
+    int tries = 0;
+    do
+    {
+      var sq = map.RandomTile(t => t.Passable(), rng);
+      Loc loc = new(dungeonID, level, sq.Item1, sq.Item2);
+      if (!objDb.Occupied(loc))
+      {
+        Actor whale = MonsterFactory.Get("umbral whale", objDb, rng);
+        objDb.AddNewActor(whale, loc);
+        return;
+      }
+      
+      ++tries;
+    }
+    while (tries < 100);
+  }
+
   public Dungeon Generate(int entranceRow, int entranceCol, GameObjectDB objDb, Rng rng)
   {    
     Dungeon cave = new(DungeonId, "a Flooded Cavern", "A moist, clammy cave. From the distance comes the sound of dripping water.", true)
@@ -283,6 +302,11 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
     cave.AddMap(BottomLevel(objDb, rng));
 
     PopulateDungeon(cave, rng, objDb);
+
+    if (rng.Next(3) == 0)
+    {
+      AddWhale(cave.LevelMaps[2], DungeonId, 2, objDb, rng);
+    }
 
     return cave;
   }
