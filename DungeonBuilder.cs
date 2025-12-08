@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Reflection.Emit;
 using System.Text;
 
 namespace Yarl2;
@@ -250,10 +251,28 @@ abstract class DungeonBuilder
         }
 
         MonsterDeck deck = dungeon.MonsterDecks[monsterLvl];
-        (int, int) sq = dungeon.LevelMaps[lvl].RandomTile(IsValidMonsterPlacementTile, rng);
+
+        (int, int) sq;
+        Loc loc;
+        int tries = 0;
+        do
+        {
+          sq = dungeon.LevelMaps[lvl].RandomTile(IsValidMonsterPlacementTile, rng);
+          loc = new(dungeon.ID, lvl, sq.Item1, sq.Item2);
+          if (!objDb.Occupied(loc))
+          {
+            break;
+          }
+
+          ++tries;
+        }
+        while (tries < 100);
+
+        // We won't flag an error. This is covering the rare instance of the 
+        // level being totally full. Skip to the next level, if any.
+        if (tries == 100)
+          break;
         
-        // I'm not actually checking to see if the square is not occupied???
-        Loc loc = new(dungeon.ID, lvl, sq.Item1, sq.Item2);
         if (deck.Indexes.Count == 0)
           deck.Reshuffle(rng);
         string m = deck.Monsters[deck.Indexes.Dequeue()];
