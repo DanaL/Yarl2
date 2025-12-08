@@ -779,7 +779,7 @@ class DiveAction(GameState gs, Actor actor, Loc loc, bool voluntary) : Action(gs
     
     var landingSpot = new Loc(Loc.DungeonID, Loc.Level + 1, Loc.Row, Loc.Col);
 
-    gs.FallIntoChasm(actor, landingSpot);    
+    gs.FallToNextLevel(actor, landingSpot);    
   }
 
   public override double Execute()

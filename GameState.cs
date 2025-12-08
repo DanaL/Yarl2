@@ -683,11 +683,16 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     if (ObjDb.Occupant(loc) is Actor actor && !(actor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>()))
     {
-      FallIntoChasm(actor, landingSpot);
+      if (actor.HasTrait<FeatherFallTrait>())
+        UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "drift")} downward into the darkness.");
+      else
+        UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the chasm!");
+
+      FallToNextLevel(actor, landingSpot);
     }
 
     var itemsToFall = ObjDb.ItemsAt(loc);
-    foreach (var item in itemsToFall)
+    foreach (Item item in itemsToFall)
     {
       ObjDb.RemoveItemFromLoc(loc, item);
       // Actually 'touching' the chasm and falling to the next level are
@@ -809,48 +814,42 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     return Loc.Nowhere;
   }
 
-  public void FallIntoChasm(Actor actor, Loc landingSpot)
+  Loc CalcFinalLandingSpot(Loc landingSpot)
   {
-    Loc CalcFinalLandingSpot(Loc landingSpot)
+    Dungeon dungeon = Campaign.Dungeons[landingSpot.DungeonID];
+    int delta = dungeon.Descending ? 1 : -1;
+    while (true)
     {
-      Dungeon dungeon = Campaign.Dungeons[landingSpot.DungeonID];
-      int delta = dungeon.Descending ? 1 : -1;
-      while (true)
-      {
-        Map map = dungeon.LevelMaps[landingSpot.Level];
-        landingSpot = Util.NearestOpen(this, landingSpot);
+      Map map = dungeon.LevelMaps[landingSpot.Level];
+      landingSpot = Util.NearestOpen(this, landingSpot);
 
-        if (map.TileAt(landingSpot.Row, landingSpot.Col).Type != TileType.Chasm)
-          return landingSpot;
-        landingSpot = landingSpot with { Level = landingSpot.Level + delta };
+      if (map.TileAt(landingSpot.Row, landingSpot.Col).Type != TileType.Chasm)
+        return landingSpot;
+      landingSpot = landingSpot with { Level = landingSpot.Level + delta };
 
-        if (dungeon.Descending && landingSpot.Level == dungeon.LevelMaps.Count)
-          break;
-        else if (!dungeon.Descending && landingSpot.Level == 0)
-          break;
-      }
-
-      // Possibly I should just throw an exception here? This would be an error
-      // condition, most likely in level generation
-      return Loc.Nowhere;
+      if (dungeon.Descending && landingSpot.Level == dungeon.LevelMaps.Count)
+        break;
+      else if (!dungeon.Descending && landingSpot.Level == 0)
+        break;
     }
 
+    // Possibly I should just throw an exception here? This would be an error
+    // condition, most likely in level generation
+    return Loc.Nowhere;
+  }
+
+  public void FallToNextLevel(Actor actor, Loc landingSpot)
+  {
     if (actor.HasTrait<IllusionTrait>())
       return;
 
     // if the actor falls into a chasm, break any grapple they are participating in
     BreakGrapple(actor);
-
-    bool featherFalling = actor.HasTrait<FeatherFallTrait>();
-
+    
     landingSpot = CalcFinalLandingSpot(landingSpot);
     int levelsFallen = Math.Abs(landingSpot.Level - actor.Loc.Level);
 
-    if (featherFalling)
-      UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "drift")} downward into the darkness.");
-    else
-      UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the chasm!");
-
+    bool featherFalling = actor.HasTrait<FeatherFallTrait>();
     if (actor is Player)
     {
       if (levelsFallen > 1 && !featherFalling)
@@ -1592,7 +1591,11 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     else if (tile.Type == TileType.Chasm && !flying)
     {
       Loc landingSpot = dest with { Level = dest.Level + 1 };
-      FallIntoChasm(actor, landingSpot);
+      if (actor.HasTrait<FeatherFallTrait>())
+        UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "drift")} downward into the darkness.");
+      else
+        UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the chasm!");
+      FallToNextLevel(actor, landingSpot);
     }
     else if (tile.Type == TileType.DeepWater && !(flying || waterWalking))
     {
@@ -1607,6 +1610,15 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       string msg = actor.Inventory.ApplyEffectToInv(DamageType.Wet, this, actor.Loc);
       UI.AlertPlayer(msg);
+    }
+    else if (tile.Type == TileType.Downstairs && actor is Player && actor.HasTrait<TipsyTrait>())
+    {
+      if (actor.AbilityCheck(Attribute.Dexterity, 13, Rng))
+      {
+        UI.AlertPlayer("You drunkenly tumble down the stairs!");
+        Portal stairs = (Portal)tile;
+        FallToNextLevel(actor, stairs.Destination);
+      }
     }
   }
 
