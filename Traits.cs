@@ -510,6 +510,49 @@ sealed class HiddenTrait : Trait
   public override string AsText() => $"Hidden";
 }
 
+sealed class HoldingBreathTrait : TemporaryTrait
+{
+  public override string AsText() => $"HoldingBreath#{OwnerID}#{ExpiresOn}";
+
+  public override List<string> Apply(GameObj target, GameState gs)
+  {
+    OwnerID = target.ID;
+    target.Traits.Add(this);
+    
+    ulong expiresOn = gs.Turn + 5;
+    if (target is Actor actor && actor.Stats.TryGetValue(Attribute.Constitution, out var conStat))
+    {
+      int mod = 10 * conStat.Curr;
+      expiresOn = (ulong)Math.Max(1, (long)expiresOn + mod);      
+    }
+
+    ExpiresOn = expiresOn;
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+
+    return [];
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (eventType == GameEventType.EndOfRound && gs.Turn > ExpiresOn)
+    {
+      Remove(gs);
+
+      if (gs.ObjDb.GetObj(OwnerID) is Actor actor)
+      {
+        Expired = true;
+        string name = MsgFactory.CalcName(actor, gs.Player).Capitalize();
+        string s = $"{name} {Grammar.Conjugate(actor, "begin")} to drown.";
+        if (actor is Player)
+          gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
+        gs.UIRef().AlertPlayer(s, gs, actor.Loc, actor);
+
+        actor.Traits.Add(new DrowningTrait());
+      }      
+    }
+  }
+}
+
 class HolyTrait : Trait
 {
   public override string AsText() => $"Holy";
@@ -2216,6 +2259,11 @@ class DropTrait : Trait
   public int Chance { get; set; }
 
   public override string AsText() => $"Drop#{ItemName}#{Chance}";
+}
+
+sealed class DrowningTrait : Trait
+{
+  public override string AsText() => "Drowning";
 }
 
 class LameTrait : TemporaryTrait
@@ -4304,6 +4352,7 @@ class TraitFactory
       }
     },
     { "Drop", (pieces, gameObj) => new DropTrait() { ItemName = pieces[1], Chance = int.Parse(pieces[2]) }},
+    { "Drowning", (pieces, gameObj) => new DrowningTrait() },
     { "Edible", (pieces, gameObj) => new EdibleTrait() },
     { "Electrocutes", (pieces, gameObj) => new ElectrocutesTrait() { DC = int.Parse(pieces[1]), Duration = int.Parse(pieces[2]) } },
     { "EmberBlessing", (pieces, gameObj) => new EmberBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
@@ -4358,6 +4407,7 @@ class TraitFactory
       }
     },
     { "Hidden", (pieces, gameObj) => new HiddenTrait() },
+    { "HoldingBreath", (pieces, gameObj) => new HoldingBreathTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2])}},
     { "Holy", (pieces, gameObj) => new HolyTrait() },
     { "Homebody", (pieces, gameObj) => new HomebodyTrait() { Loc = Loc.FromStr(pieces[1]), Range = int.Parse(pieces[2]) }},
     { "Hunter", (pieces, gameObj) => new HunterTrait() },

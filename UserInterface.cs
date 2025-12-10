@@ -716,6 +716,11 @@ abstract class UserInterface
       WriteSideBarLine(Colours.PINK, "TIPSY", statusLineNum--);
       _statuses.Add("TIPSY");
     }
+    else if (!_statuses.Contains("DROWNING") && gs.Player.HasTrait<DrowningTrait>())
+    {
+      WriteSideBarLine(Colours.BRIGHT_RED, "DROWNING", statusLineNum--);
+      _statuses.Add("DROWNING");
+    }
     if (!_statuses.Contains("AFRAID") && gs.Player.HasTrait<FrightenedTrait>())
     {
       WriteSideBarLine(Colours.YELLOW, "AFRAID", statusLineNum--);
@@ -1310,6 +1315,9 @@ abstract class UserInterface
       catch (PlayerKilledException pke)
       {
         string s = $"Oh noes you've been killed by {pke.Messages[0]} :(";
+        if (pke.Messages[0] == "drowning")
+          s = "Oh noes you have drowned :(";
+
         if (gameState.Player.HasTrait<ParalyzedTrait>())
           pke.Messages.Add("while paralyzed");
         SetPopup(new Popup(s, "", -1, -1));

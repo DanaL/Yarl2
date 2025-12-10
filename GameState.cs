@@ -1207,7 +1207,44 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
   public void ActorPostTurn(Actor actor)
   {
-    Console.WriteLine($"Turn done for {actor.Name}");
+    Map map = MapForActor(actor);
+    
+    if (map.HasFeature(MapFeatures.Submerged))
+    {
+      // If the actor ends their turn in a submerged level, need to check
+      // if they are drowning
+      bool canBreathWater = actor.Traits.Any(t => t is WaterBreathingTrait or ConstructTrait or UndeadTrait);
+      bool drowning = actor.HasTrait<DrowningTrait>();
+      if (!(canBreathWater || drowning || actor.HasTrait<HoldingBreathTrait>()))
+      {
+        // we're not drowning yet, so add a new HoldingBreathTrait
+        HoldingBreathTrait bht = new();
+        bht.Apply(actor, this);
+      }
+
+      if (drowning && canBreathWater)
+      {
+        actor.Traits = [.. actor.Traits.Where(t => t is not DrowningTrait)];
+      }
+      else if (drowning)
+      {
+        List<(int, DamageType)> p = [(1, DamageType.Force)];
+        var (hpLeft, _, _) = actor.ReceiveDmg(p, 0, this, null, 1.0);
+
+        if (hpLeft < 1)
+        {
+          string msg = $"{actor.FullName.Capitalize()} drowned!";
+          UI.AlertPlayer(msg);
+          ActorKilled(actor, "drowning", null);
+        }
+      }
+    }
+    else if (actor.HasTrait<DrowningTrait>())
+    {
+      actor.Traits = [.. actor.Traits.Where(t => t is not DrowningTrait)];
+      if (actor is Player)
+        UI.AlertPlayer("You can breathe again!");
+    }
   }
 
   // Round in the D&D sense. This is called after all Performers have taken
