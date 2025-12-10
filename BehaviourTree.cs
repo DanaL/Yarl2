@@ -1421,7 +1421,7 @@ class ChaseTarget : BehaviourNode
     if (mob.HasTrait<ImmobileTrait>())
       return PlanStatus.Failure;
 
-    bool submerged = (gs.MapForLoc(target).Features & MapFeatures.Submerged) != MapFeatures.None;
+    bool submerged = gs.MapForLoc(target).HasFeature(MapFeatures.Submerged);
     TravelCostFunction costFunc = DijkstraMap.Cost;
     if (mob.HasTrait<IntelligentTrait>())
       costFunc = DijkstraMap.CostWithDoors;

@@ -726,6 +726,8 @@ class Map : ICloneable
   public Tile[] Tiles;
   public List<string> Alerts = [];
 
+  public bool HasFeature(MapFeatures feature) => (Features & feature) != MapFeatures.None;
+
   public Map(int width, int height)
   {
     Width = width;

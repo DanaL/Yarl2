@@ -2816,7 +2816,7 @@ class DescentAction(GameState gs, Actor actor) : Action(gs, actor)
     Loc loc = Actor!.Loc;
     Map map = GameState!.Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
 
-    if (GameState!.InWilderness || (map.Features & MapFeatures.UndiggableFloor) != MapFeatures.None)
+    if (GameState!.InWilderness || map.HasFeature(MapFeatures.UndiggableFloor))
     {
       GameState.UIRef().AlertPlayer("A tiny, nearly imperceptible divot forms.", GameState, loc);
     }
@@ -2850,7 +2850,7 @@ class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
     List<Loc> sqs = [];
     Loc start = Actor!.Loc;
     Map map = GameState!.Campaign.Dungeons[start.DungeonID].LevelMaps[start.Level];
-    bool submered = (map.Features & MapFeatures.Submerged) != MapFeatures.None;
+    bool submered = map.HasFeature(MapFeatures.Submerged);
     for (int r = start.Row - 12; r < start.Row + 12; r++)
     {
       for (int c = start.Col - 12; c < start.Col + 12; c++)

@@ -69,9 +69,9 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   public void ActorEntersLevel(Actor actor, int dungeonId, int level)
   {
     Map prevMap = CurrentMap;
-    if (actor is Player && (prevMap.Features & MapFeatures.Foggy) != MapFeatures.None)
+    if (actor is Player && prevMap.HasFeature(MapFeatures.Foggy))
       UI.ClearFoggyAnimation();
-    else if (actor is Player && (prevMap.Features & MapFeatures.Submerged) != MapFeatures.None)
+    else if (actor is Player && prevMap.HasFeature(MapFeatures.Submerged))
       UI.ClearUnderwaterAnimation();
 
     CurrLevel = level;
@@ -103,11 +103,11 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       CurrentMap.Alerts = [];
     }
 
-    if (actor is Player && (CurrentMap.Features & MapFeatures.Foggy) != MapFeatures.None)
+    if (actor is Player && CurrentMap.HasFeature(MapFeatures.Foggy))
     {
       UI.RegisterAnimation(new FogAnimation(UI, this, CurrentMap.Height, CurrentMap.Width));
     }
-    else if (actor is Player && (CurrentMap.Features & MapFeatures.Submerged) != MapFeatures.None)
+    else if (actor is Player && CurrentMap.HasFeature(MapFeatures.Submerged))
     {
       UI.RegisterAnimation(new UnderwaterAnimation(UI, this, CurrentMap.Height, CurrentMap.Width));
     }
@@ -282,7 +282,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   void MakeTemporaryChasm(Loc loc)
   {
     Map map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
-    if (loc.DungeonID == 0 || (map.Features & MapFeatures.UndiggableFloor) != MapFeatures.None)
+    if (loc.DungeonID == 0 || map.HasFeature(MapFeatures.UndiggableFloor))
     {
       UI.AlertPlayer("A small ripple seems to pass over the terrain.", this, loc);
       return;
@@ -361,7 +361,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       return true;
 
     Map map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
-    if ((map.Features & MapFeatures.Submerged) != MapFeatures.None && tile.IsWater())
+    if (map.HasFeature(MapFeatures.Submerged) && tile.IsWater())
       return true;
 
     return false;
@@ -1228,7 +1228,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     // I'm not sure yet what a good monster gen rate is, and what in-game
     // conditions should affect it
-    if ((CurrentMap.Features & MapFeatures.NoRandomEncounters) != MapFeatures.None && Rng.Next(60) == 0)
+    if (CurrentMap.HasFeature(MapFeatures.NoRandomEncounters) && Rng.Next(60) == 0)
     {
       SpawnMonster();
     }
@@ -1608,7 +1608,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       ActorFallsIntoWater(actor, dest);
     }
-    else if ((map.Features & MapFeatures.Submerged) != MapFeatures.None)
+    else if (map.HasFeature(MapFeatures.Submerged))
     {
       string msg = actor.Inventory.ApplyEffectToInv(DamageType.Wet, this, actor.Loc);
       UI.AlertPlayer(msg);
@@ -2080,7 +2080,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
         lightRadius = int.Max(lightRadius, daylight);
       }
-      else if ((CurrentMap.Features & MapFeatures.Submerged) != MapFeatures.None)
+      else if (CurrentMap.HasFeature(MapFeatures.Submerged))
       {
         lightRadius = 3;
       }

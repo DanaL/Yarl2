@@ -867,7 +867,7 @@ static class Util
       Tile tile = gs.TileAt(curr);
       if (gs.TileAt(curr).PassableByFlight())
         return curr;
-      else if ((map.Features & MapFeatures.Submerged) != MapFeatures.None && tile.IsWater())          
+      else if (map.HasFeature(MapFeatures.Submerged) && tile.IsWater())
         return curr;
 
       List<Loc> adjLocs = [.. Adj8Locs(curr).Where(l => !visited.Contains(l) && map.InBounds(l.Row, l.Col))];
