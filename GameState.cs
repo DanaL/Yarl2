@@ -1188,7 +1188,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   {
     if (Performers.Count == 0)
     {
-      EndOfTurn();
+      EndOfRound();
       RefreshPerformers();
     }
 
@@ -1205,7 +1205,14 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     return next;
   }
 
-  void EndOfTurn()
+  public void ActorPostTurn(Actor actor)
+  {
+    Console.WriteLine($"Turn done for {actor.Name}");
+  }
+
+  // Round in the D&D sense. This is called after all Performers have taken
+  // their turn.
+  void EndOfRound()
   {
     bool IsActiveListener(GameObj obj)
     {

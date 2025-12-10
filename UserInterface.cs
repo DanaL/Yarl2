@@ -1269,6 +1269,8 @@ abstract class UserInterface
           actor.TakeTurn(gameState);
           if (actor.Energy >= 1.0)
             gameState.PushPerformer(actor);
+          else
+            gameState.ActorPostTurn(actor);
         }
 
         WriteAlerts();
