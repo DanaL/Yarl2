@@ -350,6 +350,8 @@ sealed class Player : Actor
         traitsToShow.Add("You are especially likeable");
       else if (trait is RegenerationTrait)
         traitsToShow.Add("You [green heal] especially quick");
+      else if (trait is WaterBreathingTrait)
+        traitsToShow.Add("You can [blue breath in water]");
     }
     
     if (alacrity < 0)

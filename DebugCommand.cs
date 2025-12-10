@@ -120,7 +120,8 @@ class DebugCommand(GameState gs)
     {"potion of descent", ItemNames.POTION_DESCENT },
     {"scroll of stainlessness", ItemNames.SCROLL_STAINLESS },
     {"alchemical compound", ItemNames.ALCHEMICAL_COMPOUND },
-    {"bomb", ItemNames.BOMB }
+    {"bomb", ItemNames.BOMB },
+    {"ring of water breathing", ItemNames.RING_OF_WATER_BREATHING }
   };
 
   public string DoCommand(string txt)

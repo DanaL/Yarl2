@@ -556,6 +556,16 @@
     ]
   },
   {
+    "Name": "RING_OF_WATER_BREATHING",
+    "DescriptiveName": "ring of water breathing",
+    "Type": "Ring",
+    "Value": 50,
+    "Glyph": "o,white,grey,black,false",
+    "Traits": [
+      "Grants#WaterBreathing"
+    ]
+  },
+  {
     "Name": "POTION_OF_LEVITATION",
     "DescriptiveName": "potion of levitation",
     "Type": "Potion",

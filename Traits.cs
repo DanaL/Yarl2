@@ -4614,7 +4614,7 @@ class TraitFactory
       }
     },
     { "Wand", (pieces, gameObj) => new WandTrait() { Charges = int.Parse(pieces[1]), IDed = bool.Parse(pieces[2]), Effect = pieces[3] } },
-    { "WaterBreathing", (pieces, gameObj) => new WaterBreathingTrait() { SourceId = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1])} },
+    { "WaterBreathing", (pieces, gameObj) => new WaterBreathingTrait() { SourceId = (pieces.Length == 1 || pieces[1] == "owner") ? gameObj!.ID : ulong.Parse(pieces[1])} },
     { "WaterWalking", (pieces, gameObj) =>
       pieces.Length > 1 ? new WaterWalkingTrait() { SourceId = ulong.Parse(pieces[1])} : new WaterWalkingTrait()
     },

@@ -601,3 +601,6 @@ A vaguely humanoid figure seemingly carved out of ice.
 #
 umbral whale
 When you're a cave-dwelling whale, pretty much everything looks like krill to you.
+#
+ring of water breathing
+They say if you hold it to your ear, you can hear the ocean.
