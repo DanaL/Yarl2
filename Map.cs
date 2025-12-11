@@ -840,6 +840,21 @@ class Map : ICloneable
     return sqs;
   }
 
+  public List<(int, int)> SqsOfTypes(HashSet<TileType> types)
+  {
+    List<(int, int)> sqs = [];
+    for (int r = 0; r < Height; r++)
+    {
+      for (int c = 0; c < Width; c++)
+      {        
+        if (types.Contains(TileAt(r, c).Type))
+          sqs.Add((r, c));
+      }
+    }
+
+    return sqs;
+  }
+
   // Find rooms -- flood fill to find areas on map that are rooms,
   // ie contiguous floor squares at least 9x9 and no longer than 16x16
   public List<List<(int, int)>> FindRooms(int minSize)

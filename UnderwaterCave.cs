@@ -72,6 +72,7 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
   int Height { get; set; } = height + 2;
   int Width { get; set; } = width + 2;
   int DungeonId { get; set; } = dungeonId;
+  HashSet<Loc> ShelfLocs { get; set; } = [];
 
   protected override bool IsValidMonsterPlacementTile(Tile tile) => tile.Type == TileType.DungeonFloor || tile.IsWater();
 
@@ -151,6 +152,8 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
         ++count;
         var sq = stack.Pop(); 
         map.SetTile(sq, TileFactory.Get(TileType.DungeonFloor));
+        ShelfLocs.Add(new(DungeonId, 0, sq.Item1, sq.Item2));
+
         floorSqs.Add(sq);
 
         List<(int, int)> adjTiles = [.. Util.Adj8Sqs(r, c)];
@@ -160,6 +163,7 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
           if (map.TileAt(adj).Type == TileType.Lake)
           {
             map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
+            ShelfLocs.Add(new(DungeonId, 0, r, c));
             stack.Push(adj);
           }
         } 
@@ -288,6 +292,30 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
     while (tries < 100);
   }
 
+  void SeedTreasure(Dungeon cave, GameObjectDB objDb, Rng rng)
+  {
+    for (int level = 0; level < cave.LevelMaps.Count; level++)
+    {
+      Map map = cave.LevelMaps[level];
+
+      List<Loc> floors = level switch
+      {
+        0 => floors = [.. ShelfLocs],
+        1 => [.. map.SqsOfType(TileType.Underwater).Select(sq => new Loc(cave.ID, level, sq.Item1, sq.Item2))],
+        _ => [.. map.SqsOfTypes([TileType.DungeonFloor, TileType.Kelp]).Select(sq => new Loc(cave.ID, level, sq.Item1, sq.Item2))]
+      };
+      floors.Shuffle(rng);
+
+      int numOfItems = rng.Next(2, 4);
+      for (int j = 0; j < numOfItems; j++)
+      {
+        Item item = Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng);
+        Loc loc = floors[j];
+        objDb.SetToLoc(loc, item);
+      }
+    }
+  }
+
   public Dungeon Generate(int entranceRow, int entranceCol, GameObjectDB objDb, Rng rng)
   {    
     Dungeon cave = new(DungeonId, "a Flooded Cavern", "A moist, clammy cave. From the distance comes the sound of dripping water.", true)
@@ -302,6 +330,7 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
     cave.AddMap(BottomLevel(objDb, rng));
 
     PopulateDungeon(cave, rng, objDb);
+    SeedTreasure(cave, objDb, rng);
 
     if (rng.Next(3) == 0)
     {
