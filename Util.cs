@@ -713,7 +713,7 @@ static class Util
     TileType.Chasm => new Glyph('\u2237', Colours.FAR_BELOW, Colours.FAR_BELOW, Colours.BLACK, false),
     TileType.CharredGrass => new Glyph('.', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     TileType.CharredStump => new Glyph('╵', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
-    TileType.FrozenDeepWater => new Glyph('.', Colours.BLUE, Colours.ICE_BLUE, Colours.WHITE, false),
+    TileType.FrozenDeepWater => new Glyph('\u2744', Colours.BLUE, Colours.ICE_BLUE, Colours.WHITE, false),
     TileType.FrozenWater => new Glyph('.', Colours.BLUE, Colours.ICE_BLUE, Colours.WHITE, false),
     TileType.Portcullis => new Glyph('ǁ', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     TileType.OpenPortcullis => new Glyph('.', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),

@@ -1688,6 +1688,11 @@ class FlyingTrait : BasicTrait
   public override string AsText() => $"Flying#{ExpiresOn}";
 }
 
+class FreezerTrait : Trait
+{
+  public override string AsText() => "Freezer";
+}
+
 class FriendlyMonsterTrait : Trait
 {
   public override string AsText() => "FriendlyMonster";
@@ -4375,6 +4380,7 @@ class TraitFactory
     { "Flammable", (pieces, gameObj) => new FlammableTrait() },
     { "Floating", (pieces, gameObj) => new FloatingTrait() },
     { "Flying", (pieces, gameObj) => new FlyingTrait() },
+    { "Freezer", (pieces, gameObj) => new FreezerTrait() },
     { "FriendlyMonster", (pieces, gameObj) => new FriendlyMonsterTrait() },
     { "Frightened", (pieces, gameObj) => new FrightenedTrait()
       { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) }

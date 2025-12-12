@@ -1583,9 +1583,18 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     Map map = Campaign.Dungeons[dest.DungeonID].LevelMaps[dest.Level];
     Tile tile = map.TileAt(dest.Row, dest.Col);
-    bool flying = actor.Traits.Any(t => t is FlyingTrait || t is FloatingTrait);
-    bool waterWalking = actor.Traits.Any(t => t is WaterWalkingTrait || t is AmphibiousTrait);
 
+    bool flying = false, waterWalking = false, freezer = false;
+    foreach (Trait t in actor.Traits)
+    {
+      if (t is FlyingTrait || t is FloatingTrait)
+        flying = true;
+      else if (t is WaterWalkingTrait || t is AmphibiousTrait)
+        waterWalking = true;
+      else if (t is FreezerTrait)
+        freezer = true;
+    }
+ 
     // At the moment ThingTouchesFLoor (formerly ThingAddedToLoc) only handles
     // floor triggers, but if it starts doing more I'll have to split it into
     // seperate moethods, or actually pass the object in
@@ -1593,6 +1602,11 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       string s = ThingTouchesFloor(dest);
       UI.AlertPlayer(s);
+    }
+
+    if (freezer)
+    {
+      ApplyDamageEffectToLoc(dest, DamageType.Cold);
     }
 
     if (actor is Player && tile.Type == TileType.MistyPortal)

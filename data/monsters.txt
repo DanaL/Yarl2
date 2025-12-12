@@ -19,7 +19,7 @@ giant spider        |M|lightgrey    |grey        |13|25|3| 1.0|12|14|Web#2#7#0#0
 goblin firestarter  |g|brightred    |dullred     |12|10|2| 1.0|10|14|FireBolt#2#5#0#0#0#2#AttackMelee,Slashing#1#1#5#1#0#0#Attack|Intelligent|
 jelly               |b|pink         |dullred     |12|40|3| 1.0|10|10|MeleeAcid#1#1#6#1#0#0#Attack|Divider,Resistance#Blunt,Immunity#Confusion,Brainless|
 acrid blob          |b|green        |darkgreen   |12|20|3| 1.0|10|10|MeleeAcid#1#1#6#1#0#0#Attack|AcidSplash,Resistance#Blunt,Immunity#Confusion,Immunity#Acid,Brainless|
-chilled jelly       |b|lightblue    |blue        |12|20|3|0.75|10|10|MeleeCold#1#1#6#1#0#0#Attack|Resistance#Blunt,Immunity#Confusion,Retribution#Cold#8#1#1,Brainless,Amphibious|
+chilled jelly       |b|lightblue    |blue        |12|20|3|0.75|10|10|MeleeCold#1#1#6#1#0#0#Attack|Resistance#Blunt,Immunity#Confusion,Retribution#Cold#8#1#1,Brainless,Amphibious,Freezer|
 sticky ooze         |b|yelloworange |torchorange |12|25|4| 1.0|10|10|MeleeAcid#1#1#1#1#0#0#Attack|Resistance#Blunt,Immunity#Confusion,Grappler#18,Brainless,Divider|
 ogre                |O|lightgrey    |grey        |13|30|6| 1.0|18|10|MeleeBlunt#1#1#6#2#0#0#Attack|KnockBack,Intelligent,Drop#ogre_liver#33,Heavy|
 centipede           |c|green        |darkgreen   |13|12|4| 1.0|12|12|MeleePiercing#1#1#4#1#0#0#Attack|Poisoner#13#1#10|
@@ -89,5 +89,5 @@ giant sea slug      |»|green        |darkgreen   |14|45|7| 1.0|12|12|MeleePierc
 giant squid         |»|pink         |faintpink   |13|60|7| 1.0|14|10|InkCloud#0#0#0#0#0#7#Attack,MeleeBlunt#1#1#8#1#0#0#Attack|Swimmer,Grappler#18,WaterBreathing#owner|
 death turtle        |ǒ|grey         |darkgrey    |16|50|8| 1.0|10|14|MeleeNecrotic#1#1#4#3#0#0#Attack|Swimmer,Undead,Immunity#Poison,Infectious#16|
 water elemental     |E|blue         |darkblue    |15|60|7| 0.8|14|12|Whirlpool#2#6#0#0#0#7#Attack,MeleeBlunt#1#1#10#2#0#0#Attack|Amphibious,Resistance#Poison,Construct,Bool#WaterElemental#true,Brainless|
-ice elemental       |E|white        |iceblue     |15|50|6| 1.0|16|12|MeleeCold#1#1#8#2#0#0#Attack|Amphibious,Resistance#Poison,Construct,Bool#IceElemental#true,Vulnerable#Blunt,Brainless|
+ice elemental       |E|white        |iceblue     |15|50|6| 1.0|16|12|MeleeCold#1#1#8#2#0#0#Attack|Amphibious,Resistance#Poison,Construct,Bool#IceElemental#true,Vulnerable#Blunt,Brainless,Freezer|
 umbral whale        |»|lightgrey    |darkgrey    |14|75|7| 0.8|18|10|Gulp#1#1#1#1#16#0#Attack|Heavy,Str#Belly#Whale,Swimmer,WaterBreathing#owner|
