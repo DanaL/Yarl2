@@ -1583,8 +1583,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     Map map = Campaign.Dungeons[dest.DungeonID].LevelMaps[dest.Level];
     Tile tile = map.TileAt(dest.Row, dest.Col);
-    bool flying = actor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>();
-    bool waterWalking = actor.HasActiveTrait<WaterWalkingTrait>();
+    bool flying = actor.Traits.Any(t => t is FlyingTrait || t is FloatingTrait);
+    bool waterWalking = actor.Traits.Any(t => t is WaterWalkingTrait || t is AmphibiousTrait);
 
     // At the moment ThingTouchesFLoor (formerly ThingAddedToLoc) only handles
     // floor triggers, but if it starts doing more I'll have to split it into

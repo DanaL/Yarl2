@@ -19,7 +19,7 @@ giant spider        |M|lightgrey    |grey        |13|25|3| 1.0|12|14|Web#2#7#0#0
 goblin firestarter  |g|brightred    |dullred     |12|10|2| 1.0|10|14|FireBolt#2#5#0#0#0#2#AttackMelee,Slashing#1#1#5#1#0#0#Attack|Intelligent|
 jelly               |b|pink         |dullred     |12|40|3| 1.0|10|10|MeleeAcid#1#1#6#1#0#0#Attack|Divider,Resistance#Blunt,Immunity#Confusion,Brainless|
 acrid blob          |b|green        |darkgreen   |12|20|3| 1.0|10|10|MeleeAcid#1#1#6#1#0#0#Attack|AcidSplash,Resistance#Blunt,Immunity#Confusion,Immunity#Acid,Brainless|
-chilled jelly       |b|lightblue    |blue        |12|20|3|0.75|10|10|MeleeCold#1#1#6#1#0#0#Attack|Resistance#Blunt,Immunity#Confusion,Retribution#Cold#8#1#1,Brainless|
+chilled jelly       |b|lightblue    |blue        |12|20|3|0.75|10|10|MeleeCold#1#1#6#1#0#0#Attack|Resistance#Blunt,Immunity#Confusion,Retribution#Cold#8#1#1,Brainless,Amphibious|
 sticky ooze         |b|yelloworange |torchorange |12|25|4| 1.0|10|10|MeleeAcid#1#1#1#1#0#0#Attack|Resistance#Blunt,Immunity#Confusion,Grappler#18,Brainless,Divider|
 ogre                |O|lightgrey    |grey        |13|30|6| 1.0|18|10|MeleeBlunt#1#1#6#2#0#0#Attack|KnockBack,Intelligent,Drop#ogre_liver#33,Heavy|
 centipede           |c|green        |darkgreen   |13|12|4| 1.0|12|12|MeleePiercing#1#1#4#1#0#0#Attack|Poisoner#13#1#10|

@@ -53,7 +53,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       return true;
     else if (tile.Type == TileType.Water || tile.Type == TileType.DeepWater || tile.Type == TileType.Chasm)
     {
-      if (waterWalking || confused || tipsy)
+      if (waterWalking || confused || tipsy || canSwim)
         return true;
     }
 
