@@ -26,6 +26,7 @@ class UnderwaterCave
 
     (int r, int c) = floorSqs[rng.Next(floorSqs.Count)];
     Loc candleLoc = new(dungeonId, 0, r, c);
+    Console.WriteLine($"Candle of Binding placed at {candleLoc}");
     objDb.Add(candle);
     objDb.SetToLoc(candleLoc, candle);
   }
@@ -64,6 +65,7 @@ class UnderwaterCave
     bottomCave.SetTile(caveExit.Row, caveExit.Col, upstairs);
 
     SetCandleOfBinding(temple.ID, floors, objDb, rng);
+    Console.WriteLine(templeMap.TileAt(8, 11).Type);
   }
 }
 

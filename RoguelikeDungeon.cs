@@ -77,7 +77,7 @@ class RLLevelMaker
       }
     }
 
-    return (map, [.. roomSqs]);
+    return (map, [.. roomSqs.Where(sq => map.TileAt(sq).Passable())]);
   }
 
   static List<int> AdjRooms(int cell, HashSet<int> usedCells)
