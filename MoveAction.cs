@@ -175,9 +175,9 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     if (tile == TileType.FrozenDeepWater || tile == TileType.FrozenWater || tile == TileType.FrozenLake)
     {
       int slipDC = actor.HasTrait<TipsyTrait>() ? 15 : 11;
-      // For slippery tiles, the actor needs to succeed on a dex check before moving, unless 
-      // the Actor is flying or floating
-      if (actor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>())
+      // For ice tiles, the actor needs to succeed on a dex check before moving, unless 
+      // the Actor is flying, floating or a frozen creature
+      if (actor.Traits.Any(t => t is FlyingTrait || t is FloatingTrait || t is FreezerTrait))
       {
         return false;
       }
