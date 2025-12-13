@@ -13,7 +13,7 @@ namespace Yarl2;
 
 class UnderwaterCave
 {
-  static void SetCandleOfBinding(int dungeonId, List<(int, int)> floorSqs, GameObjectDB objDb, Rng rng)
+  static void SetCandleOfBinding(Map map, int dungeonId, List<(int, int)> floorSqs, GameObjectDB objDb, Rng rng)
   {
     Item candle = new()
     {
@@ -26,7 +26,7 @@ class UnderwaterCave
 
     (int r, int c) = floorSqs[rng.Next(floorSqs.Count)];
     Loc candleLoc = new(dungeonId, 0, r, c);
-    Console.WriteLine($"Candle of Binding placed at {candleLoc}");
+
     objDb.Add(candle);
     objDb.SetToLoc(candleLoc, candle);
   }
@@ -47,25 +47,24 @@ class UnderwaterCave
       ExitLoc = new(0, 0, entranceRow, entranceCol)
     };
     campaign.AddDungeon(temple);
-    (Map templeMap, List<(int, int)> floors) = RLLevelMaker.MakeLevel(rng);
+    (Map templeMap, List<(int, int)> templeFloors) = RLLevelMaker.MakeLevel(rng);
+    
     temple.AddMap(templeMap);
-    (int, int) sq = floors[rng.Next(floors.Count)];
+    (int, int) sq = templeFloors[rng.Next(templeFloors.Count)];
     Loc templeEntrance = new(temple.ID, 0, sq.Item1, sq.Item2);
 
     Upstairs upstairs = new("") { Destination = templeEntrance };
 
     Map bottomCave = cave.LevelMaps[cave.LevelMaps.Count - 1];
-    floors = bottomCave.SqsOfType(TileType.DungeonFloor);
-    sq = floors[rng.Next(floors.Count)];
+    List<(int, int)> caveFloors = bottomCave.SqsOfType(TileType.DungeonFloor);
+    sq = caveFloors[rng.Next(caveFloors.Count)];
     Loc caveExit = new(cave.ID, cave.LevelMaps.Count - 1, sq.Item1, sq.Item2);
-    floors.Remove(sq);
     Downstairs downstairs = new("") { Destination = caveExit };
 
     templeMap.SetTile(templeEntrance.Row, templeEntrance.Col, downstairs);
     bottomCave.SetTile(caveExit.Row, caveExit.Col, upstairs);
 
-    SetCandleOfBinding(temple.ID, floors, objDb, rng);
-    Console.WriteLine(templeMap.TileAt(8, 11).Type);
+    SetCandleOfBinding(templeMap, temple.ID, templeFloors, objDb, rng);
   }
 }
 
