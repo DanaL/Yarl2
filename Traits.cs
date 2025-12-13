@@ -2968,7 +2968,7 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
       {
         foreach (var sq in Util.Adj8Sqs(fireSrc.Loc.Row, fireSrc.Loc.Col))
         {
-          var adj = fireSrc.Loc with { Row = sq.Item1, Col = sq.Item2 };
+          Loc adj = fireSrc.Loc with { Row = sq.Item1, Col = sq.Item2 };
           gs.ApplyDamageEffectToLoc(adj, DamageType.Fire);
         }
       }

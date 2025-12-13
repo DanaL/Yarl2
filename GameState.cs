@@ -539,16 +539,15 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     List<Item> items = [];
     items.AddRange(ObjDb.ItemsAt(loc));
     items.AddRange(ObjDb.EnvironmentsAt(loc));
-    var tile = TileAt(loc);
+    Tile tile = TileAt(loc);
     bool fireStarted = false;
-
-    Map map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
+    Map map = MapForLoc(loc);
 
     switch (damageType)
     {
       case DamageType.Fire:
         // Wooden bridges always burn for comedy reasons
-        if (tile.Flammable() && (tile.Type == TileType.WoodBridge || Rng.NextDouble() < 0.15))
+        if (TileBurns(tile))
           fireStarted = true;
 
         if (tile.Type == TileType.FrozenWater)
@@ -637,6 +636,23 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
         BridgeDestroyed(loc);
       }
+      else if (tile is Door)
+      {
+        if (LastPlayerFoV.ContainsKey(Player.Loc))
+          UI.AlertPlayer("The door is destroyed!");
+        map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
+      }
+    }
+
+    bool TileBurns(Tile tile)
+    {
+      if (!tile.Flammable())
+        return false;
+      
+      if (tile.Type == TileType.WoodBridge || tile is Door)
+        return true;
+
+      return Rng.NextDouble() < 0.15;
     }
   }
 

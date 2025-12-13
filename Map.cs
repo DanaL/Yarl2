@@ -94,6 +94,10 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Conifer => true,
     TileType.Grass => true,
     TileType.WoodBridge => true,
+    TileType.OpenDoor => true,
+    TileType.ClosedDoor => true,
+    TileType.LockedDoor => true,
+    TileType.BrokenDoor => true,
     _ => false
   };
 
