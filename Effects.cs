@@ -300,4 +300,126 @@ class EffectApplier
         break;
     }  
   }
+
+  public static void ApplyDamageEffectToLoc(Loc loc, DamageType damageType, GameState gs)
+  {
+    List<Item> items = [];
+    items.AddRange(gs.ObjDb.ItemsAt(loc));
+    items.AddRange(gs.ObjDb.EnvironmentsAt(loc));
+    Tile tile = gs.TileAt(loc);
+    bool fireStarted = false;
+    Map map = gs.MapForLoc(loc);
+
+    switch (damageType)
+    {
+      case DamageType.Fire:
+        // Wooden bridges always burn for comedy reasons
+        if (TileBurns(tile))
+          fireStarted = true;
+
+        if (tile.Type == TileType.FrozenWater)
+        {
+          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Water));
+          gs.UIRef().AlertPlayer("The ice melts!", gs, loc);
+        }
+        else if (tile.Type == TileType.FrozenDeepWater)
+        {
+          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DeepWater));
+          gs.UIRef().AlertPlayer("The ice melts!", gs, loc);
+          gs.BridgeDestroyedOverWater(loc);
+        }
+        else if (tile.Type == TileType.FrozenPool)
+        {
+          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Pool));
+          gs.UIRef().AlertPlayer("The ice melts!", gs, loc);
+        }
+        else if (tile.Type == TileType.FrozenLake)
+        {
+          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Lake));
+          gs.UIRef().AlertPlayer("The ice melts!", gs, loc);
+        }
+
+        foreach (var item in items)
+        {
+          if (item.HasTrait<FlammableTrait>())
+          {
+            gs.UIRef().AlertPlayer($"{item.FullName.DefArticle().Capitalize()} burns up!", gs, loc);
+            gs.ItemDestroyed(item, loc);
+            fireStarted = true;
+          }
+
+          if (item.Name == "mud")
+          {
+            gs.UIRef().AlertPlayer("The mud dries up.", gs, loc);
+            gs.ItemDestroyed(item, loc);
+          }
+        }
+        break;
+      case DamageType.Cold:
+        // Perhaps Cold can destroy poitions on the ground and such?
+
+        if (tile.Type == TileType.Water)
+        {
+          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.FrozenWater));
+          gs.UIRef().AlertPlayer("The water freezes!");
+        }
+        else if (tile.Type == TileType.DeepWater)
+        {
+          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.FrozenDeepWater));
+          gs.UIRef().AlertPlayer("The water freezes!");
+        }
+        else if (tile.Type == TileType.Pool)
+        {
+          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.FrozenPool));
+          gs.UIRef().AlertPlayer("The pool freezes!");
+        }
+        else if (tile.Type == TileType.Lake)
+        {
+          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.FrozenLake));
+          gs.UIRef().AlertPlayer("The water freezes!");
+        }
+        break;
+      default:
+        break;
+    }
+
+    if (fireStarted)
+    {
+      var fire = ItemFactory.Fire(gs);
+      gs.ObjDb.SetToLoc(loc, fire);
+
+      if (tile.Type == TileType.Grass)
+      {
+        map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.CharredGrass));
+      }
+      else if (tile.IsTree())
+      {
+        map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.CharredStump));
+      }
+      else if (tile.Type == TileType.WoodBridge)
+      {
+        if (gs.LastPlayerFoV.ContainsKey(gs.Player.Loc))
+          gs.UIRef().AlertPlayer("The bridge burns up and collapses!");
+
+        gs.BridgeDestroyed(loc);
+      }
+      else if (tile is Door)
+      {
+        if (gs.LastPlayerFoV.ContainsKey(gs.Player.Loc))
+          gs.UIRef().AlertPlayer("The door is destroyed!");
+        map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
+      }
+    }
+
+    bool TileBurns(Tile tile)
+    {
+      if (!tile.Flammable())
+        return false;
+      
+      if (tile.Type == TileType.WoodBridge || tile is Door)
+        return true;
+
+      return gs.Rng.NextDouble() < 0.15;
+    }
+  }
 }

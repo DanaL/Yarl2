@@ -520,7 +520,7 @@ class CastConeOfCold(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     List<(int, DamageType)> dmg = [ (gs.Rng.Next(1, 7), DamageType.Cold), (gs.Rng.Next(1, 7), DamageType.Cold) ];
     foreach (Loc loc in Affected)
     {
-      GameState.ApplyDamageEffectToLoc(loc, DamageType.Cold);
+      EffectApplier.ApplyDamageEffectToLoc(loc, DamageType.Cold, gs);
       if (GameState.ObjDb.Occupant(loc) is Actor victim)
       {
         string s = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} blasted by cold!";
@@ -866,7 +866,7 @@ class CastFireBreath(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     List<(int, DamageType)> dmg = [(gs.Rng.Next(1, 9), DamageType.Fire), (gs.Rng.Next(1, 9), DamageType.Fire)];
     foreach (Loc loc in Affected)
     {
-      GameState.ApplyDamageEffectToLoc(loc, DamageType.Fire);
+      EffectApplier.ApplyDamageEffectToLoc(loc, DamageType.Fire, gs);
       if (GameState.ObjDb.Occupant(loc) is Actor victim)
       {
         string s = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!";

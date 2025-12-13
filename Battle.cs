@@ -832,7 +832,7 @@ class Battle
     // Firebolts, ice, should apply their effects to the square they hit
     foreach (var dmg in ammo.Traits.OfType<DamageTrait>())
     {
-      gs.ApplyDamageEffectToLoc(target.Loc, dmg.DamageType);
+      EffectApplier.ApplyDamageEffectToLoc(target.Loc, dmg.DamageType, gs);
     }
 
     ClearObscured(attacker, gs);
@@ -865,7 +865,7 @@ class Battle
     // Firebolts, ice, should apply their effects to the square they hit
     foreach (var dmg in spell.Traits.OfType<DamageTrait>())
     {
-      gs.ApplyDamageEffectToLoc(target.Loc, dmg.DamageType);
+      EffectApplier.ApplyDamageEffectToLoc(target.Loc, dmg.DamageType, gs);
     }
 
     ClearObscured(attacker, gs);

@@ -444,7 +444,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     foreach (Trait t in itemTraits)
     {
       if (t is DamageTrait dt && dt.DamageType == DamageType.Fire)
-        ApplyDamageEffectToLoc(loc, DamageType.Fire);
+        EffectApplier.ApplyDamageEffectToLoc(loc, DamageType.Fire, this);
     }
 
     if (tile.Type == TileType.Pit || tile.Type == TileType.HiddenPit)
@@ -534,128 +534,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       BridgeDestroyedOverWater(loc);
   }
 
-  public void ApplyDamageEffectToLoc(Loc loc, DamageType damageType)
-  {
-    List<Item> items = [];
-    items.AddRange(ObjDb.ItemsAt(loc));
-    items.AddRange(ObjDb.EnvironmentsAt(loc));
-    Tile tile = TileAt(loc);
-    bool fireStarted = false;
-    Map map = MapForLoc(loc);
-
-    switch (damageType)
-    {
-      case DamageType.Fire:
-        // Wooden bridges always burn for comedy reasons
-        if (TileBurns(tile))
-          fireStarted = true;
-
-        if (tile.Type == TileType.FrozenWater)
-        {
-          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Water));
-          UI.AlertPlayer("The ice melts!", this, loc);
-        }
-        else if (tile.Type == TileType.FrozenDeepWater)
-        {
-          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DeepWater));
-          UI.AlertPlayer("The ice melts!", this, loc);
-          BridgeDestroyedOverWater(loc);
-        }
-        else if (tile.Type == TileType.FrozenPool)
-        {
-          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Pool));
-          UI.AlertPlayer("The ice melts!", this, loc);
-        }
-        else if (tile.Type == TileType.FrozenLake)
-        {
-          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Lake));
-          UI.AlertPlayer("The ice melts!", this, loc);
-        }
-
-        foreach (var item in items)
-        {
-          if (item.HasTrait<FlammableTrait>())
-          {
-            UI.AlertPlayer($"{item.FullName.DefArticle().Capitalize()} burns up!", this, loc);
-            ItemDestroyed(item, loc);
-            fireStarted = true;
-          }
-
-          if (item.Name == "mud")
-          {
-            UI.AlertPlayer("The mud dries up.", this, loc);
-            ItemDestroyed(item, loc);
-          }
-        }
-        break;
-      case DamageType.Cold:
-        // Perhaps Cold can destroy poitions on the ground and such?
-
-        if (tile.Type == TileType.Water)
-        {
-          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.FrozenWater));
-          UI.AlertPlayer("The water freezes!");
-        }
-        else if (tile.Type == TileType.DeepWater)
-        {
-          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.FrozenDeepWater));
-          UI.AlertPlayer("The water freezes!");
-        }
-        else if (tile.Type == TileType.Pool)
-        {
-          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.FrozenPool));
-          UI.AlertPlayer("The pool freezes!");
-        }
-        else if (tile.Type == TileType.Lake)
-        {
-          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.FrozenLake));
-          UI.AlertPlayer("The water freezes!");
-        }
-        break;
-      default:
-        break;
-    }
-
-    if (fireStarted)
-    {
-      var fire = ItemFactory.Fire(this);
-      ObjDb.SetToLoc(loc, fire);
-
-      if (tile.Type == TileType.Grass)
-      {
-        map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.CharredGrass));
-      }
-      else if (tile.IsTree())
-      {
-        map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.CharredStump));
-      }
-      else if (tile.Type == TileType.WoodBridge)
-      {
-        if (LastPlayerFoV.ContainsKey(Player.Loc))
-          UI.AlertPlayer("The bridge burns up and collapses!");
-
-        BridgeDestroyed(loc);
-      }
-      else if (tile is Door)
-      {
-        if (LastPlayerFoV.ContainsKey(Player.Loc))
-          UI.AlertPlayer("The door is destroyed!");
-        map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
-      }
-    }
-
-    bool TileBurns(Tile tile)
-    {
-      if (!tile.Flammable())
-        return false;
-      
-      if (tile.Type == TileType.WoodBridge || tile is Door)
-        return true;
-
-      return Rng.NextDouble() < 0.15;
-    }
-  }
-
   void ActorFallsIntoWater(Actor actor, Loc loc)
   {
     if (actor.HasTrait<IllusionTrait>())
@@ -666,7 +544,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     FallIntoWater(actor, loc);
   }
 
-  void BridgeDestroyedOverWater(Loc loc)
+  public void BridgeDestroyedOverWater(Loc loc)
   {
     if (ObjDb.Occupant(loc) is Actor actor)
     {// && !(actoractor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>())
@@ -1178,7 +1056,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
           ActorKilled(actor, MsgFactory.KillerName(src, Player), src);
         }
       }
-      ApplyDamageEffectToLoc(pt, retribution.Type);
+      EffectApplier.ApplyDamageEffectToLoc(pt, retribution.Type, this);
     }
   }
 
@@ -1622,7 +1500,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     if (freezer)
     {
-      ApplyDamageEffectToLoc(dest, DamageType.Cold);
+      EffectApplier.ApplyDamageEffectToLoc(dest, DamageType.Cold, this);
     }
 
     if (actor is Player && tile.Type == TileType.MistyPortal)

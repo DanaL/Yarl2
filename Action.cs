@@ -592,7 +592,7 @@ class FireBreathAction(GameState gs, Actor actor, Loc target, int range, int dmg
 
     foreach (var pt in affected)
     {
-      GameState.ApplyDamageEffectToLoc(pt, DamageType.Fire);
+      EffectApplier.ApplyDamageEffectToLoc(pt, DamageType.Fire, GameState);
     }
 
     int total = 0;
@@ -601,7 +601,7 @@ class FireBreathAction(GameState gs, Actor actor, Loc target, int range, int dmg
     List<(int, DamageType)> dmg = [(total, DamageType.Fire)];    
     foreach (var pt in affected)
     {
-      GameState.ApplyDamageEffectToLoc(pt, DamageType.Fire);
+      EffectApplier.ApplyDamageEffectToLoc(pt, DamageType.Fire, GameState);
       if (GameState.ObjDb.Occupant(pt) is Actor victim)
       {
         string s = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!";
@@ -2427,7 +2427,7 @@ class FlareAction(GameState gs, Actor actor, int dmgDie, int numOfDice, DamageTy
 
     foreach (Loc adj in Util.Adj8Locs(Actor.Loc))
     {
-      GameState.ApplyDamageEffectToLoc(adj, DamageType);
+      EffectApplier.ApplyDamageEffectToLoc(adj, DamageType, GameState);
 
       if (GameState.ObjDb.Occupant(adj) is Actor adjActor)
       {
@@ -3591,7 +3591,7 @@ class FireballAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
     List<(int, DamageType)> dmg = [(total, DamageType.Fire)];
     foreach (var pt in affected)
     {
-      GameState.ApplyDamageEffectToLoc(pt, DamageType.Fire);
+      EffectApplier.ApplyDamageEffectToLoc(pt, DamageType.Fire, GameState);
       if (GameState.ObjDb.Occupant(pt) is Actor victim)
       {
         GameState.UIRef().AlertPlayer($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!");
@@ -3775,7 +3775,7 @@ class FrostRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
 
     foreach (var pt in pts)
     {
-      GameState.ApplyDamageEffectToLoc(pt, DamageType.Cold);
+      EffectApplier.ApplyDamageEffectToLoc(pt, DamageType.Cold, GameState);
 
       if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
       {

@@ -404,7 +404,7 @@ class Traps
     List<(int, DamageType)> dmg = [(total, DamageType.Fire)];
     foreach (var pt in affected)
     {
-      gs.ApplyDamageEffectToLoc(pt, DamageType.Fire);
+      EffectApplier.ApplyDamageEffectToLoc(pt, DamageType.Fire, gs);
       if (gs.ObjDb.Occupant(pt) is Actor victim)
       {
         if (gs.LastPlayerFoV.ContainsKey(loc))
