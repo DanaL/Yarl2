@@ -51,10 +51,14 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       return true;
     else if (canSwim && (tile.Type == TileType.Lake || tile.Type == TileType.Underwater))
       return true;
-    else if (tile.Type == TileType.Water || tile.Type == TileType.DeepWater || tile.Type == TileType.Chasm)
+    else if (actor is not Player && (tile.Type == TileType.Water || tile.Type == TileType.DeepWater))
     {
       if (waterWalking || confused || tipsy || canSwim)
         return true;
+    }
+    else if (tile.Type == TileType.Chasm && (confused || tipsy))
+    {
+      return true;
     }
 
     return false;
