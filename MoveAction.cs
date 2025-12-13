@@ -268,7 +268,7 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
     // There are corner cases when I want to move the actor onto the sq they're already
     // on (like digging while in a pit and turning it into a trapdoor) to re-resolve
     // the effects of moving onto the sq, hence the Occupant ID != Actor.ID check
-    else if (GameState!.ObjDb.Occupied(Loc) && GameState.ObjDb.Occupant(Loc)!.ID != Actor.ID)
+    else if (GameState!.ObjDb.Occupied(Loc) && GameState.ObjDb.Occupant(Loc)!.ID != Actor!.ID)
     {
       Actor? occ = GameState.ObjDb.Occupant(Loc);
       if (occ is not null && occ.Behaviour is VillagePupBehaviour)
@@ -325,7 +325,7 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
     
       if (_bumpToOpen && tile.Type == TileType.ClosedDoor)
       {
-        player.QueueAction(new OpenDoorAction(GameState, Actor, Loc));
+        player.QueueAction(new OpenDoorAction(GameState, Actor!, Loc));
         return 0.0;
       }
       else if (_lockedDoorMenu && tile.Type == TileType.LockedDoor)
