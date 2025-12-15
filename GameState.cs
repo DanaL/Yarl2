@@ -1139,6 +1139,11 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       if (actor is Player)
         UI.AlertPlayer("You can breathe again!");
     }
+    else if (actor.HasTrait<HoldingBreathTrait>())
+    {
+      HoldingBreathTrait hbt = actor.Traits.OfType<HoldingBreathTrait>().First();
+      hbt.Remove(this);
+    }
   }
 
   // Round in the D&D sense. This is called after all Performers have taken
