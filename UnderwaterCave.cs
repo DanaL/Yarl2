@@ -354,6 +354,18 @@ class LostTempleBuilder(int dungeonId) : DungeonBuilder
     PopulateDungeon(temple, rng, objDb);
     SetCandleOfBinding(templeMap, templeFloors, objDb, rng);
 
+    // Add a bit of treasure
+    int numOfTreasures = rng.Next(5, 9);
+    for (int j = 0; j < numOfTreasures; j++)
+    {
+      var quality = rng.Next(5) > 0 ? TreasureQuality.Good : TreasureQuality.Uncommon;
+      Item item = Treasure.ItemByQuality(quality, objDb, rng);
+      var sq = templeFloors[rng.Next(templeFloors.Count)];
+      Loc loc = new(dungeonId, 0, sq.Item1, sq.Item2);
+      objDb.Add(item);
+      objDb.SetToLoc(loc, item);
+    }
+
     return temple;
   }
 }
