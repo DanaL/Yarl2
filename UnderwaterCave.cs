@@ -13,24 +13,6 @@ namespace Yarl2;
 
 class UnderwaterCave
 {
-  static void SetCandleOfBinding(Map map, int dungeonId, List<(int, int)> floorSqs, GameObjectDB objDb, Rng rng)
-  {
-    Item candle = new()
-    {
-      Name = "Candle of Binding",
-      Type = ItemType.Tool,
-      Glyph = new Glyph('(', Colours.WHITE, Colours.GREY, Colours.BLACK, false)
-    };
-    candle.Traits.Add(new DescriptionTrait("An ornate candle carved with symbols of the Moon Daughter."));
-    candle.Traits.Add(new ArtifactTrait());
-
-    (int r, int c) = floorSqs[rng.Next(floorSqs.Count)];
-    Loc candleLoc = new(dungeonId, 0, r, c);
-
-    objDb.Add(candle);
-    objDb.SetToLoc(candleLoc, candle);
-  }
-
   public static void SetupUnderwaterCave(Campaign campaign, int entranceRow, int entranceCol, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     UnderwaterCaveDungeon caveBuilder = new(campaign.Dungeons.Count, 30, 70);
@@ -42,29 +24,19 @@ class UnderwaterCave
     Loc caveEntrance = new(cave.ID, 0, caveBuilder.ExitLoc.Item1, caveBuilder.ExitLoc.Item2);
     factDb.Add(new LocationFact() { Desc = "UnderwaterCaveEntrance", Loc = caveEntrance });
 
-    Dungeon temple = new(campaign.Dungeons.Count, "a Dusty Temple", "", true)
-    {
-      ExitLoc = new(0, 0, entranceRow, entranceCol)
-    };
+    LostTempleBuilder templeBuider = new(campaign.Dungeons.Count);
+    Dungeon temple = templeBuider.Generate(objDb, rng);
     campaign.AddDungeon(temple);
-    (Map templeMap, List<(int, int)> templeFloors) = RLLevelMaker.MakeLevel(rng);
-    
-    temple.AddMap(templeMap);
-    (int, int) sq = templeFloors[rng.Next(templeFloors.Count)];
-    Loc templeEntrance = new(temple.ID, 0, sq.Item1, sq.Item2);
-
-    Upstairs upstairs = new("") { Destination = templeEntrance };
+   
+    Upstairs upstairs = new("") { Destination = temple.ExitLoc };
 
     Map bottomCave = cave.LevelMaps[cave.LevelMaps.Count - 1];
     List<(int, int)> caveFloors = bottomCave.SqsOfType(TileType.DungeonFloor);
-    sq = caveFloors[rng.Next(caveFloors.Count)];
+    var sq = caveFloors[rng.Next(caveFloors.Count)];
     Loc caveExit = new(cave.ID, cave.LevelMaps.Count - 1, sq.Item1, sq.Item2);
     Downstairs downstairs = new("") { Destination = caveExit };
-
-    templeMap.SetTile(templeEntrance.Row, templeEntrance.Col, downstairs);
+    temple.LevelMaps[0].SetTile(temple.ExitLoc.Row, temple.ExitLoc.Col, downstairs);
     bottomCave.SetTile(caveExit.Row, caveExit.Col, upstairs);
-
-    SetCandleOfBinding(templeMap, temple.ID, templeFloors, objDb, rng);
   }
 }
 
@@ -339,5 +311,49 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
     }
 
     return cave;
+  }
+}
+
+class LostTempleBuilder(int dungeonId) : DungeonBuilder
+{
+  int DungeonId { get; set; } = dungeonId;
+
+  void SetCandleOfBinding(Map map, List<(int, int)> floorSqs, GameObjectDB objDb, Rng rng)
+  {
+    Item candle = new()
+    {
+      Name = "Candle of Binding",
+      Type = ItemType.Tool,
+      Glyph = new Glyph('(', Colours.WHITE, Colours.GREY, Colours.BLACK, false)
+    };
+    candle.Traits.Add(new DescriptionTrait("An ornate candle carved with symbols of the Moon Daughter."));
+    candle.Traits.Add(new ArtifactTrait());
+
+    (int r, int c) = floorSqs[rng.Next(floorSqs.Count)];
+    Loc candleLoc = new(DungeonId, 0, r, c);
+
+    objDb.Add(candle);
+    objDb.SetToLoc(candleLoc, candle);
+  }
+
+  public Dungeon Generate(GameObjectDB objDb, Rng rng)
+  {
+    Dungeon temple = new(DungeonId, "a Dusty Temple", "", true)
+    {
+      MonsterDecks = DeckBuilder.ReadDeck("md_temple", rng)
+    };
+
+    (Map templeMap, List<(int, int)> templeFloors) = RLLevelMaker.MakeLevel(rng);
+
+    temple.AddMap(templeMap);
+    
+    ExitLoc = templeFloors[rng.Next(templeFloors.Count)];
+    templeFloors.Remove(ExitLoc);
+    temple.ExitLoc = new(DungeonId, 0, ExitLoc.Item1, ExitLoc.Item2);
+
+    PopulateDungeon(temple, rng, objDb);
+    SetCandleOfBinding(templeMap, templeFloors, objDb, rng);
+
+    return temple;
   }
 }
