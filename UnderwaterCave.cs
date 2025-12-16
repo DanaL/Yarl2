@@ -366,6 +366,19 @@ class LostTempleBuilder(int dungeonId) : DungeonBuilder
       objDb.SetToLoc(loc, item);
     }
 
+    AddStatue();
+    AddStatue();
+
     return temple;
+
+    void AddStatue()
+    {
+      Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
+      statue.Traits.Add(new DescriptionTrait("a worn and weathered statue of a feminine shape"));
+      var statueSq = templeFloors[rng.Next(templeFloors.Count)];
+      templeFloors.Remove(statueSq);
+      Loc statueLoc = new(dungeonId, 0, statueSq.Item1, statueSq.Item2);
+      objDb.SetToLoc(statueLoc, statue);
+    }
   }
 }
