@@ -318,8 +318,12 @@ class LostTempleBuilder(int dungeonId) : DungeonBuilder
 {
   int DungeonId { get; set; } = dungeonId;
 
-  void SetCandleOfBinding(Map map, List<(int, int)> floorSqs, GameObjectDB objDb, Rng rng)
+  void AddDagon(List<(int, int)> floorSqs, GameObjectDB objDb, Rng rng)
   {
+    Actor dagon = MonsterFactory.Get("Dagon", objDb, rng);
+    dagon.Traits.Add(new NamedTrait());
+    dagon.Traits.Add(new DescriptionTrait("\"Vast, Polyphemus-like, and loathsome.\" Scaly too."));
+
     Item candle = new()
     {
       Name = "Candle of Binding",
@@ -329,11 +333,12 @@ class LostTempleBuilder(int dungeonId) : DungeonBuilder
     candle.Traits.Add(new DescriptionTrait("An ornate candle carved with symbols of the Moon Daughter."));
     candle.Traits.Add(new ArtifactTrait());
 
-    (int r, int c) = floorSqs[rng.Next(floorSqs.Count)];
-    Loc candleLoc = new(DungeonId, 0, r, c);
+    dagon.Inventory.Add(candle, dagon.ID);
 
-    objDb.Add(candle);
-    objDb.SetToLoc(candleLoc, candle);
+    (int r, int c) = floorSqs[rng.Next(floorSqs.Count)];
+
+    Loc dagonLoc = new(DungeonId, 0, r, c);
+    objDb.AddNewActor(dagon, dagonLoc);
   }
 
   public Dungeon Generate(GameObjectDB objDb, Rng rng)
@@ -352,7 +357,7 @@ class LostTempleBuilder(int dungeonId) : DungeonBuilder
     temple.ExitLoc = new(DungeonId, 0, ExitLoc.Item1, ExitLoc.Item2);
 
     PopulateDungeon(temple, rng, objDb);
-    SetCandleOfBinding(templeMap, templeFloors, objDb, rng);
+    AddDagon(templeFloors, objDb, rng);
 
     // Add a bit of treasure
     int numOfTreasures = rng.Next(5, 9);
@@ -361,7 +366,7 @@ class LostTempleBuilder(int dungeonId) : DungeonBuilder
       var quality = rng.Next(5) > 0 ? TreasureQuality.Good : TreasureQuality.Uncommon;
       Item item = Treasure.ItemByQuality(quality, objDb, rng);
       var sq = templeFloors[rng.Next(templeFloors.Count)];
-      Loc loc = new(dungeonId, 0, sq.Item1, sq.Item2);
+      Loc loc = new(DungeonId, 0, sq.Item1, sq.Item2);
       objDb.Add(item);
       objDb.SetToLoc(loc, item);
     }
@@ -377,7 +382,7 @@ class LostTempleBuilder(int dungeonId) : DungeonBuilder
       statue.Traits.Add(new DescriptionTrait("a worn and weathered statue of a feminine shape"));
       var statueSq = templeFloors[rng.Next(templeFloors.Count)];
       templeFloors.Remove(statueSq);
-      Loc statueLoc = new(dungeonId, 0, statueSq.Item1, statueSq.Item2);
+      Loc statueLoc = new(DungeonId, 0, statueSq.Item1, statueSq.Item2);
       objDb.SetToLoc(statueLoc, statue);
     }
   }
