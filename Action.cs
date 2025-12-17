@@ -4330,6 +4330,8 @@ class HighlightLocAction(GameState gs, Actor actor) : Action(gs, actor)
         name = actor.Name.IndefArticle().Capitalize();
         if (_cyclopedia.TryGetValue(actor.Name, out var v))
           desc = v.Text;
+        if (actor.Traits.OfType<DescriptionTrait>().FirstOrDefault() is DescriptionTrait dt)
+          desc = dt.Text;
 
         Stat hp = actor.Stats[Attribute.HP];
         hpCurr = hp.Curr;
