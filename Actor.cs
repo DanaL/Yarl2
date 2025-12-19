@@ -632,19 +632,28 @@ abstract class Actor : GameObj, IZLevel
 
     bool seeInvisible = false;
     bool telepathy = false;
+    bool blinded = false;
     foreach (Trait t in other.Traits)
     {
       if (t is SeeInvisibleTrait || t is TelepathyTrait)
       {
         seeInvisible = true;
+      }
+      else if (t is TelepathyTrait) 
+      {
         telepathy = true;
-        break;
+      }
+      else if (t is BlindTrait)
+      {
+        telepathy = true;
       }
     }
 
     if (HasTrait<InvisibleTrait>() && !(seeInvisible || telepathy))
       return false;
-        
+    if (blinded && !telepathy)
+      return false;
+
     return true;
   }
 
