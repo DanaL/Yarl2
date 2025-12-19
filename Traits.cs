@@ -1642,6 +1642,58 @@ class SilverAllergyTrait : Trait
   public override string AsText() => "SilverAllergy";
 }
 
+class SlimedTrait() : TemporaryTrait
+{
+  protected override string ExpiryMsg => "The slime has cleared.";
+  
+  public override string AsText() => $"Slimed#{ExpiresOn}#{OwnerID}#{SourceId}";
+  
+  public override List<string> Apply(GameObj target, GameState gs)
+  {
+    if (target.Traits.OfType<SlimedTrait>().FirstOrDefault() is SlimedTrait slimed)
+    {
+      slimed.ExpiresOn += (ulong) gs.Rng.Next(50, 76);
+      return [];
+    }
+
+    OwnerID = target.ID;
+    Expired = false;
+    ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(50, 76);
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+
+    target.Traits.Add(this);
+
+    // Not setting this up as a listener since it will be removed when
+    // the SlimedTrait is removed
+    BlindTrait blind = new() { SourceId = SourceId};
+    target.Traits.Add(blind);
+
+    string n = MsgFactory.CalcName(target, gs.Player).Capitalize();
+    string s =  $"{n} {Grammar.Conjugate(target, "have")} been slimed!";
+    
+    return [ s.Replace("You have been", "You've been"), "You are blind!" ];
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (eventType == GameEventType.EndOfRound && gs.Turn > ExpiresOn)
+    {
+      Remove(gs);
+
+      // Need to remove the blinded trait, if any
+      if (gs.ObjDb.GetObj(OwnerID) is GameObj obj)
+        obj.Traits = [.. obj.Traits.Where(t => !(t is BlindTrait bt && bt.SourceId == SourceId))];
+    }
+  }
+}
+
+class SlimerTrait() : Trait
+{
+  public int DC { get; set; }
+
+  public override string AsText() => $"Slimer#{DC}";
+}
+
 // One could argue lots of weapons are stabby but I created this one to 
 // differentiate between a Rapier (which can impale) and a Dagger which
 // cannot
@@ -4584,6 +4636,7 @@ class TraitFactory
     { "Shunned", (pieces, gameObj) => new ShunnedTrait() },
     { "SilverAllergy", (pieces, gameObj) => new SilverAllergyTrait() },
     { "Sleeping", (pieces, gameObj) => new SleepingTrait() },
+    { "Slimer", (pieces, gameObj) => new SlimerTrait() { DC = int.Parse(pieces[1])} },
     { "Stabby", (pieces, gameObj) => new StabbyTrait() },
     { "Stackable", (pieces, gameObj) => new StackableTrait() },
     { "StatBuff", (pieces, gameObj) =>

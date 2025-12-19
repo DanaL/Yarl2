@@ -232,6 +232,13 @@ class Battle
           gs.UIRef().AlertPlayer(s);
         }
       }
+
+      if (trait is SlimerTrait slimer && !target.AbilityCheck(Attribute.Dexterity, slimer.DC, gs.Rng))
+      {
+        SlimedTrait slimed = new() { SourceId = obj.ID};
+        foreach (string s in slimed.Apply(target, gs))
+          gs.UIRef().AlertPlayer(s);
+      }
     }
 
     if (poisoner)
