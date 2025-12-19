@@ -2822,10 +2822,15 @@ class DescentAction(GameState gs, Actor actor) : Action(gs, actor)
     }
     else
     {
-      GameState.UIRef().AlertPlayer("A chasm forms!", GameState, loc);
+      Tile tile = GameState.TileAt(loc);
+      string msg = "A chasm forms!";
+      bool water = map.HasFeature(MapFeatures.Submerged) || tile.Type == TileType.Lake;
+      if (water)
+        msg = "A whirlpool forms!";
+      GameState.UIRef().AlertPlayer(msg, GameState, loc);
       Item chasm = ItemFactory.Chasm(GameState);
       GameState.ObjDb.SetToLoc(loc, chasm);
-      GameState.ChasmCreated(loc);
+      GameState.ChasmCreated(loc, water);
     }
 
     return 1.0;

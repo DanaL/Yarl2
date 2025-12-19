@@ -571,7 +571,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     }
   }
 
-  public void ChasmCreated(Loc loc)
+  public void ChasmCreated(Loc loc, bool fromWater = false)
   {
     Loc landingSpot = loc with { Level = loc.Level + 1 };
 
@@ -579,6 +579,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       if (actor.HasTrait<FeatherFallTrait>())
         UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "drift")} downward into the darkness.");
+      else if (fromWater)
+        UI.AlertPlayer($"The vortex draws {actor.FullName} into the depths!");
       else
         UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the chasm!");
 
@@ -763,7 +765,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       FlushPerformers();
     }
 
-    if (!featherFalling)
+    if (!featherFalling && !MapForLoc(landingSpot).HasFeature(MapFeatures.Submerged))
     {
       CalculateFallDamage(actor, levelsFallen);
     }
