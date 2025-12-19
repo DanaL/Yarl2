@@ -339,7 +339,7 @@ class BarkAnimation : Animation
     // I thought about having part of the message appear on screen even if the
     // speaker is off screen, but didn't want to deal with the extra 
     // complication
-    if (!_gs.LastPlayerFoV.ContainsKey(loc))
+    if (!(_gs.LastPlayerFoV.ContainsKey(loc) && _gs.LOSBetween(loc, _gs.Player.Loc)))
       return;
 
     if (loc.DungeonID == _gs.CurrDungeonID && loc.Level == _gs.CurrLevel)
