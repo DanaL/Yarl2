@@ -676,7 +676,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     {
       if (t is TorchTrait)
         torch = true;
-      if (t is ScrollTrait)
+      if (t is ReadableTrait || t is ScrollTrait || t is BookTrait)
         written = true;
       if (t is VaultKeyTrait)
         vaultKey = true;
@@ -700,6 +700,11 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
           if (Actor is Player)
             GameState.UIRef().SetPopup(new Popup(txt, "", -1, -1));
           return 1.0;
+        }
+        else if (Actor.HasTrait<BlindTrait>())
+        {
+          GameState.UIRef().AlertPlayer("You are blind and cannot read that!");
+          return 0.0;
         }
       }
 
