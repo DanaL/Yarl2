@@ -1212,7 +1212,23 @@ abstract class UserInterface
       string row = text[r];
       for (int c = 0; c < row.Length; c++)
       {
-        Sqr s = new(Colours.WHITE, Colours.BLACK, row[c]);
+        Colour colour = Colours.WHITE;
+        char ch = row[c];
+        if (r < text.Count - 1 && (ch == '(' || ch == ')'))
+          colour = Colours.GREEN;
+        else if (r == text.Count - 3 && (ch == '|' || ch == '\\' || ch == '/'))
+          colour = Colours.GREEN;
+        else if (ch == '*')
+        {
+          colour = gameState.Rng.Next(4) switch
+          {
+            0 => Colours.LIGHT_PURPLE,
+            1 => Colours.BLUE,
+            2 => Colours.PINK,
+            _ => Colours.YELLOW
+          };
+        }
+        Sqr s = new(colour, Colours.BLACK, ch);
         SqsOnScreen[r + 1, c + 1] = s;
       }
     }
