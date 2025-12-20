@@ -372,13 +372,15 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     item.ContainedBy = 0;
 
     Tile tile = TileAt(loc);
-
     if (!CheckItemDropLoc(tile, loc))
     {
       loc = Util.NearestOpen(this, loc);
     }
 
-    if (tile.Type == TileType.Chasm || ObjDb.EnvironmentsAt(loc).Where(e => e.HasTrait<TemporaryChasmTrait>()).Any())
+    Map map = MapForLoc(loc);
+    bool water = tile.Type == TileType.Lake || map.HasFeature(MapFeatures.Submerged);
+
+    if (tile.Type == TileType.Chasm || ObjDb.EnvironmentsAt(loc).Any(e => e.HasTrait<TemporaryChasmTrait>()))
     {
       string s = item.FullName.DefArticle().Capitalize();
       string v = item.Type == ItemType.Zorkmid && item.Value > 1 ? "tumble" : "tumbles";
@@ -402,7 +404,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       }
     }
 
-    if (thrown && item.Name == "potion of descent")
+    if (thrown && item.Name == "potion of descent" && !water)
     {
       ObjDb.RemoveItemFromGame(item.Loc, item);
       UI.AlertPlayer("The bottle shatters!", this, loc);
@@ -410,7 +412,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       return;
     }
 
-    if (thrown && item.Name == "flask of booze")
+    if (thrown && item.Name == "flask of booze" && !water)
     {
       ObjDb.RemoveItemFromGame(item.Loc, item);
       UI.AlertPlayer("The bottle shatters!", this, loc);
@@ -420,7 +422,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     if (thrown && item.HasTrait<ExplosiveTrait>())
     {
-      if (tile.Type == TileType.Water || tile.Type == TileType.DeepWater || tile.Type == TileType.Underwater)
+      if (tile.Type == TileType.Water || tile.Type == TileType.DeepWater || tile.Type == TileType.Underwater || water)
       {
         Cmd.DefuseBomb(item, loc, this);
       }
