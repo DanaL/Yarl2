@@ -23,12 +23,12 @@ class Cmd
 
     if (item.Type == ItemType.Zorkmid)
     {
-      inv.Add(item, actor.ID);
+      actor.AddToInventory(item, gs);
       gs.ObjDb.RemoveItemFromGame(item.Loc, item);
       return true;
     }
 
-    char slot = inv.Add(item, actor.ID);
+    char slot = actor.AddToInventory(item, gs);
     if (slot == '\0')
     {
       gs.UIRef().AlertPlayer("There's no room left in your inventory!");

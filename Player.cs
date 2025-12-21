@@ -118,6 +118,20 @@ sealed class Player : Actor
     }
   }
 
+  public override char AddToInventory(Item item, GameState? gs)
+  {
+    if (gs is not null) 
+    {
+      foreach (FlagOnPickUpTrait trait in item.Traits.OfType<FlagOnPickUpTrait>())
+      {
+        if (gs.FactDb.FactCheck(trait.Flag) is null)
+          gs.FactDb.Add(new FlagFact() { Name = trait.Flag });
+      }
+    }
+    
+    return base.AddToInventory(item, gs);
+  }
+
   public int CalcMaxHP()
   {
     int baseHP = Stats[Attribute.BaseHP].Curr;

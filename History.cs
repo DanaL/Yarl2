@@ -116,6 +116,7 @@ class Fact
         Desc = pieces[1],
         Type = (DisasterType)Enum.Parse(typeof(DisasterType), pieces[2])
       },
+      "Flag" => new FlagFact() { Name = pieces[1] },
       _ => new SimpleFact()
       {
         Name = pieces[1],
@@ -131,6 +132,13 @@ class SimpleFact : Fact
   public string Value { get; set; } = "";
 
   public override string ToString() => $"SimpleFact#{Name}#{Value}";
+}
+
+class FlagFact : Fact
+{
+  public string Name { get; set; } = "";
+
+  public override string ToString() => $"Flag#{Name}";
 }
 
 class LocationFact : Fact
@@ -454,7 +462,7 @@ class History(Rng rng)
     DescriptionTrait dt = new("A leather-bound tome with an arcane symbol emblazoned on the cover.");
     tome.Traits.Add(dt);
     tome.Traits.Add(new ArtifactTrait());
-
+    tome.Traits.Add(new FlagOnPickUpTrait() { Flag = "SorceressTomeFound"});
     objDb.Add(tome);
 
     return tome;

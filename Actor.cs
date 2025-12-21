@@ -577,7 +577,7 @@ abstract class Actor : GameObj, IZLevel
     return roll >= dc;
   }
 
-  public char AddToInventory(Item item, GameState? gs)
+  public virtual char AddToInventory(Item item, GameState? gs)
   {
     char slot = Inventory.Add(item, ID);
     if (gs is not null && slot == '\0')

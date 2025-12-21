@@ -432,7 +432,8 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
     bell.Traits.Add(new DescriptionTrait("A brass bell of exquisite manufacture."));
     bell.Traits.Add(new ArtifactTrait());
     bell.Traits.Add(new AbjurationBellTrait());
-
+    bell.Traits.Add(new FlagOnPickUpTrait() { Flag = "AbjurationBellFound" });
+    
     (int r, int c) = floorSqs[rng.Next(floorSqs.Count)];
     Loc bellLoc = new(DungeonId, levelNum, r, c);
     objDb.Add(bell);

@@ -1209,6 +1209,13 @@ class FinalBossTrait : Trait
   public override string AsText() => "FinalBoss";
 }
 
+class FlagOnPickUpTrait : Trait
+{
+  public string Flag { get; set; } = "";
+
+  public override string AsText() => $"FlagOnPickUp#{Flag}";
+}
+
 class FlammableTrait : Trait
 {
   public override string AsText() => "Flammable";
@@ -4429,6 +4436,7 @@ class TraitFactory
     { "FinalBoss", (pieces, gameObj) => new FinalBossTrait() },
     { "Finesse", (pieces, gameObj) => new FinesseTrait() },
     { "FireRebuke", (pieces, gameObj) => new FireRebukeTrait() { SourceId = ulong.Parse(pieces[1])} },
+    { "FlagOnPickUp", (pieces, gameObj) => new FlagOnPickUpTrait() { Flag = pieces[1] }},
     { "Flammable", (pieces, gameObj) => new FlammableTrait() },
     { "Floating", (pieces, gameObj) => new FloatingTrait() },
     { "Flying", (pieces, gameObj) => new FlyingTrait() },
