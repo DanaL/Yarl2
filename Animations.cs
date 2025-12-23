@@ -875,7 +875,7 @@ class RoofAnimation(GameState gs) : Animation
 class ScreenShakeAnimation : Animation
 {
   readonly GameState _gs;
-  readonly (int, int)[] _shakePattern = [ (0, 2), (0, -3), (1, 1), (-1, 0), (-1, -1), (-2, 0), (0, 1), (-2, 0), (0, 3), (0, 0) ];
+  readonly (int, int)[] _shakePattern = [ (0, 2), (0, -1), (1, 1), (-1, 0), (-1, -1), (-2, 0), (0, 1), (-2, 0), (0, 1), (0, 0) ];
   int _currentShake = 0;
   DateTime _lastFrame = DateTime.UtcNow;
   const double _shakeInterval = 50;
