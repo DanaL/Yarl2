@@ -68,6 +68,8 @@ class FactDb(RulerInfo ruler)
     {
       if (fact is SimpleFact sf && sf.Name == name)
         return fact;
+      else if (fact is FlagFact ff && ff.Name == name)
+        return fact;
       else if (fact is LocationFact lf && lf.Desc == name)
         return fact;
     }
