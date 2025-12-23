@@ -938,8 +938,10 @@ sealed class EndGameTriggerTrait : TemporaryTrait
   public override void Remove(GameState gs)
   {
     base.Remove(gs);
-    gs.UIRef().SetPopup(new Popup("Time to trigger end game!", "", -1, -1));
     gs.FactDb.Add(new FlagFact() { Name = "EndGameTriggered"});
+    gs.UIRef().AlertPlayer("RUMBLE!!");
+    gs.UIRef().PlayAnimation(new ScreenShakeAnimation(gs), gs);
+    gs.UIRef().SetPopup(new Popup("The entire earth seemed to shake!", "", -1, -1));
   }
 }
 

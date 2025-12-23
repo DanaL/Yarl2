@@ -846,7 +846,7 @@ class CloudAnimation(UserInterface ui, GameState gs) : Animation
 class RoofAnimation(GameState gs) : Animation
 {
   readonly GameState GS = gs;
-  
+
   public override void Update()
   {
     if (!GS.InWilderness)
@@ -866,7 +866,69 @@ class RoofAnimation(GameState gs) : Animation
         if (!GS.LastPlayerFoV.ContainsKey(loc))
         {
           ui.SqsOnScreen[r, c] = Constants.ROOF;
-        } 
+        }
+      }
+    }
+  }
+}
+
+class ScreenShakeAnimation : Animation
+{
+  readonly GameState _gs;
+  readonly (int, int)[] _shakePattern = [ (0, 2), (0, -3), (1, 1), (-1, 0), (-1, -1), (-2, 0), (0, 1), (-2, 0), (0, 3), (0, 0) ];
+  int _currentShake = 0;
+  DateTime _lastFrame = DateTime.UtcNow;
+  const double _shakeInterval = 50;
+  Sqr[,]? _originalScreen = null;
+
+  public ScreenShakeAnimation(GameState gs)
+  {
+    _gs = gs;
+    Expiry = DateTime.UtcNow.AddMilliseconds(500);
+  }
+
+  public override void Update()
+  {
+    if (Expiry < DateTime.UtcNow)
+      return;
+
+    if ((DateTime.UtcNow - _lastFrame).TotalMilliseconds > _shakeInterval)
+    {
+      _lastFrame = DateTime.UtcNow;
+      ++_currentShake;
+
+      if (_currentShake >= _shakePattern.Length)
+      {
+        Expiry = DateTime.MinValue;
+        return;
+      }
+    }
+
+    if (_originalScreen == null)
+    {
+      _originalScreen = new Sqr[UserInterface.ViewHeight, UserInterface.ViewWidth];
+      Array.Copy(_gs.UIRef().SqsOnScreen, _originalScreen, _gs.UIRef().SqsOnScreen.Length);
+    }
+
+    // Apply the current shake offset
+    var (offsetR, offsetC) = _shakePattern[_currentShake];
+
+    for (int r = 0; r < UserInterface.ViewHeight; r++)
+    {
+      for (int c = 0; c < UserInterface.ViewWidth; c++)
+      {
+        int sourceRow = r - offsetR;
+        int sourceCol = c - offsetC;
+
+        // If the offset puts us out of bounds, use a blank square
+        if (sourceRow < 0 || sourceRow >= UserInterface.ViewHeight || sourceCol < 0 || sourceCol >= UserInterface.ViewWidth)
+        {
+          _gs.UIRef().SqsOnScreen[r, c] = Constants.BLANK_SQ;
+        }
+        else
+        {
+          _gs.UIRef().SqsOnScreen[r, c] = _originalScreen[sourceRow, sourceCol];
+        }
       }
     }
   }
