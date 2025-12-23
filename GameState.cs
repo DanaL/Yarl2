@@ -1207,12 +1207,35 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     PrepareFieldOfView();
 
+    CheckEndGameSetup();
+    
     if (UI.PauseForResponse)
     {
       UI.BlockFoResponse(this);
       UI.PauseForResponse = false;
       UI.ClosePopup();
     }
+  }
+
+  // Check for the conditions that will set up the End Game
+  void CheckEndGameSetup()
+  {
+    Fact? candleFact = FactDb.FactCheck("CandleOfBindingFound");
+    Fact? bellFact = FactDb.FactCheck("AbjurationBellFound");
+    Fact? bookFact = FactDb.FactCheck("SorceressTomeFound");
+
+    if (candleFact is null || bellFact is null || bookFact is null)
+      return;
+
+    if (FactDb.FactCheck("EndGameTriggered") is not null)
+      return;
+    
+    // Give the player the timer trait that will then trigger end game
+    if (Player.HasTrait<EndGameTriggerTrait>())
+      return;
+
+    EndGameTriggerTrait trigger = new();
+    trigger.Apply(Player, this);
   }
 
   void CheckForStress()

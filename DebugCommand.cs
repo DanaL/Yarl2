@@ -191,6 +191,13 @@ class DebugCommand(GameState gs)
       wilderness.SetTile(towerGate.Row, towerGate.Col, TileFactory.Get(TileType.StoneFloor));
       return "";
     }
+    else if (txt == "set end game")
+    {
+      _gs.FactDb.Add(new FlagFact() { Name = "CandleOfBindingFound" });
+      _gs.FactDb.Add(new FlagFact() { Name = "AbjurationBellFound" });
+      _gs.FactDb.Add(new FlagFact() { Name = "SorceressTomeFound" });
+      return "";
+    }
     else if (txt == "unlock")
     {
       for (int r = 0; r < _gs.CurrentMap.Height; r++)

@@ -897,27 +897,50 @@ class BowTrait : Trait
   public override string AsText() => "Bow";
 }
 
-class BrainlessTrait : Trait
+sealed class BrainlessTrait : Trait
 {
   public override string AsText() => "Brainless";
 }
 
-class CudgelTrait : Trait
+sealed class CudgelTrait : Trait
 {
   public override string AsText() => "Cudgel";
 }
 
-class EdibleTrait : Trait
+sealed class EdibleTrait : Trait
 {
   public override string AsText() => "Edible";
 }
 
-class ElectrocutesTrait : Trait
+sealed class ElectrocutesTrait : Trait
 {
   public int DC { get; set; }
   public int Duration { get; set; }
 
   public override string AsText() => $"Electrocutes#{DC}#{Duration}";
+}
+
+sealed class EndGameTriggerTrait : TemporaryTrait
+{
+  public override string AsText() => $"EndGameTrigger#{ExpiresOn}#{OwnerID}";
+  
+  public override List<string> Apply(GameObj target, GameState gs)
+  {
+    ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(10, 20);
+    OwnerID = Constants.PLAYER_ID;
+    
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+    gs.Player.Traits.Add(this);
+
+    return [];
+  }
+
+  public override void Remove(GameState gs)
+  {
+    base.Remove(gs);
+    gs.UIRef().SetPopup(new Popup("Time to trigger end game!", "", -1, -1));
+    gs.FactDb.Add(new FlagFact() { Name = "EndGameTriggered"});
+  }
 }
 
 class EquipableTrait : Trait
@@ -4418,11 +4441,12 @@ class TraitFactory
     { "Drop", (pieces, gameObj) => new DropTrait() { ItemName = pieces[1], Chance = int.Parse(pieces[2]) }},
     { "Drowning", (pieces, gameObj) => new DrowningTrait() },
     { "Edible", (pieces, gameObj) => new EdibleTrait() },
-    { "Electrocutes", (pieces, gameObj) => new ElectrocutesTrait() { DC = int.Parse(pieces[1]), Duration = int.Parse(pieces[2]) } },
-    { "EmberBlessing", (pieces, gameObj) => new EmberBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
+    { "Electrocutes", (pieces, gameObj) => new ElectrocutesTrait() { DC = int.Parse(pieces[1]), Duration = int.Parse(pieces[2]) }},
+    { "EmberBlessing", (pieces, gameObj) => new EmberBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) }},
+    { "EndGameTrigger", (pieces, gameObj) => new EndGameTriggerTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) }},
     { "Equipable", (pieces, gameObj) => new EquipableTrait() },
     { "Exhausted", (pieces, gameObj) =>  new ExhaustedTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
-    { "Explosive", (pieces, GameObj) => new ExplosiveTrait() { Fuse = int.Parse(pieces[1]), DmgDie = int.Parse(pieces[2]), NumOfDice = int.Parse(pieces[3])} },
+    { "Explosive", (pieces, GameObj) => new ExplosiveTrait() { Fuse = int.Parse(pieces[1]), DmgDie = int.Parse(pieces[2]), NumOfDice = int.Parse(pieces[3]) }},
     { "ExplosionCountdown", (pieces, GameObj) => new ExplosionCountdownTrait()
       { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]),
         Fuse = int.Parse(pieces[3]), DmgDie = int.Parse(pieces[4]), NumOfDice = int.Parse(pieces[5])
