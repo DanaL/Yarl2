@@ -11,6 +11,38 @@
 
 using Yarl2;
 
+class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
+{
+  const int HEIGHT = 40;
+  const int WIDTH = 70;
+  int DungeonId { get; set; } = dungeonId;
+  Loc Entrance { get; set; } = entrance;
+  
+  public Dungeon Generate(GameState gs)
+  {
+    Dungeon dungeon = new(DungeonId, "the Gaol", "Sulphur. Heat. Mortals were not meant for this place.", true);
+    DungeonMap mapper = new(gs.Rng);
+    Map[] levels = new Map[5];
+
+    //dungeon.MonsterDecks = DeckBuilder.ReadDeck(MainOccupant, rng);
+
+    for (int levelNum = 0; levelNum < 5; levelNum++)
+    {
+      levels[levelNum] = mapper.DrawLevel(WIDTH, HEIGHT);
+      dungeon.AddMap(levels[levelNum]);
+
+      AddSecretDoors(levels[levelNum], gs.Rng);
+    }
+    
+    AddRiverToLevel(TileType.Chasm, levels[0], levels[1], 0, HEIGHT, WIDTH, DungeonId, gs.ObjDb, gs.Rng);
+
+    SetStairs(DungeonId, levels, (Entrance.Row, Entrance.Col), dungeon.Descending, gs.Rng);
+    dungeon.ExitLoc = new(DungeonId, 0, ExitLoc.Item1, ExitLoc.Item2);
+    
+    return dungeon;
+  }
+}
+
 class EndGame
 {
   public static int CostNearby(Tile tile)
@@ -70,11 +102,15 @@ class EndGame
         gs.Wilderness.SetTile(loc, TileFactory.Get(TileType.Dirt));
     }
 
+    EndGameDungeonBuilder db = new (gs.Campaign.Dungeons.Count, finalDungeonLoc);
+    Dungeon dungeon = db.Generate(gs);
+    gs.Campaign.AddDungeon(dungeon);
+
     Portal portal = new("A smouldering arch covered in profane sigils.", TileType.ProfanePortal)
     {
-      Destination = finalDungeonLoc
+      Destination = dungeon.ExitLoc
     };
- 
+
     gs.Wilderness.SetTile(finalDungeonLoc.Row, finalDungeonLoc.Col, portal);
   }
 }
