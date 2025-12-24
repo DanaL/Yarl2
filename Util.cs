@@ -761,6 +761,7 @@ static class Util
     TileType.MistyPortal => new Glyph('Ո', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     TileType.MysteriousMirror => new Glyph('Ω', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     TileType.BellyFloor => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, true),
+    TileType.Lava => new Glyph('~', Colours.WHITE, Colours.YELLOW, Colours.BRIGHT_RED, false),
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
   };
 
