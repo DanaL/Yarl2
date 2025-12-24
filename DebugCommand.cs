@@ -193,9 +193,7 @@ class DebugCommand(GameState gs)
     }
     else if (txt == "set end game")
     {
-      _gs.FactDb.Add(new FlagFact() { Name = "CandleOfBindingFound" });
-      _gs.FactDb.Add(new FlagFact() { Name = "AbjurationBellFound" });
-      _gs.FactDb.Add(new FlagFact() { Name = "SorceressTomeFound" });
+      EndGame.Setup(_gs);
       return "";
     }
     else if (txt == "unlock")
