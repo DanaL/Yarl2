@@ -586,6 +586,12 @@ class LavaAnimation(UserInterface ui, GameState gs) : Animation
           UI.SqsOnScreen[r, c] = UI.SqsOnScreen[r, c] with { Bg = colour };
           LavaSqs[loc] = colour;
         }
+
+        // If player is over a lava sqr, make them more visible
+        if (loc == GS.Player.Loc)
+        {
+         UI.SqsOnScreen[r, c] = UI.SqsOnScreen[r, c] with { Fg = Colours.DARK_GREY }; 
+        }
       }
     }
   }
