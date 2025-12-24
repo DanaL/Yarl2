@@ -545,6 +545,60 @@ class PolearmAnimation : Animation
   }
 }
 
+class LavaAnimation(UserInterface ui, GameState gs) : Animation
+{
+  readonly UserInterface UI = ui;
+  readonly GameState GS = gs;
+  DateTime LastUpdate { get; set; } = DateTime.MinValue;
+  Dictionary<Loc, Colour> LavaSqs { get; set; } = [];
+
+  public override void Update()
+  {
+    var dd = DateTime.UtcNow - LastUpdate;
+    if (dd.TotalMilliseconds > 1250)
+    {
+      foreach (Loc loc in LavaSqs.Keys)
+      {
+        if (GS.Rng.Next(4) == 0)
+          LavaSqs[loc] = PickLavaColour(GS.Rng);
+      }
+      LastUpdate = DateTime.UtcNow;
+    }
+
+    int rowOffset = GS.Player.Loc.Row - UI.PlayerScreenRow;
+    int colOffset = GS.Player.Loc.Col - UI.PlayerScreenCol;
+    for (int r = 0; r < UserInterface.ViewHeight; r++)
+    {
+      for (int c = 0; c < UserInterface.ViewWidth; c++)
+      {        
+        int mapRow = r + rowOffset;
+        int mapCol = c + colOffset;
+        Loc loc = new(GS.CurrDungeonID, GS.CurrLevel, mapRow, mapCol);
+        Tile tile = GS.TileAt(loc);
+        if (tile.Type != TileType.Lava || !GS.LastPlayerFoV.ContainsKey(loc))
+          continue;
+        
+        if (LavaSqs.TryGetValue(loc, out var bgColour))
+          UI.SqsOnScreen[r, c] = UI.SqsOnScreen[r, c] with {Bg = bgColour};
+        else
+        {
+          Colour colour = PickLavaColour(GS.Rng);
+          UI.SqsOnScreen[r, c] = UI.SqsOnScreen[r, c] with { Bg = colour };
+          LavaSqs[loc] = colour;
+        }
+      }
+    }
+  }
+
+  static Colour PickLavaColour(Rng rng) => rng.Next(5) switch
+  {
+    0 => Colours.BRIGHT_ORANGE,
+    1 => Colours.YELLOW_ORANGE,
+    2 => Colours.AMBER,
+    _ => Colours.YELLOW
+  };
+}
+
 class UnderwaterAnimation(UserInterface ui, GameState gs, int h, int w) : Animation
 {
   int Height { get; set; } = h;
@@ -558,7 +612,6 @@ class UnderwaterAnimation(UserInterface ui, GameState gs, int h, int w) : Animat
 
   public override void Update()
   {
-    // Update the foggy spots only occasionally
     var dd = DateTime.UtcNow - LastUpdate;
     if (dd.TotalMilliseconds > 500)
     {

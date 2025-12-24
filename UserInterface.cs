@@ -1262,6 +1262,7 @@ abstract class UserInterface
 
     _animations.Add(new CloudAnimation(this, gameState));
     _animations.Add(new RoofAnimation(gameState));
+    _animations.Add(new LavaAnimation(this, gameState));
 
     InputController = new PlayerCommandController(gameState);
     DateTime refresh = DateTime.UtcNow;

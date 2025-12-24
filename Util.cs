@@ -71,6 +71,9 @@ static class Colours
   public static readonly Colour EXAMINE = ICE_BLUE with { Alpha = 175 };
   public static readonly Colour CREAM = new(255, 253, 208, 255);
   public static readonly Colour SHAMROCK = new(3, 172, 19, 255);
+  public static readonly Colour BRIGHT_ORANGE = new(255, 127, 0, 255);
+  public static readonly Colour BURNT_ORANGE = new(204, 85, 0, 255);
+  public static readonly Colour AMBER = new(255, 191, 0, 255);
 
   public static string ColourToText(Colour colour)
   {
@@ -115,6 +118,9 @@ static class Colours
     else if (colour == NULL) return "null";
     else if (colour == CREAM) return "cream";
     else if (colour == SHAMROCK) return "shamrock";
+    else if (colour == BRIGHT_ORANGE) return "brightorange";
+    else if (colour == BURNT_ORANGE) return "burntorange";
+    else if (colour == AMBER) return "amber";
     else throw new Exception($"Hmm I don't know that colour {colour}");
   }
 
@@ -161,6 +167,9 @@ static class Colours
     "null" => NULL,
     "cream" => CREAM,
     "shamrock" => SHAMROCK,
+    "brightorange" => BRIGHT_ORANGE,
+    "burntorange" => BURNT_ORANGE,
+    "amber" => AMBER,
     _ => throw new Exception($"Hmm I don't know that colour {colour}")
   };
 
@@ -761,7 +770,7 @@ static class Util
     TileType.MistyPortal => new Glyph('Ո', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     TileType.MysteriousMirror => new Glyph('Ω', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     TileType.BellyFloor => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, true),
-    TileType.Lava => new Glyph('~', Colours.WHITE, Colours.YELLOW, Colours.BRIGHT_RED, false),
+    TileType.Lava => new Glyph('~', Colours.LIGHT_GREY, Colours.YELLOW_ORANGE, Colours.BURNT_ORANGE, false),
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
   };
 
