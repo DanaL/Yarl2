@@ -844,7 +844,7 @@ class DownstairsAction(GameState gameState) : PortalAction(gameState)
     var p = GameState!.Player!;
     var t = GameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
 
-    if (t.Type == TileType.Downstairs || t.Type == TileType.Portal)
+    if (t.Type == TileType.Downstairs || t.Type == TileType.Portal || t.Type == TileType.ProfanePortal)
     {
       UsePortal((Portal)t);
     }

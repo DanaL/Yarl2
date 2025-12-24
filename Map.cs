@@ -27,7 +27,7 @@ enum TileType
   BridgeTrigger, HiddenBridgeCollapseTrap, RevealedBridgeCollapseTrap, 
   BusinessSign, FakeStairs, HiddenSummonsTrap, RevealedSummonsTrap,
   HFence, VFence, CornerFence, MonsterWall, Lever, Crops, IllusoryWall,
-  Underwater, Kelp, MistyPortal, MysteriousMirror, BellyFloor
+  Underwater, Kelp, MistyPortal, MysteriousMirror, BellyFloor, ProfanePortal
 }
 
 interface ITriggerable
@@ -380,13 +380,10 @@ class Portal(string stepMessage) : Tile(TileType.Portal)
   public override bool Passable() => true;
   public override bool PassableByFlight() => true;
   public override bool Opaque() => false;
-
   public override string StepMessage => _stepMessage;
 
-  public override string ToString()
-  {
-    return $"{(int)Type};{Destination};{_stepMessage}";
-  }
+  public Portal(string stepMessage, TileType type) : this(stepMessage) => Type = type;
+  public override string ToString() => $"{(int)Type};{Destination};{_stepMessage}";
 }
 
 class Upstairs : Portal

@@ -696,6 +696,7 @@ static class Util
     TileType.Mountain => new Glyph('\u039B', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     TileType.SnowPeak => new Glyph('\u039B', Colours.WHITE, Colours.GREY, Colours.BLACK, false),
     TileType.Portal => new Glyph('Ո', Colours.WHITE, Colours.GREY, Colours.BLACK, false),
+    TileType.ProfanePortal => new Glyph('Ո', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, false),
     TileType.Upstairs => new Glyph('<', Colours.WHITE, Colours.GREY, Colours.BLACK, false),
     TileType.Downstairs => new Glyph('>', Colours.WHITE, Colours.GREY, Colours.BLACK, false),
     TileType.Cloud => new Glyph('#', Colours.WHITE, Colours.WHITE, Colours.BLACK, false),

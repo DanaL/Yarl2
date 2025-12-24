@@ -943,6 +943,7 @@ sealed class EndGameTriggerTrait : TemporaryTrait
     gs.UIRef().AlertPlayer("RUMBLE!!");
     gs.UIRef().SetPopup(new Popup("The entire earth seemed to shake!", "", -1, -1));
     gs.UIRef().PlayAnimation(new ScreenShakeAnimation(gs), gs);
+    EndGame.Setup(gs);
   }
 }
 
