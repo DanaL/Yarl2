@@ -11,6 +11,8 @@
 
 namespace Yarl2;
 
+record struct RiverConfig(TileType RiverTile, bool Center, bool SkipBridges);
+
 // Generate dungeon levels! I drew a lot upon Bob Nystrom's blog and Roguelike Basin
 class DungeonMap(Rng rng)
 {
@@ -649,7 +651,7 @@ class DungeonMap(Rng rng)
 
   // Draw a river on the map. River being a flow of some sort: water, lava,
   // or a chasm
-  public static void CreateRiver(Map map, int width, int height, TileType riverTile, int dungeonId, int level, GameObjectDB objDb, Rng rng)
+  public static void CreateRiver(Map map, int width, int height, RiverConfig riverConfig, int dungeonId, int level, GameObjectDB objDb, Rng rng)
   {
     // pick starting wall
     int roll = rng.Next(4);
@@ -724,8 +726,10 @@ class DungeonMap(Rng rng)
       dir = ChangeRiverDir(dir, origDir, rng);
     }
 
-    DrawRiver(map, pts, riverTile, dungeonId, level, objDb, rng);
-    AddBridges(map, height, width, riverTile, rng);
+    DrawRiver(map, pts, riverConfig.RiverTile, dungeonId, level, objDb, rng);
+
+    if (!riverConfig.SkipBridges)
+      AddBridges(map, height, width, riverConfig.RiverTile, rng);
   }
 
   static void AddBridges(Map map, int height, int width, TileType riverTile, Rng rng)
@@ -854,7 +858,7 @@ class DungeonMap(Rng rng)
   // Skip any points that have items on them so that we don't remove the 
   // the floor from beneath items that are places on the level in earler 
   // steps of dungeon creation
-  static void DrawRiver(Map map, List<(int, int, Dir)> pts, TileType riverTile, int dungeonId, int level, GameObjectDB objDb, Rng rng)
+  static void  DrawRiver(Map map, List<(int, int, Dir)> pts, TileType riverTile, int dungeonId, int level, GameObjectDB objDb, Rng rng)
   {
     for (int j = 0; j < pts.Count - 1; j++)
     {

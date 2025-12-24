@@ -841,13 +841,13 @@ abstract class DungeonBuilder
     objDb.SetToLoc(loc, bait);
   }
 
-  protected static void AddRiverToLevel(TileType riverTile, Map map, Map? mapBelow, int levelNum, int height, int width, int dungeonId, GameObjectDB objDb, Rng rng)
+  protected static void AddRiverToLevel(RiverConfig riverConfig, Map map, Map? mapBelow, int levelNum, int height, int width, int dungeonId, GameObjectDB objDb, Rng rng)
   {    
-    DungeonMap.CreateRiver(map, width + 1, height + 1, riverTile, dungeonId, levelNum, objDb, rng);
+    DungeonMap.CreateRiver(map, width + 1, height + 1, riverConfig, dungeonId, levelNum, objDb, rng);
 
     // When making a chasm, we want to turn any walls below chasms on the 
     // floor below into floors. 
-    if (riverTile == TileType.Chasm && mapBelow is not null)
+    if (riverConfig.RiverTile == TileType.Chasm && mapBelow is not null)
     {
       for (int r = 1; r < height; r++)
       {

@@ -48,14 +48,19 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       if (rng.Next(4) == 0)
       {
         Map? nextLevel = null;
+        RiverConfig riverConfig;
         TileType riverType = TileType.DeepWater;
         if (levelNum < numOfLevels - 1 && rng.Next(3) == 0)
         {
-          riverType = TileType.Chasm;
+          riverConfig = new(TileType.Chasm, false, false);
           nextLevel = levels[levelNum + 1];
         }
+        else
+        {
+          riverConfig = new(TileType.DeepWater, false, false);
+        }
 
-        AddRiverToLevel(riverType, levels[levelNum], nextLevel, levelNum, HEIGHT, WIDTH, DungeonId, objDb, rng);
+        AddRiverToLevel(riverConfig, levels[levelNum], nextLevel, levelNum, HEIGHT, WIDTH, DungeonId, objDb, rng);
         riverLevels.Add((levelNum, riverType));
       }
     }

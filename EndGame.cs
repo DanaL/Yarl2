@@ -34,7 +34,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       AddSecretDoors(levels[levelNum], gs.Rng);
     }
     
-    AddRiverToLevel(TileType.Lava, levels[0], levels[1], 0, HEIGHT, WIDTH, DungeonId, gs.ObjDb, gs.Rng);
+    AddRiverToLevel(new(TileType.Lava, true, true), levels[0], levels[1], 0, HEIGHT, WIDTH, DungeonId, gs.ObjDb, gs.Rng);
 
     SetStairs(DungeonId, levels, (Entrance.Row, Entrance.Col), dungeon.Descending, gs.Rng);
     dungeon.ExitLoc = new(DungeonId, 0, ExitLoc.Item1, ExitLoc.Item2);
