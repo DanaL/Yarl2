@@ -18,27 +18,104 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
   int DungeonId { get; set; } = dungeonId;
   Loc Entrance { get; set; } = entrance;
   
+  Map FirstLevelMap(GameState gs)
+  {
+    Map map = new(82, 42, TileType.PermWall);
+
+    bool[,] open = CACave.GetCave(40, 80, gs.Rng);
+    for (int r = 0; r < 40; r++)
+    {
+      for (int c = 0; c < 80; c++)
+      {
+        TileType tt = open[r, c] ? TileType.DungeonFloor : TileType.DungeonWall;
+        map.SetTile(r + 1 , c + 1, TileFactory.Get(tt));
+      }
+    }
+
+    ConfigurablePassable passable = new();
+    passable.Passable.Add(TileType.DungeonFloor);
+    CACave.JoinCaves(map, gs.Rng, gs.ObjDb, passable, TileType.DungeonFloor, TileType.DungeonWall, TileType.DungeonWall);
+
+    // Draw the lava lake
+    for (int r = 16; r <= 26; r++)
+    {
+      int start_c = 31 - gs.Rng.Next(1, 4);
+      int end_c = 51 + gs.Rng.Next(1, 4);
+      for (int c = start_c; c <= end_c; c++)
+      {
+        if ((r > 16 && r < 26) || gs.Rng.Next(3) < 2)
+         map.SetTile(r, c, TileFactory.Get(TileType.Lava));
+      }
+    }
+
+    List<Loc> islandLocs = [];
+    // Draw island in the centre
+    for (int r = 19; r <= 23; r++)
+    {
+      int start_c = r > 19 && r < 23 ? 37 - gs.Rng.Next(1, 4) : 38;
+      int end_c = r > 19 && r < 23 ? 45 + gs.Rng.Next(1, 4) : 44;
+      for (int c = start_c; c <= end_c; c++)
+      {
+        if ((r > 16 && r < 26) || gs.Rng.Next(3) < 2) 
+        {
+          map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
+          islandLocs.Add(new(DungeonId, 0, r, c));
+        }
+      }
+    }
+
+    // Draw the gatehouse
+    for (int c = 37; c <= 45; c++) 
+    {
+      map.SetTile(12, c, TileFactory.Get(TileType.StoneWall));
+      map.SetTile(11, c, TileFactory.Get(TileType.DungeonFloor));
+      // Ensure these tiles are lava for aesthetics
+      map.SetTile(16, c, TileFactory.Get(TileType.Lava));
+    }
+    for (int r = 13; r <= 15; r++)
+    {      
+      map.SetTile(r, 37, TileFactory.Get(TileType.StoneWall));
+      map.SetTile(r, 45, TileFactory.Get(TileType.StoneWall));
+      map.SetTile(r, 36, TileFactory.Get(TileType.DungeonFloor));
+      map.SetTile(r, 46, TileFactory.Get(TileType.DungeonFloor));
+
+      // Erase any dungeon walls that are inside the gate house
+      for (int c = 38; c <= 44; c++)
+        map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
+    }
+    map.SetTile(12, gs.Rng.Next(39, 44), TileFactory.Get(TileType.LockedDoor));
+
+    return map;
+  }
+
   public Dungeon Generate(GameState gs)
   {
     Dungeon dungeon = new(DungeonId, "the Gaol", "Sulphur. Heat. Mortals were not meant for this place.", true);
     DungeonMap mapper = new(gs.Rng);
-    Map[] levels = new Map[5];
+    List<Map> levels = [];
 
     //dungeon.MonsterDecks = DeckBuilder.ReadDeck(MainOccupant, rng);
-
-    for (int levelNum = 0; levelNum < 5; levelNum++)
+    levels.Add(FirstLevelMap(gs));
+    for (int levelNum = 1; levelNum <= 4; levelNum++)
     {
-      levels[levelNum] = mapper.DrawLevel(WIDTH, HEIGHT);
-      dungeon.AddMap(levels[levelNum]);
-
+      levels.Add(mapper.DrawLevel(WIDTH, HEIGHT));
+      //dungeon.AddMap(levels[levelNum]);
       AddSecretDoors(levels[levelNum], gs.Rng);
     }
     
-    AddRiverToLevel(new(TileType.Lava, true, true), levels[0], levels[1], 0, HEIGHT, WIDTH, DungeonId, gs.ObjDb, gs.Rng);
+    //AddRiverToLevel(new(TileType.Lava, true, true), levels[0], levels[1], 0, HEIGHT, WIDTH, DungeonId, gs.ObjDb, gs.Rng);
 
-    SetStairs(DungeonId, levels, (Entrance.Row, Entrance.Col), dungeon.Descending, gs.Rng);
-    dungeon.ExitLoc = new(DungeonId, 0, ExitLoc.Item1, ExitLoc.Item2);
+    //SetStairs(DungeonId, levels, (Entrance.Row, Entrance.Col), dungeon.Descending, gs.Rng);
     
+    List<(int, int)> floors = levels[0].SqsOfType(TileType.DungeonFloor);
+    var exitSq = floors[gs.Rng.Next(floors.Count)];
+
+    //dungeon.ExitLoc = new(DungeonId, 0, ExitLoc.Item1, ExitLoc.Item2);
+    dungeon.ExitLoc = new(DungeonId, 0, exitSq.Item1, exitSq.Item2);
+    
+    foreach (Map map in levels)
+      dungeon.AddMap(map);
+
     return dungeon;
   }
 }
