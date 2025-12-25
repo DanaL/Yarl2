@@ -85,6 +85,11 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     }
     map.SetTile(12, gs.Rng.Next(39, 44), TileFactory.Get(TileType.LockedDoor));
 
+    int leverRow = gs.Rng.Next(13, 16);
+    int leverCol = gs.Rng.Next(38, 45);
+    Loc bridgeStart = new(DungeonId, 0, 16, gs.Rng.Next(38, 45));
+    map.SetTile(leverRow, leverCol, new Lever(TileType.BridgeLever, false, bridgeStart));
+    
     return map;
   }
 

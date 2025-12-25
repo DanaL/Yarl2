@@ -28,7 +28,7 @@ enum TileType
   BusinessSign, FakeStairs, HiddenSummonsTrap, RevealedSummonsTrap,
   HFence, VFence, CornerFence, MonsterWall, Lever, Crops, IllusoryWall,
   Underwater, Kelp, MistyPortal, MysteriousMirror, BellyFloor, ProfanePortal,
-  Lava
+  Lava, BridgeLever
 }
 
 interface ITriggerable
@@ -213,7 +213,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.CornerFence => "fence",
     TileType.RevealedSummonsTrap => "monster summon trap",
     TileType.RevealedBridgeCollapseTrap => "bridge collapse trigger",
-    TileType.Lever => "a lever",
+    TileType.Lever or TileType.BridgeLever => "a lever",
     TileType.Crops => "crops",
     TileType.Kelp => "kelp",
     TileType.Lake => "water",

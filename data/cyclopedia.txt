@@ -329,6 +329,9 @@ Drinking this potion causes others to simply not notice you. Handy for escaping 
 lever|Lever
 A lever (bump to activate). It likely activates some mechanism within the dungeon!
 #
+bridgelever|Lever
+A lever (bump to activate). It likely activates some mechanism within the dungeon!
+#
 portcullis|Portcullis
 A stout metal gate. Unlike doors, it cannot have its lock picked or be easily smashed down.
 #

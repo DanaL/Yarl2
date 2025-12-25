@@ -582,10 +582,11 @@ internal class MapSaver
             tile = new MonsterWall(glyph, monsterId);
             break;
           case TileType.Lever:
+          case TileType.BridgeLever:
             bool on = bool.Parse(pieces[2]);
             digits = Util.ToNums(pieces[3]);
             Loc gateLoc = new(digits[0], digits[1], digits[2], digits[3]);
-            Lever l = new(TileType.Lever, on, gateLoc);
+            Lever l = new(type, on, gateLoc);
             tile = l;
             break;
 

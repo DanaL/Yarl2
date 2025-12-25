@@ -159,6 +159,7 @@ class Examiner : Inputer
             case TileType.Well:
             case TileType.BridgeTrigger:
             case TileType.Lever:
+            case TileType.BridgeLever:
             case TileType.RevealedSummonsTrap:            
             case TileType.MistyPortal:
             case TileType.MysteriousMirror:

@@ -716,7 +716,7 @@ static class Util
     TileType.VWindow => new Glyph('|', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, false),
     TileType.Forge => new Glyph('^', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, false),
     TileType.Well => new Glyph('o', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, false),
-    TileType.Bridge => new Glyph('=', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
+    TileType.Bridge => new Glyph('=', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, false),
     TileType.WoodBridge => new Glyph('=', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false),
     TileType.Landmark => new Glyph('_', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, true),
     TileType.IdolAltar => new Glyph('_', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, true),
@@ -760,7 +760,7 @@ static class Util
     TileType.VFence => new Glyph('|', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false),
     TileType.CornerFence => new Glyph('+', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false),
     TileType.MonsterWall => ((MonsterWall)tile).Glyph,
-    TileType.Lever =>
+    TileType.Lever or TileType.BridgeLever =>
       ((Lever)tile).On ? new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, true)
                        : new Glyph('|', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, true),
     TileType.IllusoryWall => new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),

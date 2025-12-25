@@ -380,6 +380,27 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
         Lever lever = (Lever)tile;
         lever.Activate(GameState);
       }
+      else if (tile.Type == TileType.BridgeLever)
+      {
+        // This specific to the drawbridge in the first level of the Gaol.
+        // If I add more drawbridges, I'll need to generalize this and probably
+        // create a separate class from Lever.
+        Lever lever = (Lever)tile;
+        if (lever.On)
+          GameState.UIRef().AlertPlayer("This lever has already been triggered.");
+        else
+        {
+          GameState.UIRef().AlertPlayer("You hear a rumble and the grinding of machinery.");
+          lever.On = true;
+          Loc bridge = lever.Gate;
+          do 
+          {
+            GameState.CurrentMap.SetTile(bridge.Row, bridge.Col, TileFactory.Get(TileType.Bridge));
+            bridge.Row += 1;
+          }
+          while (GameState.TileAt(bridge).Type != TileType.DungeonFloor);
+        }
+      }
       else
       {
         ui.AlertPlayer(BlockedMessage(tile), GameState, Loc);
