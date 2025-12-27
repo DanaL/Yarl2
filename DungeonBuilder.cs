@@ -454,7 +454,7 @@ abstract class DungeonBuilder
   // another. Ie., if you go down stairs at (13, 20) on one level, you'll 
   // arrive at (13, 20) on the next level. Contrasted with classic rogue 
   // dungeons.
-  static void CreateStairwayStacked(int dungeonId, Map[] levelMaps, int levelNum, (int, int) arrivalStairs, bool desc, Rng rng)
+  protected static void CreateStairwayStacked(int dungeonId, Map[] levelMaps, int levelNum, (int, int) arrivalStairs, bool desc, Rng rng)
   {
     Map currLvl = levelMaps[levelNum];
     Map nextLvl = levelMaps[levelNum + 1];

@@ -129,28 +129,31 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     dungeon.ExitLoc = FindArrivalLoc(firstLevel, gs.Rng);
     Upstairs arrival = new("") { Destination = Entrance };
     firstLevel.SetTile(dungeon.ExitLoc.Row, dungeon.ExitLoc.Col, arrival);
-    
+    levels.Add(firstLevel);
+
     for (int levelNum = 1; levelNum <= 4; levelNum++)
     {
       levels.Add(mapper.DrawLevel(WIDTH, HEIGHT));
-      //dungeon.AddMap(levels[levelNum]);
-     // AddSecretDoors(levels[levelNum], gs.Rng);
+      AddSecretDoors(levels[levelNum], gs.Rng);
     }
 
-    //SetStairs(DungeonId, [.. levels], (Entrance.Row, Entrance.Col), dungeon.Descending, gs.Rng);
-    //AddRiverToLevel(new(TileType.Lava, true, true), levels[0], levels[1], 0, HEIGHT, WIDTH, DungeonId, gs.ObjDb, gs.Rng);
+    // Pick spot on the island for the stairs down from the first level
+    List<Loc> options = [];
+    foreach (Loc loc in IslandLocs)
+    {
+      if (levels[0].TileAt(loc.Row, loc.Col).Type == TileType.DungeonFloor)
+        options.Add(loc);
+    }
+    Loc firstFloorDownLoc = options[gs.Rng.Next(options.Count)];
+    Downstairs downstairs = new("") { Destination = firstFloorDownLoc with { Level = 1}};
+    Upstairs upstairs = new("") { Destination = firstFloorDownLoc};
+    levels[0].SetTile(firstFloorDownLoc.Row, firstFloorDownLoc.Col, downstairs);
+    levels[1].SetTile(firstFloorDownLoc.Row, firstFloorDownLoc.Col, upstairs);
+    CreateStairwayStacked(dungeonId, [.. levels], 1, (firstFloorDownLoc.Row, firstFloorDownLoc.Col), true, gs.Rng);
 
-    levels.Insert(0, firstLevel);  
-    
-    List<(int, int)> floors = levels[0].SqsOfType(TileType.DungeonFloor);
-    var exitSq = floors[gs.Rng.Next(floors.Count)];
-
-    //dungeon.ExitLoc = new(DungeonId, 0, ExitLoc.Item1, ExitLoc.Item2);
-    //dungeon.ExitLoc = new(DungeonId, 0, exitSq.Item1, exitSq.Item2);
-    
     foreach (Map map in levels)
       dungeon.AddMap(map);
-
+      
     return dungeon;
   }
 }
