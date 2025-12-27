@@ -17,7 +17,9 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
   const int WIDTH = 70;
   int DungeonId { get; set; } = dungeonId;
   Loc Entrance { get; set; } = entrance;
-  
+  public readonly HashSet<Loc> IslandLocs = [];
+  Loc FirstFloorDoor { get; set; }
+
   Map FirstLevelMap(GameState gs)
   {
     Map map = new(82, 42, TileType.PermWall);
@@ -59,7 +61,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
         if ((r > 16 && r < 26) || gs.Rng.Next(3) < 2) 
         {
           map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
-          islandLocs.Add(new(DungeonId, 0, r, c));
+          IslandLocs.Add(new(DungeonId, 0, r, c));
         }
       }
     }
@@ -83,7 +85,9 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       for (int c = 38; c <= 44; c++)
         map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
     }
-    map.SetTile(12, gs.Rng.Next(39, 44), TileFactory.Get(TileType.LockedDoor));
+    int doorCol = gs.Rng.Next(39, 44);
+    map.SetTile(12, doorCol, TileFactory.Get(TileType.LockedDoor));
+    FirstFloorDoor = new(DungeonId, 0, 12, doorCol);
 
     int leverRow = gs.Rng.Next(13, 16);
     int leverCol = gs.Rng.Next(38, 45);
@@ -93,6 +97,26 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     return map;
   }
 
+  Loc FindArrivalLoc(Map map, Rng rng)
+  {
+    DijkstraMap dmap = new(map, [], map.Height, map.Width, true);
+    dmap.Generate(DijkstraMap.CostWithDoors, (FirstFloorDoor.Row, FirstFloorDoor.Col), 100);
+
+    List<Loc> floors = [];
+    for (int r = 0; r < map.Height; r++)
+    {
+      for (int c = 0; c < map.Width; c++)
+      {
+        if (dmap.Sqrs[r, c] < int.MaxValue && map.TileAt(r, c).Type == TileType.DungeonFloor)
+        {
+          floors.Add(new (DungeonId, 0, r, c));
+        }
+      }
+    }
+    
+    return floors[rng.Next(floors.Count)];
+  }
+
   public Dungeon Generate(GameState gs)
   {
     Dungeon dungeon = new(DungeonId, "the Gaol", "Sulphur. Heat. Mortals were not meant for this place.", true);
@@ -100,23 +124,29 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     List<Map> levels = [];
 
     //dungeon.MonsterDecks = DeckBuilder.ReadDeck(MainOccupant, rng);
-    levels.Add(FirstLevelMap(gs));
+    Map firstLevel = FirstLevelMap(gs);
+    
+    dungeon.ExitLoc = FindArrivalLoc(firstLevel, gs.Rng);
+    Upstairs arrival = new("") { Destination = Entrance };
+    firstLevel.SetTile(dungeon.ExitLoc.Row, dungeon.ExitLoc.Col, arrival);
+    
     for (int levelNum = 1; levelNum <= 4; levelNum++)
     {
       levels.Add(mapper.DrawLevel(WIDTH, HEIGHT));
       //dungeon.AddMap(levels[levelNum]);
-      AddSecretDoors(levels[levelNum], gs.Rng);
+     // AddSecretDoors(levels[levelNum], gs.Rng);
     }
-    
+
+    //SetStairs(DungeonId, [.. levels], (Entrance.Row, Entrance.Col), dungeon.Descending, gs.Rng);
     //AddRiverToLevel(new(TileType.Lava, true, true), levels[0], levels[1], 0, HEIGHT, WIDTH, DungeonId, gs.ObjDb, gs.Rng);
 
-    //SetStairs(DungeonId, levels, (Entrance.Row, Entrance.Col), dungeon.Descending, gs.Rng);
+    levels.Insert(0, firstLevel);  
     
     List<(int, int)> floors = levels[0].SqsOfType(TileType.DungeonFloor);
     var exitSq = floors[gs.Rng.Next(floors.Count)];
 
     //dungeon.ExitLoc = new(DungeonId, 0, ExitLoc.Item1, ExitLoc.Item2);
-    dungeon.ExitLoc = new(DungeonId, 0, exitSq.Item1, exitSq.Item2);
+    //dungeon.ExitLoc = new(DungeonId, 0, exitSq.Item1, exitSq.Item2);
     
     foreach (Map map in levels)
       dungeon.AddMap(map);
