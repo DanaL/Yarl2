@@ -433,7 +433,8 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
     bell.Traits.Add(new ArtifactTrait());
     bell.Traits.Add(new AbjurationBellTrait());
     bell.Traits.Add(new FlagOnPickUpTrait() { Flag = "AbjurationBellFound" });
-    
+    bell.Traits.Add(new CoolDownTrait() { Time = 75});
+
     (int r, int c) = floorSqs[rng.Next(floorSqs.Count)];
     Loc bellLoc = new(DungeonId, levelNum, r, c);
     objDb.Add(bell);
@@ -463,6 +464,7 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
     }
 
     Map[] levels = [.. dungeon.LevelMaps.Values];
+    levels[2].Features |= MapFeatures.UndiggableFloor;
     SetRoguelikeStairs(DungeonId, levels, new Loc(0, 0, entranceRow, entranceCol), rng);
 
     PopulateDungeon(dungeon, rng, objDb);
