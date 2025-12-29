@@ -672,6 +672,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     }
 
     bool torch = false, written = false, vaultKey = false;
+    bool onCooldown = false;
     foreach (Trait t in item.Traits)
     {
       if (t is TorchTrait)
@@ -680,6 +681,14 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
         written = true;
       if (t is VaultKeyTrait)
         vaultKey = true;
+
+      if (t is CoolDownTrait cd) 
+      { 
+        if (cd.LastUse + cd.Time < GameState!.Turn)
+          cd.LastUse = GameState.Turn;
+        else
+          onCooldown = true;
+      }
     }
 
     GameState!.ClearMenu();
@@ -690,6 +699,13 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     List<Trait> useableTraits = [.. item.Traits.Where(t => t is IUSeable)];
     if (useableTraits.Count != 0 || item.HasTrait<CanApplyTrait>())
     {
+      if (onCooldown)
+      {
+        string name = MsgFactory.CalcName(item, GameState.Player).Capitalize();
+        GameState.UIRef().AlertPlayer($"{name} is on cooldown.");
+        return 1.0;
+      }
+
       if (written)
       {
         // Eventually being blind will prevent you from reading things

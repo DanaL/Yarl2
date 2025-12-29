@@ -2294,6 +2294,14 @@ class BoostMaxStatTrait : TemporaryTrait
   public override string AsText() => $"BoostMaxStat#{Stat}#{Amount}";
 }
 
+class CoolDownTrait : Trait
+{
+  public ulong Time { get; set; } = 75;
+  public ulong LastUse { get; set; } = ulong.MinValue;
+
+  public override string AsText() => $"CoolDown#{Time}#{LastUse}";
+}
+
 class ConfusedTrait : TemporaryTrait
 {
   public int DC { get; set; }
@@ -4371,6 +4379,7 @@ class TraitFactory
     { "ChampionBlessing", (pieces, gameObj) => new ChampionBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
     { "Cleansing", (pieces, gamObj) => new CleansingTrait() },
     { "Cleave", (pieces, gameObj) => new CleaveTrait() },
+    { "CoolDown", (pieces, gameObj) => new CoolDownTrait() { Time = ulong.Parse(pieces[1]), LastUse = ulong.Parse(pieces[2])}},
     { "Confused", (pieces, gameObj) => new ConfusedTrait() { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) } },
     { "Construct", (pieces, gameObj) => new ConstructTrait() },
     { "Consumable", (pieces, gameObj) => new ConsumableTrait() },
