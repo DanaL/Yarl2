@@ -66,11 +66,17 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       }
     }
 
+    for (int c = 35; c <= 47; c++)
+    {
+      map.SetTile(11, c, TileFactory.Get(TileType.DungeonFloor));
+    }
+    map.SetTile(12, 36, TileFactory.Get(TileType.DungeonFloor));
+    map.SetTile(12, 46, TileFactory.Get(TileType.DungeonFloor));
+
     // Draw the gatehouse
     for (int c = 37; c <= 45; c++) 
     {
       map.SetTile(12, c, TileFactory.Get(TileType.StoneWall));
-      map.SetTile(11, c, TileFactory.Get(TileType.DungeonFloor));
       GateHouseLocs.Add(new (DungeonId, 0, 11, c));
       // Ensure these tiles are lava for aesthetics
       map.SetTile(16, c, TileFactory.Get(TileType.Lava));
@@ -79,9 +85,12 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     {      
       map.SetTile(r, 37, TileFactory.Get(TileType.StoneWall));
       map.SetTile(r, 45, TileFactory.Get(TileType.StoneWall));
+      
+      map.SetTile(r, 35, TileFactory.Get(TileType.DungeonFloor));
       map.SetTile(r, 36, TileFactory.Get(TileType.DungeonFloor));
       map.SetTile(r, 46, TileFactory.Get(TileType.DungeonFloor));
-
+      map.SetTile(r, 47, TileFactory.Get(TileType.DungeonFloor));
+      
       GateHouseLocs.Add(new (DungeonId, 0, r, 36));
       GateHouseLocs.Add(new (DungeonId, 0, r, 46));
 
