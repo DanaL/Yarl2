@@ -18,6 +18,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
   int DungeonId { get; set; } = dungeonId;
   Loc Entrance { get; set; } = entrance;
   public readonly HashSet<Loc> IslandLocs = [];
+  public readonly HashSet<Loc> GateHouseLocs = [];
   Loc FirstFloorDoor { get; set; }
 
   Map FirstLevelMap(GameState gs)
@@ -50,7 +51,6 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       }
     }
 
-    List<Loc> islandLocs = [];
     // Draw island in the centre
     for (int r = 19; r <= 23; r++)
     {
@@ -71,6 +71,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     {
       map.SetTile(12, c, TileFactory.Get(TileType.StoneWall));
       map.SetTile(11, c, TileFactory.Get(TileType.DungeonFloor));
+      GateHouseLocs.Add(new (DungeonId, 0, 11, c));
       // Ensure these tiles are lava for aesthetics
       map.SetTile(16, c, TileFactory.Get(TileType.Lava));
     }
@@ -81,9 +82,15 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       map.SetTile(r, 36, TileFactory.Get(TileType.DungeonFloor));
       map.SetTile(r, 46, TileFactory.Get(TileType.DungeonFloor));
 
+      GateHouseLocs.Add(new (DungeonId, 0, r, 36));
+      GateHouseLocs.Add(new (DungeonId, 0, r, 46));
+
       // Erase any dungeon walls that are inside the gate house
-      for (int c = 38; c <= 44; c++)
+      for (int c = 38; c <= 44; c++) 
+      {
         map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
+        GateHouseLocs.Add(new (DungeonId, 0, r, c));
+      }
     }
     int doorCol = gs.Rng.Next(39, 44);
     map.SetTile(12, doorCol, TileFactory.Get(TileType.LockedDoor));
@@ -107,9 +114,14 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     {
       for (int c = 0; c < map.Width; c++)
       {
+        Loc candidate = new (DungeonId, 0, r, c);
+        // We don't need to avoid the island because they are as yet unreachable
+        // from the gatehouse door
+        if (GateHouseLocs.Contains(candidate))
+          continue;
         if (dmap.Sqrs[r, c] < int.MaxValue && map.TileAt(r, c).Type == TileType.DungeonFloor)
         {
-          floors.Add(new (DungeonId, 0, r, c));
+          floors.Add(candidate);
         }
       }
     }
@@ -149,11 +161,11 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     Upstairs upstairs = new("") { Destination = firstFloorDownLoc};
     levels[0].SetTile(firstFloorDownLoc.Row, firstFloorDownLoc.Col, downstairs);
     levels[1].SetTile(firstFloorDownLoc.Row, firstFloorDownLoc.Col, upstairs);
-    CreateStairwayStacked(dungeonId, [.. levels], 1, (firstFloorDownLoc.Row, firstFloorDownLoc.Col), true, gs.Rng);
+    CreateStairwayStacked(DungeonId, [.. levels], 1, (firstFloorDownLoc.Row, firstFloorDownLoc.Col), true, gs.Rng);
 
     foreach (Map map in levels)
       dungeon.AddMap(map);
-      
+
     return dungeon;
   }
 }
