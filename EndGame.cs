@@ -9,7 +9,15 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Security.Cryptography;
 using Yarl2;
+
+class IslandInfo
+{
+  public int ID { get; set; }
+  public bool FullyConnection { get; set; } = false;
+  public HashSet<Loc> IslandSqs { get; set; } = [];
+}
 
 class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
 {
@@ -20,6 +28,192 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
   public readonly HashSet<Loc> IslandLocs = [];
   public readonly HashSet<Loc> GateHouseLocs = [];
   Loc FirstFloorDoor { get; set; }
+
+  static readonly List<string> IslandTemplates =
+  [
+    "~~~~~~~~~~~.....~~~......~~~.....~~~~.....~~~~~.....~~~~~.....~~~~...~~~~~~~~~~~~",
+    "~~~~~~~~~~~~.....~~~.....~~~...~~~~~~..~~~~~~~..~~~~~~~...~~~~~~~....~~~~~~~~~~~~",
+    "~~~~~~~~~~~.....~~~......~~~......~~~......~~~.....~~~~~...~~~~~~..~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~.....~~~......~~~...~..~~~......~~~..~..~~~~~...~~~~~~..~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~..~~~~~~....~~~~......~~~......~~~.....~~~~~...~~~~~~~.~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~...~~~~~.....~~~.......~~.......~~.......~~~.....~~~~~...~~~~~~~~~~~~",
+    "~~~~~~~~~~~~...~~~~~.....~~~.......~~.......~~.......~~~.....~~~~~...~~~~~~~~~~~~",
+    "~~~~~~~~~~~~...~~~~~.....~~~...~...~~...~...~~...~...~~~.....~~~~~...~~~~~~~~~~~~",
+    "~~~~~~~~~~~~.....~~~......~~~~~..~~~~~~..~~~~~~~...~~~~......~~~.....~~~~~~~~~~~~",
+    "~~~~~~~~~~~~...~~~~~.....~~~.......~~.......~~......~~~~....~~~~~~..~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~...~~~~~.....~~~.......~~.......~~......~~~~....~~~~~~..~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~...~~~~~.....~~~.......~~.......~~......~~~~....~~~~~~..~~~~~~~~~~~~~"
+  ];
+
+  string RotateTemplate(string template, Rng rng)
+  {
+    char[] rotated = new char[81];
+    int rotation = rng.Next(4);
+    for (int r = 0; r < 9; r++)
+    {
+      for (int c = 0; c < 9; c++)
+      {
+        var (rotatedR, rotatedC) = rotation switch
+        {
+          0 => (r, c),
+          1 => (c, 8 - r),
+          2 => (8 - r, 8 - c),
+          _ => (8 - c, r)
+        };
+        int idx = rotatedR * 9 + rotatedC;
+        rotated[idx] = template[r * 9 + c];
+        
+      }
+    }
+
+    return string.Join("", rotated);
+  }
+  void DrawIsland(Map map, IslandInfo info, int row, int col, Rng rng)
+  {
+    string template = RotateTemplate(IslandTemplates[rng.Next(IslandTemplates.Count)], rng);
+
+    int rowOffset = rng.Next(5) switch
+    {
+      0 => -1,
+      1 => 1,
+      _ => 0
+    };
+    int colOffSet = rng.Next(5) switch
+    {
+      0 => -1,
+      1 => 1,
+      _ => 0
+    };
+
+    for (int r = 0; r < 9; r++)
+    {
+      for (int c = 0; c < 9; c++)
+      {
+        if (template[r * 9 + c] == '~')
+          continue;
+        Loc loc = new(DungeonId, 4, row * 10 + r + rowOffset, col * 10 + c + colOffSet);
+        map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
+        info.IslandSqs.Add(loc);
+      }
+    }
+  }
+
+  void DrawDestIslandTL(Map map, IslandInfo info, int row, int col, Rng rng)
+  {
+    int startRow = rng.Next(1, 3);
+    int startCol = rng.Next(5, 8);
+    for (int r = startRow; r < 11; r++)
+    {
+      for (int c = startCol; c < 11; c++)
+      {
+        Loc loc = new(DungeonId, 4, row * 10 + r, col * 10 + c);
+        map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
+        info.IslandSqs.Add(loc);
+      }
+
+      if (startCol > 3 && rng.Next(5) == 0)
+        --startCol;
+      else if (startCol < 7 && rng.Next(10) == 0)
+        ++startCol;
+    }  
+  }
+
+  void DrawDestIslandTR(Map map, IslandInfo info, int row, int col, Rng rng)
+  {
+    int startRow = rng.Next(1, 3);
+    int endCol = rng.Next(4, 6);
+    for (int r = startRow; r < 11; r++)
+    {
+      for (int c = 0; c < endCol; c++)
+      {
+        Loc loc = new(DungeonId, 4, row * 10 + r, col * 10 + c);
+        map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
+        info.IslandSqs.Add(loc);
+      }
+
+      if (endCol < 7 && rng.Next(5) == 0)
+        ++endCol;
+      else if (endCol > 3 && rng.Next(10) == 0)
+        --endCol;
+    }  
+  }
+
+  void DrawDestIslandBL(Map map, IslandInfo info, int row, int col, Rng rng)
+  {
+    int endRow = rng.Next(5, 9);
+    int startCol = rng.Next(5, 8);
+    for (int r = 0; r < endRow; r++)
+    {
+      for (int c = startCol; c < 11; c++)
+      {
+        Loc loc = new(DungeonId, 4, row * 10 + r, col * 10 + c);
+        map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
+        info.IslandSqs.Add(loc);
+      }
+
+      if (startCol > 3 && rng.Next(5) == 0)
+        --startCol;
+      else if (startCol < 7 && rng.Next(10) == 0)
+        ++startCol;
+    }  
+  }
+
+  void DrawDestIslandBR(Map map, IslandInfo info, int row, int col, Rng rng)
+  {
+    int endRow = rng.Next(5, 9);
+    int endCol = rng.Next(4, 6);
+    for (int r = 0; r < endRow; r++)
+    {
+      for (int c = 0; c < endCol; c++)
+      {
+        Loc loc = new(DungeonId, 4, row * 10 + r, col * 10 + c);
+        map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
+        info.IslandSqs.Add(loc);
+      }
+
+      if (endCol < 7 && rng.Next(5) == 0)
+        ++endCol;
+      else if (endCol > 3 && rng.Next(10) == 0)
+        --endCol;
+    }  
+  }
+
+  Map BottomLevel(GameState gs)
+  {
+    Map map = new(80, 60, TileType.Lake);
+
+    // First pick 4 blocks for the island with the final prison
+    int row = gs.Rng.Next(0, 5);
+    int col = gs.Rng.Next(0, 7);
+    int destIslandTL = row * 8 + col;
+    int destIslandTR = row * 8 + col + 1;
+    int destIslandBL = (row + 1) * 8 + col;
+    int destIslandBR = (row + 1) * 8 + col + 1;
+    HashSet<int> destIsland = [ destIslandTL, destIslandTR, destIslandBL, destIslandBR ];
+
+    IslandInfo info = new() { ID = destIslandTL };
+    DrawDestIslandTL(map, info, destIslandTL / 8, destIslandTL % 8, gs.Rng);
+    info = new() { ID = destIslandTR };
+    DrawDestIslandTR(map, info, destIslandTR / 8, destIslandTR % 8, gs.Rng);
+    info = new() { ID = destIslandBL };
+    DrawDestIslandBL(map, info, destIslandBL / 8, destIslandBL % 8, gs.Rng);
+    info = new() { ID = destIslandBR };
+    DrawDestIslandBR(map, info, destIslandBR / 8, destIslandBR % 8, gs.Rng);
+
+    List<int> ids = [.. Enumerable.Range(0, 48).Where(id => !destIsland.Contains(id))];
+    ids.Shuffle(gs.Rng);
+    foreach (int id in ids.Take(gs.Rng.Next(28, 33)))
+    {
+      info = new() { ID = id };
+      DrawIsland(map, info, id / 8, id % 8, gs.Rng);
+    }
+
+    List<HashSet<int>> connections = [ destIsland ];
+
+    map.Dump();
+
+    return map;  
+  }
 
   Map FirstLevelMap(GameState gs)
   {
@@ -146,7 +340,8 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
 
     //dungeon.MonsterDecks = DeckBuilder.ReadDeck(MainOccupant, rng);
     Map firstLevel = FirstLevelMap(gs);
-    
+    Map bottom = BottomLevel(gs);
+
     dungeon.ExitLoc = FindArrivalLoc(firstLevel, gs.Rng);
     Upstairs arrival = new("") { Destination = Entrance };
     firstLevel.SetTile(dungeon.ExitLoc.Row, dungeon.ExitLoc.Col, arrival);
@@ -170,7 +365,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     Upstairs upstairs = new("") { Destination = firstFloorDownLoc};
     levels[0].SetTile(firstFloorDownLoc.Row, firstFloorDownLoc.Col, downstairs);
     levels[1].SetTile(firstFloorDownLoc.Row, firstFloorDownLoc.Col, upstairs);
-    CreateStairwayStacked(DungeonId, [.. levels], 1, (firstFloorDownLoc.Row, firstFloorDownLoc.Col), true, gs.Rng);
+    //CreateStairwayStacked(DungeonId, [.. levels], 1, (firstFloorDownLoc.Row, firstFloorDownLoc.Col), true, gs.Rng);
 
     foreach (Map map in levels)
       dungeon.AddMap(map);

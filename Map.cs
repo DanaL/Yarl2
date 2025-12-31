@@ -976,6 +976,7 @@ class Map : ICloneable
           TileType.IllusoryWall => '?',
           TileType.SecretDoor => 'S',
           TileType.MysteriousMirror => 'M',
+          TileType.Lava => '~',
           _ => ' '
         };
         Console.Write(ch);
