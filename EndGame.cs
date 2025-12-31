@@ -305,6 +305,29 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     }
   }
 
+  void BottomLevelTweaks(Map map)
+  {
+    // The sometimes the generator will overwrite lava in 'donut' islands
+    // so turn any bridges that don't adjoin any other bridge to 
+    for (int r = 0; r < map.Height; r++)
+    {
+      for (int c = 0; c < map.Width; c++)
+      {
+        if (map.TileAt(r, c).Type == TileType.WoodBridge)
+        {
+          int adjBridges = 0;
+          foreach (var adj in Util.Adj8Sqs(r, c))
+          {
+            if (map.InBounds(adj) && map.TileAt(adj).Type == TileType.WoodBridge)
+              ++adjBridges;
+          }
+          if (adjBridges == 0)
+            map.SetTile(r, c, TileFactory.Get(TileType.Lava));
+        }
+      }
+    }
+  }
+
   Map BottomLevel(GameState gs)
   {
     Map map = new(80, 60, TileType.Lava);
@@ -341,10 +364,18 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     }
 
     JoinIslands(map, islands, connections, gs.Rng);
+    BottomLevelTweaks(map);
 
-    map.Dump();
+    Map finalMap = new(82, 62, TileType.PermWall) { Features = MapFeatures.UndiggableFloor };
+    for (int r = 0; r < map.Height; r++)
+    {
+      for (int c = 0; c < map.Width; c++)
+      {
+        finalMap.SetTile(r + 1, c + 1, map.TileAt(r, c));
+      }
+    }
 
-    return map;  
+    return finalMap;  
   }
 
   Map FirstLevelMap(GameState gs)
@@ -473,17 +504,19 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     //dungeon.MonsterDecks = DeckBuilder.ReadDeck(MainOccupant, rng);
     Map firstLevel = FirstLevelMap(gs);
     Map bottom = BottomLevel(gs);
+    bottom.Dump();
 
     dungeon.ExitLoc = FindArrivalLoc(firstLevel, gs.Rng);
     Upstairs arrival = new("") { Destination = Entrance };
     firstLevel.SetTile(dungeon.ExitLoc.Row, dungeon.ExitLoc.Col, arrival);
     levels.Add(firstLevel);
 
-    for (int levelNum = 1; levelNum <= 4; levelNum++)
+    for (int levelNum = 1; levelNum <= 3; levelNum++)
     {
       levels.Add(mapper.DrawLevel(WIDTH, HEIGHT));
       AddSecretDoors(levels[levelNum], gs.Rng);
     }
+    levels.Add(bottom);
 
     // Pick spot on the island for the stairs down from the first level
     List<Loc> options = [];
@@ -497,7 +530,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     Upstairs upstairs = new("") { Destination = firstFloorDownLoc};
     levels[0].SetTile(firstFloorDownLoc.Row, firstFloorDownLoc.Col, downstairs);
     levels[1].SetTile(firstFloorDownLoc.Row, firstFloorDownLoc.Col, upstairs);
-    //CreateStairwayStacked(DungeonId, [.. levels], 1, (firstFloorDownLoc.Row, firstFloorDownLoc.Col), true, gs.Rng);
+    CreateStairwayStacked(DungeonId, [.. levels], 1, (firstFloorDownLoc.Row, firstFloorDownLoc.Col), true, gs.Rng);
 
     foreach (Map map in levels)
       dungeon.AddMap(map);
