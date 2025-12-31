@@ -14,7 +14,7 @@ using Yarl2;
 class IslandInfo
 {
   public int ID { get; set; }
-  public HashSet<Dir> Connections = [];
+  public HashSet<Dir> Connections = []; 
   public HashSet<Loc> Sqs { get; set; } = [];
 }
 
@@ -580,7 +580,8 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
 
     levels.Add(bottom);
     SetFinalStairs(levels, gs);
-
+    levels[^2].Features |= MapFeatures.UndiggableFloor;
+    
     foreach (Map map in levels)
       dungeon.AddMap(map);
 
