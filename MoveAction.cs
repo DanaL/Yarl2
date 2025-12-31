@@ -398,7 +398,7 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
             GameState.CurrentMap.SetTile(bridge.Row, bridge.Col, TileFactory.Get(TileType.Bridge));
             bridge.Row += 1;
           }
-          while (GameState.TileAt(bridge).Type != TileType.DungeonFloor);
+          while (!(GameState.TileAt(bridge).Type == TileType.DungeonFloor || GameState.TileAt(bridge).Type == TileType.Downstairs));
         }
       }
       else
