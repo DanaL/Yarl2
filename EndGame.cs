@@ -20,6 +20,7 @@ class IslandInfo
 
 class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
 {
+  const int BOTTOM_LVL = 4;
   const int HEIGHT = 40;
   const int WIDTH = 70;
   int DungeonId { get; set; } = dungeonId;
@@ -27,7 +28,9 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
   public readonly HashSet<Loc> IslandLocs = [];
   public readonly HashSet<Loc> GateHouseLocs = [];
   Loc FirstFloorDoor { get; set; }
-  Dictionary<Loc, int> IslandIndices = [];
+  readonly Dictionary<Loc, int> IslandIndices = [];
+  readonly HashSet<Loc> CentralLocs = [];
+  Loc BottomLevelArrivalStairs { get; set; }
 
   static readonly List<string> IslandTemplates =
   [
@@ -91,7 +94,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       {
         if (template[r * 9 + c] == '~')
           continue;
-        Loc loc = new(DungeonId, 4, row * 10 + r + rowOffset, col * 10 + c + colOffSet);
+        Loc loc = new(DungeonId, BOTTOM_LVL, row * 10 + r + rowOffset, col * 10 + c + colOffSet);
         map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
         info.Sqs.Add(loc);
         IslandIndices[loc] = info.ID;
@@ -107,7 +110,8 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     {
       for (int c = startCol; c < 11; c++)
       {
-        Loc loc = new(DungeonId, 4, row * 10 + r, col * 10 + c);
+        Loc loc = new(DungeonId, BOTTOM_LVL, row * 10 + r, col * 10 + c);
+        CentralLocs.Add(loc);
         map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
         info.Sqs.Add(loc);
         IslandIndices[loc] = info.ID;
@@ -128,7 +132,8 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     {
       for (int c = 0; c < endCol; c++)
       {
-        Loc loc = new(DungeonId, 4, row * 10 + r, col * 10 + c);
+        Loc loc = new(DungeonId, BOTTOM_LVL, row * 10 + r, col * 10 + c);
+        CentralLocs.Add(loc);
         map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
         info.Sqs.Add(loc);
         IslandIndices[loc] = info.ID;
@@ -149,7 +154,8 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     {
       for (int c = startCol; c < 11; c++)
       {
-        Loc loc = new(DungeonId, 4, row * 10 + r, col * 10 + c);
+        Loc loc = new(DungeonId, BOTTOM_LVL, row * 10 + r, col * 10 + c);
+        CentralLocs.Add(loc);
         map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
         info.Sqs.Add(loc);
         IslandIndices[loc] = info.ID;
@@ -170,7 +176,8 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     {
       for (int c = 0; c < endCol; c++)
       {
-        Loc loc = new(DungeonId, 4, row * 10 + r, col * 10 + c);
+        Loc loc = new(DungeonId, BOTTOM_LVL, row * 10 + r, col * 10 + c);
+        CentralLocs.Add(loc);
         map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
         info.Sqs.Add(loc);
         IslandIndices[loc] = info.ID;
@@ -218,7 +225,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       };
 
       List<Loc> bridges = [];
-      Loc loc = new(DungeonId, 4, row, col);
+      Loc loc = new(DungeonId, BOTTOM_LVL, row, col);
       bool failedToJoin = false;
       while (true)
       {
@@ -376,6 +383,32 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       }
     }
 
+    // Place the stairs far from the 'center' ideally
+    int minRow = int.MaxValue, maxRow = 0, minCol = int.MaxValue, maxCol = 0;
+    foreach (Loc loc in CentralLocs)
+    {
+      minRow = int.Min(loc.Row, minRow);
+      maxRow = int.Max(loc.Row, maxRow);
+      minCol = int.Min(loc.Col, minCol);
+      maxCol = int.Max(loc.Col, maxCol);
+    }
+    Loc centralLoc = new(DungeonId, BOTTOM_LVL, (maxRow + minRow) / 2, (maxCol + minCol) / 2);
+    DijkstraMap dij = new(finalMap, [], finalMap.Height, finalMap.Width, false);
+    dij.Generate(DijkstraMap.Cost, (centralLoc.Row, centralLoc.Col), int.MaxValue);
+    List<(Loc, int)> stairCandidates = [];
+    for (int r = 0; r < finalMap.Height; r++)
+    {
+      for (int c = 0; c < finalMap.Width; c++)
+      {
+        if (dij.Sqrs[r, c] < int.MaxValue)
+        {
+          stairCandidates.Add((new(DungeonId, BOTTOM_LVL, r, c), dij.Sqrs[r, c]));
+        }
+      }
+    }
+    stairCandidates = [.. stairCandidates.OrderByDescending(c => c.Item2).Take(20)];
+    BottomLevelArrivalStairs = stairCandidates[gs.Rng.Next(stairCandidates.Count)].Item1;
+
     return finalMap;  
   }
 
@@ -496,6 +529,19 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     return floors[rng.Next(floors.Count)];
   }
 
+  void SetFinalStairs(List<Map> levels, GameState gs)
+  {
+    Map penultimate = levels[^2];
+    Map bottom = levels[^1];
+    List<Loc> floors = [.. penultimate.SqsOfType(TileType.DungeonFloor).Select(sq => new Loc(DungeonId, levels.Count - 2, sq.Item1, sq.Item2))];
+    Loc downstairsLoc = floors[gs.Rng.Next(floors.Count)];
+
+    Downstairs down = new("") { Destination = BottomLevelArrivalStairs };
+    penultimate.SetTile(downstairsLoc.Row, downstairsLoc.Col, down);
+    Upstairs up = new("") { Destination = downstairsLoc };
+    bottom.SetTile(BottomLevelArrivalStairs.Row, BottomLevelArrivalStairs.Col, up);
+  }
+
   public Dungeon Generate(GameState gs)
   {
     Dungeon dungeon = new(DungeonId, "the Gaol", "Sulphur. Heat. Mortals were not meant for this place.", true);
@@ -517,8 +563,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       levels.Add(mapper.DrawLevel(WIDTH, HEIGHT));
       AddSecretDoors(levels[levelNum], gs.Rng);
     }
-    levels.Add(bottom);
-
+    
     // Pick spot on the island for the stairs down from the first level
     List<Loc> options = [];
     foreach (Loc loc in IslandLocs)
@@ -532,6 +577,9 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     levels[0].SetTile(firstFloorDownLoc.Row, firstFloorDownLoc.Col, downstairs);
     levels[1].SetTile(firstFloorDownLoc.Row, firstFloorDownLoc.Col, upstairs);
     CreateStairwayStacked(DungeonId, [.. levels], 1, (firstFloorDownLoc.Row, firstFloorDownLoc.Col), true, gs.Rng);
+
+    levels.Add(bottom);
+    SetFinalStairs(levels, gs);
 
     foreach (Map map in levels)
       dungeon.AddMap(map);
