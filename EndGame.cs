@@ -192,15 +192,15 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     int minRow = island.Sqs.Min(s => s.Row);
     int maxRow = island.Sqs.Max(s => s.Row);
     if (maxRow - minRow > 4)
-      row = rng.Next(minRow + rng.Next(0, 3), maxRow - rng.Next(0, 3) + 1);
+      row = rng.Next(minRow + rng.Next(1, 3), maxRow - rng.Next(1, 3) + 1);
     else
-      row = rng.Next(minRow, maxRow + 1);
+      row = rng.Next(minRow + 1, maxRow);
     int minCol = island.Sqs.Min(s => s.Col);
     int maxCol = island.Sqs.Max(s => s.Col);
     if (maxCol - minCol > 4)
-      col = rng.Next(minCol + rng.Next(0, 3), maxCol - rng.Next(0, 3) + 1);
+      col = rng.Next(minCol + rng.Next(1, 3), maxCol - rng.Next(1, 3) + 1);
     else
-      col = rng.Next(minCol, maxCol + 1);
+      col = rng.Next(minCol + 1, maxCol);
 
     int otherIslandId = -1;
 
@@ -305,7 +305,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     }
   }
 
-  void BottomLevelTweaks(Map map)
+  static void BottomLevelTweaks(Map map)
   {
     // The sometimes the generator will overwrite lava in 'donut' islands
     // so turn any bridges that don't adjoin any other bridge to 
@@ -363,6 +363,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       islands[id] = info;
     }
 
+    map.Dump();
     JoinIslands(map, islands, connections, gs.Rng);
     BottomLevelTweaks(map);
 
