@@ -9,14 +9,13 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Security.Cryptography;
 using Yarl2;
 
 class IslandInfo
 {
   public int ID { get; set; }
-  public bool FullyConnection { get; set; } = false;
-  public HashSet<Loc> IslandSqs { get; set; } = [];
+  public HashSet<Dir> Connections = [];
+  public HashSet<Loc> Sqs { get; set; } = [];
 }
 
 class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
@@ -28,6 +27,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
   public readonly HashSet<Loc> IslandLocs = [];
   public readonly HashSet<Loc> GateHouseLocs = [];
   Loc FirstFloorDoor { get; set; }
+  Dictionary<Loc, int> IslandIndices = [];
 
   static readonly List<string> IslandTemplates =
   [
@@ -93,7 +93,8 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
           continue;
         Loc loc = new(DungeonId, 4, row * 10 + r + rowOffset, col * 10 + c + colOffSet);
         map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
-        info.IslandSqs.Add(loc);
+        info.Sqs.Add(loc);
+        IslandIndices[loc] = info.ID;
       }
     }
   }
@@ -108,7 +109,8 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       {
         Loc loc = new(DungeonId, 4, row * 10 + r, col * 10 + c);
         map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
-        info.IslandSqs.Add(loc);
+        info.Sqs.Add(loc);
+        IslandIndices[loc] = info.ID;
       }
 
       if (startCol > 3 && rng.Next(5) == 0)
@@ -128,7 +130,8 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       {
         Loc loc = new(DungeonId, 4, row * 10 + r, col * 10 + c);
         map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
-        info.IslandSqs.Add(loc);
+        info.Sqs.Add(loc);
+        IslandIndices[loc] = info.ID;
       }
 
       if (endCol < 7 && rng.Next(5) == 0)
@@ -148,7 +151,8 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       {
         Loc loc = new(DungeonId, 4, row * 10 + r, col * 10 + c);
         map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
-        info.IslandSqs.Add(loc);
+        info.Sqs.Add(loc);
+        IslandIndices[loc] = info.ID;
       }
 
       if (startCol > 3 && rng.Next(5) == 0)
@@ -168,7 +172,8 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       {
         Loc loc = new(DungeonId, 4, row * 10 + r, col * 10 + c);
         map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
-        info.IslandSqs.Add(loc);
+        info.Sqs.Add(loc);
+        IslandIndices[loc] = info.ID;
       }
 
       if (endCol < 7 && rng.Next(5) == 0)
@@ -178,9 +183,132 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     }  
   }
 
+  int TryToConnect(int id, Map map, Dictionary<int, IslandInfo> islands, List<HashSet<int>> connections, HashSet<int> homeSet, Rng rng)
+  {
+    List<Dir> dirs = [ Dir.North, Dir.South, Dir.East, Dir.West ];
+    dirs.Shuffle(rng);
+    IslandInfo island = islands[id];
+    int row, col;
+    int minRow = island.Sqs.Min(s => s.Row);
+    int maxRow = island.Sqs.Max(s => s.Row);
+    if (maxRow - minRow > 4)
+      row = rng.Next(minRow + rng.Next(0, 3), maxRow - rng.Next(0, 3) + 1);
+    else
+      row = rng.Next(minRow, maxRow + 1);
+    int minCol = island.Sqs.Min(s => s.Col);
+    int maxCol = island.Sqs.Max(s => s.Col);
+    if (maxCol - minCol > 4)
+      col = rng.Next(minCol + rng.Next(0, 3), maxCol - rng.Next(0, 3) + 1);
+    else
+      col = rng.Next(minCol, maxCol + 1);
+
+    int otherIslandId = -1;
+
+    foreach (Dir dir in dirs)
+    {
+      if (island.Connections.Contains(dir))
+        continue;
+      
+      var (deltaR, deltaC) = dir switch
+      {
+        Dir.North => (-1, 0),
+        Dir.South => (1, 0),
+        Dir.East => (0, 1),
+        _ => (0, -1)
+      };
+
+      List<Loc> bridges = [];
+      Loc loc = new(DungeonId, 4, row, col);
+      bool failedToJoin = false;
+      while (true)
+      {
+        loc = loc with { Row = loc.Row + deltaR, Col = loc.Col + deltaC };
+        if (!map.InBounds(loc.Row, loc.Col))
+        {
+          failedToJoin = true;
+          break;
+        }
+        if (island.Sqs.Contains(loc)) 
+        {
+          continue;
+        }
+        Tile tile = map.TileAt(loc.Row, loc.Col);
+        if (tile.Type == TileType.Lava) 
+        {
+          bridges.Add(loc);
+          continue;
+        }
+        else if (tile.Type == TileType.WoodBridge)
+        {
+          // No t-joint bridges (for now)
+          failedToJoin = true;
+          break;
+        }
+        if (IslandIndices.TryGetValue(loc, out int otherId))
+        {
+          failedToJoin = homeSet.Contains(otherId);
+          if (!failedToJoin)
+            otherIslandId = otherId;
+          break;
+        }
+        else
+        {
+          throw new Exception("I think this should never happen??");
+        }
+      }
+
+      if (!failedToJoin)
+      {
+        foreach (Loc bridge in bridges)
+        {
+          map.SetTile(bridge.Row, bridge.Col, TileFactory.Get(TileType.WoodBridge));
+        }
+        break;
+      }
+
+      island.Connections.Add(dir);
+    }
+
+    return otherIslandId;
+  }
+
+  void JoinIslands(Map map, Dictionary<int, IslandInfo> islands, List<HashSet<int>> connections, Rng rng)
+  {
+    connections.Shuffle(rng);
+
+    while (connections.Count > 1)
+    {
+      HashSet<int> set = connections[0];
+      foreach (int id in set)
+      {
+        if (islands[id].Connections.Count == 4)
+          continue;
+        int otherIslandId = TryToConnect(id, map, islands, connections, set, rng);
+        if (otherIslandId != -1)
+        {
+          int idx = -1;
+          for (int j = 0; j < connections.Count; j++)
+          {
+            if (connections[j].Contains(otherIslandId))
+            {
+              idx = j;
+              break;
+            }
+          }
+          HashSet<int> unioned = [.. set.Union(connections[idx])];
+          connections.RemoveAt(idx);
+          connections.RemoveAt(0);
+          connections.Add(unioned);
+          break;
+        }
+      }
+    }
+  }
+
   Map BottomLevel(GameState gs)
   {
-    Map map = new(80, 60, TileType.Lake);
+    Map map = new(80, 60, TileType.Lava);
+    Dictionary<int, IslandInfo> islands = [];
 
     // First pick 4 blocks for the island with the final prison
     int row = gs.Rng.Next(0, 5);
@@ -191,24 +319,28 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     int destIslandBR = (row + 1) * 8 + col + 1;
     HashSet<int> destIsland = [ destIslandTL, destIslandTR, destIslandBL, destIslandBR ];
 
-    IslandInfo info = new() { ID = destIslandTL };
-    DrawDestIslandTL(map, info, destIslandTL / 8, destIslandTL % 8, gs.Rng);
-    info = new() { ID = destIslandTR };
-    DrawDestIslandTR(map, info, destIslandTR / 8, destIslandTR % 8, gs.Rng);
-    info = new() { ID = destIslandBL };
-    DrawDestIslandBL(map, info, destIslandBL / 8, destIslandBL % 8, gs.Rng);
-    info = new() { ID = destIslandBR };
-    DrawDestIslandBR(map, info, destIslandBR / 8, destIslandBR % 8, gs.Rng);
+    islands[destIslandTL] = new() { ID = destIslandTL };
+    DrawDestIslandTL(map, islands[destIslandTL], destIslandTL / 8, destIslandTL % 8, gs.Rng);
+    islands[destIslandTR] = new() { ID = destIslandTR };
+    DrawDestIslandTR(map, islands[destIslandTR], destIslandTR / 8, destIslandTR % 8, gs.Rng);
+    islands[destIslandBL] = new() { ID = destIslandBL };
+    DrawDestIslandBL(map, islands[destIslandBL], destIslandBL / 8, destIslandBL % 8, gs.Rng);
+    islands[destIslandBR] = new() { ID = destIslandBR };
+    DrawDestIslandBR(map, islands[destIslandBR], destIslandBR / 8, destIslandBR % 8, gs.Rng);
+
+    List<HashSet<int>> connections = [ destIsland ];
 
     List<int> ids = [.. Enumerable.Range(0, 48).Where(id => !destIsland.Contains(id))];
     ids.Shuffle(gs.Rng);
     foreach (int id in ids.Take(gs.Rng.Next(28, 33)))
     {
-      info = new() { ID = id };
+      IslandInfo info = new() { ID = id };
       DrawIsland(map, info, id / 8, id % 8, gs.Rng);
+      connections.Add([id]);
+      islands[id] = info;
     }
 
-    List<HashSet<int>> connections = [ destIsland ];
+    JoinIslands(map, islands, connections, gs.Rng);
 
     map.Dump();
 
