@@ -374,7 +374,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     JoinIslands(map, islands, connections, gs.Rng);
     BottomLevelTweaks(map);
 
-    Map finalMap = new(82, 62, TileType.PermWall) { Features = MapFeatures.UndiggableFloor };
+    Map finalMap = new(82, 62, TileType.PermWall) { Features = MapFeatures.UndiggableFloor | MapFeatures.Unmappable };
     for (int r = 0; r < map.Height; r++)
     {
       for (int c = 0; c < map.Width; c++)
@@ -581,7 +581,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     levels.Add(bottom);
     SetFinalStairs(levels, gs);
     levels[^2].Features |= MapFeatures.UndiggableFloor;
-    
+
     foreach (Map map in levels)
       dungeon.AddMap(map);
 

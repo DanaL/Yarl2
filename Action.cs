@@ -2238,9 +2238,9 @@ class MagicMapAction(GameState gs, Actor caster) : Action(gs, caster)
     // It's probably a bug if a monster invokes this action??
     if (Actor is Player player)
     {
-      if (GameState!.InWilderness)
+      if (GameState!.CurrentMap.HasFeature(MapFeatures.Unmappable))
       {
-        GameState.UIRef().AlertPlayer("The wide world is big for the spell! The magic fizzles!");
+        GameState.UIRef().AlertPlayer("This region cannot be encompassed by such puny magicks! The spell faiis.");
       }
       else
       {
