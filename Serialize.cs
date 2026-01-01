@@ -483,6 +483,7 @@ internal class MapSaver
       TileType type = (TileType)int.Parse(pieces[1]);
       try
       {
+        Glyph glyph;
         switch (type)
         {
           case TileType.Portal:
@@ -577,7 +578,7 @@ internal class MapSaver
             tile = new BusinessSign(pieces[2]);
             break;
           case TileType.MonsterWall:
-            Glyph glyph = Glyph.TextToGlyph(pieces[2]);
+            glyph = Glyph.TextToGlyph(pieces[2]);
             ulong monsterId = ulong.Parse(pieces[3]);
             tile = new MonsterWall(glyph, monsterId);
             break;
@@ -589,7 +590,11 @@ internal class MapSaver
             Lever l = new(type, on, gateLoc);
             tile = l;
             break;
-
+          case TileType.Shackle:
+            glyph = Glyph.TextToGlyph(pieces[2]);
+            bool activated = bool.Parse(pieces[3]);
+            tile = new Shackle(glyph) { Activated = activated };
+            break;
         }
       }
       catch (Exception ex)

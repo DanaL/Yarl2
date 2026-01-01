@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+// Ա რ Ұ
 using Yarl2;
 
 class IslandInfo
@@ -30,6 +31,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
   Loc FirstFloorDoor { get; set; }
   readonly Dictionary<Loc, int> IslandIndices = [];
   readonly HashSet<Loc> CentralLocs = [];
+  Loc GaolCentre { get; set; } // Center as in Arioch's location
   Loc BottomLevelArrivalStairs { get; set; }
 
   static readonly List<string> IslandTemplates =
@@ -48,7 +50,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     "~~~~~~~~~~~~...~~~~~.....~~~.......~~.......~~......~~~~....~~~~~~..~~~~~~~~~~~~~"
   ];
 
-  string RotateTemplate(string template, Rng rng)
+  static string RotateTemplate(string template, Rng rng)
   {
     char[] rotated = new char[81];
     int rotation = rng.Next(4);
@@ -392,9 +394,9 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       minCol = int.Min(loc.Col, minCol);
       maxCol = int.Max(loc.Col, maxCol);
     }
-    Loc centralLoc = new(DungeonId, BOTTOM_LVL, (maxRow + minRow) / 2, (maxCol + minCol) / 2);
+    GaolCentre = new(DungeonId, BOTTOM_LVL, (maxRow + minRow) / 2, (maxCol + minCol) / 2);
     DijkstraMap dij = new(finalMap, [], finalMap.Height, finalMap.Width, false);
-    dij.Generate(DijkstraMap.Cost, (centralLoc.Row, centralLoc.Col), int.MaxValue);
+    dij.Generate(DijkstraMap.Cost, (GaolCentre.Row, GaolCentre.Col), int.MaxValue);
     List<(Loc, int)> stairCandidates = [];
     for (int r = 0; r < finalMap.Height; r++)
     {
@@ -408,6 +410,12 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     }
     stairCandidates = [.. stairCandidates.OrderByDescending(c => c.Item2).Take(20)];
     BottomLevelArrivalStairs = stairCandidates[gs.Rng.Next(stairCandidates.Count)].Item1;
+
+    finalMap.SetTile(GaolCentre.Row, GaolCentre.Col, TileFactory.Get(TileType.Arioch));
+    finalMap.SetTile(GaolCentre.Row - 1, GaolCentre.Col - 1, new Shackle(new ('\\', Colours.DARK_GREY, Colours.DARK_GREY, Colours.BLACK, false)));
+    finalMap.SetTile(GaolCentre.Row - 1, GaolCentre.Col + 1, new Shackle(new ('/', Colours.DARK_GREY, Colours.DARK_GREY, Colours.BLACK, false)));
+    finalMap.SetTile(GaolCentre.Row + 1, GaolCentre.Col - 1, new Shackle(new ('/', Colours.DARK_GREY, Colours.DARK_GREY, Colours.BLACK, false)));
+    finalMap.SetTile(GaolCentre.Row + 1, GaolCentre.Col + 1, new Shackle(new ('\\', Colours.DARK_GREY, Colours.DARK_GREY, Colours.BLACK, false)));
 
     return finalMap;  
   }

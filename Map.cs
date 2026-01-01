@@ -28,7 +28,7 @@ enum TileType
   BusinessSign, FakeStairs, HiddenSummonsTrap, RevealedSummonsTrap,
   HFence, VFence, CornerFence, MonsterWall, Lever, Crops, IllusoryWall,
   Underwater, Kelp, MistyPortal, MysteriousMirror, BellyFloor, ProfanePortal,
-  Lava, BridgeLever
+  Lava, BridgeLever, Arioch, Shackle
 }
 
 interface ITriggerable
@@ -221,6 +221,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Underwater => "water",
     TileType.MistyPortal => "misty portal",
     TileType.BellyFloor => "soft tissue",
+    TileType.Arioch => "a writhing, imprisoned demon lord",
     _ => "unknown"
   };
 
@@ -542,6 +543,18 @@ class MonsterWall(Glyph glyph, ulong monsterId) : Tile(TileType.MonsterWall)
   public override string ToString() => $"{(int)Type};{Glyph};{MonsterId}";
 }
 
+class Shackle(Glyph glyph) : Tile(TileType.Shackle)
+{
+  public Glyph Glyph { get; set; } = glyph;
+  public bool Activated { get; set; } = false;
+
+  public override bool Opaque() => false;
+  public override bool Passable() => false;
+  public override bool PassableByFlight() => false;
+
+  public override string ToString() => $"{(int)Type};{Glyph};{Activated}";
+}
+
 class Lever(TileType type, bool on, Loc gate) : Tile(type)
 {
   public bool On { get; set; } = on;
@@ -638,6 +651,7 @@ class TileFactory
   static readonly Tile MistyPortal = new BasicTile(TileType.MistyPortal, true, false, true);
   static readonly Tile BellyFloor = new BasicTile(TileType.BellyFloor, true, false, true);
   static readonly Tile Lava = new BasicTile(TileType.Lava, false, false, true);
+  static readonly Tile Arioch = new BasicTile(TileType.Arioch, false, false, false);
 
   public static Tile Get(TileType type) => type switch
   {
@@ -708,6 +722,7 @@ class TileFactory
     TileType.MistyPortal => MistyPortal,
     TileType.BellyFloor => BellyFloor,
     TileType.Lava => Lava,
+    TileType.Arioch => Arioch,
     _ => Unknown
   };
 }
