@@ -666,5 +666,7 @@ class EndGame
     };
 
     gs.Wilderness.SetTile(finalDungeonLoc.Row, finalDungeonLoc.Col, portal);
+
+    gs.FactDb.Add(new SimpleFact() { Name="GaolId", Value = dungeon.ID.ToString() });
   }
 }

@@ -3939,6 +3939,89 @@ class LightSpellTrait : TemporaryTrait
   }
 }
 
+sealed class BindingTrait : Trait, IGameEventListener, IUSeable, IDesc
+{
+  public bool Lit { get; set; }
+  public int Fuel { get; set; }
+
+  public bool Expired { get; set; } = false;
+  public bool Listening => Lit;
+  public ulong ObjId => SourceId;
+  public GameEventType EventType => GameEventType.EndOfRound;
+  public string Desc() => Lit ? "(lit)" : "";
+
+  public override string AsText() => $"Binding#{SourceId}#{Lit}#{Fuel}";
+
+  void Extinguish(Item item, GameState gs)
+  {
+    gs.StopListening(GameEventType.EndOfRound, this);
+
+    Lit = false;
+    item.Traits = [..item.Traits.Where(t => t is not LightSourceTrait)];
+  }
+
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (!Lit)
+      return;
+
+    if (gs.ObjDb.GetObj(SourceId) is not Item item)
+      throw new Exception("Hmm this should not have happened!");
+
+    Loc itemLoc = item.Loc;
+    if (item.ContainedBy > 0 && gs.ObjDb.GetObj(item.ContainedBy) is Actor owner)
+    {
+      itemLoc = owner.Loc;
+    }
+
+    if (--Fuel < 0)
+    {
+      Lit = false;
+      Expired = true;
+      Extinguish(item, gs);
+      
+      string msg = $"{item.Name.DefArticle().Capitalize()} flickers and dies.";
+      gs.UIRef().AlertPlayer(msg, gs, itemLoc);
+    }
+    else if (Fuel == 25)
+    {
+      string msg = $"{item.Name.DefArticle().Capitalize()} begins to burn low.";
+      gs.UIRef().AlertPlayer(msg, gs, itemLoc);
+    }
+    else if (Fuel == 10)
+    {
+      string msg = $"{item.Name.DefArticle().Capitalize()} begins to sputter.";
+      gs.UIRef().AlertPlayer(msg, gs, itemLoc);
+    }
+  }
+
+  public UseResult Use(Actor user, GameState gs, int row, int col, Item? item)
+  {
+    if (item is null)
+      throw new Exception("Hmm this this shouldn't have happened!");
+
+    if (Fuel < 0)
+    {
+      return new UseResult(null, $"The {item.Name} is burnt out.");
+    }
+
+    if (Lit)
+    {
+      Extinguish(item, gs);
+      return new UseResult(null, $"You snuff out {item.FullName}.");
+    }
+    else
+    {
+      Lit = true;
+      item.Traits.Add(new LightSourceTrait() { Radius = 2, FgColour = Colours.WHITE, BgColour = Colours.LIGHT_GREY });
+      gs.RegisterForEvent(GameEventType.EndOfRound, this);
+      return new UseResult(null, $"You light {item.FullName.DefArticle()}. It emanates a stark, white light.");      
+    }
+  }
+
+  public void Used() {}
+}
+
 // Who knew torches would be so complicated...
 sealed class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
 {
@@ -4355,6 +4438,7 @@ class TraitFactory
     {
       "Berzerk", (pieces, gameObj) => pieces.Length == 1 ? new BerzerkTrait() : new BerzerkTrait() { SourceId = ulong.Parse(pieces[1])}
     },
+    { "Binding", (pieces, gameObj) => new BindingTrait() { SourceId = ulong.Parse(pieces[1]), Lit = bool.Parse(pieces[2]), Fuel = int.Parse(pieces[3])}},
     { "Blind", (pieces, gameObj) =>
       new BlindTrait()
       {

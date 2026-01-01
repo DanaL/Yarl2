@@ -469,4 +469,21 @@ class History(Rng rng)
 
     return tome;
   }
+
+  public static Item CandleOfBinding(GameObjectDB objDb)
+  {
+    Item candle = new()
+    {
+      Name = "Candle of Binding",
+      Type = ItemType.Tool,
+      Glyph = new Glyph('(', Colours.WHITE, Colours.GREY, Colours.BLACK, false)
+    };
+    candle.Traits.Add(new DescriptionTrait("An ornate candle carved with symbols of the Moon Daughter.\n\nThese are used in magic rituals and best not used frivolously."));
+    candle.Traits.Add(new ArtifactTrait());
+    candle.Traits.Add(new FlagOnPickUpTrait() { Flag = "CandleOfBindingFound" });
+    candle.Traits.Add(new BindingTrait() { SourceId = candle.ID, Fuel = 60, Lit = false});
+    objDb.Add(candle);
+
+    return candle;
+  }
 }

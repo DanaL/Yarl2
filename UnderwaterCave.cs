@@ -324,15 +324,7 @@ class LostTempleBuilder(int dungeonId) : DungeonBuilder
     dagon.Traits.Add(new NamedTrait());
     dagon.Traits.Add(new DescriptionTrait("\"Vast, Polyphemus-like, and loathsome.\" Scaly too."));
 
-    Item candle = new()
-    {
-      Name = "Candle of Binding",
-      Type = ItemType.Tool,
-      Glyph = new Glyph('(', Colours.WHITE, Colours.GREY, Colours.BLACK, false)
-    };
-    candle.Traits.Add(new DescriptionTrait("An ornate candle carved with symbols of the Moon Daughter."));
-    candle.Traits.Add(new ArtifactTrait());
-    candle.Traits.Add(new FlagOnPickUpTrait() { Flag = "CandleOfBindingFound" });
+    Item candle = History.CandleOfBinding(objDb);
     dagon.Inventory.Add(candle, dagon.ID);
 
     (int r, int c) = floorSqs[rng.Next(floorSqs.Count)];

@@ -196,6 +196,12 @@ class DebugCommand(GameState gs)
       EndGame.Setup(_gs);
       return "";
     }
+    else if (txt == "candle")
+    {
+      Item candle = History.CandleOfBinding(_gs.ObjDb);
+      _gs.Player.AddToInventory(candle, _gs);
+      return "";
+    }
     else if (txt == "unlock")
     {
       for (int r = 0; r < _gs.CurrentMap.Height; r++)
