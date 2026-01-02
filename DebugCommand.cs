@@ -208,6 +208,12 @@ class DebugCommand(GameState gs)
       _gs.Player.AddToInventory(bell, _gs);
       return "";
     }
+    else if (txt == "tome")
+    {
+      Item tome = History.SorceressTome(_gs.ObjDb);
+      _gs.Player.AddToInventory(tome, _gs);
+      return "";
+    }
     else if (txt == "unlock")
     {
       for (int r = 0; r < _gs.CurrentMap.Height; r++)

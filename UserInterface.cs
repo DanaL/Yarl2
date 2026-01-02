@@ -1348,6 +1348,11 @@ abstract class UserInterface
       }
       catch (VictoryException)
       {
+        string s = "As you read the final incantation, the remaining chain becomes infused with the binding spell.\n\nArioch belows in rage as his arcane prison is renewed once more!";
+        SetPopup(new Popup(s, "", -1, -1));
+        WriteAlerts();
+        BlockFoResponse(gameState);
+        
         Reset();
         return RunningState.GameOver;
       }

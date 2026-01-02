@@ -1977,6 +1977,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
           new InventoryOptions() { Title = "Cast on which item?" },
           new ApplyStainlessnessAction(gs, user, item))),
     "alchemicalcompound" => new UseResult(new ConsumeAlchemicalCompound(gs, user, item!)),
+    "refreshbinding" => new UseResult(new BindSpellAction(gs, gs.Player)),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 
@@ -3417,8 +3418,7 @@ class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
   public UseResult Use(Actor user, GameState gs, int row, int col, Item? item)
   {
     Item? doc = gs.ObjDb.GetObj(OwnerID) as Item;
-    string msg = $"{user.FullName.Capitalize()} read:\n{_text}";
-    gs.UIRef().SetPopup(new Popup(msg, doc!.FullName.IndefArticle().Capitalize(), -1, -1));
+    gs.UIRef().SetPopup(new Popup(_text, doc!.FullName.IndefArticle().Capitalize(), -1, -1));
 
     Action action = new CloseMenuAction(gs, 1.0);
     

@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Runtime.Intrinsics.X86;
+
 namespace Yarl2;
 
 abstract class Action
@@ -2833,6 +2835,87 @@ class DescentAction(GameState gs, Actor actor) : Action(gs, actor)
       GameState.ChasmCreated(loc, water);
     }
 
+    return 1.0;
+  }
+}
+
+class BindSpellAction(GameState gs, Actor caster) : Action(gs, caster)
+{
+  public override double Execute()
+  {
+    Loc loc = GameState!.Player.Loc;
+    bool bindingAura = GameState.Player.Inventory.Items()
+                            .Any(i => i.Traits.OfType<BindingTrait>().FirstOrDefault() is BindingTrait bt && bt.Lit);
+
+    int shackleCount = 0;
+    if (GameState.FactDb.FactCheck("ShacklesCharged") is SimpleFact fact)
+    {
+      shackleCount = int.Parse(fact.Value);
+      GameState.FactDb.ClearFact(fact);
+    }
+
+    bool shackleActivated = false;
+    string msg = "The Sorceress conveniently left bookmarked a powerful binding incantation, which you read aloud.";
+    // Is the player positioned to engage a shackle?
+    Tile tile = GameState.CurrentMap.TileAt(loc.Row + 1, loc.Col + 1);
+    if (bindingAura && tile is Shackle shackle1 && !shackle1.Activated)
+    {
+      msg += "\n\nThe chains begin to glow with power!";
+      shackle1.Activated = true;
+      shackle1.Glyph = shackle1.Glyph with { Lit = Colours.ICE_BLUE, Unlit = Colours.LIGHT_BLUE };
+      shackleActivated = true;
+      Loc shackleLoc = loc with { Row = loc.Row + 1, Col = loc.Col + 1};
+      GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, shackleLoc, Colours.WHITE, Colours.ICE_BLUE, '\\'));
+      ++shackleCount;
+    }
+
+    tile = GameState.CurrentMap.TileAt(loc.Row + 1, loc.Col - 1);
+    if (bindingAura && tile is Shackle shackle2 && !shackle2.Activated)
+    {
+      msg += "\n\nThe chains begin to glow with power!";
+      shackle2.Activated = true;
+      shackle2.Glyph = shackle2.Glyph with { Lit = Colours.ICE_BLUE, Unlit = Colours.LIGHT_BLUE };
+      shackleActivated = true;
+      Loc shackleLoc = loc with { Row = loc.Row + 1, Col = loc.Col - 1};
+      GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, shackleLoc, Colours.WHITE, Colours.ICE_BLUE, '/'));
+      ++shackleCount;
+    }
+
+    tile = GameState.CurrentMap.TileAt(loc.Row - 1, loc.Col - 1);
+    if (bindingAura && tile is Shackle shackle3 && !shackle3.Activated)
+    {
+      msg += "\n\nThe chains begin to glow with power!";
+      shackle3.Activated = true;
+      shackle3.Glyph = shackle3.Glyph with { Lit = Colours.ICE_BLUE, Unlit = Colours.LIGHT_BLUE };
+      shackleActivated = true;
+      Loc shackleLoc = loc with { Row = loc.Row - 1, Col = loc.Col - 1};
+      GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, shackleLoc, Colours.WHITE, Colours.ICE_BLUE, '\\'));
+      ++shackleCount;
+    }
+
+    tile = GameState.CurrentMap.TileAt(loc.Row - 1, loc.Col + 1);
+    if (bindingAura && tile is Shackle shackle4 && !shackle4.Activated)
+    {
+      msg += "\n\nThe chains begin to glow!";
+      shackle4.Activated = true;
+      shackle4.Glyph = shackle4.Glyph with { Lit = Colours.ICE_BLUE, Unlit = Colours.LIGHT_BLUE };
+      shackleActivated = true;
+      Loc shackleLoc = loc with { Row = loc.Row - 1, Col = loc.Col + 1};
+      GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, shackleLoc, Colours.WHITE, Colours.ICE_BLUE, '/'));
+      ++shackleCount;
+    }
+    
+    GameState.FactDb.Add(new SimpleFact() { Name = "ShacklesCharged", Value = shackleCount.ToString()});
+    if (!shackleActivated)
+      msg += "\n\n...to little effect.";
+
+    if (shackleCount == 4)
+    {
+      throw new VictoryException();
+    }
+    
+    GameState.UIRef().SetPopup(new Popup(msg, "", -1, -1));  
+    
     return 1.0;
   }
 }

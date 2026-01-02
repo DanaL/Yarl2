@@ -459,12 +459,14 @@ class History(Rng rng)
       Glyph = new Glyph('♪', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, false)
     };
 
-    ReadableTrait rt = new("lorem ipsum") { OwnerID = tome.ID };
-    tome.Traits.Add(rt);
+    //ReadableTrait rt = new("The Sorceress conveniently left bookmarked a powerful binding incantation, which you read aloud.") { OwnerID = tome.ID };
+    //tome.Traits.Add(rt);
+    tome.Traits.Add(new CanApplyTrait());
     DescriptionTrait dt = new("A leather-bound tome with an arcane symbol emblazoned on the cover.");
     tome.Traits.Add(dt);
     tome.Traits.Add(new ArtifactTrait());
     tome.Traits.Add(new FlagOnPickUpTrait() { Flag = "SorceressTomeFound"});
+    tome.Traits.Add(new UseSimpleTrait("refreshbinding") { SourceId = tome.ID });
     objDb.Add(tome);
 
     return tome;

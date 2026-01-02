@@ -29,7 +29,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       }
       else
       {
-        GameState!.UIRef().AlertPlayer($"You ready {Tool.Name.DefArticle()}.");
+        GameState!.UIRef().AlertPlayer($"{Tool.Name.DefArticle()}.");
       }
     }
 
