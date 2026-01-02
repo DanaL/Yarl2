@@ -796,11 +796,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       pke.Messages.Add(killedBy);
       throw pke;
     }
-    else if (victim.HasTrait<FinalBossTrait>())
-    {
-      UI.VictoryScreen(victim.FullName, this);
-      throw new VictoryException();
-    }
     else if (locVisible && victim.Traits.OfType<DeathMessageTrait>().FirstOrDefault() is DeathMessageTrait dmt)
     {
       UI.AlertPlayer(dmt.Message);

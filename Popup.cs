@@ -372,20 +372,49 @@ class PopupMenu(string title, List<string> menuItems) : IPopup
   public void SetDefaultTextColour(Colour colour) => DefaultTextColour = colour;
 }
 
+class Overlay(string txt) : IPopup
+{
+  string Txt { get; set; } = txt;
+
+  public void Draw(UserInterface ui)
+  {
+    int row = 0, col = 0;
+    LineScanner ls = new(Txt);
+    var words = ls.Scan();
+    Sqr space = new(Colours.WHITE, Colours.BLACK, ' ');
+
+    foreach (var word in words)
+    {
+      string w = word.Item2;
+      if (w.Length > UserInterface.ScreenWidth - col || w == "\n")
+      {
+        for (; col < UserInterface.ScreenWidth; col++)
+          ui.WriteSq(row, col, space);
+        row++;
+        col = 0;
+      }
+      else
+      {
+        ui.WriteLine(w, row, col, w.Length, word.Item1);
+        col += w.Length;
+      }
+    }
+  }
+
+  public void SetDefaultTextColour(Colour colour) { }
+}
+
 class Hint(List<string> text, int row) : IPopup
 {
   Colour DefaultTextColour { get; set; } = Colours.WHITE;
   List<string> Text { get; set; } = text;
   int Row { get; set; } = row;
 
-  public void SetDefaultTextColour(Colour colour)
-  {
-    DefaultTextColour = colour;
-  }
+  public void SetDefaultTextColour(Colour colour) => DefaultTextColour = colour;
 
   public void Draw(UserInterface ui)
   {
-    int widest = Text.Select(s => s.Length).Max();
+    int widest = Text.Max(s => s.Length);
     int col = (UserInterface.ViewWidth - widest) / 2;
 
     int row = Row;

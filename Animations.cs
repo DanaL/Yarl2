@@ -31,7 +31,6 @@ class AimAnimation(UserInterface ui, GameState gs, Loc origin, Loc initialTarget
     if (Expiry < DateTime.UtcNow)
       return;
 
-    // foreach (var pt in Util.Bresenham(_start.Row, _start.Col, Target.Row, Target.Col))
     foreach (var pt in Util.LerpLine(_start.Row, _start.Col, Target.Row, Target.Col))
     {
       var (scrR, scrC) = _ui.LocToScrLoc(pt.Item1, pt.Item2, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
@@ -260,6 +259,7 @@ class BarkAnimation : Animation
   readonly Actor _actor;
   readonly string _bark;
   readonly UserInterface _ui;
+  public bool AlwaysOnTop { get; set; } = false;
 
   public BarkAnimation(GameState gs, int duration, Actor actor, string bark)
   {
@@ -320,7 +320,7 @@ class BarkAnimation : Animation
       var (mapRow, mapCol) = _ui.ScrLocToGameLoc(row, col, playerLoc.Row, playerLoc.Col);
       Loc mapLoc = playerLoc with { Row = mapRow, Col = mapCol };
 
-      if (!_gs.ObjDb.Occupied(mapLoc) || !_gs.LastPlayerFoV.ContainsKey(mapLoc))
+      if (AlwaysOnTop || !_gs.ObjDb.Occupied(mapLoc) || !_gs.LastPlayerFoV.ContainsKey(mapLoc))
         _ui.SqsOnScreen[row, col] = sqr;
     }
   }

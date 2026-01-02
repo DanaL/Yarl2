@@ -9,7 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Diagnostics;
 using System.Text;
 
 namespace Yarl2;
@@ -52,8 +51,8 @@ abstract class UserInterface
   protected abstract void Blit(); // Is blit the right term for this? 'Presenting the screen'
 
   protected int FontSize;
-  public int PlayerScreenRow { get; protected set; }
-  public int PlayerScreenCol { get; protected set; }
+  public int PlayerScreenRow { get; set; }
+  public int PlayerScreenCol { get; set; }
   protected List<string>? _longMessage;
   protected UIState State = UIState.InMainMenu;
 
@@ -105,199 +104,6 @@ abstract class UserInterface
         SqsOnScreen[r, c] = Constants.BLANK_SQ;
       }
     }
-  }
-
-  public void VictoryScreen(string bossName, GameState gs)
-  {
-    int WriteParagraph(string txt, int startLine)
-    {
-      var words = txt.Split(' ');
-      string line = "";
-      foreach (var word in words)
-      {
-        if (41 + line.Length + word.Length >= 80)
-        {
-          WriteLine(line, startLine++, 40, 40, Colours.WHITE);
-          line = "";
-        }
-        line += word + " ";
-      }
-      WriteLine(line, startLine++, 40, 40, Colours.WHITE);
-
-      return startLine;
-    }
-
-    void PlaceVillager(GameState gs, Actor villager, int centerRow, int centerCol)
-    {
-      List<Loc> locs = [];
-
-      for (int r = centerRow - 5; r < centerRow + 5; r++)
-      {
-        for (int c = centerCol - 5; c < centerCol + 5; c++)
-        {
-          var loc = new Loc(0, 0, r, c);
-
-          if (gs.ObjDb.Occupied(loc))
-            continue;
-
-          switch (gs.TileAt(loc).Type)
-          {
-            case TileType.Bridge:
-            case TileType.Dirt:
-            case TileType.Grass:
-            case TileType.GreenTree:
-            case TileType.RedTree:
-            case TileType.YellowTree:
-            case TileType.OrangeTree:
-              locs.Add(loc);
-              break;
-          }
-        }
-      }
-
-      if (locs.Count > 0)
-      {
-        var loc = locs[gs.Rng.Next(locs.Count)];
-        gs.ObjDb.ActorMoved(villager, villager.Loc, loc);
-      }
-    }
-
-    gs.CurrDungeonID = 0;
-    gs.CurrLevel = 0;
-
-    var popup = new Popup($"\nYou have defeated {bossName}!\n\n  -- Press any key to continue --", "Victory", -1, -1);
-    SetPopup(popup);
-    UpdateDisplay(gs);
-    BlockForInput(gs);
-    ClearLongMessage();
-
-    var town = gs.Campaign.Town!;
-
-    int minRow = int.MaxValue, minCol = int.MaxValue, maxRow = 0, maxCol = 0;
-    foreach (var loc in town.TownSquare)
-    {
-      if (loc.Row < minRow)
-        minRow = loc.Row;
-      if (loc.Col < minCol)
-        minCol = loc.Col;
-      if (loc.Row > maxRow)
-        maxRow = loc.Row;
-      if (loc.Col > maxCol)
-        maxCol = loc.Col;
-    }
-
-    int playerRow = (minRow + maxRow) / 2;
-    int playerCol = (minCol + maxCol) / 2;
-    var playerLoc = new Loc(0, 0, playerRow, playerCol);
-    gs.ObjDb.ActorMoved(gs.Player, gs.Player.Loc, playerLoc);
-
-    List<Actor> villagers = [];
-    foreach (var obj in gs.ObjDb.Objs)
-    {
-      if (obj.Value is Actor actor && actor.HasTrait<VillagerTrait>())
-      {
-        villagers.Add(actor);
-        PlaceVillager(gs, actor, playerRow, playerCol);
-      }
-    }
-
-    Glyph playerGlyph = new('@', Colours.WHITE, Colours.WHITE, Colours.BLACK, false);
-    Animation? bark = null;
-    GameEvent e;
-    do
-    {
-      ClearScreen();
-      ClearSqsOnScreen();
-
-      int screenR = 6;
-      int screenC = 7;
-      for (int r = minRow - 6; r < maxRow + 6; r++)
-      {
-        for (int c = minCol - 6; c < maxCol + 11; c++)
-        {
-          Glyph glyph;
-          if (r == playerRow && c == playerCol)
-          {
-            glyph = playerGlyph;
-            PlayerScreenRow = screenR;
-            PlayerScreenCol = screenC;
-          }
-          else if (gs.ObjDb.Occupant(new Loc(0, 0, r, c)) is Actor actor)
-          {
-            glyph = actor.Glyph;
-          }
-          else
-          {
-            var tile = gs.TileAt(new Loc(0, 0, r, c));
-            glyph = Util.TileToGlyph(tile);
-          }
-
-          var sqr = new Sqr(glyph.Lit, Colours.BLACK, glyph.Ch);
-          SqsOnScreen[screenR, screenC++] = sqr;
-        }
-        ++screenR;
-        screenC = 7;
-      }
-
-      if (bark is not null && bark.Expiry > DateTime.UtcNow)
-      {
-        bark.Update();
-      }
-      else if (villagers.Count > 0)
-      {
-        var v = villagers[gs.Rng.Next(villagers.Count)];
-
-        var cheer = "";
-        if (v.Glyph.Ch == 'd')
-        {
-          cheer = "Arf! Arf!";
-        }
-        else
-        {
-          int roll = gs.Rng.Next(4);
-          if (roll == 0)
-            cheer = "Huzzah!";
-          else if (roll == 1)
-            cheer = "Praise them with great praise!";
-          else if (roll == 2)
-            cheer = "Our hero!";
-          else
-            cheer = "We'll be safe now!";
-        }
-
-        bark = new BarkAnimation(gs, 2000, v, cheer);
-      }
-
-      for (int r = 0; r < ViewHeight; r++)
-      {
-        for (int c = 0; c < ScreenWidth / 2; c++)
-        {
-          WriteSq(r, c, SqsOnScreen[r, c]);
-        }
-      }
-
-      int lineNum = WriteParagraph("Congratulations, Hero!!", 1);
-
-      var sb = new StringBuilder();
-      sb.Append("After your defeat of ");
-      sb.Append(bossName);
-      sb.Append(" you return to ");
-      sb.Append(town.Name);
-      sb.Append(" and receive the accoldates of the townsfolk.");
-
-      lineNum = WriteParagraph(sb.ToString(), lineNum + 1);
-      var para2 = "The darkness has been lifted from the region and the village will soon begin again to prosper. Yet after resting for a time and enjoying the villagers' gratitude and hospitality, the yearning for adventure begins to overtake you.";
-      lineNum = WriteParagraph(para2, lineNum + 1);
-      var para3 = "You've heard, for instance, tales of a fabled dungeon in whose depths lies the legendary Amulet of Yender...";
-      lineNum = WriteParagraph(para3, lineNum + 1);
-      WriteParagraph("Press any key to exit.", lineNum + 1);
-
-      Blit();
-
-      e = PollForEvent();
-      Delay();
-    }
-    while (e.Type == GameEventType.NoEvent);
   }
 
   public void SetPopup(IPopup popup) => _popup = popup;
@@ -1352,7 +1158,9 @@ abstract class UserInterface
         SetPopup(new Popup(s, "", -1, -1));
         WriteAlerts();
         BlockFoResponse(gameState);
-        
+
+        Victory.VictoryScreen(gameState);
+
         Reset();
         return RunningState.GameOver;
       }
