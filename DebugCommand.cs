@@ -202,6 +202,12 @@ class DebugCommand(GameState gs)
       _gs.Player.AddToInventory(candle, _gs);
       return "";
     }
+    else if (txt == "bell")
+    {
+      Item bell = History.AbjurationBell(_gs.ObjDb);
+      _gs.Player.AddToInventory(bell, _gs);
+      return "";
+    }
     else if (txt == "unlock")
     {
       for (int r = 0; r < _gs.CurrentMap.Height; r++)
