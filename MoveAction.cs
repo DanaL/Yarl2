@@ -428,6 +428,7 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
     TileType.VaultDoor => "Metal doors bar your path!",
     TileType.LockedDoor => "The door is locked!",
     TileType.DungeonWall => "",
+    TileType.Lava => "Entering the lava seems like a terrible idea.",
     TileType.Arioch => "The awful visage of a Demon Lord, writhing in its shackles!",
     _ => "You cannot go that way!"
   };

@@ -789,7 +789,7 @@ class FireRebukeTrait : Trait
 
       foreach (var adj in Util.Adj8Locs(target.Loc))
       {
-        EffectApplier.ApplyDamageEffectToLoc(adj, DamageType.Fire, gs);
+        Effects.ApplyDamageEffectToLoc(adj, DamageType.Fire, gs);
 
         if (gs.ObjDb.Occupant(adj) is Actor victim)
         {
@@ -2612,7 +2612,7 @@ class ExplosionCountdownTrait : TemporaryTrait, IDesc
     List<(int, DamageType)> dmg = [(total, DamageType.Force)];
     foreach (Loc pt in sqs)
     {
-      EffectApplier.ApplyDamageEffectToLoc(pt, DamageType.Force, gs);
+      Effects.ApplyDamageEffectToLoc(pt, DamageType.Force, gs);
       if (gs.ObjDb.Occupant(pt) is Actor victim)
       {
         string name = MsgFactory.CalcName(victim, gs.Player, Article.Def).Capitalize();
@@ -3029,7 +3029,7 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
       }
 
       var victim = gs.ObjDb.Occupant(fireSrc.Loc);
-      EffectApplier.ApplyDamageEffectToLoc(fireSrc.Loc, DamageType.Fire, gs);
+      Effects.ApplyDamageEffectToLoc(fireSrc.Loc, DamageType.Fire, gs);
 
       if (victim is not null)
       {
@@ -3060,7 +3060,7 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
         foreach (var sq in Util.Adj8Sqs(fireSrc.Loc.Row, fireSrc.Loc.Col))
         {
           Loc adj = fireSrc.Loc with { Row = sq.Item1, Col = sq.Item2 };
-          EffectApplier.ApplyDamageEffectToLoc(adj, DamageType.Fire, gs);
+          Effects.ApplyDamageEffectToLoc(adj, DamageType.Fire, gs);
         }
       }
     }

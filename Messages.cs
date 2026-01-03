@@ -25,7 +25,7 @@ class Grammar
 {
   public static string Conjugate(GameObj subject, string verb)
   {
-    var player = subject is Player;
+    bool player = subject is Player;
 
     if (verb == "is" && player)
       return "are";
@@ -35,6 +35,10 @@ class Grammar
       return verb;
     else if (verb == "have")
       return "has";
+    else if (verb == "was" && player)
+      return "were";
+    else if (verb == "was")
+      return "was";
 
     if (subject is Player || subject.HasTrait<PluralTrait>())
       return verb;

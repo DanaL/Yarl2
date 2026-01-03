@@ -1062,7 +1062,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
     foreach (var item in Items())
     {
-      var (s, destroyed) = EffectApplier.Apply(damageType, gs, item, owner);
+      var (s, destroyed) = Effects.Apply(damageType, gs, item, owner);
       if (s != "")
         msgs.Add(s);
       if (destroyed)      

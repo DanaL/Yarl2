@@ -452,7 +452,7 @@ class CleansingAction(GameState gs, Actor actor, Item source) : Action(gs, actor
   {
     Loc loc = Actor!.Loc with { Row = Actor.Loc.Row + Row, Col = Actor.Loc.Col + Col };
 
-    EffectApplier.CleanseLoc(GameState!, loc, Source);
+    Effects.CleanseLoc(GameState!, loc, Source);
 
     if (Source.HasTrait<ConsumableTrait>())
     {

@@ -228,7 +228,7 @@ class Battle
         if (metalItems.Count > 0)
         {
           var damagedItem = metalItems[gs.Rng.Next(metalItems.Count)];
-          var (s, _) = EffectApplier.Apply(DamageType.Rust, gs, damagedItem, target);
+          var (s, _) = Effects.Apply(DamageType.Rust, gs, damagedItem, target);
           gs.UIRef().AlertPlayer(s);
         }
       }
@@ -367,7 +367,7 @@ class Battle
 
     if (target.HasTrait<CorrosiveTrait>() && weapon is not null)
     {
-      var (s, _) = EffectApplier.Apply(DamageType.Rust, gs, weapon, actor);
+      var (s, _) = Effects.Apply(DamageType.Rust, gs, weapon, actor);
       if (attacker is Player)
       {
         gs.UIRef().AlertPlayer(s);          
@@ -839,7 +839,7 @@ class Battle
     // Firebolts, ice, should apply their effects to the square they hit
     foreach (var dmg in ammo.Traits.OfType<DamageTrait>())
     {
-      EffectApplier.ApplyDamageEffectToLoc(target.Loc, dmg.DamageType, gs);
+      Effects.ApplyDamageEffectToLoc(target.Loc, dmg.DamageType, gs);
     }
 
     ClearObscured(attacker, gs);
@@ -872,7 +872,7 @@ class Battle
     // Firebolts, ice, should apply their effects to the square they hit
     foreach (var dmg in spell.Traits.OfType<DamageTrait>())
     {
-      EffectApplier.ApplyDamageEffectToLoc(target.Loc, dmg.DamageType, gs);
+      Effects.ApplyDamageEffectToLoc(target.Loc, dmg.DamageType, gs);
     }
 
     ClearObscured(attacker, gs);

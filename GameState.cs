@@ -438,7 +438,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     foreach (DamageType effect in tile.TerrainEffects())
     {
-      var (s, _) = EffectApplier.Apply(effect, this, item, null);
+      var (s, _) = Effects.Apply(effect, this, item, null);
       UI.AlertPlayer(s);
     }
 
@@ -446,7 +446,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     foreach (Trait t in itemTraits)
     {
       if (t is DamageTrait dt && dt.DamageType == DamageType.Fire)
-        EffectApplier.ApplyDamageEffectToLoc(loc, DamageType.Fire, this);
+        Effects.ApplyDamageEffectToLoc(loc, DamageType.Fire, this);
     }
 
     if (tile.Type == TileType.Pit || tile.Type == TileType.HiddenPit)
@@ -1055,7 +1055,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
           ActorKilled(actor, MsgFactory.KillerName(src, Player), src);
         }
       }
-      EffectApplier.ApplyDamageEffectToLoc(pt, retribution.Type, this);
+      Effects.ApplyDamageEffectToLoc(pt, retribution.Type, this);
     }
   }
 
@@ -1098,10 +1098,16 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     return next;
   }
 
-  public void ActorPostTurn(Actor actor)
+  public void ActorPreTurn(Actor actor)
   {
     Map map = MapForActor(actor);
-    
+    Tile tile = TileAt(actor.Loc);
+
+    if (tile.Type == TileType.Lava && !actor.Traits.Any(t => t is FlyingTrait || t is LevitationTrait))
+    {
+      Effects.ApplyLava(actor, this);
+    }
+
     if (map.HasFeature(MapFeatures.Submerged))
     {
       // If the actor ends their turn in a submerged level, need to check
@@ -1527,7 +1533,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     if (freezer)
     {
-      EffectApplier.ApplyDamageEffectToLoc(dest, DamageType.Cold, this);
+      Effects.ApplyDamageEffectToLoc(dest, DamageType.Cold, this);
     }
 
     if (actor is Player && tile.Type == TileType.MistyPortal)

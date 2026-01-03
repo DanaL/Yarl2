@@ -1094,11 +1094,10 @@ abstract class UserInterface
       {
         if (gameState.NextPerformer() is Actor actor)
         {
+          gameState.ActorPreTurn(actor);
           actor.TakeTurn(gameState);
           if (actor.Energy >= 1.0)
             gameState.PushPerformer(actor);
-          else
-            gameState.ActorPostTurn(actor);
         }
 
         WriteAlerts();

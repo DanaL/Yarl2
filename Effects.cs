@@ -16,7 +16,7 @@ namespace Yarl2;
 // I sort of feel like it's maybe 'better' design to have each Item/Trait host
 // the code that's specific to an effect inside the class? But for my dumb brain
 // I think it makes sense to have the effects code in one place.
-class EffectApplier
+class Effects
 {
   public static string ExtinguishTorch(GameState gs, GameObj receiver)
   {
@@ -176,6 +176,21 @@ class EffectApplier
       DamageType.Fire => ApplyFire(gs, receiver, owner),
       _ => ("", false),
     };
+  }
+
+  public static void ApplyLava(Actor actor, GameState gs)
+  {
+    List<(int, DamageType)> p = [(gs.Rng.Next(50, 76), DamageType.Fire)];
+    var (hpLeft, _, _) = actor.ReceiveDmg(p, 0, gs, null, 1.0);
+    if (hpLeft < 1)
+    {
+      string name = MsgFactory.CalcName(actor, gs.Player);
+      string msg = $"{name.Capitalize()} {Grammar.Conjugate(actor, "was")} immolated in lava!";
+      gs.UIRef().AlertPlayer(msg, gs, actor.Loc);
+      gs.ActorKilled(actor, "a lava situation", null);
+    } 
+
+    actor.Inventory.ApplyEffectToInv(DamageType.Fire, gs, actor.Loc);
   }
 
   static void CleansePlayer(GameState gs)

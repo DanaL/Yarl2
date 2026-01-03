@@ -594,7 +594,7 @@ class FireBreathAction(GameState gs, Actor actor, Loc target, int range, int dmg
 
     foreach (var pt in affected)
     {
-      EffectApplier.ApplyDamageEffectToLoc(pt, DamageType.Fire, GameState);
+      Effects.ApplyDamageEffectToLoc(pt, DamageType.Fire, GameState);
     }
 
     int total = 0;
@@ -603,7 +603,7 @@ class FireBreathAction(GameState gs, Actor actor, Loc target, int range, int dmg
     List<(int, DamageType)> dmg = [(total, DamageType.Fire)];    
     foreach (var pt in affected)
     {
-      EffectApplier.ApplyDamageEffectToLoc(pt, DamageType.Fire, GameState);
+      Effects.ApplyDamageEffectToLoc(pt, DamageType.Fire, GameState);
       if (GameState.ObjDb.Occupant(pt) is Actor victim)
       {
         string s = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!";
@@ -962,7 +962,7 @@ class RepairItemAction : Action
     {
       if (ToRepair.Contains(item.ID))
       {
-        EffectApplier.RemoveRust(item);
+        Effects.RemoveRust(item);
         items.Add(item);
 
         // Removing it and adding it back in will unstack an item where needed.
@@ -1036,7 +1036,7 @@ class InnkeeperServiceAction : Action
       // forget to do it before they rest.
       foreach (Item item in GameState.Player.Inventory.Items())
       {
-        EffectApplier.ExtinguishTorch(GameState, item);
+        Effects.ExtinguishTorch(GameState, item);
       }
 
       // Rest for six hours
@@ -2429,7 +2429,7 @@ class FlareAction(GameState gs, Actor actor, int dmgDie, int numOfDice, DamageTy
 
     foreach (Loc adj in Util.Adj8Locs(Actor.Loc))
     {
-      EffectApplier.ApplyDamageEffectToLoc(adj, DamageType, GameState);
+      Effects.ApplyDamageEffectToLoc(adj, DamageType, GameState);
 
       if (GameState.ObjDb.Occupant(adj) is Actor adjActor)
       {
@@ -3526,7 +3526,7 @@ class ApplyStainlessnessAction(GameState gs, Actor actor, Item? item) : Action(g
       // Still need to remove rust from currently rusted items
       if (item.HasTrait<RustedTrait>())
       {
-        EffectApplier.RemoveRust(item);
+        Effects.RemoveRust(item);
         GameState.UIRef().AlertPlayer($"{objName.Capitalize()} looks as good as new!");
       }
 
@@ -3679,7 +3679,7 @@ class FireballAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
     List<(int, DamageType)> dmg = [(total, DamageType.Fire)];
     foreach (var pt in affected)
     {
-      EffectApplier.ApplyDamageEffectToLoc(pt, DamageType.Fire, GameState);
+      Effects.ApplyDamageEffectToLoc(pt, DamageType.Fire, GameState);
       if (GameState.ObjDb.Occupant(pt) is Actor victim)
       {
         GameState.UIRef().AlertPlayer($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!");
@@ -3863,7 +3863,7 @@ class FrostRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
 
     foreach (var pt in pts)
     {
-      EffectApplier.ApplyDamageEffectToLoc(pt, DamageType.Cold, GameState);
+      Effects.ApplyDamageEffectToLoc(pt, DamageType.Cold, GameState);
 
       if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
       {
