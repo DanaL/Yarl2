@@ -28,6 +28,10 @@ interface IReadable
 interface IUSeable
 {
   UseResult Use(Actor user, GameState gs, int row, int col, Item? item);
+}
+
+interface ICharged
+{
   void Used();
 }
 
@@ -231,8 +235,6 @@ class CastTrait : Trait, IUSeable
   {          
     return new UseResult(new UseSpellItemAction(gs, caster, "gust of wind", item));
   }
-
-  public void Used(){ }
 }
 
 class CelerityTrait : TemporaryTrait
@@ -617,8 +619,6 @@ class AbjurationBellTrait : Trait, IUSeable
 
     return new UseResult(action);
   }
-
-  public void Used() { }
 }
 
 class AcidSplashTrait : Trait
@@ -1159,8 +1159,6 @@ class StoneTabletTrait(string text) : BasicTrait, IUSeable, IOwner
     
     return new UseResult(action);
   }
-
-  public void Used() {}
 }
 
 sealed class StressTrait : Trait 
@@ -1980,8 +1978,6 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "refreshbinding" => new UseResult(new BindSpellAction(gs, gs.Player)),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
-
-  public void Used() {}
 }
 
 class SideEffectTrait : Trait
@@ -3424,8 +3420,6 @@ class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
     
     return new UseResult(action);
   }
-
-  public void Used() {}
 }
 
 class ReaverBlessingTrait : BlessingTrait
@@ -4018,8 +4012,6 @@ sealed class BindingTrait : Trait, IGameEventListener, IUSeable, IDesc
       return new UseResult(null, $"You light {item.FullName.DefArticle()}. It emanates a stark, white light.");      
     }
   }
-
-  public void Used() {}
 }
 
 // Who knew torches would be so complicated...
@@ -4040,8 +4032,6 @@ sealed class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDes
   {
     return $"Torch#{OwnerID}#{Lit}#{Fuel}#{Expired}";
   }
-
-  public void Used() {}
 
   public string ReceiveEffect(DamageType damageType, GameState gs, Item item, Loc loc)
   {
@@ -4267,7 +4257,7 @@ sealed class UndeadTrait : Trait
   public override string AsText() => $"Undead";
 }
 
-class WandTrait : Trait, IUSeable, INeedsID, IDesc
+class WandTrait : Trait, IUSeable, INeedsID, IDesc, ICharged
 {
   public int Charges { get; set; }
   public bool IDed { get; set; }

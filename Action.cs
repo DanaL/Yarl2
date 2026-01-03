@@ -3697,9 +3697,9 @@ class FireballAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
       Item.IDInfo["wand of fireballs"] = Item.IDInfo["wand of fireballs"] with { Known = true };
       wand.Used();
     }
-    else if (_source is IUSeable useable)
+    else if (_source is ICharged charged)
     {
-      useable.Used();
+      charged.Used();
     }
 
     return 1.0;
@@ -3760,9 +3760,9 @@ class RayOfSlownessAction(GameState gs, Actor actor, Trait src, ulong sourceId) 
       Item.IDInfo["wand of slow monster"] = Item.IDInfo["wand of slow monster"] with { Known = true };
       wand.Used();
     }
-    else if (_source is IUSeable useable)
+    else if (_source is ICharged charged)
     {
-      useable.Used();
+      charged.Used();
     }
 
     return 1.0;
@@ -3828,9 +3828,9 @@ class DigRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, ac
       Item.IDInfo["wand of digging"] = Item.IDInfo["wand of digging"] with { Known = true };
       wand.Used();
     }
-    else if (Source is IUSeable useable)
+    else if (Source is ICharged charged)
     {
-      useable.Used();
+      charged.Used();
     }
 
     return 1.0;
@@ -3877,9 +3877,9 @@ class FrostRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
       Item.IDInfo["wand of frost"] = Item.IDInfo["wand of frost"] with { Known = true };
       wand.Used();
     }
-    else if (_source is IUSeable useable)
+    else if (_source is ICharged charged)
     {
-      useable.Used();
+      charged.Used();
     }
 
     return 1.0;
@@ -3940,9 +3940,9 @@ class MagicMissleAction(GameState gs, Actor actor, Trait? src) : TargetedAction(
       Item.IDInfo["wand of magic missiles"] = Item.IDInfo["wand of magic missiles"] with { Known = true };
       wand.Used();
     }
-    else if (Source is IUSeable useable) 
+    else if (Source is ICharged charged) 
     {
-      useable.Used();
+      charged.Used();
     }
 
     ArrowAnimation anim = new(GameState!, pts, Colours.LIGHT_BLUE);
@@ -4025,8 +4025,8 @@ class SwapWithMobAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
     }
     else
     {
-      if (_source is IUSeable useable)
-        useable.Used();
+      if (_source is ICharged charged)
+        charged.Used();
       GameState.UIRef().AlertPlayer("The magic is released but nothing happens. The spell fizzles.");
     }
 
@@ -4129,8 +4129,8 @@ class CastHealMonster(GameState gs, Actor actor, Trait src) : Action(gs, actor)
       GameState.UIRef().AlertPlayer("The magic is released but nothing happens. The spell fizzles.");
     }
 
-    if (_source is IUSeable useable)
-      useable.Used();
+    if (_source is ICharged charged)
+      charged.Used();
 
     return energyCost;
   }
