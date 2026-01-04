@@ -556,7 +556,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     DungeonMap mapper = new(gs.Rng);
     List<Map> levels = [];
 
-    //dungeon.MonsterDecks = DeckBuilder.ReadDeck(MainOccupant, rng);
+    dungeon.MonsterDecks = DeckBuilder.ReadDeck("gaol", gs.Rng);
     Map firstLevel = FirstLevelMap(gs);
     Map bottom = BottomLevel(gs);
     bottom.Dump();
@@ -593,6 +593,8 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     foreach (Map map in levels)
       dungeon.AddMap(map);
 
+    PopulateDungeon(dungeon, gs.Rng, gs.ObjDb);
+    
     return dungeon;
   }
 }

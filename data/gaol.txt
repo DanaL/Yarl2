@@ -1,0 +1,10 @@
+LEVEL 1
+duergar spearfisher 2,duergar soldier 3
+LEVEL 2
+duergar spearfisher 2,duergar soldier 3
+LEVEL 3
+duergar spearfisher 2,duergar soldier 3
+LEVEL 4
+duergar spearfisher 2,duergar soldier 3
+LEVEL 5
+duergar spearfisher 2,duergar soldier 3
