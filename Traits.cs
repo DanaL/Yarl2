@@ -127,7 +127,7 @@ class AlluringTrait : TemporaryTrait
       if (path.Count > 0)
       {
         gs.UIRef().AlertPlayer($"You feel compelled to move toward the {MsgFactory.CalcName(owner, gs.Player)}!");
-        gs.Player.QueueAction(new MoveAction(gs, gs.Player, path.Pop()));
+        gs.Player.QueueAction(new MoveAction(gs, gs.Player, path.Pop(), false));
       }      
     }
   }

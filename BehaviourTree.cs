@@ -506,7 +506,7 @@ class TryToEscape : BehaviourNode
         {
           if (gs.LastPlayerFoV.ContainsKey(adj))
             gs.UIRef().AlertPlayer($"{mob.FullName.Capitalize()} jumps into the teleport trap!");
-          mob.ExecuteAction(new MoveAction(gs, mob, adj));
+          mob.ExecuteAction(new MoveAction(gs, mob, adj, false));
           return PlanStatus.Running;
         }
       }
@@ -546,7 +546,7 @@ class TryToEscape : BehaviourNode
         if (tile is Door door && !door.Open)
           mob.ExecuteAction(new OpenDoorAction(gs, mob, loc));
         else
-          mob.ExecuteAction(new MoveAction(gs, mob, loc));
+          mob.ExecuteAction(new MoveAction(gs, mob, loc, false));
         return PlanStatus.Running;
       }
     }
@@ -598,7 +598,7 @@ class WanderInArea(HashSet<Loc> area) : BehaviourNode
     {
       Loc loc = adjs[gs.Rng.Next(adjs.Count)];
 
-      Action mv = new MoveAction(gs, mob, loc);
+      Action mv = new MoveAction(gs, mob, loc, false);
       string bark = mob.GetBark(gs);
       if (bark != "")
         mv.Quip = bark;
@@ -976,7 +976,7 @@ class FindWayToArea(HashSet<Loc> area) : BehaviourNode
       {
         PrevAction = "move";
         PrevLoc = mob.Loc;
-        action = new MoveAction(gs, mob, next);
+        action = new MoveAction(gs, mob, next, false);
         Path.Pop();
       }
 
@@ -1055,7 +1055,7 @@ class KeepDistance : BehaviourNode
       return PlanStatus.Failure;
 
     Loc loc = opts[gs.Rng.Next(opts.Count)];
-    Action action = new MoveAction(gs, mob, loc);
+    Action action = new MoveAction(gs, mob, loc, false);
 
     mob.ExecuteAction(action);
 
@@ -1127,7 +1127,7 @@ class RandomMove : BehaviourNode
     if (opts.Count > 0)
     {
       var (loc, door) = opts[gs.Rng.Next(opts.Count)];
-      action = door ? new OpenDoorAction(gs, mob, loc) : new MoveAction(gs, mob, loc);
+      action = door ? new OpenDoorAction(gs, mob, loc) : new MoveAction(gs, mob, loc, false);
     }
     else
     {
@@ -1170,7 +1170,7 @@ class RandomMove : BehaviourNode
     if (opts.Count > 0)
     {
       Loc loc = opts[gs.Rng.Next(opts.Count)];
-      action = new MoveAction(gs, mob, loc);
+      action = new MoveAction(gs, mob, loc, false);
     }
     else
     {
@@ -1280,7 +1280,7 @@ class FindGoal(IPathBuilder pathBuilder) : BehaviourNode
       }
       else
       {
-        mob.ExecuteAction(new MoveAction(gs, mob, next));
+        mob.ExecuteAction(new MoveAction(gs, mob, next, false));
         return PlanStatus.Running;
       }
     }
@@ -1339,7 +1339,7 @@ class FindUpStairs : BehaviourNode
       }
       else
       {
-        mob.ExecuteAction(new MoveAction(gs, mob, next));
+        mob.ExecuteAction(new MoveAction(gs, mob, next, false));
         return PlanStatus.Running;
       }
     }
@@ -1388,7 +1388,7 @@ class SeekPlayerAStar : BehaviourNode
     // refreshed      
     if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).Passable())
     {
-      mob.ExecuteAction(new MoveAction(gs, mob, loc));
+      mob.ExecuteAction(new MoveAction(gs, mob, loc, false));
       return PlanStatus.Running;
     }
 
@@ -1474,7 +1474,7 @@ class ChaseTarget : BehaviourNode
       }
       else if (!gs.ObjDb.Occupied(loc))
       {
-        mob.ExecuteAction(new MoveAction(gs, mob, loc));
+        mob.ExecuteAction(new MoveAction(gs, mob, loc, false));
         return PlanStatus.Success;
       }
     }
@@ -1527,7 +1527,7 @@ class WalkPath(Stack<Loc> path) : BehaviourNode
       else
       {
         PrevLoc = mob.Loc;
-        action = new MoveAction(gs, mob, next);
+        action = new MoveAction(gs, mob, next, false);
         Path.Pop();
       }
 

@@ -14,18 +14,21 @@ namespace Yarl2;
 // The code for MoveAction was getting lengthy enough that I figured I
 // should move it to its own file
 
-class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, actor)
+class MoveAction(GameState gameState, Actor actor, Loc loc, bool involuntary) : Action(gameState, actor)
 {
   public Loc Loc { get; init; } = loc;
-  
-  public static bool CanMoveTo(Actor actor, Map map, Loc loc)
+  protected bool Involuntary { get; init; } = involuntary;
+
+  // TTD: for monsters, in their movement action setup, I should be looking
+  // there to see if they are confused or tipsy and setting up the Involuntary
+  // field. (Currently only setting it for the player)
+  public static bool CanMoveTo(Actor actor, Map map, Loc loc, bool involuntary)
   {
     bool canFly = false;
     bool canSwim = false;
     bool waterWalking = false;
     bool confused = false;
-    bool tipsy = false;
-
+    
     foreach (Trait t in actor.Traits)
     {
       if (t is FlyingTrait ft && ft.Active)
@@ -38,8 +41,6 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         canSwim = true;
       else if (t is WaterWalkingTrait)
         waterWalking = true;
-      else if (t is TipsyTrait)
-        tipsy = true;
       else if (t is ConfusedTrait)
         confused = true;
     }
@@ -53,10 +54,14 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       return true;
     else if (actor is not Player && (tile.Type == TileType.Water || tile.Type == TileType.DeepWater))
     {
-      if (waterWalking || confused || tipsy || canSwim)
+      if (waterWalking || confused || involuntary || canSwim)
         return true;
     }
-    else if (tile.Type == TileType.Chasm && (confused || tipsy))
+    else if (tile.Type == TileType.Chasm && (confused || involuntary))
+    {
+      return true;
+    }
+    else if (tile.Type == TileType.Lava && involuntary)
     {
       return true;
     }
@@ -215,7 +220,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
 
       return 0.0;
     }
-    else if (!CanMoveTo(Actor!, GameState.CurrentMap, Loc))
+    else if (!CanMoveTo(Actor!, GameState.CurrentMap, Loc, Involuntary))
     {
       return 0.0;
     }
@@ -241,11 +246,11 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
 
 // I think only the Player should ever call this aciton. Monsters/NPCs should
 // be choosing specific Attack or Move actions
-class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameState, actor, loc)
+class BumpAction(GameState gameState, Actor actor, Loc loc, bool involuntary) : MoveAction(gameState, actor, loc, involuntary)
 {
   readonly bool _bumpToOpen = gameState.Options!.BumpToOpen;
   readonly bool _lockedDoorMenu = gameState.Options.BumpForLockedDoors;
-
+  
   public override double Execute()
   {
     UserInterface ui = GameState!.UIRef();
@@ -319,7 +324,7 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
         return 0.0;
       }
     }
-    else if (!CanMoveTo(player, GameState.CurrentMap, Loc))
+    else if (!CanMoveTo(player, GameState.CurrentMap, Loc, Involuntary))
     {
       Tile tile = GameState.CurrentMap.TileAt(Loc.Row, Loc.Col);
     

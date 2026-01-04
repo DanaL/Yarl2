@@ -2970,7 +2970,7 @@ class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
       GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, start, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
 
       base.Execute();
-      Actor.QueueAction(new MoveAction(GameState, Actor, landingSpot));
+      Actor.QueueAction(new MoveAction(GameState, Actor, landingSpot, false));
       if (GameState.LastPlayerFoV.ContainsKey(Actor.Loc))
         GameState.UIRef().AlertPlayer($"Bamf! {Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "blink")} away!");
       

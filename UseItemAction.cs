@@ -181,7 +181,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       // isn't still technically stuck in the pit and unable to leave the square
       digger.Traits = [..digger.Traits.Where(t => t is not InPitTrait)];
 
-      digger.QueueAction(new MoveAction(gs, digger, loc));
+      digger.QueueAction(new MoveAction(gs, digger, loc, false));
 
       gs.Noise(loc.Row, loc.Col, 3);
     }

@@ -40,9 +40,6 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
   static (int, int) KeyToDir(char ch) =>
     MovementDirections.TryGetValue(ch, out var dir) ? dir : (0, 0);
 
-  static char DirToKey((int dr, int dc) dir) =>
-    MovementDirections.FirstOrDefault(x => x.Value == dir).Key;
-
   List<(char, Loc, bool)> Turns(char ch, Loc loc, Actor p, Map m)
   {
     List<(char, Loc, bool)> turns = [];
@@ -53,19 +50,19 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
       case 'l':
       case 'h':
         a = loc with { Row = loc.Row + 1};        
-        valid = MoveAction.CanMoveTo(p, m, a);
+        valid = MoveAction.CanMoveTo(p, m, a, false);
         turns.Add(('j', a, valid));
         b = loc with { Row = loc.Row - 1};
-        valid = MoveAction.CanMoveTo(p, m, b);
+        valid = MoveAction.CanMoveTo(p, m, b, false);
         turns.Add(('k', b, valid));
         break;
       case 'j':
       case 'k':
         a = loc with { Col = loc.Col + 1};        
-        valid = MoveAction.CanMoveTo(p, m, a);
+        valid = MoveAction.CanMoveTo(p, m, a, false);
         turns.Add(('l', a, valid));
         b = loc with { Col = loc.Col - 1};
-        valid = MoveAction.CanMoveTo(p, m, b);
+        valid = MoveAction.CanMoveTo(p, m, b, false);
         turns.Add(('h', b, valid));
         break;
     }
@@ -141,10 +138,10 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     char dir = char.ToLower(ch);
     var (dr, dc) = MovementDirections[dir];
     Loc loc = player.Loc with { Row = player.Loc.Row + dr, Col = player.Loc.Col + dc };
-    while (MoveAction.CanMoveTo(player, map, loc))
+    while (MoveAction.CanMoveTo(player, map, loc, false))
     {
-      moves.Add(new MoveAction(gs, player, loc));  
-      player.QueueAction(new MoveAction(gs, player, loc));
+      moves.Add(new MoveAction(gs, player, loc, false));  
+      player.QueueAction(new MoveAction(gs, player, loc, false));
       Loc prev = loc;
       loc = player.Loc with { Row = loc.Row + dr, Col = loc.Col + dc };
       
@@ -160,7 +157,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
       if (InterestingTiles(gs, prev))
         break;
 
-      if (!MoveAction.CanMoveTo(player, map, loc))
+      if (!MoveAction.CanMoveTo(player, map, loc, false))
       {
         List<(char, Loc, bool)> turns = Turns(dir, prev, player, map);
         var (ndir1, nloc1, valid1) = turns[0];
@@ -214,17 +211,22 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
 
   void CalcMovementAction(GameState gs, char ch)
   {
+    bool involuntary = false;
     if (GS.Player.HasTrait<ConfusedTrait>())
     {
       gs.UIRef().AlertPlayer("You are confused!");
       char[] dirs = ['h', 'j', 'k', 'l', 'y', 'u', 'b', 'n'];
-      ch = dirs[gs.Rng.Next(dirs.Length)];
+      char nch = dirs[gs.Rng.Next(dirs.Length)];
+      if (nch != ch)
+        involuntary = true;
+      ch = nch;
     }
-
+    
     if (GS.Player.HasTrait<TipsyTrait>() && gs.Rng.NextDouble() < 0.15)
     {
       gs.UIRef().AlertPlayer("You stagger!");
       ch = CalcStagger(gs, ch);
+      involuntary = true;
     }
 
     (int dr, int dc) = KeyToDir(ch);
@@ -248,7 +250,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
       }
     }
 
-    gs.Player.QueueAction(new BumpAction(gs, gs.Player, gs.Player.Loc.Move(dr, dc)));
+    gs.Player.QueueAction(new BumpAction(gs, gs.Player, gs.Player.Loc.Move(dr, dc), involuntary));
   }
 
   // Check if the player has a focus readied, or knows spells that don't need a focus
