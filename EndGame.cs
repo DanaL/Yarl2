@@ -9,7 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-// Ա რ Ұ
 using Yarl2;
 
 class IslandInfo
@@ -579,12 +578,17 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       if (levels[0].TileAt(loc.Row, loc.Col).Type == TileType.DungeonFloor)
         options.Add(loc);
     }
+    
     Loc firstFloorDownLoc = options[gs.Rng.Next(options.Count)];
-    Downstairs downstairs = new("") { Destination = firstFloorDownLoc with { Level = 1}};
+    List<(int, int)> secondLevelFloors = [.. levels[1].SqsOfType(TileType.DungeonFloor)];
+    var (slUpRow, slUpCol) = secondLevelFloors[gs.Rng.Next(secondLevelFloors.Count)];
+    Loc secondFloorUpLoc = new(DungeonId, 1, slUpRow, slUpCol);
+
+    Downstairs downstairs = new("") { Destination = secondFloorUpLoc };
     Upstairs upstairs = new("") { Destination = firstFloorDownLoc};
-    levels[0].SetTile(firstFloorDownLoc.Row, firstFloorDownLoc.Col, downstairs);
-    levels[1].SetTile(firstFloorDownLoc.Row, firstFloorDownLoc.Col, upstairs);
-    CreateStairwayStacked(DungeonId, [.. levels], 1, (firstFloorDownLoc.Row, firstFloorDownLoc.Col), true, gs.Rng);
+    levels[0].SetTile(firstFloorDownLoc.Row, firstFloorDownLoc.Col, downstairs);        
+    levels[1].SetTile(secondFloorUpLoc.Row, secondFloorUpLoc.Col, upstairs);
+    CreateStairwayStacked(DungeonId, [.. levels], 1, (secondFloorUpLoc.Row, secondFloorUpLoc.Col), true, gs.Rng);
 
     levels.Add(bottom);
     SetFinalStairs(levels, gs);
