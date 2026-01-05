@@ -348,22 +348,25 @@ abstract class Actor : GameObj, IZLevel
         msg += $" {s}";
     }
 
-    Animation anim;
-    if (fireDamage)
+    if (total > 0)
     {
-      anim = new HitAnimation(gs, this, Colours.BRIGHT_RED, Colours.TORCH_YELLOW, Constants.FIRE_CHAR);
+      Animation anim;
+      if (fireDamage)
+      {
+        anim = new HitAnimation(gs, this, Colours.BRIGHT_RED, Colours.TORCH_YELLOW, Constants.FIRE_CHAR);
+      }
+      else if (coldDamage)
+      {
+        anim = new HitAnimation(gs, this, Colours.WHITE, Colours.ICE_BLUE, '*');
+      }
+      else
+      {
+        char ch = VisibleTo(gs.Player) ? Glyph.Ch : ' ';
+        anim = new HitAnimation(gs, this, Colours.WHITE, Colours.FX_RED, ch);
+      }
+      gs.UIRef().RegisterAnimation(anim);
     }
-    else if (coldDamage)
-    {
-      anim = new HitAnimation(gs, this, Colours.WHITE, Colours.ICE_BLUE, '*');
-    }
-    else
-    {
-      char ch = VisibleTo(gs.Player) ? Glyph.Ch : ' ';
-      anim = new HitAnimation(gs, this, Colours.WHITE, Colours.FX_RED, ch);
-    }
-    gs.UIRef().RegisterAnimation(anim);
-
+    
     if (Traits.OfType<AuraOfProtectionTrait>().FirstOrDefault() is AuraOfProtectionTrait aura)
     {
       aura.HP -= total;
