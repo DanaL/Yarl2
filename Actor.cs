@@ -978,7 +978,7 @@ class MonsterFactory
             {
               Item item = ItemFactory.Get(itemName, objDb);
               char slot = m.AddToInventory(item, null);
-              if (equiped)
+              if (equiped && slot != '$')
                 m.Inventory.ToggleEquipStatus(slot);
             }
           }

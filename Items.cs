@@ -757,7 +757,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     if (item.Type == ItemType.Zorkmid)
     {
       Zorkmids += item.Value;
-      return '\0';
+      return '$';
     }
 
     char slotToUse = '\0';
