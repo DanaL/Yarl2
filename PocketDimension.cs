@@ -49,6 +49,7 @@ class PocketDimension
     int dungeonId = TempDungeonId(gs);
     Dungeon belly = new(dungeonId, "a monster's belly", $"You've been swallowed by {monster.Name.IndefArticle()}!", true);
     belly.AddMap(map);
+    gs.Campaign.AddDungeon(belly, belly.ID);
 
     return (new Loc(dungeonId, 0, 1, 1), belly);
   }
