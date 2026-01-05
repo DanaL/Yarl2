@@ -385,9 +385,14 @@ class SmithBehaviour : NPCBehaviour
     }
     else if (hour >= 7 && hour < 19) 
     {
-      List<Item> items = [..smith.Inventory.UsedSlots()
-                                .Select(smith.Inventory.ItemAt)
-                                .Select(si => si.Item1)];
+      List<Item> items = [];
+      foreach (var slot in smith.Inventory.UsedSlots())
+      {
+        var (i, _) = smith.Inventory.ItemAt(slot);
+        if (i is not null)
+          items.Add(i);
+      }
+      
       Item? item;
       if (items.Count > 0)
         item = items[gs.Rng.Next(items.Count)];
