@@ -1435,7 +1435,10 @@ class ChaseTarget : BehaviourNode
       costFunc = submerged ? DijkstraMap.CostForAmphibians : DijkstraMap.CostForSwimming;
     else if (mob.HasTrait<AmphibiousTrait>())
       costFunc = DijkstraMap.CostForAmphibians;
-
+    else if (mob.Traits.Any(t => t is ImmunityTrait it && it.Type == DamageType.Fire)) 
+    {
+      costFunc = DijkstraMap.WrapCostFunction(new() { [TileType.Lava] = 1 });
+    }
     // For Swimmers, if the target is on a non-water tile on a non-submerged
     // level, look for adjacent water tile instead
     if (mob.HasTrait<SwimmerTrait>() && !submerged)

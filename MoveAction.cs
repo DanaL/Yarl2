@@ -61,7 +61,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc, bool involuntary) : 
     {
       return true;
     }
-    else if (tile.Type == TileType.Lava && involuntary)
+    else if (tile.Type == TileType.Lava && (involuntary || actor.Traits.Any(t => t is ImmunityTrait it && it.Type == DamageType.Fire)))
     {
       return true;
     }

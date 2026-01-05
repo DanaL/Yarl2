@@ -109,6 +109,17 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
       return int.MaxValue;
   }
 
+  public static TravelCostFunction WrapCostFunction(Dictionary<TileType, int> extraCosts)
+  {
+    return (tile) =>
+    {
+      if (extraCosts.TryGetValue(tile.Type, out int cost))
+        return cost;
+
+      return Cost(tile);
+    };
+  }
+
   // Passable defines the squares to be used in the pathfinding and their weight
   // (Ie., a floor might be passable with score 1 but a door is 2 because it's 
   // slightly more expensive)
