@@ -52,7 +52,7 @@ evil villain        |h|lightblue    |blue        |10|10|3| 1.0|10|10|MeleeSlashi
 rot grub            |w|white        |grey        |10| 8|3| 1.0|10|10|MeleePiercing#1#1#4#1#0#0#Attack|Mosquito|
 python              |S|grey         |darkgrey    |13|20|4| 1.0|14|12|Crush#1#1#4#1#0#0#Attack,MeleeBlunt#1#1#6#1#0#0#Attack|Grappler#15|
 rum gremlin         |i|lightbrown   |brown       |13|20|4| 1.0|10|10|RumBreath#0#4#0#0#0#5#Attack,MeleeSlashing#1#1#4#1#0#0#Attack|Intelligent|PoorLoot
-flame beetle        |a|brightred    |dullred     |15|30|5| 1.0|12|12|MeleeFire#1#1#6#1#0#0#Attack|Drop#beetle_carapace#33,Immunity#Fire,LightSource#owner#1#dullred#torchred|
+flame beetle        |a|brightred    |dullred     |15|30|5| 1.0|12|12|MeleeFire#1#1#6#1#0#0#Attack|Drop#beetle_carapace#33,Resistance#Fire,LightSource#owner#1#dullred#torchred|
 giant toad          |t|green        |darkgreen   |13|30|3| 1.0|10|10|Gulp#1#1#6#1#13#0#Attack|Heavy,Str#Belly#Small|
 frog                |t|limegreen    |darkgreen   |10| 1|1| 1.0|10|10||Passive|
 zombie frog         |t|grey         |darkgrey    |11|10|2| 1.0|10|10|MeleeNecrotic#1#1#4#1#0#0#Attack|Undead,Brainless,Immunity#Poison|
@@ -68,7 +68,7 @@ clay golem          |G|brightred    |brown       |15|60|5| 1.0|12|10|MeleeBlunt#
 lard golem          |G|cream        |lightbrown  |15|45|5| 1.0|12|10|MeleeBlunt#1#1#10#1#0#0#Attack|Resistance#Blunt,Immunity#Confusion,Retribution#Grease#0#0#0,Brainless,Construct|
 phantom summoner    |p|iceblue      |blue        |16|50|5| 1.0|10|10|MinorSummon#0#0#0#0#0#12#Attack,MagicMissile#3#6#5#2#0#2#Attack,MeleeSlashing#1#1#5#1#0#0#Attack|Intelligent|
 hellhound pup       |d|dullred      |brown       |14|30|6| 1.0|10|10|FireBreath#0#4#5#3#15#5#Attack,MeleePiercing#1#1#10#1#0#0#Attack|Resistance#Fire|
-hellhound           |d|brightred    |dullred     |15|50|8| 1.0|10|10|FireBreath#0#5#6#3#15#5#Attack,MeleePiercing#1#1#6#2#0#0#Attack|Immunity#Fire|
+hellhound           |d|brightred    |dullred     |15|50|8| 1.0|10|10|FireBreath#0#5#6#3#15#5#Attack,MeleePiercing#1#1#6#2#0#0#Attack|Resistance#Fire|
 killer bee          |I|yelloworange |brown       |17|12|6| 1.0|10|10|MeleePiercing#1#1#2#1#0#0#Attack|Flying,Poisoner#13#2#20|
 invisible stalker   |i|grey         |darkgrey    |15|40|5| 1.0|10|14|MeleeBlunt#1#1#4#3#0#0#Attack|Invisible#owner#false#max,Flying|
 wraith              |W|blue         |darkgrey    |14|40|5| 1.0|10|10|MeleeNecrotic#1#1#10#1#0#0#Attack|Immunity#Poison,Resistance#Piercing,Resistance#Blunt,Resistance#Slashing,Undead,SilverAllergy,Numbs|
