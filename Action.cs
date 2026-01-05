@@ -3096,6 +3096,28 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice) : Action
   }
 }
 
+class DestressAction(GameState gs, Actor target, int amount) : Action(gs, target)
+{
+  int Amount { get; init; } = amount;
+
+  public override double Execute()
+  {
+    base.Execute();
+    double cost = 0.0;
+    
+    if (Actor is not null && Actor.Stats.TryGetValue(Attribute.Nerve, out var nerve))
+    {
+      nerve.Change(50);
+
+      if (Actor is Player)
+        GameState!.UIRef().AlertPlayer("You feel calmer.");
+      cost = 1.0;
+    }
+
+    return cost;
+  }
+}
+
 class SootheAction(GameState gs, Actor target, int amount) : Action(gs, target)
 {
   int Amount { get; set; } = amount;

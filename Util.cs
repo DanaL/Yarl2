@@ -1004,6 +1004,8 @@ static class StringUtils
       return "elves";
     else if (s == "half-elf")
       return "half-elves";
+    else if (s == "lembas")
+      return s;
     else if (s.EndsWith('s') || s.EndsWith('x') || s.EndsWith("ch"))
       return s + "es";
     else

@@ -657,6 +657,19 @@
     ]
   },
   {
+    "Name": "LEMBAS",
+    "DescriptiveName": "lembas",
+    "Type": "Food",
+    "Value": 1,
+    "Glyph": ",,yellow,yelloworange,black,false",
+    "Traits": [
+      "Edible",
+      "Consumable",
+      "Stackable",
+      "UseSimple#destress"
+    ]
+  },
+  {
     "Name": "TALISMAN_OF_CIRCUMSPECTION",
     "DescriptiveName": "talisman of circumspection",
     "Type": "Talisman",

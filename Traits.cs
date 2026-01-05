@@ -1962,11 +1962,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "buffstrength" => new UseResult(new ApplyTraitAction(gs, user,
                         new StatBuffTrait()
                         {
-                          Attr = Attribute.Strength,
-                          Amt = 2,
-                          OwnerID = user.ID,
-                          ExpiresOn = gs.Turn + 50,
-                          SourceId = item!.ID
+                          Attr = Attribute.Strength, Amt = 2, OwnerID = user.ID, ExpiresOn = gs.Turn + 50, SourceId = item!.ID
                         })),
     "heroism" => BuildHeroism(user, gs, item!),
     "nondescript" => new UseResult(new ApplyTraitAction(gs, user, new NondescriptTrait())),
@@ -1976,6 +1972,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
           new ApplyStainlessnessAction(gs, user, item))),
     "alchemicalcompound" => new UseResult(new ConsumeAlchemicalCompound(gs, user, item!)),
     "refreshbinding" => new UseResult(new BindSpellAction(gs, gs.Player)),
+    "destress" => new UseResult(new DestressAction(gs, gs.Player, 125)),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 }

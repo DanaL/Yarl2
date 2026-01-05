@@ -43,7 +43,7 @@ class Treasure
       ItemNames.SPEAR, ItemNames.WAND_MAGIC_MISSILES, ItemNames.WAND_HEAL_MONSTER, ItemNames.LEATHER_GLOVES,
       ItemNames.WAND_FROST, ItemNames.WAND_SWAP, ItemNames.RING_OF_PROTECTION, ItemNames.WAND_SLOW_MONSTER,
       ItemNames.POTION_OF_LEVITATION, ItemNames.SCROLL_KNOCK, ItemNames.LOCK_PICK, ItemNames.WAND_FIREBALLS,
-      ItemNames.VIAL_OF_POISON, ItemNames.SCROLL_PROTECTION,
+      ItemNames.VIAL_OF_POISON, ItemNames.SCROLL_PROTECTION, ItemNames.LEMBAS,
       ItemNames.GUIDE_AXES, ItemNames.GUIDE_STABBY, ItemNames.GUIDE_SWORDS, ItemNames.BEETLE_CARAPACE,
       ItemNames.HILL_GIANT_ESSENCE, ItemNames.FROST_GIANT_ESSENCE, ItemNames.FIRE_GIANT_ESSENCE,
       ItemNames.SCROLL_DISARM, ItemNames.GUIDE_BOWS, ItemNames.TROLL_BROOCH, ItemNames.SMOULDERING_CHARM,
@@ -174,7 +174,7 @@ class Treasure
     return GenerateItem(name, objDb, rng);
   }
 
-  public static Item MinorGift(GameObjectDB objDb, Rng rng) => rng.Next(9) switch
+  public static Item MinorGift(GameObjectDB objDb, Rng rng) => rng.Next(10) switch
   {
     0 => ItemFactory.Get(ItemNames.POTION_HEALING, objDb),
     1 => ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb),
@@ -184,6 +184,7 @@ class Treasure
     5 => ItemFactory.Get(ItemNames.SCROLL_DISARM, objDb),
     6 => ItemFactory.Get(ItemNames.POTION_OBSCURITY, objDb),
     7 => ItemFactory.Get(ItemNames.TINCTURE_CELERITY, objDb),
+    8 => ItemFactory.Get(ItemNames.LEMBAS, objDb),
     _ => ItemFactory.Get(ItemNames.POTION_MIND_READING, objDb)
   };
 

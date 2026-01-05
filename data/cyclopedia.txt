@@ -613,3 +613,6 @@ The liquid inside this bottle provides immediate access to the level below. Ofte
 #
 chasm
 A hole in the floor leading to the level below.
+#
+lembas
+A famous brand of elven cookie, typically sold by the Elf Guides as a fundraiser. This comforting food from your childhood is both nostalgic and soothing.

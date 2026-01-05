@@ -121,7 +121,8 @@ class DebugCommand(GameState gs)
     {"scroll of stainlessness", ItemNames.SCROLL_STAINLESS },
     {"alchemical compound", ItemNames.ALCHEMICAL_COMPOUND },
     {"bomb", ItemNames.BOMB },
-    {"ring of water breathing", ItemNames.RING_OF_WATER_BREATHING }
+    {"ring of water breathing", ItemNames.RING_OF_WATER_BREATHING },
+    {"lembas", ItemNames.LEMBAS },
   };
 
   public string DoCommand(string txt)
