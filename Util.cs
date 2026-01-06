@@ -790,18 +790,19 @@ static class Util
       string s = lines[j + 1];
       string key, title;
       int k = s.IndexOf('|');
+      string txt = lines[j + 2];
+      txt = txt.Replace("\\n", "\n");
       CyclopediaEntry entry;
       if (k > -1)
       {
         key = s[..k];
         title = s[(k + 1)..];
-        entry = new CyclopediaEntry(title, lines[j + 2]);
+        entry = new CyclopediaEntry(title, txt);
       }
       else
       {
         key = s;
-        title = s;
-        entry = new CyclopediaEntry(s, lines[j + 2]);
+        entry = new CyclopediaEntry(s, txt);
       }
 
       cyclopedia.Add(key, entry);
