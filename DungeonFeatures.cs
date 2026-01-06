@@ -380,7 +380,7 @@ class IdolAltarMaker
       Item prize = PickPrize(objDb, rng);
       objDb.SetToLoc(prizeLoc, prize);
 
-      prize = PickPrize(objDb, rng);
+      prize = Treasure.MinorGift(objDb, rng);
       objDb.SetToLoc(prizeLoc, prize);
 
       Tile altar = new IdolAltar(altarDesc)
