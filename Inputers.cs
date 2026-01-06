@@ -1447,6 +1447,22 @@ class InventoryDetails : Inputer
         items.Add("it has [LIGHTBLUE reach]");
       if (trait is ImpaleTrait)
         items.Add("it can [LIGHTBLUE impale] foes");
+
+      if (trait is GrantsTrait grants)
+      {
+        foreach (string gs in grants.TraitsGranted)
+        {
+          if (gs.StartsWith("ACMod#"))
+          {
+            string[] pieces = gs.Split('#');
+            int acMod = int.Parse(pieces[1]);
+            string ac = acMod.ToString();
+            if (acMod > 0)
+              ac = "+" + acMod;
+            items.Add($"it provides a [ICEBLUE {ac}] AC modifier");
+          }
+        }
+      }
     }
 
     if (items.Count == 0 && weaponType == "" && damage.Count == 0)
