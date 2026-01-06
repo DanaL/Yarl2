@@ -912,7 +912,7 @@ class UpgradeItemAction : Action
     {
       GameState.Player.Inventory.Zorkmids -= Total;
 
-      var (_, msg) = Alchemy.UpgradeItem(item, reagent);
+      var (_, msg) = Alchemy.UpgradeItem(item, reagent, GameState.Player);
 
       GameState.Player.Inventory.RemoveByID(reagent.ID, GameState);
 
@@ -3511,6 +3511,30 @@ class ConsumeAlchemicalCompound(GameState gs, Actor actor, Item item) : Action(g
     
     foreach (string s in messages)
       GameState.UIRef().AlertPlayer(s);
+
+    return 1.0;
+  }
+}
+
+class EnchantItemAction(GameState gs, Actor actor, Item item) : Action(gs, actor)
+{
+  public char Choice { get; set; }
+  Item SourceItem { get; set; } = item;
+
+  public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
+
+  public override double Execute()
+  {
+    base.Execute();
+
+    GameState!.ClearMenu();
+
+    var (item, _) = Actor!.Inventory.ItemAt(Choice);
+    if (item != null)
+    {
+      var (_, msg) = Alchemy.UpgradeItem(item, SourceItem, Actor);
+      GameState.UIRef().AlertPlayer(msg);
+    }
 
     return 1.0;
   }

@@ -1351,5 +1351,19 @@
       "Explosive#1#6#3",
       "Stackable"
     ]
+  },
+  {
+    "Name": "SCROLL_ENCHANTING",
+    "DescriptiveName": "scroll of enchanting",
+    "Type": "Scroll",
+    "Value": 25,
+    "Glyph": "?,white,grey,black,false",
+    "Traits": [
+      "Consumable",
+      "UseSimple#enchant",
+      "Flammable",
+      "Scroll",
+      "Stackable"
+    ]
   }
 ]

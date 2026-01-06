@@ -49,7 +49,7 @@ class Alchemy
     return false;
   }
 
-  public static (bool, string) UpgradeItem(Item item, Item reagent)
+  public static (bool, string) UpgradeItem(Item item, Item reagent, Actor actor)
   {
     bool success = false;
     string msg = "";
@@ -86,9 +86,76 @@ class Alchemy
           msg = $"Enhanced by mithril, your {item.Name} is now stronger!\n\n{reagent.Name.IndefArticle().Capitalize()} was consumed.";
         }
         break;
+      case "scroll of enchanting":
+        return Enchant(item, actor);
     }
     
     return (success, msg);
+  }
+
+  static (bool, string) EnchantGrantsTrait(Item item, GrantsTrait grantsTrait, Actor actor)
+  {
+    List<string> traitsGranted = [.. grantsTrait.TraitsGranted];
+    bool enchanted = false;
+    string msg = "";
+    for (int j = 0; j < traitsGranted.Count; j++)
+    {
+      if (traitsGranted[j].StartsWith("ACMod#"))
+      {
+        ACModTrait acmod = (ACModTrait)TraitFactory.FromText(traitsGranted[j], item);
+        acmod.ArmourMod += 1;
+
+        traitsGranted.RemoveAt(j);
+        traitsGranted.Insert(j, acmod.AsText());
+        enchanted = true;
+        msg = $"{item.FullName.DefArticle().Capitalize()} shines faintly and hums with new magic!";
+
+        foreach (Trait t in actor.Traits)
+        {
+          if (t is ACModTrait active && active.SourceId == item.ID)
+            active.ArmourMod = acmod.ArmourMod;
+        }
+      }
+    }
+    
+    if (enchanted)
+    {
+      grantsTrait.TraitsGranted = [.. traitsGranted];
+      return (true, msg);
+    }
+
+    return (false, "The item glows briefly, but otherwise you discern no effect.");
+  }
+
+  static (bool, string) Enchant(Item item, Actor actor)
+  {    
+    if (item.Type == ItemType.Weapon && !item.HasTrait<WeaponBonusTrait>())
+      item.Traits.Add(new WeaponBonusTrait() { Bonus = 0, SourceId = item.ID });
+
+    foreach (Trait trait in item.Traits)
+    {
+      if (trait is WeaponBonusTrait wbt)
+      {
+        wbt.Bonus += 1;
+        return (true, $"{item.FullName.DefArticle().Capitalize()} shines faintly and becomes more effective!");
+      }
+      else if (trait is ArmourTrait at)
+      {
+        at.Bonus += 1;
+        return (true, $"{item.FullName.DefArticle().Capitalize()} shines faintly and becomes stronger!");
+      }
+      else if (trait is ACModTrait acMod)
+      {
+        acMod.ArmourMod += 1;
+        return (true, $"{item.FullName.DefArticle().Capitalize()} shines faintly and hums with new magic!");
+      }
+      else if (trait is GrantsTrait grantsTrait)
+      {
+        return EnchantGrantsTrait(item, grantsTrait, actor);
+      }
+    }
+
+    return (false, "The item glows briefly, but otherwise you discern no effect.");
   }
 
   public static int CountUpgrades(Item item)

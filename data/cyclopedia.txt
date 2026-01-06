@@ -609,10 +609,13 @@ ring of water breathing
 They say if you hold it to your ear, you can hear the ocean.
 #
 potion of descent
-The liquid inside this bottle provides immediate access to the level below. Often involuntarily.
+The liquid inside this bottle provides immediate access to the level below. Potentially involuntarily.
 #
 chasm
 A hole in the floor leading to the level below.
 #
 lembas
 A famous brand of elven cookie, typically sold by the Elf Guides as a fundraiser. This comforting food from your childhood is both nostalgic and soothing.
+#
+scroll of enchanting
+"In a gold rush, the real zorkmids are in selling shovels" - Ebenezum\n\nSome wizards adventure, some sell supplies to adventurers.
