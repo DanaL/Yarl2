@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Runtime.Intrinsics.X86;
-
 namespace Yarl2;
 
 abstract class Action

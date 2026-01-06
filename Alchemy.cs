@@ -116,6 +116,22 @@ class Alchemy
             active.ArmourMod = acmod.ArmourMod;
         }
       }
+      else if (traitsGranted[j].StartsWith("StatBuff"))
+      {
+        StatBuffTrait buff = (StatBuffTrait)TraitFactory.FromText(traitsGranted[j], item);
+        buff.Amt += buff.Attr == Attribute.HP ? 5 : 1;
+
+        traitsGranted.RemoveAt(j);
+        traitsGranted.Insert(j, buff.AsText());
+        enchanted = true;
+        msg = $"{item.FullName.DefArticle().Capitalize()} shines faintly and hums with new magic!";
+
+        foreach (Trait t in actor.Traits)
+        {
+          if (t is StatBuffTrait active && active.SourceId == item.ID)
+            active.Amt = buff.Amt;
+        }
+      }
     }
     
     if (enchanted)
@@ -152,7 +168,7 @@ class Alchemy
       else if (trait is GrantsTrait grantsTrait)
       {
         return EnchantGrantsTrait(item, grantsTrait, actor);
-      }
+      }      
     }
 
     return (false, "The item glows briefly, but otherwise you discern no effect.");
