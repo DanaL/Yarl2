@@ -429,6 +429,16 @@ class UseTurnIntoBatsPower(Power power) : UsePower(power)
 {
   protected override bool Available(Mob mob, GameState gs)
   {
+    int hp = 1, maxHp = 1;
+    if (mob.Stats.TryGetValue(Attribute.HP, out var currHp))
+    {
+      hp = currHp.Curr;
+      maxHp = currHp.Max;
+
+      if (hp >= maxHp / 3)
+        return false;
+    }
+    
     if (mob.LastPowerUse.TryGetValue(Power.Name, out ulong lastUse))
     {
       if (gs.Turn < lastUse + Power.Cooldown)

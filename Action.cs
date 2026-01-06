@@ -180,6 +180,7 @@ class TransFormIntoBatsAction(GameState gs, Actor actor) : Action(gs, actor)
     for (int j = 0; j < int.Min(numOfBats, batLocs.Count); j++)
     {
       Actor bat = MonsterFactory.Get("dire bat", GameState.ObjDb, GameState.Rng);
+      bat.BecomeFrightened(GameState);
       GameState.ObjDb.AddNewActor(bat, batLocs[j]);
       bats.Add(bat);
       GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, batLocs[j], Colours.DARK_GREY, Colours.BLACK, '*'));
