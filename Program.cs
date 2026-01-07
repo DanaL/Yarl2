@@ -36,7 +36,7 @@ try
     switch (gameSetup)
     {
       case SetupType.Quit:
-        state = RunningState.Quitting;
+        state = RunningState.ExitGame;
         break;
       case SetupType.NewGame:
         try
@@ -45,7 +45,7 @@ try
           
           display.InTutorial = false;
           if (gameState is null)
-            state = RunningState.Quitting;
+            state = RunningState.ExitGame;
         }
         catch (GameNotLoadedException)
         {
@@ -63,7 +63,7 @@ try
           gameState = new GameLoader(display).Load(options);
           
           if (gameState is null)
-            state = RunningState.Quitting;
+            state = RunningState.ExitGame;
         }
         catch (GameNotLoadedException)
         {
@@ -76,12 +76,16 @@ try
       break;
 
     if (gameState is not null)
-      state = display.GameLoop(gameState);
-
+    {
+      display.State = UIState.InGame;
+      GameLoop(display, gameState);
+    }
+    display.Reset();
+    
     display.CheatSheetMode = CheatSheetMode.Messages;
     display.MessageHistory = [];
   }
-  while (state != RunningState.Quitting);
+  while (state != RunningState.ExitGame);
 }
 catch (QuitGameException)
 {
@@ -116,11 +120,212 @@ catch (QuitGameException)
 //   display.BlockForInput(null);
 // }
 
+static void GameLoop(UserInterface ui, GameState gameState)
+{
+  Options opts = gameState.Options;
+  if (opts.DefaultMoveHints)
+    ui.CheatSheetMode = CheatSheetMode.MvMixed;
+
+  ui.SetInputController(new PlayerCommandController(gameState));  
+  ui.RegisterAnimation(new CloudAnimation(ui, gameState));
+  ui.RegisterAnimation(new RoofAnimation(gameState));
+  ui.RegisterAnimation(new LavaAnimation(ui, gameState));
+
+  DateTime refresh = DateTime.UtcNow;
+
+  while (true)
+  {
+    bool quitting = ui.CheckForInput(gameState);
+    if (quitting)
+      break;
+
+    try
+    {
+      if (gameState.NextPerformer() is Actor actor)
+      {
+        gameState.ActorPreTurn(actor);
+        actor.TakeTurn(gameState);
+        if (actor.Energy >= 1.0)
+          gameState.PushPerformer(actor);
+      }
+
+      ui.WriteAlerts();
+    }
+    catch (QuitGameException)
+    {
+      // If the players quits the game while playing, we bump them 
+      // back to the main menu. (Whereas saving also exits the program)
+      return;
+    }
+    catch (SaveGameException)
+    {
+      ui.WriteAlerts();
+
+      bool success;
+      try
+      {
+        Serialize.WriteSaveGame(gameState, ui);
+        Serialize.WriteOptions(gameState.Options);
+
+        success = true;
+
+        ui.SetLongMessage([" Be seeing you..."]);
+        ui.BlockForInput(gameState);
+        success = true;
+      }
+      catch (Exception ex)
+      {
+        ui.SetPopup(new Popup(ex.Message, "", -1, -1));
+        success = false;
+      }
+      
+      if (success)
+      {
+        throw new QuitGameException();
+      }
+    }
+    catch (PlayerKilledException pke)
+    {
+      string s = $"Oh noes you've been killed by {pke.Messages[0]} :(";
+      if (pke.Messages[0] == "drowning")
+        s = "Oh noes you have drowned :(";
+
+      if (gameState.Player.HasTrait<ParalyzedTrait>())
+        pke.Messages.Add("while paralyzed");
+      ui.SetPopup(new Popup(s, "", -1, -1));
+      ui.WriteAlerts();
+      ui.BlockFoResponse(gameState);
+      DrawGravestone(ui, gameState, pke.Messages);
+
+      return;
+    }
+    catch (VictoryException)
+    {
+      string s = "As you read the final incantation, the remaining chain becomes infused with the binding spell.\n\nArioch belows in rage as his arcane prison is renewed once more!";
+      ui.SetPopup(new Popup(s, "", -1, -1));
+      ui.WriteAlerts();
+      ui.BlockFoResponse(gameState);
+
+      Victory.VictoryScreen(gameState);
+
+      return;
+    }
+
+    TimeSpan elapsed = DateTime.UtcNow - refresh;
+    int totalMs = (int)elapsed.TotalMilliseconds;
+    if (totalMs >= 25)
+    {
+      ui.RefreshScreen(gameState);
+
+      refresh = DateTime.UtcNow;
+    }
+  }
+}
+
+static void DrawGravestone(UserInterface ui, GameState gameState, List<string> messages)
+{
+  List<string> text =
+    [
+      "       ",
+           "         __________________",
+          @"        /                  \",
+          @"       /       RIP          \   ___",
+          @"      /                      \ /   \",
+          @"     /                        \|    |       __",
+          @"    |       killed by:         |___|       /  \",
+          @"    |                          |         |     |",
+          @"    |                          |         |_____|",
+          @"    |                          |      ___",
+          @"    |                          |     /   \",
+          @"    |                          |    |     |",
+          @"    |                          |    |     |",
+          @"    *       *         *        |*  _*__)__|_",
+          @"____)/\_____(\__/____\(/_______\)/_|(/____"
+      ];
+
+  text[5] = $@"     /{gameState.Player.Name.PadLeft((21 + gameState.Player.Name.Length) / 2).PadRight(24)}\    |        __";
+  text[7] = $@"    |{messages[0].PadLeft((22 + messages[0].Length) / 2),-26}|          |    |";
+
+  int finalLevel = gameState.CurrLevel + 1;
+
+  string dn;
+
+  if (gameState.Player.Traits.OfType<SwallowedTrait>().FirstOrDefault() is SwallowedTrait swt)
+  {
+    dn = " in something's belly";
+
+    if (gameState.ObjDb.GetObj(swt.SwallowerID) is Actor swallower)
+      finalLevel = swallower.Loc.Level + 1;
+  }
+  else
+  {
+    dn = $"in {gameState.CurrentDungeon.Name}";
+  }
+
+  int x = (26 - dn.Length) / 2;
+  dn = dn.PadLeft(26 - x, ' ');
+  dn = dn.PadRight(26, ' ');
+  text[8] = $@"    |{dn}|          |____|";
+
+  string lvlTxt = $"on level {finalLevel}";
+  lvlTxt = $@"    |{lvlTxt.PadLeft((22 + lvlTxt.Length) / 2),-26}|                ";
+  text.Insert(9, lvlTxt);
+
+  if (messages.Count > 1)
+  {
+    string s = $@"    |{messages[1].PadLeft((22 + messages[1].Length) / 2),-26}|          |    |";
+    text.Insert(8, s);
+  }
+
+  text.Add("");
+  text.Add(" See your inventory? (y/n)");
+
+  ui.ClosePopup();
+  ui.CheatSheetMode = CheatSheetMode.Messages;
+  ui.SqsOnScreen = new Sqr[UserInterface.ScreenHeight, UserInterface.ScreenWidth];
+  ui.ClearSqsOnScreen();
+  for (int r = 0; r < text.Count; r++)
+  {
+    string row = text[r];
+    for (int c = 0; c < row.Length; c++)
+    {
+      Colour colour = Colours.WHITE;
+      char ch = row[c];
+      if (r < text.Count - 1 && (ch == '(' || ch == ')'))
+        colour = Colours.GREEN;
+      else if (r == text.Count - 3 && (ch == '|' || ch == '\\' || ch == '/'))
+        colour = Colours.GREEN;
+      else if (ch == '*')
+      {
+        colour = gameState.Rng.Next(4) switch
+        {
+          0 => Colours.LIGHT_PURPLE,
+          1 => Colours.BLUE,
+          2 => Colours.PINK,
+          _ => Colours.YELLOW
+        };
+      }
+      Sqr s = new(colour, Colours.BLACK, ch);
+      ui.SqsOnScreen[r + 1, c + 1] = s;
+    }
+  }
+
+  if (ui.Confirmation("", gameState))
+  {
+    ui.ClosePopup();
+    ui.ClearSqsOnScreen();
+    gameState.Player.Inventory.ShowMenu(gameState.UIRef(), new InventoryOptions() { Title = "You were carrying", Options = InvOption.MentionMoney });
+    ui.BlockForInput(gameState);
+    ui.CloseMenu();
+  }
+  //BlockForInput(gameState);
+}
+
 namespace Yarl2
 {
   enum RunningState
   {
-    Playing, Quitting, GameOver, Pregame
+    Playing, ExitGame, GameOver, Pregame
   }
 
   public class Configuration
