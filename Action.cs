@@ -4436,7 +4436,7 @@ class HighlightLocAction(GameState gs, Actor actor) : Action(gs, actor)
   {
     string name;
     string desc = "I have no further info about this object. This is probably Dana's fault.";
-
+    bool disguised = false;
     int hpCurr = -1;
     int hpMax = -1;
     if (GameState!.ObjDb.Occupant(loc) is Actor actor)
@@ -4452,6 +4452,7 @@ class HighlightLocAction(GameState gs, Actor actor) : Action(gs, actor)
         name = dt.DisguiseForm.IndefArticle().Capitalize();
         if (_cyclopedia.TryGetValue(dt.DisguiseForm, out var v))
           desc = v.Text;
+        disguised = true;
       }
       else if (actor.HasTrait<VillagerTrait>())
       {
@@ -4471,33 +4472,36 @@ class HighlightLocAction(GameState gs, Actor actor) : Action(gs, actor)
         hpMax = hp.Max;
       }
 
-      string extraInfo = "";
-      foreach (Trait t in actor.Traits)
+      if (!disguised)
       {
-        if (t is PoisonedTrait)
-          extraInfo += "[GREEN Poisoned]. ";
-        else if (t is ConfusedTrait)
-          extraInfo += "[YELLOW Confused]. ";
-        else if (t is SleepingTrait)
-          extraInfo += "[PINK Sleeping]. ";
-        else if (t is TipsyTrait)
-          extraInfo += "[PINK Tipsy]. ";
-        else if (t is FrightenedTrait)
-          extraInfo += "[YELLOW Frightened]. ";
-      }
+        string extraInfo = "";
+        foreach (Trait t in actor.Traits)
+        {
+          if (t is PoisonedTrait)
+            extraInfo += "[GREEN Poisoned]. ";
+          else if (t is ConfusedTrait)
+            extraInfo += "[YELLOW Confused]. ";
+          else if (t is SleepingTrait)
+            extraInfo += "[PINK Sleeping]. ";
+          else if (t is TipsyTrait)
+            extraInfo += "[PINK Tipsy]. ";
+          else if (t is FrightenedTrait)
+            extraInfo += "[YELLOW Frightened]. ";
+        }
 
-      if (actor.Stats.TryGetValue(Attribute.MobAttitude, out var attitude))
-      {
-        if (attitude.Curr == Mob.INDIFFERENT)
-          extraInfo += "[WHITE Indifferent]. ";
-        else if (attitude.Curr == Mob.INACTIVE)
-          extraInfo += "[WHITE Inactive]. ";
-      }
+        if (actor.Stats.TryGetValue(Attribute.MobAttitude, out var attitude))
+        {
+          if (attitude.Curr == Mob.INDIFFERENT)
+            extraInfo += "[WHITE Indifferent]. ";
+          else if (attitude.Curr == Mob.INACTIVE)
+            extraInfo += "[WHITE Inactive]. ";
+        }
 
-      extraInfo = extraInfo.Trim();
-      if (extraInfo.Length > 0)
-      {
-        desc += "\n\n" + extraInfo;
+        extraInfo = extraInfo.Trim();
+        if (extraInfo.Length > 0)
+        {
+          desc += "\n\n" + extraInfo;
+        }
       }
 
       return new LocDetails(name, desc, actor.Glyph.Ch, hpCurr, hpMax);
