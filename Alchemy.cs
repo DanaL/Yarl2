@@ -134,6 +134,29 @@ class Alchemy
             active.Amt = buff.Amt;
             actor.Stats[active.Attr] = new Stat(actor.Stats[active.Attr].Curr + amt);
             actor.CalcHP();
+            break;
+          }
+        }
+      }
+      else if (traitsGranted[j].StartsWith("Regeneration"))
+      {
+        RegenerationTrait regen = (RegenerationTrait)TraitFactory.FromText(traitsGranted[j], item);
+        regen.SourceId = item.ID;
+        if (regen.Rate < 3) 
+        {
+          regen.Rate += 1;
+          traitsGranted.RemoveAt(j);
+          traitsGranted.Insert(j, regen.AsText());
+          enchanted = true;
+          msg = $"{item.FullName.DefArticle().Capitalize()} shines faintly and hums with new magic!";
+        
+          foreach (Trait t in actor.Traits)
+          {
+            if (t is RegenerationTrait active && active.SourceId == item.ID)
+            {            
+              active.Rate = regen.Rate;
+              break;
+            }
           }
         }
       }
