@@ -4503,7 +4503,11 @@ class HighlightLocAction(GameState gs, Actor actor) : Action(gs, actor)
           desc += "\n\n" + extraInfo;
         }
       }
-
+      else if (name == "Zorkmid")
+      {
+        name = "Zorkmids";
+      }
+      
       return new LocDetails(name, desc, actor.Glyph.Ch, hpCurr, hpMax);
     }
 

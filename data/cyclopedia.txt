@@ -622,3 +622,6 @@ scroll of enchanting
 #
 scroll of knock
 Door-to-door sales-wizards found people often would not answer their doors so they developed these scrolls, which are now illegal in many realms.
+#
+mimic
+Monsters that disguise themselves as enticing treasure to lure prey (adventurers) close. It is debated if mimics are a product of wizardry or natural selection.

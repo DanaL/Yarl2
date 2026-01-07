@@ -1975,7 +1975,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "destress" => new UseResult(new DestressAction(gs, gs.Player, 125)),
     "enchant" => new UseResult(new InventoryChoiceAction(gs, user,
           new InventoryOptions() { Title = "Use on which item?" },
-              new EnchantItemAction(gs, user, item)    
+              new EnchantItemAction(gs, user, item!)    
       )),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };

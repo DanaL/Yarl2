@@ -400,7 +400,7 @@ class DebugCommand(GameState gs)
       Actor monster;
 
       if (monsterName == "mimic")
-        monster = MonsterFactory.Mimic();
+        monster = MonsterFactory.Mimic(true, _gs.Rng);
       else
         monster = MonsterFactory.Get(monsterName, _gs.ObjDb, _gs.Rng);
       

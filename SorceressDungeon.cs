@@ -419,7 +419,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
       {
         Loc loc = doors[rng.Next(doors.Count)];
         map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
-        Actor mimic = MonsterFactory.Mimic();
+        Actor mimic = MonsterFactory.Mimic(false, rng);
         objDb.AddNewActor(mimic, loc);
       }
 

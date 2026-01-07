@@ -288,6 +288,12 @@ class ItemFactory
     return item;
   }
 
+  public static (string, Glyph) MimicDetails(Rng rng)
+  {    
+    ItemTemplate template = Items.Values.ElementAt(rng.Next(Items.Count));
+    return (template.Name, template.Glyph);
+  }
+
   public static Item Get(ItemNames name, GameObjectDB objDB)
   {
     Item item;

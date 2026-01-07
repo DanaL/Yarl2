@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System;
+
 namespace Yarl2;
 
 // Actor should really be an abstract class but abstract classes seemed
@@ -998,12 +1000,22 @@ class MonsterFactory
   }
 
   // I didn't put mimics in the monster data file because they're going they
-  // need to be placed and configred specifcally anyhow.
-  public static Actor Mimic()
+  // need to be placed and configured specifcally anyhow.
+  public static Actor Mimic(bool random, Rng rng)
   {
-    Glyph doorGlyph = new('+', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false);
-    
-    Mob mimic = new() { Name = "mimic", Recovery = 1.0, Glyph = doorGlyph };
+    Glyph glyph;
+    string name;
+    if (random)
+    {
+      (name, glyph) = ItemFactory.MimicDetails(rng);
+    }
+    else
+    {
+      glyph = new('+', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false);
+      name = "closed door";
+    }
+             
+    Mob mimic = new() { Name = "mimic", Recovery = 1.0, Glyph = glyph };
     mimic.Traits.Add(new BehaviourTreeTrait() { Plan = "MimicPlan" });
 
     mimic.Stats.Add(Attribute.HP, new Stat(40));
@@ -1020,9 +1032,9 @@ class MonsterFactory
 
     DisguiseTrait disguise = new()
     {
-      Disguise = doorGlyph,
+      Disguise = glyph,
       TrueForm = new Glyph('m', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, false),
-      DisguiseForm = "closed door",
+      DisguiseForm = name,
       Disguised = true
     };
     mimic.Traits.Add(disguise);
