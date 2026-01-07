@@ -3249,6 +3249,7 @@ class StatBuffTrait : TemporaryTrait
       {
         int curr = player.Stats[Attribute.HP].Curr;
         int maxHP = player.CalcMaxHP();
+        player.Stats[Attribute.HP].SetMax(maxHP);
         player.Stats[Attribute.HP].SetCurr(int.Min(curr, maxHP));
       }
 
