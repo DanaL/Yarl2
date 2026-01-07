@@ -242,6 +242,13 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
         roomIds.RemoveAt(0);
       }
 
+      if (level >= 4 && rng.NextDouble() < 0.10)
+      {
+        // For mimic groups, we don't take their rooms out of rotation
+        int roomId = roomIds[rng.Next(roomIds.Count)];
+        Rooms.AddMimicGroup(rooms[roomId], DungeonId, level, objDb, rng);
+      }
+
       // These aren't rooms really, but decorations/features
       if (level > 0 && rng.NextDouble() < 0.25)
       {

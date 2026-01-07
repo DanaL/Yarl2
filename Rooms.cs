@@ -1033,6 +1033,42 @@ class Rooms
     return walls;
   }
 
+  public static void AddMimicGroup(List<(int, int)> room, int dungeonId, int level, GameObjectDB objDb, Rng rng)
+  {
+    room.Shuffle(rng);
+
+    List<(int, int)> nearby = [];
+    Loc loc = Loc.Nowhere;
+    foreach (var sq in room)
+    {
+      loc = new(dungeonId, level, sq.Item1, sq.Item2);
+      if (UseableSq(loc))
+      {
+        nearby = [..room.Where(sq2 => Util.Distance(loc.Row, loc.Col, sq2.Item1, sq2.Item2) <= 2
+                        && !(sq2.Item1 == loc.Row && sq2.Item2 == loc.Col) && UseableSq(new(dungeonId, level, sq2.Item1, sq2.Item2)))];
+        break;
+      }
+    }
+
+    if (loc != Loc.Nowhere)
+    {
+      objDb.AddNewActor(MonsterFactory.Mimic(true, rng), loc);
+      if (nearby.Count > 0)
+      {
+        objDb.AddNewActor(MonsterFactory.Mimic(true, rng), new(dungeonId, level, nearby[0].Item1, nearby[0].Item2));
+      }
+      if (nearby.Count > 1)
+      {
+        if (rng.NextDouble() < 0.6)
+          objDb.AddNewActor(MonsterFactory.Mimic(true, rng), new(dungeonId, level, nearby[1].Item1, nearby[1].Item2));
+        else
+          objDb.SetToLoc(new(dungeonId, level, nearby[1].Item1, nearby[1].Item2), Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng));
+      }
+    }
+    
+    bool UseableSq(Loc loc) => !(objDb.AreBlockersAtLoc(loc) || objDb.HazardsAtLoc(loc));
+  }
+
   public static void MakeMinedChamber(Map map, List<(int, int)> room, int dungeonId, int level, FactDb factDb, GameObjectDB objDb, Rng rng)
   {
     // Find good squares to be mined.
