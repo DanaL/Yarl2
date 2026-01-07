@@ -29,7 +29,7 @@ class Treasure
       ItemNames.POTION_COLD_RES, ItemNames.POTION_FIRE_RES, ItemNames.POTION_MIND_READING, ItemNames.WAND_MAGIC_MISSILES,
       ItemNames.WAND_HEAL_MONSTER, ItemNames.HELMET, ItemNames.SHIELD, ItemNames.ZORKMIDS_MEDIOCRE, ItemNames.SCROLL_KNOCK,
       ItemNames.SCROLL_KNOCK, ItemNames.LOCK_PICK, ItemNames.VIAL_OF_POISON, ItemNames.SCROLL_PROTECTION,
-      ItemNames.SCROLL_DISARM, ItemNames.BEETLE_CARAPACE, ItemNames.LEATHER_GLOVES,
+      ItemNames.SCROLL_DISARM, ItemNames.BEETLE_CARAPACE, ItemNames.LEATHER_GLOVES, ItemNames.MITHRIL_ORE,
       ItemNames.SCROLL_TREASURE_DETECTION, ItemNames.SCROLL_TRAP_DETECTION, ItemNames.SKELETON_KEY,
       ItemNames.POTION_HARDINESS, ItemNames.POTION_HEROISM, ItemNames.POTION_DESCENT, ItemNames.SCROLL_STAINLESS
   ]; 
@@ -43,7 +43,7 @@ class Treasure
       ItemNames.SPEAR, ItemNames.WAND_MAGIC_MISSILES, ItemNames.WAND_HEAL_MONSTER, ItemNames.LEATHER_GLOVES,
       ItemNames.WAND_FROST, ItemNames.WAND_SWAP, ItemNames.RING_OF_PROTECTION, ItemNames.WAND_SLOW_MONSTER,
       ItemNames.POTION_OF_LEVITATION, ItemNames.SCROLL_KNOCK, ItemNames.LOCK_PICK, ItemNames.WAND_FIREBALLS,
-      ItemNames.VIAL_OF_POISON, ItemNames.SCROLL_PROTECTION, ItemNames.LEMBAS,
+      ItemNames.VIAL_OF_POISON, ItemNames.SCROLL_PROTECTION, ItemNames.LEMBAS, ItemNames.SCROLL_ENCHANTING,
       ItemNames.GUIDE_AXES, ItemNames.GUIDE_STABBY, ItemNames.GUIDE_SWORDS, ItemNames.BEETLE_CARAPACE,
       ItemNames.HILL_GIANT_ESSENCE, ItemNames.FROST_GIANT_ESSENCE, ItemNames.FIRE_GIANT_ESSENCE,
       ItemNames.SCROLL_DISARM, ItemNames.GUIDE_BOWS, ItemNames.TROLL_BROOCH, ItemNames.SMOULDERING_CHARM,
@@ -74,7 +74,8 @@ class Treasure
     ItemNames.WIND_FAN,
     ItemNames.TINCTURE_CELERITY,
     ItemNames.POTION_DESCENT,
-    ItemNames.SCROLL_STAINLESS
+    ItemNames.SCROLL_STAINLESS,
+    ItemNames.SCROLL_ENCHANTING
   ];
 
   public static Item GetTalisman(Rng rng, GameObjectDB objDb)
