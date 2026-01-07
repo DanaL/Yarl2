@@ -619,3 +619,6 @@ A famous brand of elven cookie, typically sold by the Elf Guides as a fundraiser
 #
 scroll of enchanting
 "In a gold rush, the real zorkmids are in selling shovels" - Ebenezum\n\nSome wizards adventure, some sell supplies to adventurers.
+#
+scroll of knock
+Door-to-door saleswizards found people often would not answer their doors so they developed these scrolls, which are now illegal in many realms.
