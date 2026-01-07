@@ -160,6 +160,28 @@ class Alchemy
           }
         }
       }
+      else if (traitsGranted[j].StartsWith("Dodge"))
+      {
+        DodgeTrait dodge = (DodgeTrait)TraitFactory.FromText(traitsGranted[j], item);
+        dodge.SourceId = item.ID;
+        if (dodge.Rate < 51) 
+        {
+          dodge.Rate += 3;
+          traitsGranted.RemoveAt(j);
+          traitsGranted.Insert(j, dodge.AsText());
+          enchanted = true;
+          msg = $"{item.FullName.DefArticle().Capitalize()} shines faintly and hums with new magic!";
+        
+          foreach (Trait t in actor.Traits)
+          {
+            if (t is DodgeTrait active && active.SourceId == item.ID)
+            {            
+              active.Rate = dodge.Rate;
+              break;
+            }
+          }
+        }
+      }
     }
     
     if (enchanted)
