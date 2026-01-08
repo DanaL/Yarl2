@@ -57,6 +57,10 @@ class MoveAction(GameState gameState, Actor actor, Loc loc, bool involuntary) : 
       if (waterWalking || confused || involuntary || canSwim)
         return true;
     }
+    else if (actor is Player && tile.Type == TileType.DeepWater && (confused || involuntary))
+    {
+      return true;
+    }
     else if (tile.Type == TileType.Chasm && (confused || involuntary))
     {
       return true;
