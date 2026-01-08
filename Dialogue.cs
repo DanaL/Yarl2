@@ -769,6 +769,51 @@ class DialogueInterpreter
   public DialogueInterpreter() { }
   static readonly int HOLY_WATER_PRICE = 20;
 
+  public static List<string> ValidateDialogueFiles()
+  {
+    List<string> errors = [];
+
+    string dialogueDir = "dialogue";
+    if (!Directory.Exists(dialogueDir))
+    {
+      // Check if we're in a macOS app bundle
+      string? exePath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+      if (exePath is not null)
+      {
+        string altPath = Path.Combine(exePath, "..", "Resources", "dialogue");
+        if (Directory.Exists(altPath))
+          dialogueDir = altPath;
+      }
+    }
+
+    if (!Directory.Exists(dialogueDir))
+    {
+      errors.Add("dialogue directory not found!");
+      return errors;
+    }
+
+    string[] files = Directory.GetFiles(dialogueDir, "*.txt");
+
+    foreach (string file in files)
+    {
+      try
+      {
+        string txt = File.ReadAllText(file);
+        ScriptScanner scanner = new(txt);
+        List<ScriptToken> tokens = scanner.ScanTokens();
+        ScriptParser parser = new(tokens);
+        parser.Parse();
+      }
+      catch (Exception ex)
+      {
+        string filename = Path.GetFileName(file);
+        errors.Add($"{filename}: {ex.Message}");
+      }
+    }
+
+    return errors;
+  }
+
   public (string, string) Run(string filename, Actor mob, GameState gs)
   {
     string path = ResourcePath.GetDialogueFilePath(filename);

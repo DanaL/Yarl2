@@ -22,6 +22,20 @@ if (options.Display == "Bearlib")
 else
   display = new RaylibUserInterface($"Dana's Delve {Constants.VERSION} + Raylib", options);
 
+// Validate dialogue files at startup
+List<string> dialogueErrors = DialogueInterpreter.ValidateDialogueFiles();
+if (dialogueErrors.Count > 0)
+{
+  List<string> errorMessage = ["Dialogue file validation errors found:", ""];
+  errorMessage.AddRange(dialogueErrors);
+  errorMessage.Add("");
+  errorMessage.Add("Press any key to continue anyway (errors will occur during gameplay)");
+
+  display.SetLongMessage(errorMessage);
+  display.BlockForInput(null);
+  display.ClearLongMessage();
+}
+
 try
 {
   RunningState state = RunningState.Pregame;
