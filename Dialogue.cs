@@ -300,7 +300,7 @@ class ScriptParser(List<ScriptToken> tokens)
     Consume(TokenType.OPTION);
 
     if (!Check(TokenType.STRING))
-      throw new Exception("Expected text for option.");
+      throw new Exception("Expected text for option");
     
     string str = Peek().Lexeme;
     Advance();
@@ -308,7 +308,7 @@ class ScriptParser(List<ScriptToken> tokens)
     ScriptExpr expr = Expr();
 
     if (expr is ScriptAtomic)
-      throw new Exception("Cannot have atomic expr as action for option.");
+      throw new Exception("Cannot have atomic expr as action for option");
     
     Consume(TokenType.RIGHT_PAREN);
 
@@ -422,7 +422,7 @@ class ScriptParser(List<ScriptToken> tokens)
     do
     {
       if (IsAtEnd())
-        throw new Exception("Unterminated and.");
+        throw new Exception("Unterminated and");
 
       ScriptExpr expr = Expr();
       conditions.Add(expr);
@@ -441,7 +441,7 @@ class ScriptParser(List<ScriptToken> tokens)
     do
     {
       if (IsAtEnd())
-        throw new Exception("Unterminated and.");
+        throw new Exception("Unterminated or");
 
       ScriptExpr expr = Expr();
       conditions.Add(expr);
@@ -461,7 +461,7 @@ class ScriptParser(List<ScriptToken> tokens)
     do
     {
       if (IsAtEnd())
-        throw new Exception("Unterminated conditional.");
+        throw new Exception("Unterminated conditional");
 
       Consume(TokenType.LEFT_PAREN);
 
@@ -470,7 +470,7 @@ class ScriptParser(List<ScriptToken> tokens)
         Advance();
 
         if (elseClause is not null)
-          throw new Exception("Cannot have multiple else clauses in cond.");
+          throw new Exception("Cannot have multiple else clauses in cond");
         
         elseClause = new ScriptBranch(new ScriptBool(true), Expr());
         Consume(TokenType.RIGHT_PAREN);
@@ -771,28 +771,16 @@ class DialogueInterpreter
 
   public static List<string> ValidateDialogueFiles()
   {
-    List<string> errors = [];
+    List<string> errors = [];    
+    string path = ResourcePath.ResourceFolder("dialogue");
 
-    string dialogueDir = "dialogue";
-    if (!Directory.Exists(dialogueDir))
-    {
-      // Check if we're in a macOS app bundle
-      string? exePath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-      if (exePath is not null)
-      {
-        string altPath = Path.Combine(exePath, "..", "Resources", "dialogue");
-        if (Directory.Exists(altPath))
-          dialogueDir = altPath;
-      }
-    }
-
-    if (!Directory.Exists(dialogueDir))
+    if (!Directory.Exists(path))
     {
       errors.Add("dialogue directory not found!");
       return errors;
     }
 
-    string[] files = Directory.GetFiles(dialogueDir, "*.txt");
+    string[] files = Directory.GetFiles(path, "*.txt");
 
     foreach (string file in files)
     {
@@ -807,7 +795,7 @@ class DialogueInterpreter
       catch (Exception ex)
       {
         string filename = Path.GetFileName(file);
-        errors.Add($"{filename}: {ex.Message}");
+        errors.Add($"{filename}: [BRIGHTRED {ex.Message}]");
       }
     }
 

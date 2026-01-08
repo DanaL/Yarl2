@@ -22,18 +22,22 @@ if (options.Display == "Bearlib")
 else
   display = new RaylibUserInterface($"Dana's Delve {Constants.VERSION} + Raylib", options);
 
-// Validate dialogue files at startup
 List<string> dialogueErrors = DialogueInterpreter.ValidateDialogueFiles();
 if (dialogueErrors.Count > 0)
 {
-  List<string> errorMessage = ["Dialogue file validation errors found:", ""];
+  List<string> errorMessage = ["Dialogue script file errors found:", ""];
   errorMessage.AddRange(dialogueErrors);
   errorMessage.Add("");
-  errorMessage.Add("Press any key to continue anyway (errors will occur during gameplay)");
+  errorMessage.Add("Unfortunately, with damaged script files, delve cannot run.");
+  errorMessage.Add("");
+  errorMessage.Add("Please fix the errors in the script files or perhaps download a fresh");
+  errorMessage.Add("copy of delve!");
 
   display.SetLongMessage(errorMessage);
   display.BlockForInput(null);
   display.ClearLongMessage();
+
+  Environment.Exit(1);
 }
 
 try

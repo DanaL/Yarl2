@@ -1484,6 +1484,28 @@ public static class ResourcePath
     return FindResourcePath("dialogue", filename);
   }
 
+  public static string ResourceFolder(string folder)
+  {
+    string folderPath = folder;
+    if (OperatingSystem.IsMacOS())
+    {
+      string exePath = AppDomain.CurrentDomain.BaseDirectory;
+
+      if (exePath.Contains(".app/Contents/MacOS"))
+      {
+        string baseDir = exePath.TrimEnd(Path.DirectorySeparatorChar);
+        string? contentsDir = Path.GetDirectoryName(baseDir);
+
+        if (contentsDir is not null)
+        {
+          folderPath = Path.Combine(contentsDir, folder); 
+        }
+      }      
+    }
+
+    return folderPath;
+  }
+
   static string FindResourcePath(string folder, string filename)
   {
     string path = string.IsNullOrEmpty(folder)
