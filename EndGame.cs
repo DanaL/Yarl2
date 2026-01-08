@@ -598,7 +598,22 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       dungeon.AddMap(map);
 
     PopulateDungeon(dungeon, gs.Rng, gs.ObjDb);
-    
+    List<Loc> lvlOneIslands = [.. IslandLocs];
+    lvlOneIslands.Shuffle(gs.Rng);
+    int count = 0;
+    foreach (Loc islandLoc in  lvlOneIslands)
+    {
+      if (levels[0].TileAt(islandLoc.Row, islandLoc.Col).Type == TileType.DungeonFloor && !gs.ObjDb.Occupied(islandLoc))
+      {
+        Actor spearGuy = MonsterFactory.Get("duergar spearfisher", gs.ObjDb, gs.Rng);
+        gs.ObjDb.AddNewActor(spearGuy, islandLoc);
+        ++count;
+      }
+
+      if (count >= 2)
+        break;
+    }
+
     return dungeon;
   }
 }
