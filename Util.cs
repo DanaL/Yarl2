@@ -231,7 +231,8 @@ static class Constants
   public static Sqr ROOF = new(Colours.ROOF_TILE, Colours.BLACK, '░');
   public static Sqr INK = new(Colours.BLACK, Colours.BLACK, '░');
   public static Colour NO_COLOUR = new(0, 0, 0, 0);
-
+  public static readonly GameEvent NO_EVENT = new(GameEventType.NoEvent, '\0');
+  
   public const int WILDERNESS_WIDTH = 129;
 
   public static int MQ_START_OF_GAME = 0;

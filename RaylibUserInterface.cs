@@ -126,7 +126,7 @@ class RaylibUserInterface : UserInterface
       return EventQ.Dequeue();
     }
 
-    return new GameEvent(GameEventType.NoEvent, '\0');
+    return Constants.NO_EVENT;
   }
 
   Color ToRaylibColor(Colour colour)

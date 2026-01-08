@@ -128,7 +128,7 @@ internal class BLUserInterface : UserInterface, IDisposable
         return new GameEvent(GameEventType.KeyInput, value);
     }
 
-    return new GameEvent(GameEventType.NoEvent, '\0');
+    return Constants.NO_EVENT;
   }
 
   public override void WriteLine(string message, int lineNum, int col, int width, Colour textColour)
