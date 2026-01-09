@@ -257,8 +257,9 @@ static void DrawGravestone(UserInterface ui, GameState gameState, List<string> m
           @"    |                          |     /   \",
           @"    |                          |    |     |",
           @"    |                          |    |     |",
-          @"    *       *         *        |*  _*__)__|_",
-          @"____)/\_____(\__/____\(/_______\)/_|(/____"
+          @"    *       *                  |*  _*__)__|_",
+          @"____)/\_____(\__/_____*________\)/_|(/____",
+          @"                     \(/                   "
       ];
 
   text[5] = $@"     /{gameState.Player.Name.PadLeft((21 + gameState.Player.Name.Length) / 2).PadRight(24)}\    |        __";
@@ -312,6 +313,8 @@ static void DrawGravestone(UserInterface ui, GameState gameState, List<string> m
       if (r < text.Count - 1 && (ch == '(' || ch == ')'))
         colour = Colours.GREEN;
       else if (r == text.Count - 3 && (ch == '|' || ch == '\\' || ch == '/'))
+        colour = Colours.GREEN;
+      else if (r == text.Count - 4 && (ch == '|' || ch == '\\' || ch == '/'))
         colour = Colours.GREEN;
       else if (ch == '*')
       {
