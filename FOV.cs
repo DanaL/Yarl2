@@ -87,7 +87,6 @@ class ShadowLine
 class FieldOfView
 {
   static readonly Dictionary<Loc, bool> _opaqueLocs = new(256);
-  static readonly Dictionary<Loc, int> _visible = new(1024);
 
   static (int, int) RotateOctant(int row, int col, int octant)
   {
@@ -243,15 +242,15 @@ class FieldOfView
   public static Dictionary<Loc, int> CalcVisible(int radius, Loc loc, Map map, GameObjectDB objDb)
   {
     _opaqueLocs.Clear();
-    _visible.Clear();
-    _visible.Add(loc, Illumination.Full);
+    Dictionary<Loc, int> visible = [];
+    visible.Add(loc, Illumination.Full);
 
     for (int j = 0; j < 8; j++)
     {
-      CalcOctant(radius, loc, map, j, objDb, _visible);
+      CalcOctant(radius, loc, map, j, objDb, visible);
     }
 
-    return _visible;
+    return visible;
   }
 
   static Shadow ProjectTile(int row, int col)
