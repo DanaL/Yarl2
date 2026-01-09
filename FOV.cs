@@ -86,6 +86,9 @@ class ShadowLine
 
 class FieldOfView
 {
+  static readonly Dictionary<Loc, bool> _opaqueLocs = new(256);
+  static readonly Dictionary<Loc, int> _visible = new(1024);
+
   static (int, int) RotateOctant(int row, int col, int octant)
   {
     return octant switch
@@ -101,9 +104,8 @@ class FieldOfView
     };
   }
 
-  static Dictionary<Loc, int> CalcOctant(int radius, Loc origin, Map map, int octant, GameObjectDB objDb, Dictionary<Loc, bool> opaqueLocs)
+  static void CalcOctant(int radius, Loc origin, Map map, int octant, GameObjectDB objDb, Dictionary<Loc, int> visible)
   {
-    Dictionary<Loc, int> visibleSqs = [];
     bool fullShadow = false;
     var line = new ShadowLine();
 
@@ -125,29 +127,27 @@ class FieldOfView
         {
           int illum;
           Loc loc = origin with { Row = r, Col = c};
-          if (IsOpaque(loc, origin, map, objDb, opaqueLocs))
+          if (IsOpaque(loc, origin, map, objDb, _opaqueLocs))
           {
             line.Add(projection);
             fullShadow = line.IsFullShadow();
-            illum = CalcIllumination(loc, origin, map, objDb, opaqueLocs);            
+            illum = CalcIllumination(loc, origin, map, objDb, _opaqueLocs);
           }
           else
           {
             illum = Illumination.Full;
           }
-          
-          if (!visibleSqs.TryAdd(loc, illum))
+
+          if (!visible.TryAdd(loc, illum))
           {
-            visibleSqs[loc] |= illum;
+            visible[loc] |= illum;
           }
         }
 
         if (fullShadow)
-          return visibleSqs;
+          return;
       }
     }
-
-    return visibleSqs;
   }
 
   // Calculate which corneres of a tile are illuminated. Opaque squares are only lit on their
@@ -242,23 +242,16 @@ class FieldOfView
 
   public static Dictionary<Loc, int> CalcVisible(int radius, Loc loc, Map map, GameObjectDB objDb)
   {
-    Dictionary<Loc, bool> opaqueLocs = [];
-    Dictionary<Loc, int> visible = [];
-    visible.Add(loc, Illumination.Full);
+    _opaqueLocs.Clear();
+    _visible.Clear();
+    _visible.Add(loc, Illumination.Full);
 
     for (int j = 0; j < 8; j++)
     {
-      Dictionary<Loc, int> octant = CalcOctant(radius, loc, map, j, objDb, opaqueLocs);
-      foreach (var sq in octant)
-      {
-        if (!visible.TryAdd(sq.Key, sq.Value))
-        {
-          visible[sq.Key] |= sq.Value;
-        }
-      }
+      CalcOctant(radius, loc, map, j, objDb, _visible);
     }
 
-    return visible;
+    return _visible;
   }
 
   static Shadow ProjectTile(int row, int col)
