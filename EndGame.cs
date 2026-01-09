@@ -370,8 +370,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       connections.Add([id]);
       islands[id] = info;
     }
-
-    map.Dump();
+    
     JoinIslands(map, islands, connections, gs.Rng);
     BottomLevelTweaks(map);
 
@@ -549,6 +548,27 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     bottom.SetTile(BottomLevelArrivalStairs.Row, BottomLevelArrivalStairs.Col, up);
   }
 
+  static void AddTreasure(Map map, int dungeonId, int level, GameObjectDB objDb, Rng rng)
+  {
+    var floors = map.SqsOfType(TileType.DungeonFloor);
+    floors.Shuffle(rng);
+
+    for (int j = 0; j < rng.Next(6, 9) && j < floors.Count; j++)
+    {
+      var quality = rng.Next(10) switch
+      {
+        0 => TreasureQuality.Common,
+        1 => TreasureQuality.Uncommon,
+        2 => TreasureQuality.Uncommon,
+        3 => TreasureQuality.Uncommon,
+        _ => TreasureQuality.Good
+      };
+      Item item = Treasure.ItemByQuality(quality, objDb, rng);
+      Loc loc = new(dungeonId, level, floors[j].Item1, floors[j].Item2);
+      objDb.SetToLoc(loc, item);
+    }
+  }
+
   public Dungeon Generate(GameState gs)
   {
     Dungeon dungeon = new(DungeonId, "the Gaol", "Sulphur. Heat. Mortals were not meant for this place.", true);
@@ -558,8 +578,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     dungeon.MonsterDecks = DeckBuilder.ReadDeck("gaol", gs.Rng);
     Map firstLevel = FirstLevelMap(gs);
     Map bottom = BottomLevel(gs);
-    bottom.Dump();
-
+    
     dungeon.ExitLoc = FindArrivalLoc(firstLevel, gs.Rng);
     Upstairs arrival = new("") { Destination = Entrance };
     firstLevel.SetTile(dungeon.ExitLoc.Row, dungeon.ExitLoc.Col, arrival);
@@ -594,9 +613,12 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     SetFinalStairs(levels, gs);
     levels[^2].Features |= MapFeatures.UndiggableFloor;
 
-    foreach (Map map in levels)
-      dungeon.AddMap(map);
-
+    for (int lvl = 0; lvl <= BOTTOM_LVL; lvl++)
+    {
+      AddTreasure(levels[lvl], dungeonId, lvl, gs.ObjDb, gs.Rng);
+      dungeon.AddMap(levels[lvl]);
+    }
+ 
     PopulateDungeon(dungeon, gs.Rng, gs.ObjDb);
     List<Loc> lvlOneIslands = [.. IslandLocs];
     lvlOneIslands.Shuffle(gs.Rng);
