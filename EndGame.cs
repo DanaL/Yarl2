@@ -569,6 +569,35 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     }
   }
 
+  static void AddRooms(Map map, int dungeonId, int level, GameObjectDB objDb, Rng rng)
+  {
+    List<List<(int, int)>> rooms = map.FindRooms(9);
+    List<int> roomIds = [.. Enumerable.Range(0, rooms.Count)];
+    roomIds.Shuffle(rng);
+    List<int> potentialVaults = [];
+
+    foreach (int id in roomIds)
+    {
+      RoomCorners corners = Rooms.IsRectangle(map, rooms[id]);
+      if (corners.LowerRow - corners.UpperRow >= 5 && corners.RightCol - corners.LeftCol >= 5)
+      {
+        var innerSqs = Rooms.RoomInRoom(map, corners, rng);
+        rooms[id] = [.. innerSqs];
+        break;
+      }
+    }
+
+    bool mimic = false;
+    foreach (int roomId in roomIds)
+    {
+      if (!mimic && rng.Next(10) == 0)
+      {        
+        Rooms.AddMimicGroup(rooms[roomId], dungeonId, level, objDb, rng);
+        mimic = true;
+      }
+    }
+  }
+
   public Dungeon Generate(GameState gs)
   {
     Dungeon dungeon = new(DungeonId, "the Gaol", "Sulphur. Heat. Mortals were not meant for this place.", true);
@@ -616,6 +645,10 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     for (int lvl = 0; lvl <= BOTTOM_LVL; lvl++)
     {
       AddTreasure(levels[lvl], dungeonId, lvl, gs.ObjDb, gs.Rng);
+
+      if (lvl > 0 && lvl < BOTTOM_LVL)
+        AddRooms(levels[lvl], dungeonId, lvl, gs.ObjDb, gs.Rng);
+
       dungeon.AddMap(levels[lvl]);
     }
  
