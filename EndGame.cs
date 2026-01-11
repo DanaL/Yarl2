@@ -593,7 +593,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       // In case the floors squares were modified before we get to considering the room
       List<(int, int)> roomSqs = [.. rooms[roomId].Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor)];
 
-      if (rng.Next(5) == 0)
+      if (rng.Next(10) == 0)
       {
         switch (rng.Next(4))
         {
@@ -674,7 +674,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     }
   
     TidyOrphanedDoors(levels);
-    
+
     CreateStairwayStacked(DungeonId, [.. levels[..^1]], 1, (secondFloorUpLoc.Row, secondFloorUpLoc.Col), true, gs.Rng);
 
     PopulateDungeon(dungeon, gs.Rng, gs.ObjDb);
