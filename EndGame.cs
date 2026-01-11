@@ -658,8 +658,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     Upstairs upstairs = new("") { Destination = firstFloorDownLoc};
     levels[0].SetTile(firstFloorDownLoc.Row, firstFloorDownLoc.Col, downstairs);        
     levels[1].SetTile(secondFloorUpLoc.Row, secondFloorUpLoc.Col, upstairs);
-    CreateStairwayStacked(DungeonId, [.. levels[..^1]], 1, (secondFloorUpLoc.Row, secondFloorUpLoc.Col), true, gs.Rng);
-
+    
     levels[4] = bottom;
     SetFinalStairs([.. levels], gs);
     levels[^2].Features |= MapFeatures.UndiggableFloor;
@@ -674,6 +673,8 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       dungeon.AddMap(levels[lvl]);
     }
  
+    CreateStairwayStacked(DungeonId, [.. levels[..^1]], 1, (secondFloorUpLoc.Row, secondFloorUpLoc.Col), true, gs.Rng);
+    
     PopulateDungeon(dungeon, gs.Rng, gs.ObjDb);
     List<Loc> lvlOneIslands = [.. IslandLocs];
     lvlOneIslands.Shuffle(gs.Rng);
