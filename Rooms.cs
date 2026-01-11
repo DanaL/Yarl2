@@ -1042,6 +1042,7 @@ class Rooms
     foreach (var sq in room)
     {
       loc = new(dungeonId, level, sq.Item1, sq.Item2);
+      
       if (UseableSq(loc))
       {
         nearby = [..room.Where(sq2 => Util.Distance(loc.Row, loc.Col, sq2.Item1, sq2.Item2) <= 2

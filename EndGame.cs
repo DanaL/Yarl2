@@ -569,12 +569,12 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     }
   }
 
-  static void AddRooms(Map map, int dungeonId, int level, GameObjectDB objDb, Rng rng)
+  static void AddRooms(Map map, int dungeonId, int level, Map[] maps, GameObjectDB objDb, Rng rng)
   {
     List<List<(int, int)>> rooms = map.FindRooms(9);
     List<int> roomIds = [.. Enumerable.Range(0, rooms.Count)];
     roomIds.Shuffle(rng);
-    List<int> potentialVaults = [];
+    List<int> potentialVaults = []; 
 
     foreach (int id in roomIds)
     {
@@ -590,9 +590,31 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     bool mimic = false;
     foreach (int roomId in roomIds)
     {
+      // In case the floors squares were modified before we get to considering the room
+      List<(int, int)> roomSqs = [.. rooms[roomId].Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor)];
+
+      if (rng.Next(5) == 0)
+      {
+        switch (rng.Next(4))
+        {
+          case 0:
+            Rooms.ChasmTrapRoom(maps, rng, dungeonId, level, roomSqs, objDb);
+            break;
+          case 1:
+            Rooms.TriggerChasmRoom(maps, rng, dungeonId, level, roomSqs, objDb);
+            break;
+          case 2:
+            Rooms.BasicChasmRoom(maps, rng, dungeonId, level, roomSqs, objDb);
+            break;
+          default:
+            Rooms.ChasmIslandRoom(maps, rng, dungeonId, level, roomSqs, objDb);
+            break;
+        }
+      }
+
       if (!mimic && rng.Next(10) == 0)
       {        
-        Rooms.AddMimicGroup(rooms[roomId], dungeonId, level, objDb, rng);
+        Rooms.AddMimicGroup(roomSqs, dungeonId, level, objDb, rng);
         mimic = true;
       }
     }
@@ -602,7 +624,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
   {
     Dungeon dungeon = new(DungeonId, "the Gaol", "Sulphur. Heat. Mortals were not meant for this place.", true);
     DungeonMap mapper = new(gs.Rng);
-    List<Map> levels = [];
+    Map[] levels = new Map[5];
 
     dungeon.MonsterDecks = DeckBuilder.ReadDeck("gaol", gs.Rng);
     Map firstLevel = FirstLevelMap(gs);
@@ -611,11 +633,11 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     dungeon.ExitLoc = FindArrivalLoc(firstLevel, gs.Rng);
     Upstairs arrival = new("") { Destination = Entrance };
     firstLevel.SetTile(dungeon.ExitLoc.Row, dungeon.ExitLoc.Col, arrival);
-    levels.Add(firstLevel);
+    levels[0] = firstLevel;
 
     for (int levelNum = 1; levelNum <= 3; levelNum++)
     {
-      levels.Add(mapper.DrawLevel(WIDTH, HEIGHT));
+      levels[levelNum] = mapper.DrawLevel(WIDTH, HEIGHT);
       AddSecretDoors(levels[levelNum], gs.Rng);
     }
     
@@ -636,10 +658,10 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     Upstairs upstairs = new("") { Destination = firstFloorDownLoc};
     levels[0].SetTile(firstFloorDownLoc.Row, firstFloorDownLoc.Col, downstairs);        
     levels[1].SetTile(secondFloorUpLoc.Row, secondFloorUpLoc.Col, upstairs);
-    CreateStairwayStacked(DungeonId, [.. levels], 1, (secondFloorUpLoc.Row, secondFloorUpLoc.Col), true, gs.Rng);
+    CreateStairwayStacked(DungeonId, [.. levels[..^1]], 1, (secondFloorUpLoc.Row, secondFloorUpLoc.Col), true, gs.Rng);
 
-    levels.Add(bottom);
-    SetFinalStairs(levels, gs);
+    levels[4] = bottom;
+    SetFinalStairs([.. levels], gs);
     levels[^2].Features |= MapFeatures.UndiggableFloor;
 
     for (int lvl = 0; lvl <= BOTTOM_LVL; lvl++)
@@ -647,7 +669,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       AddTreasure(levels[lvl], dungeonId, lvl, gs.ObjDb, gs.Rng);
 
       if (lvl > 0 && lvl < BOTTOM_LVL)
-        AddRooms(levels[lvl], dungeonId, lvl, gs.ObjDb, gs.Rng);
+        AddRooms(levels[lvl], dungeonId, lvl, levels, gs.ObjDb, gs.Rng);
 
       dungeon.AddMap(levels[lvl]);
     }
