@@ -102,6 +102,19 @@ abstract class Tile(TileType type) : IZLevel
     _ => false
   };
 
+  public virtual bool IsHiddenSqr() => Type switch
+  {
+    TileType.HiddenBridgeCollapseTrap => true,
+    TileType.HiddenDartTrap => true,
+    TileType.HiddenMagicMouth => true,
+    TileType.HiddenPit => true,
+    TileType.HiddenSummonsTrap => true,
+    TileType.HiddenTeleportTrap => true,
+    TileType.HiddenTrapDoor => true,
+    TileType.HiddenWaterTrap => true,
+    _ => false  
+  };
+
   public bool IsVisibleTrap() => Type switch
   {
     TileType.TrapDoor => true,
@@ -347,6 +360,8 @@ class GateTrigger(Loc gate) : Tile(TileType.GateTrigger), IGameEventListener
   public bool Expired { get; set; }
   public bool Listening => true;
   public GameEventType EventType => GameEventType.LocChanged;
+
+  public override bool IsHiddenSqr() => !Found;
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {

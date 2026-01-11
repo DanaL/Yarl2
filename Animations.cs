@@ -429,7 +429,7 @@ class SqAnimation : Animation
   }
 }
 
-record HighlightSqr(int Row, int Col, Sqr Sqr, Loc Loc, Glyph Glyph, DateTime Expiry);
+record HighlightSqr(int Row, int Col, Sqr Sqr, Loc Loc, Glyph Glyph, DateTime Expiry, bool Show);
 
 class MagicMapAnimation : Animation
 {
@@ -488,7 +488,8 @@ class MagicMapAnimation : Animation
                   : new Sqr(glyph.Lit, Colour, ch);
 
       var (scrR, scrC) = _ui.LocToScrLoc(loc.Row, loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
-      _sqsToMark.Enqueue(new HighlightSqr(scrR, scrC, sqr, loc, glyph, DateTime.UtcNow.AddMilliseconds(_delay)));
+      bool show = !(tile.Type == TileType.DungeonFloor || tile.IsHiddenSqr());
+      _sqsToMark.Enqueue(new HighlightSqr(scrR, scrC, sqr, loc, glyph, DateTime.UtcNow.AddMilliseconds(_delay), show));
 
       ++_index;
     }
@@ -500,7 +501,8 @@ class MagicMapAnimation : Animation
     {
       if (sq.Row >= 0 && sq.Col >= 0 && sq.Row < UserInterface.ViewHeight && sq.Col < UserInterface.ViewWidth)
         _ui.SqsOnScreen[sq.Row, sq.Col] = sq.Sqr;
-      _dungeon.RememberedLocs.TryAdd(sq.Loc, new(sq.Glyph, 0));
+      if (sq.Show)
+        _dungeon.RememberedLocs.TryAdd(sq.Loc, new(sq.Glyph, 0));
     }
 
     if (_index >= _locs.Count)
