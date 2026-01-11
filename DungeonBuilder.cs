@@ -213,6 +213,7 @@ abstract class DungeonBuilder
       TileType.DungeonWall => true,
       TileType.ClosedDoor => true,
       TileType.LockedDoor => true,
+      TileType.StoneWall => true,
       _ => false
     };
   }
