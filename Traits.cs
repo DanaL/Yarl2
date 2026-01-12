@@ -2949,6 +2949,7 @@ sealed class PoisonedTrait : TemporaryTrait
       gs.RegisterForEvent(GameEventType.EndOfRound, this);
       OwnerID = target.ID;
       ExpiresOn = gs.Turn + (ulong)Duration;
+      gs.UIRef().RegisterAnimation(new HitAnimation(gs, target, Colours.BLACK, Colours.LIME_GREEN, '*'));
       return [$"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} poisoned!"];
     }
 

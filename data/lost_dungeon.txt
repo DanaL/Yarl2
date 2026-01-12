@@ -1,6 +1,6 @@
 LEVEL 1
 giant beetle 1,troll 1,mud golem 1,clay golem 1,flame spirit 1,displacer beast 1,invisible stalker 1,wraith 1,owlbear 1,duergar spearfisher 1
 LEVEL 2
-giant beetle 1,troll 1,mud golem 1,clay golem 1,flame spirit 1,phantom summoner 1,displacer beast 1,invisible stalker 1,wraith 1,owlbear 1,duergar spearfisher 1
+giant beetle 1,troll 1,mud golem 1,clay golem 1,flame spirit 1,phantom summoner 1,displacer beast 1,invisible stalker 1,wraith 1,owlbear 1,duergar spearfisher 1,evil eye 1
 LEVEL 3
-troll 1,mud golem 1,clay golem 1,flame spirit 1,phantom summoner 1,displacer beast 1,killer bee 1,invisible stalker 1,wraith 1,owlbear 1,duergar spearfisher 1,vampire 1
+troll 1,mud golem 1,clay golem 1,flame spirit 1,phantom summoner 1,displacer beast 1,killer bee 1,invisible stalker 1,wraith 1,owlbear 1,duergar spearfisher 1,vampire 1,evil eye 1

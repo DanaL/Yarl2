@@ -1228,8 +1228,12 @@ class Power
       case "Whirlpool":
         return new WhirlpoolAction(gs, mob);
       case "CastConfusion":
-        txt = $"{mob.FullName.Capitalize()} casts confusion!";
+        txt = $"{mob.FullName.Capitalize()} inflicts confusion!";
         return new ApplyAffectAction(gs, mob, loc, $"Confused#0#{DC}#0", txt);
+      case "CastPoison":
+        txt = $"{mob.FullName.Capitalize()} inflicts poison!";
+        string poisoned = $"Poisoned#{DC}#2#0#0#10";
+        return new ApplyAffectAction(gs, mob, loc, poisoned, txt);
       default:
         return new PassAction();
     }

@@ -1,10 +1,10 @@
 LEVEL 1
-troll 1,duergar soldier 3,hellhound 1,flame spirit 1,flame beetle 2,imp 1
+troll 1,duergar soldier 3,hellhound 1,flame spirit 1,flame beetle 2,imp 1,evil eye 1
 LEVEL 2
-duergar spearfisher 1,troll 1,duergar soldier 3,hellhound 1,flame spirit 1,flame beetle 2,imp 1
+duergar spearfisher 1,troll 1,duergar soldier 3,hellhound 1,flame spirit 1,flame beetle 2,imp 1,evil eye 1
 LEVEL 3
-duergar spearfisher 1,troll 1,duergar soldier 3,hellhound 1,flame spirit 1,flame beetle 2,imp 1,vampire 1
+duergar spearfisher 1,troll 1,duergar soldier 3,hellhound 1,flame spirit 1,flame beetle 2,imp 1,vampire 1,evil eye 1
 LEVEL 4
-duergar spearfisher 1,troll 1,duergar soldier 3,hellhound 1,flame spirit 1,imp 1,vampire 1
+duergar spearfisher 1,troll 1,duergar soldier 3,hellhound 1,flame spirit 1,imp 1,vampire 1,evil eye 1
 LEVEL 5
-duergar spearfisher 1,troll 1,duergar soldier 3,hellhound 1,flame spirit 1,imp 1,vampire 1
+duergar spearfisher 1,troll 1,duergar soldier 3,hellhound 1,flame spirit 1,imp 1,vampire 1,evil eye 1

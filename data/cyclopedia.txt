@@ -625,3 +625,6 @@ Door-to-door sales-wizards found people often would not answer their doors so th
 #
 mimic
 Monsters that disguise themselves as enticing treasure to lure prey (adventurers) close. It is debated if mimics are a product of wizardry or natural selection.
+#
+evil eye
+Despite being a large, floating eyeball it manages to be slightly narrowed in a disdainful, menacing sort of way.
