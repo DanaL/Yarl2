@@ -1227,6 +1227,9 @@ class Power
         return new ThrowBombAction(gs, mob, loc);
       case "Whirlpool":
         return new WhirlpoolAction(gs, mob);
+      case "CastConfusion":
+        txt = $"{mob.FullName.Capitalize()} casts confusion!";
+        return new ApplyAffectAction(gs, mob, loc, $"Confused#0#{DC}#0", txt);
       default:
         return new PassAction();
     }

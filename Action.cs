@@ -468,7 +468,32 @@ class ShriekAction(GameState gs, Actor actor, int radius) : Action(gs, actor)
 
     return 1.0;
   }
-} 
+}
+
+class ApplyAffectAction(GameState gs, Actor actor, Loc target, string effectTemplate, string txt) : Action(gs, actor)
+{
+  Loc TargetLoc { get; set; } = target;
+  string EffectTemplate { get; set; } = effectTemplate;
+  string EffectText { get; set; } = txt;
+
+  public override double Execute()
+  {
+    base.Execute();
+
+    GameState!.UIRef().AlertPlayer(EffectText);
+
+    if (GameState.ObjDb.Occupant(TargetLoc) is Actor victim)
+    {      
+      var effect = (TemporaryTrait)TraitFactory.FromText(EffectTemplate, victim);
+      List<string> msgs = effect.Apply(victim, GameState);
+      string s = string.Join(' ', msgs).Trim();
+
+      GameState.UIRef().AlertPlayer(s, GameState, TargetLoc, victim);
+    }
+
+    return 1.0;
+  }
+}
 
 class AoEAction(GameState gs, Actor actor, Loc target, string effectTemplate, int radius, string txt) : Action(gs, actor)
 {
