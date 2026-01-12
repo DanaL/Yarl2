@@ -126,13 +126,46 @@ class Not(BehaviourNode node) : BehaviourNode
   }
 }
 
+class RandoSelector(List<BehaviourNode> nodes) : BehaviourNode
+{
+  public List<BehaviourNode> Children { get; set; } = nodes;
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    if (Label == "powers")
+      Console.WriteLine();
+
+    int curr = 0;
+
+    Children.Shuffle(gs.Rng);
+    while (curr < Children.Count)
+    {
+      BehaviourNode node = Children[curr];
+      PlanStatus status = node.Execute(mob, gs);
+      if (status == PlanStatus.Running)
+      {
+        return status;
+      }
+
+      if (status == PlanStatus.Success)
+      {
+        return status;
+      }
+
+      ++curr;
+    }
+    
+    return PlanStatus.Failure;
+  }
+}
+
 class Selector(List<BehaviourNode> nodes) : BehaviourNode
 {
   public List<BehaviourNode> Children { get; set; } = nodes;
   int Curr { get; set; } = 0;
 
   public override PlanStatus Execute(Mob mob, GameState gs)
-  {
+  {    
     while (Curr < Children.Count)
     {
       BehaviourNode node = Children[Curr];
@@ -1761,6 +1794,47 @@ class Planner
     return new Selector(plan);
   }
 
+  // This is just the standard monster plan, but Powers selector is replaced
+  // by a RandoSelector
+  static BehaviourNode CreateRandoMonsterPlan(Mob mob)
+  {
+    BehaviourNode plan = CreateMonsterPlan(mob);
+    ReplacePowersSelector(plan);
+    return plan;
+  }
+
+  static void ReplacePowersSelector(BehaviourNode node)
+  {
+    if (node is Selector selector)
+    {
+      for (int i = 0; i < selector.Children.Count; i++)
+      {
+        if (selector.Children[i] is Selector childSelector && childSelector.Label == "powers")
+        {
+          selector.Children[i] = new RandoSelector(childSelector.Children) { Label = "powers" };
+        }
+        else
+        {
+          ReplacePowersSelector(selector.Children[i]);
+        }
+      }
+    }
+    else if (node is Sequence sequence)
+    {
+      for (int i = 0; i < sequence.Children.Count; i++)
+      {
+        if (sequence.Children[i] is Selector childSelector && childSelector.Label == "powers")
+        {
+          sequence.Children[i] = new RandoSelector(childSelector.Children) { Label = "powers" };
+        }
+        else
+        {
+          ReplacePowersSelector(sequence.Children[i]);
+        }
+      }
+    }
+  }
+
   static Selector CreateMonsterPlan(Mob mob)
   {
     bool immobile = mob.HasTrait<ImmobileTrait>();
@@ -2002,6 +2076,7 @@ class Planner
     "SmithPlan" => CreateSmithPlan(mob, gs),
     "MonsterPlan" => CreateMonsterPlan(mob),
     "MimicPlan" => CreateMimicPlan(mob),
+    "Rando" => CreateRandoMonsterPlan(mob),
     "PrisonerPlan" => CreatePrisonerPlan(mob),
     "PriestPlan" => WanderInHome(gs.Town.Shrine, gs),
     "GrocerPlan" => WanderInHome(gs.Town.Market, gs),
