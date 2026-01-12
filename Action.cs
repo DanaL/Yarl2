@@ -1741,6 +1741,45 @@ class CastCurse(Loc target, int dc) : Action
   }
 }
 
+class CastTeleportAway(Loc target) : Action
+{
+  Loc TargetLoc { get; set; } = target;
+
+  public override double Execute()
+  {
+    if (GameState!.ObjDb.Occupant(TargetLoc) is not Actor target)
+      return 1.0;
+
+    Actor caster = Actor!;
+
+    string casterName = MsgFactory.CalcName(caster, GameState.Player).Capitalize();
+    string targetName = MsgFactory.CalcName(target, GameState.Player);
+    string s = $"{casterName} {Grammar.Conjugate(caster, "teleport")} {targetName} away!";
+    GameState.UIRef().AlertPlayer(s, GameState, TargetLoc);
+
+    List<Loc> landingSpots = [];
+    for (int r = 0; r < GameState.CurrentMap.Height; r++)
+    {
+      for (int c = 0; c < GameState.CurrentMap.Width; c++)
+      {
+        Loc loc = new(GameState.CurrDungeonID, GameState.CurrLevel, r, c);
+
+        if (GameState.TileAt(loc).Passable() && !GameState.ObjDb.Occupied(loc))
+          landingSpots.Add(loc);
+      }
+    }
+
+    Loc landingSpot = landingSpots[GameState.Rng.Next(landingSpots.Count)];
+    GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, TargetLoc, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
+    GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, landingSpot, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
+
+    target.ClearAnchors(GameState);
+    GameState.ResolveActorMove(target, TargetLoc, landingSpot);
+
+    return 1.0;
+  }
+}
+
 class MinorSummonAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   static string RandomMonster(Rng rng)

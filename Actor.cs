@@ -1120,6 +1120,8 @@ class Power
           GameState = gs,
           Actor = mob
         };
+      case "CastTeleportAway":
+        return new CastTeleportAway(loc) { GameState = gs, Actor = mob };
       case "RumBreath":
         return new RumBreathAction(gs, mob, loc, MaxRange);
       case "Nudity":

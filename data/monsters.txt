@@ -93,4 +93,4 @@ ice elemental       |E|white        |iceblue     |15|50|6| 1.0|16|12|MeleeCold#1
 umbral whale        |»|lightgrey    |darkgrey    |14|75|7| 0.8|18|10|Gulp#1#1#1#1#16#0#Attack|Heavy,Str#Belly#Whale,Swimmer,WaterBreathing#owner|
 Dagon               |H|limegreen    |green       |16|75|7| 0.8|18|10|MeleeSlashing#1#1#12#1#0#0#Attack|Heavy,Amphibious,Slimer#15|
 fire elemental      |E|brightred    |dullred     |15|50|6| 1.0|16|12|MeleeFire#1#1#8#2#0#0#Attack|Construct,Brainless,Immunity#Fire|
-evil eye            |e|brightred    |dullred     |15|50|6| 0.5|10|10|CastCurse#1#7#0#0#16#10#Attack,FlareFire#1#1#6#4#0#5#Attack,MeleePiercing#1#1#6#1#0#0#Attack|Floating,Immobile,BehaviourTree#Rando|
+evil eye            |e|brightred    |dullred     |15|50|6| 0.5|10|10|CastCurse#1#7#0#0#16#10#Attack,CastTeleportAway#1#6#0#0#0#19#Attack,FlareFire#1#1#6#4#0#5#Attack,MeleePiercing#1#1#6#1#0#0#Attack|Floating,Immobile,BehaviourTree#Rando|
