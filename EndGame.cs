@@ -548,7 +548,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     bottom.SetTile(BottomLevelArrivalStairs.Row, BottomLevelArrivalStairs.Col, up);
   }
 
-  static void AddTreasure(Map map, int dungeonId, int level, GameObjectDB objDb, Rng rng)
+  void AddTreasure(Map map, int level, GameObjectDB objDb, Rng rng)
   {
     var floors = map.SqsOfType(TileType.DungeonFloor);
     floors.Shuffle(rng);
@@ -564,12 +564,12 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
         _ => TreasureQuality.Good
       };
       Item item = Treasure.ItemByQuality(quality, objDb, rng);
-      Loc loc = new(dungeonId, level, floors[j].Item1, floors[j].Item2);
+      Loc loc = new(DungeonId, level, floors[j].Item1, floors[j].Item2);
       objDb.SetToLoc(loc, item);
     }
   }
 
-  static void AddRooms(Map map, int dungeonId, int level, Map[] maps, GameObjectDB objDb, Rng rng)
+  void AddRooms(Map map, int level, Map[] maps, GameObjectDB objDb, Rng rng)
   {
     List<List<(int, int)>> rooms = map.FindRooms(9);
     List<int> roomIds = [.. Enumerable.Range(0, rooms.Count)];
@@ -598,23 +598,23 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
         switch (rng.Next(4))
         {
           case 0:
-            Rooms.ChasmTrapRoom(maps, rng, dungeonId, level, roomSqs, objDb);
+            Rooms.ChasmTrapRoom(maps, rng, DungeonId, level, roomSqs, objDb);
             break;
           case 1:
-            Rooms.TriggerChasmRoom(maps, rng, dungeonId, level, roomSqs, objDb);
+            Rooms.TriggerChasmRoom(maps, rng, DungeonId, level, roomSqs, objDb);
             break;
           case 2:
-            Rooms.BasicChasmRoom(maps, rng, dungeonId, level, roomSqs, objDb);
+            Rooms.BasicChasmRoom(maps, rng, DungeonId, level, roomSqs, objDb);
             break;
           default:
-            Rooms.ChasmIslandRoom(maps, rng, dungeonId, level, roomSqs, objDb);
+            Rooms.ChasmIslandRoom(maps, rng, DungeonId, level, roomSqs, objDb);
             break;
         }
       }
 
       if (!mimic && rng.Next(10) == 0)
       {        
-        Rooms.AddMimicGroup(roomSqs, dungeonId, level, objDb, rng);
+        Rooms.AddMimicGroup(roomSqs, DungeonId, level, objDb, rng);
         mimic = true;
       }
     }
@@ -665,10 +665,10 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
 
     for (int lvl = 0; lvl <= BOTTOM_LVL; lvl++)
     {
-      AddTreasure(levels[lvl], dungeonId, lvl, gs.ObjDb, gs.Rng);
+      AddTreasure(levels[lvl], lvl, gs.ObjDb, gs.Rng);
 
       if (lvl > 0 && lvl < BOTTOM_LVL)
-        AddRooms(levels[lvl], dungeonId, lvl, levels, gs.ObjDb, gs.Rng);
+        AddRooms(levels[lvl], lvl, levels, gs.ObjDb, gs.Rng);
 
       dungeon.AddMap(levels[lvl]);
     }
