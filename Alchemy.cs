@@ -195,25 +195,28 @@ class Alchemy
 
   static (bool, string) Enchant(Item item, Actor actor)
   {    
-    if (item.Type == ItemType.Weapon && !item.HasTrait<WeaponBonusTrait>())
+    if ((item.Type == ItemType.Weapon || item.Type == ItemType.Bow) && !item.HasTrait<WeaponBonusTrait>())
       item.Traits.Add(new WeaponBonusTrait() { Bonus = 0, SourceId = item.ID });
 
     foreach (Trait trait in item.Traits)
     {
       if (trait is WeaponBonusTrait wbt)
       {
+        string s = $"{item.FullName.DefArticle().Capitalize()} shines faintly and becomes more effective!";
         wbt.Bonus += 1;
-        return (true, $"{item.FullName.DefArticle().Capitalize()} shines faintly and becomes more effective!");
+        return (true, s);
       }
       else if (trait is ArmourTrait at)
       {
+        string s = $"{item.FullName.DefArticle().Capitalize()} shines faintly and becomes stronger!";
         at.Bonus += 1;
-        return (true, $"{item.FullName.DefArticle().Capitalize()} shines faintly and becomes stronger!");
+        return (true, s);
       }
       else if (trait is ACModTrait acMod)
       {
+        string s = $"{item.FullName.DefArticle().Capitalize()} shines faintly and hums with new magic!";
         acMod.ArmourMod += 1;
-        return (true, $"{item.FullName.DefArticle().Capitalize()} shines faintly and hums with new magic!");
+        return (true, s);
       }
       else if (trait is GrantsTrait grantsTrait)
       {
