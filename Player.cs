@@ -202,7 +202,14 @@ sealed class Player : Actor
     int mod = Stats[Attribute.Dexterity].Curr;
 
     if (Stats.TryGetValue(Attribute.AttackBonus, out var attackBonus))
+    {
       mod += attackBonus.Curr;
+    }
+
+    if (weapon.Traits.OfType<WeaponBonusTrait>().FirstOrDefault() is WeaponBonusTrait wb)
+    {
+      mod += wb.Bonus;
+    }
 
     return mod;
   }
