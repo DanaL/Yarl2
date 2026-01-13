@@ -181,6 +181,7 @@ class Treasure
     {
       TreasureQuality.Uncommon => UncommonItems[rng.Next(UncommonItems.Count)],
       TreasureQuality.Good => GoodItems[rng.Next(GoodItems.Count)],
+      TreasureQuality.Rare => RareItems[rng.Next(RareItems.Count)],
       _ => CommonItems[rng.Next(CommonItems.Count)],
     };
     
@@ -191,8 +192,15 @@ class Treasure
       switch (item.Type)
       {
         case ItemType.Weapon:
-        case ItemType.Armour:
         case ItemType.Bow:
+          int bonus = rng.Next(5) == 0 ? 2 : 1;
+          item.Traits.Add(new WeaponBonusTrait() { Bonus = bonus, SourceId = item.ID });
+          break;
+        case ItemType.Armour:
+          if (item.Traits.OfType<ArmourTrait>().FirstOrDefault() is ArmourTrait at)
+          {
+            at.Bonus += rng.Next(5) == 0 ? 2 : 1;
+          }
           break;
       }
     }

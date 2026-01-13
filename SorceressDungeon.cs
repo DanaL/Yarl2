@@ -428,7 +428,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
         AddMoldPatch(map, floorSqs, objDb, rng);
       }
 
-      AddTreasure(objDb, floorSqs, rng);
+      AddTreasure(objDb, floorSqs, lvl, rng);
     }
 
     PopulateDungeon(towerDungeon, rng, objDb);
@@ -436,7 +436,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
     return (towerDungeon, entrance);
   }
 
-  static void AddTreasure(GameObjectDB objDb, List<Loc> floors, Rng rng)
+  static void AddTreasure(GameObjectDB objDb, List<Loc> floors, int levelNum, Rng rng)
   {
     int numItems = rng.Next(2, 6);
     for (int j = 0; j < numItems; j++)
@@ -465,6 +465,11 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
       PlaceItem(compound);
     }
     
+    if (levelNum == 4 && rng.Next(3) == 0)
+    {
+      PlaceItem(Treasure.ItemByQuality(TreasureQuality.Rare, objDb, rng));
+    }
+
     void PlaceItem(Item item)
     {
       Loc loc = floors[rng.Next(floors.Count)];

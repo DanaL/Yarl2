@@ -555,12 +555,14 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
 
     for (int j = 0; j < rng.Next(6, 9) && j < floors.Count; j++)
     {
-      var quality = rng.Next(10) switch
+      var quality = rng.Next(12) switch
       {
         0 => TreasureQuality.Common,
         1 => TreasureQuality.Uncommon,
         2 => TreasureQuality.Uncommon,
         3 => TreasureQuality.Uncommon,
+        10 => TreasureQuality.Rare,
+        11 => TreasureQuality.Rare,
         _ => TreasureQuality.Good
       };
       Item item = Treasure.ItemByQuality(quality, objDb, rng);

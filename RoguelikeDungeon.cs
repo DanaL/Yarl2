@@ -399,11 +399,12 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
 
       for (int j = 0; j < rng.Next(3, 6); j++)
       {
-        Item item = rng.Next(10) switch
+        Item item = rng.Next(12) switch
         {
           0 or 1 => Treasure.ItemByQuality(TreasureQuality.Common, objDb, rng),
           2 or 3 or 4 => Treasure.ItemByQuality(TreasureQuality.Uncommon, objDb, rng),
-          _ => Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng)
+          5 or 6 or 7 or 8 or 9 => Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng),
+          _ => Treasure.ItemByQuality(TreasureQuality.Rare, objDb, rng)
         };
 
         Loc loc = floors[rng.Next(floors.Count)];

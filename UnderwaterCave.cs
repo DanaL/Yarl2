@@ -282,7 +282,8 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
       int numOfItems = rng.Next(2, 4);
       for (int j = 0; j < numOfItems; j++)
       {
-        Item item = Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng);
+        TreasureQuality quality = rng.Next(5) == 0 ? TreasureQuality.Rare : TreasureQuality.Good;
+        Item item = Treasure.ItemByQuality(quality, objDb, rng);
         Loc loc = floors[j];
         objDb.SetToLoc(loc, item);
       }
