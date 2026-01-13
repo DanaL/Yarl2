@@ -11,7 +11,7 @@
 
 namespace Yarl2;
 
-enum TreasureQuality { Common, Uncommon, Good }
+enum TreasureQuality { Common, Uncommon, Good, Rare }
 
 class Treasure
 {  
@@ -52,7 +52,19 @@ class Treasure
       ItemNames.FEATHERFALL_BOOTS, ItemNames.WIND_FAN, ItemNames.SKELETON_KEY, ItemNames.POTION_HARDINESS,
       ItemNames.TINCTURE_CELERITY, ItemNames.POTION_HEROISM, ItemNames.POTION_DESCENT, ItemNames.SCROLL_STAINLESS
   ];
-  
+
+  static readonly List<ItemNames> RareItems = [
+      ItemNames.GUISARME, ItemNames.LONGSWORD, ItemNames.SHORTSHORD, ItemNames.SPEAR,
+      ItemNames.SHIELD, ItemNames.HELMET, ItemNames.STUDDED_LEATHER_ARMOUR, ItemNames.CHAINMAIL,
+      ItemNames.LEATHER_GLOVES, ItemNames.CLOAK_OF_PROTECTION, ItemNames.GAUNTLETS_OF_POWER,
+      ItemNames.RING_OF_PROTECTION, ItemNames.WAND_FIREBALLS, ItemNames.SCROLL_ENCHANTING, 
+      ItemNames.HILL_GIANT_ESSENCE, ItemNames.FROST_GIANT_ESSENCE, ItemNames.FIRE_GIANT_ESSENCE, ItemNames.POTION_HARDINESS,
+      ItemNames.GUIDE_BOWS, ItemNames.GUIDE_AXES, ItemNames.GUIDE_STABBY, ItemNames.GUIDE_SWORDS,
+      ItemNames.CRIMSON_KING_WARD, ItemNames.CROESUS_CHARM, ItemNames.CUTPURSE_CREST,
+      ItemNames.GASTON_BADGE, ItemNames.LESSER_BURLY_CHARM, ItemNames.LESSER_GRACE_CHARM, ItemNames.LESSER_HEALTH_CHARM,
+      ItemNames.SMOULDERING_CHARM, ItemNames.TALISMAN_OF_CIRCUMSPECTION, ItemNames.TROLL_BROOCH
+  ];
+
   public static readonly List<ItemNames> Consumables = [
     ItemNames.POTION_COLD_RES,
     ItemNames.POTION_FIRE_RES,
@@ -172,6 +184,19 @@ class Treasure
       _ => CommonItems[rng.Next(CommonItems.Count)],
     };
     
+    Item item = GenerateItem(name, objDb, rng);
+
+    if (quality == TreasureQuality.Rare)
+    {
+      switch (item.Type)
+      {
+        case ItemType.Weapon:
+        case ItemType.Armour:
+        case ItemType.Bow:
+          break;
+      }
+    }
+
     return GenerateItem(name, objDb, rng);
   }
 

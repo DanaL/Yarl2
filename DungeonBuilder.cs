@@ -218,7 +218,7 @@ abstract class DungeonBuilder
     };
   }
 
-  protected static void AddGoodItemToLevel(Map map, int dungeonId, int level, Rng rng, GameObjectDB objDb)
+  protected static void AddTalismanToLevel(Map map, int dungeonId, int level, Rng rng, GameObjectDB objDb)
   {
     List<Loc> opts = [];
     for (int r = 0; r < map.Height; r++)
