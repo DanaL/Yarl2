@@ -1428,6 +1428,8 @@ class InventoryDetails : Inputer
       }
       if (trait is LashTrait)
         items.Add("It will [BRIGHTRED lash] at opponents in a line");
+      if (trait is FrighteningTrait)
+        items.Add("It may [DARKGREEN frighten] your foes");
       if (trait is CleaveTrait)
         items.Add("it can [BRIGHTRED cleave] enemies");
       if (trait is TwoHandedTrait)

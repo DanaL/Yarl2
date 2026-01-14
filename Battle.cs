@@ -556,6 +556,7 @@ class Battle
     Item? weapon = attacker.Inventory.ReadiedWeapon();
     int weaponBonus = 0;
     bool cleaveTrait = false, lashTrait = false, impaleTrait = false;
+    FrighteningTrait? frighteningWeapon = null;
     if (weapon is not null)
     {
       foreach (Trait trait in weapon.Traits)
@@ -570,6 +571,8 @@ class Battle
           lashTrait = true;
         if (trait is ImpaleTrait)
           impaleTrait = true;
+        if (trait is FrighteningTrait ft)
+          frighteningWeapon = ft;
       }
     }
     
@@ -658,6 +661,15 @@ class Battle
 
       if (grappler is not null)
         messages.Add(ResolveGrapple(attacker, target, gs, grappler));
+
+      if (frighteningWeapon is not null)
+      {
+        FrightenedTrait frightened = new() { DC = frighteningWeapon.DC };
+        foreach (string s in frightened.Apply(target, gs))
+        {
+          gs.UIRef().AlertPlayer(s, gs, target.Loc);
+        }
+      }
 
       string verb = "hit";
       if (attacker.Traits.OfType<AttackVerbTrait>().FirstOrDefault() is AttackVerbTrait avt)

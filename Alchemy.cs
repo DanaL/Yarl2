@@ -51,6 +51,11 @@ class Alchemy
       return true;
     }
 
+    if (reagent.Name == "fearful rune" && item.Type == ItemType.Weapon && !item.HasTrait<FrighteningTrait>())
+    {
+      return true;
+    }
+
     return false;
   }
 
@@ -96,6 +101,10 @@ class Alchemy
       case "rune of lashing":
         msg = $"The smith welds the Rune of Lashing to your {item.Name}. Affixed to your weapon, the rune continues to glow with a faint, malevolent light.";
         item.Traits.Add(new LashTrait());
+        return (true, msg);
+      case "fearful rune":
+        msg = $"The smith welds the Fearful Rune to your {item.Name} with a shudder and quickly returns it to you.";
+        item.Traits.Add(new FrighteningTrait() { DC = 13 });
         return (true, msg);
     }
     
