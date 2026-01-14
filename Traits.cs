@@ -2413,6 +2413,11 @@ class LameTrait : TemporaryTrait
   }
 }
 
+class LashTrait : Trait
+{
+  public override string AsText() => "Lash";
+}
+
 class LeaveDungeonTrait : Trait, IGameEventListener
 {
   public bool Expired { get; set; }
@@ -4613,6 +4618,7 @@ class TraitFactory
     { "KnockBack", (pieces, gameObj) => new KnockBackTrait() },
     { "KoboldAltar", (pieces, gameObj) => new KoboldAltarTrait() },
     { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
+    { "Lash", (pieces, gameObj) => new LashTrait() },
     { "LeaveDungeon", (pieces, gameObj) => new LeaveDungeonTrait() { SourceId = ulong.Parse(pieces[1]) }},
     { "Levitation", (pieces, gameObj) => new LevitationTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "LightBeam", (pieces, gameObj) => new LightBeamTrait()

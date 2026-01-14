@@ -46,6 +46,11 @@ class Alchemy
       return upgradableWeapon;
     }
 
+    if (reagent.Name == "rune of lashing" && item.Type == ItemType.Weapon && !item.HasTrait<LashTrait>())
+    {
+      return true;
+    }
+
     return false;
   }
 
@@ -88,6 +93,10 @@ class Alchemy
         break;
       case "scroll of enchanting":
         return Enchant(item, actor);
+      case "rune of lashing":
+        msg = $"The smith welds the Rune of Lashing to your {item.Name}. Affixed to your weapon, the rune continues to glow with a faint, malevolent light.";
+        item.Traits.Add(new LashTrait());
+        return (true, msg);
     }
     
     return (success, msg);

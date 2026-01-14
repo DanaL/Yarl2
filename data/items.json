@@ -1365,5 +1365,16 @@
       "Scroll",
       "Stackable"
     ]
+  },
+  {
+    "Name": "RUNE_OF_LASHING",
+    "DescriptiveName": "rune of lashing",
+    "Type": "Reagent",
+    "Value": 50,
+    "Glyph": "Θ,brightred,dullred,black,false",
+    "Traits": [
+      "Stackable",
+      "LightSource#owner#1#faintpink#redaura"
+    ]
   }
 ]

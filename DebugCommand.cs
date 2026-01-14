@@ -123,7 +123,8 @@ class DebugCommand(GameState gs)
     {"bomb", ItemNames.BOMB },
     {"ring of water breathing", ItemNames.RING_OF_WATER_BREATHING },
     {"lembas", ItemNames.LEMBAS },
-    {"scroll of enchanting", ItemNames.SCROLL_ENCHANTING }
+    {"scroll of enchanting", ItemNames.SCROLL_ENCHANTING },
+    {"rune of lashing", ItemNames.RUNE_OF_LASHING }
   };
 
   public string DoCommand(string txt)

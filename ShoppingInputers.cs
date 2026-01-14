@@ -174,7 +174,7 @@ class ShopMenuInputer : Inputer
         lines.Add(line.ToString());
       }
 
-      int widest = lines.Select(l => l.Length).Max() + 2;
+      int widest = lines.Max(l => l.Length) + 2;
       int l = 0;
       foreach (var key in keys)
       {

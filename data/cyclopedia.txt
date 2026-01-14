@@ -628,3 +628,6 @@ Monsters that disguise themselves as enticing treasure to lure prey (adventurers
 #
 evil eye
 Despite being a large, floating eyeball it manages to be slightly narrowed in a disdainful, menacing sort of way.
+#
+rune of lashing
+An arcane rune that could be inscribed on your weapon to infuse it with magic.
