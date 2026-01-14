@@ -62,7 +62,8 @@ class Treasure
       ItemNames.GUIDE_BOWS, ItemNames.GUIDE_AXES, ItemNames.GUIDE_STABBY, ItemNames.GUIDE_SWORDS,
       ItemNames.CRIMSON_KING_WARD, ItemNames.CROESUS_CHARM, ItemNames.CUTPURSE_CREST,
       ItemNames.GASTON_BADGE, ItemNames.LESSER_BURLY_CHARM, ItemNames.LESSER_GRACE_CHARM, ItemNames.LESSER_HEALTH_CHARM,
-      ItemNames.SMOULDERING_CHARM, ItemNames.TALISMAN_OF_CIRCUMSPECTION, ItemNames.TROLL_BROOCH
+      ItemNames.SMOULDERING_CHARM, ItemNames.TALISMAN_OF_CIRCUMSPECTION, ItemNames.TROLL_BROOCH,
+      ItemNames.RUNE_OF_LASHING
   ];
 
   public static readonly List<ItemNames> Consumables = [
