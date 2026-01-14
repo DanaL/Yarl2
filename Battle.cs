@@ -59,22 +59,36 @@ class Battle
     return (total, dmg.Type);
   }
 
-  static bool ResolveImpale(Actor attacker, Actor target, int attackRoll, GameState gs, int weaponBonus)
+  static void ExtraAttackAtLocation(Actor attacker, Loc loc, int attackRoll, GameState gs, int weaponBonus)
   {
-    bool success = false;
+    Actor? occ = gs.ObjDb.Occupant(loc);
+    if (occ is not null && attackRoll >= occ.AC)
+    {
+      ResolveMeleeHit(attacker, occ, gs, "lash", weaponBonus, null);
+    }
+  }
 
+  static void ResolveImpale(Actor attacker, Actor target, int attackRoll, GameState gs, int weaponBonus)
+  {    
     // is there an opponent behind the primary target to impale?
     int diffRow = (attacker.Loc.Row - target.Loc.Row) * 2;
     int diffCol = (attacker.Loc.Col - target.Loc.Col) * 2;
     Loc checkLoc = attacker.Loc with { Row = attacker.Loc.Row - diffRow, Col = attacker.Loc.Col - diffCol };
-    Actor? occ = gs.ObjDb.Occupant(checkLoc);
-    if (occ is not null && attackRoll >= occ.AC)
-    {
-      ResolveMeleeHit(attacker, occ, gs, "impale", weaponBonus, null);
-      success = true;
-    }
+    ExtraAttackAtLocation(attacker, checkLoc, attackRoll, gs, weaponBonus);
+  }
 
-    return success;
+  // Really, Lash is just kind of super-impale
+  static void ResolveLash(Actor attacker, Loc targetLoc, int attackRoll, GameState gs, int weaponBonus)
+  {
+    int diffRow = (attacker.Loc.Row - targetLoc.Row) * 2;
+    int diffCol = (attacker.Loc.Col - targetLoc.Col) * 2;
+    Loc loc = targetLoc with { Row = attacker.Loc.Row - diffRow, Col = attacker.Loc.Col - diffCol };
+    ExtraAttackAtLocation(attacker, loc, attackRoll, gs, weaponBonus);
+    
+    diffRow = (attacker.Loc.Row - targetLoc.Row) * 3;
+    diffCol = (attacker.Loc.Col - targetLoc.Col) * 3;
+    loc = targetLoc with { Row = attacker.Loc.Row - diffRow, Col = attacker.Loc.Col - diffCol };
+    ExtraAttackAtLocation(attacker, loc, attackRoll, gs, weaponBonus);
   }
 
   static bool ResolveCleave(Actor attacker, Actor target, int attackRoll, GameState gs, int weaponBonus)
@@ -541,6 +555,7 @@ class Battle
     double result = 1.0;
     Item? weapon = attacker.Inventory.ReadiedWeapon();
     int weaponBonus = 0;
+    bool cleaveTrait = false, lashTrait = false, impaleTrait = false;
     if (weapon is not null)
     {
       foreach (Trait trait in weapon.Traits)
@@ -549,6 +564,12 @@ class Battle
           weaponBonus += wb.Bonus;
         if (trait is WeaponSpeedTrait qw)
           result = qw.Cost;
+        if (trait is CleaveTrait)
+          cleaveTrait = true;
+        if (trait is LashTrait)
+          lashTrait = true;
+        if (trait is ImpaleTrait)
+          impaleTrait = true;
       }
     }
     
@@ -653,7 +674,7 @@ class Battle
         HandleThief(attacker, target, gs);
       }
 
-      if (weapon is not null && weapon.HasTrait<CleaveTrait>() && !swallowed)
+      if (weapon is not null && cleaveTrait && !swallowed)
       {
         // A versatile weapon only cleaves if it is being wielded with two hands
         // (ie., the attacker doesn't have a shield equipped)
@@ -664,7 +685,7 @@ class Battle
         }
       }
 
-      if (weapon is not null && weapon.HasTrait<ImpaleTrait>() && !swallowed)
+      if (weapon is not null && impaleTrait && !swallowed)
         ResolveImpale(attacker, target, roll, gs, weaponBonus);
     }
     else
@@ -697,6 +718,12 @@ class Battle
           }
         }
       }
+    }
+
+    // lash happens on a hit or a miss
+    if (weapon is not null && lashTrait && Util.Distance(attacker.Loc, target.Loc) == 1)
+    {
+      ResolveLash(attacker, target.Loc, roll, gs, weaponBonus);
     }
 
     return result;
