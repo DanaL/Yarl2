@@ -580,7 +580,7 @@ class TryToEscape : BehaviourNode
       if (map is null)
         throw new Exception("Dijkstra maps should never be null");
 
-      List<(int, int)> route = map.EscapeRoute(mob.Loc.Row, mob.Loc.Col, 5);
+      List<(int, int)> route = map.EscapeRoute(mob.Loc.Row, mob.Loc.Col, 15);
       if (route.Count > 0)
       {
         Loc loc = mob.Loc with { Row = route[0].Item1, Col = route[0].Item2 };

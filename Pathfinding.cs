@@ -258,52 +258,46 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
   // would be no path to flee down. But maybe the kobold knows its stuck
   // and wil turn to fight?
   public List<(int, int)> EscapeRoute(int startRow, int startCol, int maxLength)
-  {    
-    List<(int, int)> bestPath = [];
-    List<(int, int)> currentPath = [ (startRow, startCol) ];
-    int bestScore = 0;
+  {
+    if (Sqrs is null)
+      throw new Exception("Map should never be null");
 
-    void FindPath(int row, int col, int currentScore, HashSet<(int, int)> visited)
+    List<(int, int)> longestPath = [];
+    Queue<List<(int, int)>> q = new();
+    q.Enqueue([(startRow, startCol)]);
+    HashSet<(int, int)> visited = [(startRow, startCol)];
+
+    while (q.Count > 0)
     {
-      if (Sqrs is null)
-        throw new Exception("Map should never be null");
+      List<(int, int)> currentPath = q.Dequeue();
 
-      if (currentScore > bestScore && currentPath.Count > 1)
+      if (currentPath.Count >= maxLength)
+        return [.. currentPath.Skip(1)];
+
+      if (currentPath.Count > longestPath.Count)
+        longestPath = [.. currentPath];
+
+      var (currRow, currCol) = currentPath[^1];
+
+      foreach (var (adjRow, adjCol) in Util.Adj8Sqs(currRow, currCol))
       {
-        bestScore = currentScore;
-        bestPath = [.. currentPath];
-      }
-
-      if (currentPath.Count == maxLength)
-        return;
-
-      foreach (var (adjRow, adjCol) in Util.Adj8Sqs(row, col))
-      {
-        // bounds check (I don't think this is strictly necessary because the maps
-        // should all have a perimeter of walls)
         if (adjRow < 0 || adjCol < 0 || adjRow >= Height || adjCol >= Width)
           continue;
 
         var adj = (adjRow, adjCol);
         int cost = Sqrs[adjRow, adjCol];
-        // The goal square is marked 0 in the map, which is the player's
-        // location and thus impassable
-        if (visited.Contains(adj) || cost == int.MaxValue || cost == 0)
+
+        // Skip walls, the player, and already visited squares
+        if (cost == int.MaxValue || cost == 0 || visited.Contains(adj))
           continue;
 
         visited.Add(adj);
-        currentPath.Add(adj);
-
-        FindPath(adjRow, adjCol, currentScore + Sqrs[adjRow, adjCol], visited);
-
-        visited.Remove(adj);
-        currentPath.RemoveAt(currentPath.Count - 1);
+        List<(int, int)> newPath = [.. currentPath, adj];
+        q.Enqueue(newPath);
       }
     }
 
-    FindPath(startRow, startCol, 0, [ (startRow, startCol) ]);
-
-    return [.. bestPath.Skip(1)];
+    return [.. longestPath.Skip(1)];
   }
 }
 
