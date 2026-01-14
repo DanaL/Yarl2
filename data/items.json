@@ -1376,5 +1376,16 @@
       "Stackable",
       "LightSource#owner#1#faintpink#redaura"
     ]
+  },
+  {
+    "Name": "FEARFUL_RUNE",
+    "DescriptiveName": "fearful rune",
+    "Type": "Reagent",
+    "Value": 50,
+    "Glyph": "Θ,green,darkgreen,black,false",
+    "Traits": [
+      "Stackable",
+      "LightSource#owner#1#ghostlyaura#ghostlyaura"
+    ]
   }
 ]
