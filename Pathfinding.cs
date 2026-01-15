@@ -20,8 +20,8 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
 {
   public const int IMPASSABLE = 9999;
   Map Map { get; set; } = map;
-  int Height { get; set; } = height;
-  int Width { get; set; } = width;
+  public int Height { get; init; } = height;
+  public int Width { get; init; } = width;
   public readonly int[,] Sqrs = new int[height, width];
   Dictionary<(int, int), int> ExtraCosts { get; set; } = extraCosts;
 
@@ -239,65 +239,6 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
     }
 
     return [.. adj.OrderBy(v => v.Item3)];
-  }
-
-  // Use the dijkstra map to flee from the player. Do a depth-first search 
-  // looking for the most expensive path in maxLength moves, which should
-  // lead away from the player.
-  //
-  // One thing I can't decide if it's a bug or good behaviour: because I'm
-  // counting occupied sqs as blocked, if there's no clear path to the player
-  // the monster won't find an escape route at all. Ie.,
-  //
-  //    ##########
-  //    #..@k....+
-  //    ##########
-  //
-  // Assuming the kobold couldn't use doors, the DMap calculation would 
-  // effectively not find a path between the door and the kobold so there
-  // would be no path to flee down. But maybe the kobold knows its stuck
-  // and wil turn to fight?
-  public List<(int, int)> EscapeRoute(int startRow, int startCol, int maxLength)
-  {
-    if (Sqrs is null)
-      throw new Exception("Map should never be null");
-
-    List<(int, int)> longestPath = [];
-    Queue<List<(int, int)>> q = new();
-    q.Enqueue([(startRow, startCol)]);
-    HashSet<(int, int)> visited = [(startRow, startCol)];
-
-    while (q.Count > 0)
-    {
-      List<(int, int)> currentPath = q.Dequeue();
-
-      if (currentPath.Count >= maxLength)
-        return [.. currentPath.Skip(1)];
-
-      if (currentPath.Count > longestPath.Count)
-        longestPath = [.. currentPath];
-
-      var (currRow, currCol) = currentPath[^1];
-
-      foreach (var (adjRow, adjCol) in Util.Adj8Sqs(currRow, currCol))
-      {
-        if (adjRow < 0 || adjCol < 0 || adjRow >= Height || adjCol >= Width)
-          continue;
-
-        var adj = (adjRow, adjCol);
-        int cost = Sqrs[adjRow, adjCol];
-
-        // Skip walls, the player, and already visited squares
-        if (cost == int.MaxValue || cost == 0 || visited.Contains(adj))
-          continue;
-
-        visited.Add(adj);
-        List<(int, int)> newPath = [.. currentPath, adj];
-        q.Enqueue(newPath);
-      }
-    }
-
-    return [.. longestPath.Skip(1)];
   }
 }
 

@@ -515,6 +515,39 @@ class PassTurn : BehaviourNode
 
 class TryToEscape : BehaviourNode
 {
+  Loc GoalLoc { get; set; } = Loc.Nowhere;
+
+  static (Loc, Loc) PickLocToFleeTo(Mob mob, DijkstraMap map, TravelCostFunction costFunc, GameState gs)
+  {
+    int furthest = 0;
+    (int, int) best = (-1, -1);    
+    for (int r = int.Max(0, mob.Loc.Row - 10); r <= int.Min(map.Height - 1, mob.Loc.Row + 10); r++)
+    {
+      for (int c = int.Max(0, mob.Loc.Col - 10); c <= int.Min(map.Width - 1, mob.Loc.Col + 10); c++)
+      {
+        if (map.Sqrs[r, c] < int.MaxValue && map.Sqrs[r, c] > furthest)
+        {
+          best = (r, c);
+          furthest = map.Sqrs[r, c];
+        }
+        else if (map.Sqrs[r, c] == furthest && gs.Rng.Next(6) == 0)
+        {
+          best = (r, c);
+        }          
+      }
+    }
+
+    if (best == (-1, -1))
+      return (Loc.Nowhere, Loc.Nowhere);
+
+    Loc goal = mob.Loc with { Row = best.Item1, Col = best.Item2 };
+    var path = AStar.FindPath(gs.ObjDb, gs.CurrentMap, mob.Loc, goal, costFunc, true);
+    if (path is not null && path.Count > 0)
+      return (path.Peek(), goal);
+
+    return (Loc.Nowhere, Loc.Nowhere);;
+  }
+
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
     if (gs.Rng.Next(10) == 0)
@@ -524,20 +557,35 @@ class TryToEscape : BehaviourNode
       return PlanStatus.Success;
     }
 
+    if (mob.Loc == GoalLoc)
+      GoalLoc = Loc.Nowhere;
+
+    DijkstraMap? map = gs.GetDMap();
+    TravelCostFunction costFunc = DijkstraMap.Cost;
     bool smart = false;
-    bool airborne = false;
     bool immobile = false;
-    bool swimmer = false;
     foreach (Trait t in mob.Traits)
     {
       if (t is IntelligentTrait)
+      {
         smart = true;
+        map = gs.GetDMap("doors");
+        costFunc = DijkstraMap.CostWithDoors;
+      }
       else if (t is FloatingTrait || t is FlyingTrait)
-        airborne = true;
+      {
+        map = gs.GetDMap("flying");
+        costFunc = DijkstraMap.CostByFlight;
+      }
       else if (t is ImmobileTrait)
+      {
         immobile = true;
+      }
       else if (t is SwimmerTrait)
-        swimmer = true;
+      {
+        map = gs.GetDMap("swim");
+        costFunc = DijkstraMap.CostForSwimming;
+      }
     }
 
     // A smart monster will jump on a teleport trap to escape
@@ -550,6 +598,7 @@ class TryToEscape : BehaviourNode
           if (gs.LastPlayerFoV.ContainsKey(adj))
             gs.UIRef().AlertPlayer($"{mob.FullName.Capitalize()} jumps into the teleport trap!");
           mob.ExecuteAction(new MoveAction(gs, mob, adj, false));
+          GoalLoc = Loc.Nowhere;
           return PlanStatus.Running;
         }
       }
@@ -562,35 +611,45 @@ class TryToEscape : BehaviourNode
       {
         UsePower usePower = new(power);
         if (usePower.Execute(mob, gs) == PlanStatus.Success)
+        {
+          GoalLoc = Loc.Nowhere;
           return PlanStatus.Running;
+        }
       }
     }
 
     if (!immobile)
-    {
-      DijkstraMap? map;
-      if (airborne)
-        map = gs.GetDMap("flying");
-      else if (smart)
-        map = gs.GetDMap("doors");
-      else if (swimmer)
-        map = gs.GetDMap("swim");
-      else
-        map = gs.GetDMap();
+    {      
       if (map is null)
         throw new Exception("Dijkstra maps should never be null");
 
-      List<(int, int)> route = map.EscapeRoute(mob.Loc.Row, mob.Loc.Col, 15);
-      if (route.Count > 0)
+      Loc loc = Loc.Nowhere;
+      if (GoalLoc == Loc.Nowhere)
       {
-        Loc loc = mob.Loc with { Row = route[0].Item1, Col = route[0].Item2 };
-
+        var (first, goal) = PickLocToFleeTo(mob, map, costFunc, gs);
+        GoalLoc = goal;
+        loc = first;
+      }
+      else
+      {
+        var path = AStar.FindPath(gs.ObjDb, gs.CurrentMap, mob.Loc, GoalLoc, costFunc, true);
+        loc = path.Peek();
+      }
+      
+      if (loc != Loc.Nowhere)
+      {
         Tile tile = gs.TileAt(loc);
         if (tile is Door door && !door.Open)
           mob.ExecuteAction(new OpenDoorAction(gs, mob, loc));
         else
           mob.ExecuteAction(new MoveAction(gs, mob, loc, false));
+
         return PlanStatus.Running;
+      }
+      else
+      {
+        GoalLoc = Loc.Nowhere;
+        return PlanStatus.Failure;
       }
     }
 
@@ -606,6 +665,7 @@ class TryToEscape : BehaviourNode
       return PlanStatus.Running;
 
     mob.ExecuteAction(new PassAction());
+
     return PlanStatus.Running;
   }
 }
