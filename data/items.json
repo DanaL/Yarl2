@@ -1387,5 +1387,16 @@
       "Stackable",
       "LightSource#owner#1#ghostlyaura#ghostlyaura"
     ]
+  },
+  {
+    "Name": "RUNE_OF_PARRYING",
+    "DescriptiveName": "rune of parrying",
+    "Type": "Reagent",
+    "Value": 50,
+    "Glyph": "Θ,iceblue,blue,black,false",
+    "Traits": [
+      "Stackable",
+      "LightSource#owner#1#mysticaura#holyaura"
+    ]
   }
 ]
