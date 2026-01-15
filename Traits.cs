@@ -1468,8 +1468,16 @@ abstract class TemporaryTrait : BasicTrait, IGameEventListener, IOwner
 
 class TelepathyTrait : TemporaryTrait
 {
-  protected override string ExpiryMsg => "You can no longer sense others' minds!";
+  protected override string ExpiryMsg => "";
   public override string AsText() => $"Telepathy#{base.AsText()}";
+
+  public override void Remove(GameState gs)
+  {
+    base.Remove(gs);
+    
+    if (gs.ObjDb.GetObj(OwnerID) is Player && !gs.Player.HasTrait<TelepathyTrait>())
+      gs.UIRef().AlertPlayer("You can no longer sense others' minds!");
+  }
 
   public override List<string> Apply(GameObj target, GameState gs)
   {
