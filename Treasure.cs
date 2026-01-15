@@ -63,7 +63,7 @@ class Treasure
       ItemNames.CRIMSON_KING_WARD, ItemNames.CROESUS_CHARM, ItemNames.CUTPURSE_CREST,
       ItemNames.GASTON_BADGE, ItemNames.LESSER_BURLY_CHARM, ItemNames.LESSER_GRACE_CHARM, ItemNames.LESSER_HEALTH_CHARM,
       ItemNames.SMOULDERING_CHARM, ItemNames.TALISMAN_OF_CIRCUMSPECTION, ItemNames.TROLL_BROOCH,
-      ItemNames.RUNE_OF_LASHING
+      ItemNames.RUNE_OF_LASHING, ItemNames.FEARFUL_RUNE, ItemNames.RUNE_OF_PARRYING
   ];
 
   public static readonly List<ItemNames> Consumables = [
