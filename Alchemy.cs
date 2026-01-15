@@ -56,6 +56,11 @@ class Alchemy
       return true;
     }
 
+    if (reagent.Name == "rune of parrying" && item.Type == ItemType.Weapon)
+    {
+      return true;
+    }
+
     return false;
   }
 
@@ -105,6 +110,17 @@ class Alchemy
       case "fearful rune":
         msg = $"The smith welds the Fearful Rune to your {item.Name} with a shudder and quickly returns it to you.";
         item.Traits.Add(new FrighteningTrait() { DC = 13 });
+        return (true, msg);
+      case "rune of parrying":
+        msg = $"With the rune sealed to your {item.Name}, it begins seems almost to twitch, ready to parry incoming attacks.";
+        if (item.Traits.OfType<ACModTrait>().FirstOrDefault() is ACModTrait acMod)
+        {
+          acMod.ArmourMod += 2;
+        }
+        else
+        {
+          item.Traits.Add(new ACModTrait() { ArmourMod = 2 });
+        }
         return (true, msg);
     }
     

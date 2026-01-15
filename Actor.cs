@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System;
-
 namespace Yarl2;
 
 // Actor should really be an abstract class but abstract classes seemed

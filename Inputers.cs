@@ -1451,6 +1451,8 @@ class InventoryDetails : Inputer
         items.Add("it has [LIGHTBLUE reach]");
       if (trait is ImpaleTrait)
         items.Add("it can [LIGHTBLUE impale] foes");
+      if (trait is ACModTrait)
+        items.Add("it provides [LIGHTBLUE a bonus to AC]");
 
       if (trait is GrantsTrait grants)
       {
