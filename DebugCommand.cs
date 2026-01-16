@@ -126,7 +126,8 @@ class DebugCommand(GameState gs)
     {"scroll of enchanting", ItemNames.SCROLL_ENCHANTING },
     {"rune of lashing", ItemNames.RUNE_OF_LASHING },
     {"fearful rune", ItemNames.FEARFUL_RUNE },
-    {"rune of parrying", ItemNames.RUNE_OF_PARRYING }
+    {"rune of parrying", ItemNames.RUNE_OF_PARRYING },
+    {"potion of dragon breath", ItemNames.POTION_DRAGON_BREATH }
   };
 
   public string DoCommand(string txt)

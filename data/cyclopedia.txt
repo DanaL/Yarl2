@@ -637,3 +637,6 @@ You're loathe to touch this rune, but it could cause your weapon to terrorize yo
 #
 rune of parrying
 This rune hums faintly and is shaped into a protective sigil.
+#
+potion of dragon breath
+Magicians have always been jealous of dragons. Their giant gold of treasure, their wings, their teeth. So, they invented this potion that at least lets them replicate a dragon's breath weapon.

@@ -1935,6 +1935,46 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     ));
   }
 
+  static UseResult SetupDragonBreath(Actor user, GameState gs)
+  {
+    string desc;
+    DamageType dt;
+    ExplosionColours colours;
+    int dmgDie = 6, numOfDie = 4;
+
+    switch (gs.Rng.Next(5))
+    {
+      case 0:
+        desc = "a gout of flame";
+        dt = DamageType.Fire;
+        colours = new(Colours.BRIGHT_RED, Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.WHITE, '\u22CF');
+        break;
+      case 1:
+        desc = "a blast of cold";
+        dt = DamageType.Cold;
+        colours = new(Colours.ICE_BLUE, Colours.LIGHT_BLUE, Colours.WHITE, Colours.BLUE, '*');
+        break;
+      case 2:
+        desc = "a wave of electricity";
+        dt = DamageType.Electricity;
+        colours = new(Colours.BLUE, Colours.LIGHT_BLUE, Colours.DARK_BLUE, Colours.YELLOW, '*');
+        break;
+      case 3:
+        desc = "a spray of acid";
+        dt = DamageType.Acid;
+        colours = new(Colours.GREY, Colours.DARK_GREY, Colours.LIGHT_GREY, Colours.BLACK, '*');
+        break;
+      default:
+        desc = "a cloud of poison";
+        dt = DamageType.Poison;
+        colours = new(Colours.LIME_GREEN, Colours.GREEN, Colours.SOPHIE_GREEN, Colours.DARK_GREEN, '*');
+        break;
+    }
+
+    AimAction action = new(gs, user, new BreathWeaponAction(gs, user, dt, desc, dmgDie, numOfDie, 5, colours));
+    return new UseResult(action);
+  }
+
   public UseResult Use(Actor user, GameState gs, int row, int col, Item? item) => Spell switch
   {
     "antidote" => new UseResult(new AntidoteAction(gs, user)),
@@ -1986,6 +2026,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
           new InventoryOptions() { Title = "Use on which item?" },
               new EnchantItemAction(gs, user, item!)    
       )),
+    "dragonbreath" => SetupDragonBreath(user, gs),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 }

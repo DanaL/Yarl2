@@ -576,6 +576,84 @@ class RumBreathAction(GameState gs, Actor actor, Loc target, int range) : Action
   }
 }
 
+class BreathWeaponAction(GameState gs, Actor actor, DamageType dmgType, string desc, int dmgDie, int numOfDice, int range, ExplosionColours colours) : DirectionalAction(gs, actor)
+{
+  readonly DamageType _damageType = dmgType;
+  readonly string _desc = desc;
+  readonly int _dmgDie = dmgDie;
+  readonly int _numOfDice = numOfDice;
+  readonly int _range = range;
+  readonly ExplosionColours _colours = colours;
+
+  public override double Execute()
+  {
+    base.Execute();
+
+    if (GameState!.LastPlayerFoV.ContainsKey(Actor!.Loc))
+    {
+      string n = MsgFactory.CalcName(Actor, GameState.Player).Capitalize();
+      string s = $"{n} {Grammar.Conjugate(Actor, "breath")} {_desc}!";
+      GameState.UIRef().AlertPlayer(s);
+    }
+
+    List<Loc> affected = ConeCalculator.Affected(_range, Actor.Loc, Loc, GameState.CurrentMap, GameState.ObjDb, []);
+    affected.Insert(0, Actor.Loc);
+    var explosion = new ExplosionAnimation(GameState!)
+    {
+      MainColour = _colours.Main,
+      AltColour1 = _colours.Alt1,
+      AltColour2 = _colours.Alt2,
+      Highlight = _colours.Highlight,
+      Centre = Actor.Loc,
+      Sqs = [.. affected],
+      Ch = _colours.Ch
+    };
+    GameState.UIRef().PlayAnimation(explosion, GameState);
+
+    affected.Remove(Actor.Loc);
+
+    foreach (var pt in affected)
+    {
+      Effects.ApplyDamageEffectToLoc(pt, _damageType, GameState);
+    }
+
+    int total = 0;
+    for (int j = 0; j < _numOfDice; j++)
+      total += GameState.Rng.Next(_dmgDie) + 1;
+    List<(int, DamageType)> dmg = [(total, _damageType)];
+    foreach (var pt in affected)
+    {
+      Effects.ApplyDamageEffectToLoc(pt, _damageType, GameState);
+      if (GameState.ObjDb.Occupant(pt) is Actor victim)
+      {
+        string s = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the {_damageType.ToString().ToLower()}!";
+        GameState.UIRef().AlertPlayer(s, GameState, victim.Loc, victim);
+
+        var (hpLeft, dmgMsg, _) = victim.ReceiveDmg(dmg, 0, GameState, null, 1.0);
+        if (dmgMsg != "")
+          GameState.UIRef().AlertPlayer(dmgMsg);
+        if (hpLeft < 1)
+        {
+          GameState.ActorKilled(victim, "fiery breath", null);
+        }
+      }
+    }
+
+    return 1.0;
+  }
+
+  public override void ReceiveUIResult(UIResult result)
+  {
+    var dirResult = (DirectionUIResult)result;
+    var actorLoc = Actor!.Loc;
+    Loc = actorLoc with
+    {
+      Row = actorLoc.Row + dirResult.Row,
+      Col = actorLoc.Col + dirResult.Col
+    };
+  }
+}
+
 // I'm sure as I add more breath weapons I'll make this more generic, or extract
 // a subclass
 class FireBreathAction(GameState gs, Actor actor, Loc target, int range, int dmgDie, int dmgDice) : Action(gs, actor)
@@ -644,7 +722,7 @@ class FireBreathAction(GameState gs, Actor actor, Loc target, int range, int dmg
     }
 
     return 1.0;
-  }
+  }  
 }
 
 class BashAction(GameState gs, Actor actor) : Action(gs, actor)
@@ -4247,6 +4325,24 @@ class CastHealMonster(GameState gs, Actor actor, Trait src) : Action(gs, actor)
   public override void ReceiveUIResult(UIResult result) => _target = ((LocUIResult)result).Loc;
 }
 
+class AimAction(GameState gs, Actor actor, Action replacementAction) : Action(gs, actor)
+{
+  readonly Action _replacementAction = replacementAction;
+
+  public override double Execute()
+  {
+    base.Execute();
+
+    if (Actor is Player)
+    {
+      DirectionalInputer aimer = new(GameState!, false, false) { DeferredAction = _replacementAction };
+      GameState!.UIRef().SetInputController(aimer);
+    }
+
+    return 0.0;
+  }
+}
+
 class InventoryChoiceAction(GameState gs, Actor actor, InventoryOptions opts, Action replacementAction) : Action(gs, actor)
 {
   readonly InventoryOptions InvOptions = opts;
@@ -4260,14 +4356,11 @@ class InventoryChoiceAction(GameState gs, Actor actor, InventoryOptions opts, Ac
     {
       char[] slots = player.Inventory.UsedSlots();
       player.Inventory.ShowMenu(GameState!.UIRef(), InvOptions);
-      Inventorier inputer = new(GameState!, [.. slots])
-      {
-        DeferredAction = ReplacementAction
-      };
+      Inventorier inputer = new(GameState!, [.. slots]) { DeferredAction = ReplacementAction };
       GameState.UIRef().SetInputController(inputer);
     }
 
-    return 1.0;
+    return 0.0;
   }
 }
 

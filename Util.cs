@@ -24,6 +24,7 @@ enum Dir { North, South, East, West, None }
 // Bearlib's didn't have a comparison operator implemented, which was 
 // inconvenient for me
 record struct Colour(int R, int G, int B, int Alpha);
+record struct ExplosionColours(Colour Main, Colour Alt1, Colour Alt2, Colour Highlight, char Ch);
 
 static class Colours
 {
