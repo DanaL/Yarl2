@@ -619,7 +619,7 @@ class Battle
 
       List<string> messages = [];
       GrapplerTrait? grappler = null;
-      bool thief = false;
+      bool thief = false, shieldBash = false;
       foreach (Trait t in attacker.Traits)
       {
         if (t is KnockBackTrait)
@@ -656,6 +656,11 @@ class Battle
           FrightenedTrait frightened = new() { DC = ft.DC, ExpiresOn = gs.Turn + 25 };
           List<string> msgs = frightened.Apply(target, gs);
           messages.AddRange(msgs);
+        }
+
+        if (t is ShieldBashTrait)
+        {
+          shieldBash = true;          
         }
       }
 
@@ -699,6 +704,9 @@ class Battle
 
       if (weapon is not null && impaleTrait && !swallowed)
         ResolveImpale(attacker, target, roll, gs, weaponBonus);
+
+      if (shieldBash)
+        HandleShieldBash(attacker, target, gs);
     }
     else
     {
@@ -773,6 +781,38 @@ class Battle
     s += attacker.BecomeFrightened(gs);
 
     gs.UIRef().AlertPlayer(s, gs, target.Loc);
+  }
+
+  static void HandleShieldBash(Actor attacker, Actor target, GameState gs)
+  {
+    if (target.HasTrait<DeadTrait>())
+      return;
+
+    bool equipedShield = false;
+    foreach (Item item in attacker.Inventory.Items())
+    {
+      if (item.Equipped && item.Traits.OfType<ArmourTrait>().FirstOrDefault() is ArmourTrait armour && armour.Part == ArmourParts.Shield)
+      {
+        equipedShield = true;
+        break;
+      }
+    }
+
+    if (!equipedShield || Util.Distance(attacker.Loc, target.Loc) > 1)
+      return;
+
+    if (gs.Rng.Next(3) > 0)
+      return;
+
+    string an = MsgFactory.CalcName(attacker, gs.Player).Capitalize();
+    string tn = MsgFactory.CalcName(target, gs.Player);
+    string msg = $"{an} {Grammar.Conjugate(attacker, "slam")}";
+    msg += attacker is Player ? " your shield " : " their shield ";
+    msg += $" into {tn}!";
+    gs.UIRef().AlertPlayer(msg, gs, attacker.Loc);
+
+
+    // ResolveKnockBack
   }
 
   static void HandleCutpurse(Actor attacker, Actor target, GameState gs)

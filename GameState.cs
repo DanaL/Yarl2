@@ -805,6 +805,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       UI.AlertPlayer(MsgFactory.MobKilledMessage(victim, attacker, this));
     }
 
+    victim.Traits.Add(new DeadTrait());
+
     // Was anything listening for the the victims death?
     // Making a copy is the easiest way to deal with the collection being
     // modified by the alert

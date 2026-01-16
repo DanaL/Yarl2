@@ -2031,6 +2031,17 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
   };
 }
 
+class ShieldBashTrait : TemporaryTrait
+{
+  public override string AsText() => "ShieldBash";
+
+  public override List<string> Apply(GameObj target, GameState gs)
+  {
+    target.Traits.Add(this);
+    return ["You learn how to execute Shield Bashes! "];
+  }
+}
+
 class SideEffectTrait : Trait
 {
   public string Effect { get; set; } = "";
@@ -2123,6 +2134,11 @@ class CurseTrait : TemporaryTrait
 class CutpurseTrait : Trait
 {
   public override string AsText() => $"Cutpurse#{SourceId}";
+}
+
+class DeadTrait : Trait
+{
+  public override string AsText() => "Dead";
 }
 
 class DeathMessageTrait : BasicTrait
@@ -4547,6 +4563,7 @@ class TraitFactory
         };
       }
     },
+    { "Dead", (pieces, gameObj) => new DeadTrait() },
     { "DeathMessage", (pieces, gameObj) => new DeathMessageTrait() { Message = pieces[1] } },
     { "DemonVisage", (pieces, gameObj) => new DemonVisageTrait() },
     { "Description", (pieces, gameObj) => new DescriptionTrait(pieces[1]) },
@@ -4810,6 +4827,7 @@ class TraitFactory
         };
       }
     },
+    { "ShieldBash", (pieces, gameObj) => new ShieldBashTrait() },
     { "SideEffect", (pieces, gameObj) => new SideEffectTrait() { Odds = int.Parse(pieces[1]), Effect = string.Join('#', pieces[2..] ) } },
     { "Shunned", (pieces, gameObj) => new ShunnedTrait() },
     { "SilverAllergy", (pieces, gameObj) => new SilverAllergyTrait() },

@@ -1410,5 +1410,20 @@
       "UseSimple#dragonbreath",
       "Consumable"
     ]
+  },
+  {
+    "Name": "PHALANX_PHOLIOS_2",
+    "DescriptiveName": "Phalanx Pholios Vol. 2",
+    "Type": "Scroll",
+    "Value": 100,
+    "Glyph": "♪,white,lightgrey,black,false",
+    "Traits": [
+      "Consumable",
+      "Flammable",
+      "Stackable",
+      "SideEffect#100#ShieldBash",
+      "CanApply",
+      "Book"
+    ]
   }
 ]

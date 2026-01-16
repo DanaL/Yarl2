@@ -643,3 +643,6 @@ This rune hums faintly and is shaped into a protective sigil.
 #
 potion of dragon breath
 Magicians have always been jealous of dragons. Their giant gold of treasure, their wings, their teeth. So, they invented this potion that at least lets them replicate a dragon's breath weapon.
+#
+Phalanx Pholios Vol. 2
+In this issue of Phalanx Pholios, we teach the Shield Bash technique! You paid good zorkmids for that shield, why use it only to block enemies' attacks?
