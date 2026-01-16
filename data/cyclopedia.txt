@@ -206,6 +206,9 @@ A charm emblazoned with a kettle bell.
 lesser health charm
 A charm emblazoned with a heart.
 #
+neatly printed flyer
+The Greater Yendorian Tourism Bureau discourages advertising in the dungeon but is often ignored by enterprising merchants.
+#
 lesser grace charm
 A charm emblazoned with a juggling jester.
 #
