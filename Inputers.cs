@@ -1303,7 +1303,12 @@ class InventoryDetails : Inputer
         desc += "\n\n";
         if (InteractionMenu.Contains("use"))
         {
-          desc += "[ICEBLUE a)] use item\n";
+          desc += item.Type switch
+          {
+            ItemType.Potion => "[ICEBLUE a)] drink potion\n",
+            ItemType.Scroll or ItemType.Document => $"[ICEBLUE a)] read {item.Type.ToString().ToLower()}\n",
+            _ => "[ICEBLUE a)] use item\n",
+          };
           Options.Add('a');
         }
         if (InteractionMenu.Contains("drop"))
