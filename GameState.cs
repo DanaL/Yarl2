@@ -1608,10 +1608,10 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       }
     }
 
-    if (actor is Player && Options.AutoPickupGold && ObjDb.ItemsAt(Player.Loc).FirstOrDefault(i => i.Type == ItemType.Zorkmid) is Item gold)
+    if (actor is Player && Options.AutoPickupGold && ObjDb.ItemsAt(actor.Loc).FirstOrDefault(i => i.Type == ItemType.Zorkmid) is Item gold)
     {
       var action = new PickupItemAction(this, actor) { ItemIDs = [ gold.ID ]};
-      Player.QueueAction(action);
+      actor.QueueAction(action);
     }
   }
 
