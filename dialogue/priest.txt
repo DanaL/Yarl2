@@ -5,39 +5,22 @@
     (else (say "Greetings, oh [BLUE righteous faithful]. "))
   )
   
-  (cond
-    ((= ORCHARD_EXISTS true) 
-      (say
-        (pick
-          ("It is my duty to look after the spiritual well-being of #TOWN_NAME." 
-            "Have you heard the good word about Huntokar?" 
-            "It's said in ancient days the elves of old would grow magic fruit in their secret orchards."
-            "I feel in my bones that the [BRIGHTRED old evil] begins to stir once more."
-            "Long ago, the ruins were a mighty kindgom. But then a great evil arose deep underground."
-            "Adventurers defeated the evil but it appears to be waking again, endangering #TOWN_NAME."
-            "Huntokar grants mightier blessings to loyal followers."
-            "Huntokar weeps for those whose bones lay in the depths without having proper funerary rites."
-            "There were shrines to Huntokar below ground, but foul monsters have desecrated them. A terrible sin!"
-          )
-        )
-      )
-    )
-    (else
-      (say
-        (pick
-          ("It is my duty to look after the spiritual well-being of #TOWN_NAME." 
+  (def lines '("It is my duty to look after the spiritual well-being of #TOWN_NAME." 
           "Have you heard the good word about Huntokar?"
           "I feel in my bones that the [BRIGHTRED old evil] begins to stir once more."
           "Long ago, the ruins were a mighty kindgom. But then a great evil arose deep underground."
           "Adventurers defeated the evil but it appears to be waking again, endangering #TOWN_NAME."
           "Huntokar grants mightier blessings to loyal followers."
           "Huntokar weeps for those whose bones lay in the depths without having proper funerary rites."
-          "There were shrines to Huntokar below ground, but foul monsters have desecrated them. A terrible sin!"
-          )
-        )
-      )
+          "There were shrines to Huntokar below ground, but foul monsters have desecrated them. A terrible sin!")
+  )
+  (cond
+    ((= ORCHARD_EXISTS true) 
+      (append lines "It is said in ancient days the elves of old would grow magic fruit in their secret orchards.")
     )
   )
+
+  (say (pick lines))
 
   (
     (blessings-options)

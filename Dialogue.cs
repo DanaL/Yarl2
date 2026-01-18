@@ -15,13 +15,13 @@ namespace Yarl2;
 
 enum TokenType
 {
-  LEFT_PAREN, RIGHT_PAREN, 
+  LEFT_PAREN, RIGHT_PAREN, QUOTE,
   IDENTIFIER, STRING, NUMBER,
   COND, GIVE, OFFER, SAY, PICK, SET, BUMP,
   AND, OR,
   EQ, NEQ, LT, LTE, GT, GTE, ELSE,
   TRUE, FALSE,
-  OPTION, SPEND, END, 
+  OPTION, SPEND, END, DEF, APPEND,
   BLESSINGS, GRANT_CHAMP_BLESSING, GRANT_PALADIN_BLESSING, GRANT_REAVER_BLESSING,
   GRANT_EMBER_BLESSING, GRANT_TRICKSTER_BLESSSING, GRANT_WINTER_BLESSING,
   SHOP_MENU, SHOP_SELECTION, DRAGON_CULT_QUEST, SELL_MENU,
@@ -66,6 +66,9 @@ class ScriptScanner(string src)
         break;
       case ')':
         AddToken(TokenType.RIGHT_PAREN, ")");
+        break;
+      case '\'':
+        AddToken(TokenType.QUOTE, "'");
         break;
       case '=':
         AddToken(TokenType.EQ, "=");
@@ -128,6 +131,8 @@ class ScriptScanner(string src)
       "end" => TokenType.END,
       "offer" => TokenType.OFFER,
       "bump" => TokenType.BUMP,
+      "def" => TokenType.DEF,
+      "append" => TokenType.APPEND,
       "blessings-options" => TokenType.BLESSINGS,
       "grant-champion-blessing" => TokenType.GRANT_CHAMP_BLESSING,
       "grant-reaver-blessing" => TokenType.GRANT_REAVER_BLESSING,
@@ -248,6 +253,8 @@ class ScriptParser(List<ScriptToken> tokens)
       TokenType.OFFER => OfferExpr(),
       TokenType.BUMP => BumpExpr(),
       TokenType.DRAGON_CULT_QUEST => StartDragonCultQuest(),
+      TokenType.DEF => DefExpr(),
+      TokenType.APPEND => AppendExpr(),
       _ => ListExpr(),
     };
   }
@@ -499,6 +506,42 @@ class ScriptParser(List<ScriptToken> tokens)
     return new ScriptSay(expr);
   }
 
+  ScriptDef DefExpr()
+  {
+    Consume(TokenType.DEF);
+
+    if (!Check(TokenType.IDENTIFIER))
+      throw new Exception("Expected identifier in boolean expression");
+    ScriptLiteral lit = (ScriptLiteral)Expr();
+    
+    Consume(TokenType.QUOTE);
+
+    ScriptExpr expr = NonAtomic();
+    Consume(TokenType.RIGHT_PAREN);
+
+    if (expr is ScriptList list)
+      return new ScriptDef(lit.Name, list);
+    
+    throw new Exception("Expected list in def expression");
+  }
+
+  ScriptAppend AppendExpr()
+  {
+    Consume(TokenType.APPEND);
+
+    if (!Check(TokenType.IDENTIFIER))
+      throw new Exception("Expected identifier in append expression");
+    ScriptLiteral lit = (ScriptLiteral)Expr();
+
+    ScriptExpr val = Expr();
+    if (val is not ScriptAtomic atomic)
+      throw new Exception("Expected value in append expression");
+    
+    Consume(TokenType.RIGHT_PAREN);
+    
+    return new ScriptAppend(lit.Name, atomic);
+  }
+
   ScriptEnd EndExpr()
   {
     Consume(TokenType.END);
@@ -541,13 +584,23 @@ class ScriptParser(List<ScriptToken> tokens)
   ScriptPick PickExpr()
   {
     Consume(TokenType.PICK);
-    ScriptExpr expr = NonAtomic();
-    Consume(TokenType.RIGHT_PAREN);
 
-    if (expr is ScriptList list)
-      return new ScriptPick(list);
+    if (Check(TokenType.IDENTIFIER))
+    {
+      ScriptLiteral lit = (ScriptLiteral)Expr();
+      Consume(TokenType.RIGHT_PAREN);
+      return new ScriptPick(lit.Name);
+    }
+    else 
+    {
+      ScriptExpr expr = NonAtomic();
+      Consume(TokenType.RIGHT_PAREN);
+
+      if (expr is ScriptList list)
+        return new ScriptPick(list);
+    }
     
-    throw new Exception("Expected list in Pick expression");    
+    throw new Exception("Malformed Pick expression");    
   }
 
   ScriptBooleanExpr BooleanExpr()
@@ -644,9 +697,25 @@ class ScriptBooleanExpr(ScriptToken op, string identifier, ScriptAtomic val) : S
   public ScriptAtomic Value { get; set; } = val;
 }
 
-class ScriptPick(ScriptList list) : ScriptExpr
+class ScriptPick : ScriptExpr
 {
-  public ScriptList List { get; set; } = list;
+  public string Identifier { get; set; } = "";
+  public ScriptList? List { get; set; } = null;
+
+  public ScriptPick(string identifier) => Identifier = identifier;
+  public ScriptPick(ScriptList list) => List = list;
+}
+
+class ScriptDef(string identifier, ScriptList list) : ScriptExpr
+{
+  public string Identifier { get; set; } = identifier;
+  public ScriptList List { get; set; } = list;  
+}
+
+class ScriptAppend(string identifier, ScriptAtomic val) : ScriptExpr
+{
+  public string Identifier { get; set; } = identifier;
+  public ScriptAtomic Value { get; set; } = val;
 }
 
 class ScriptSay(ScriptExpr dialogue) : ScriptExpr
@@ -768,6 +837,10 @@ class DialogueInterpreter
   StringBuilder Footer { get; set; } = new();
   public DialogueInterpreter() { }
   static readonly int HOLY_WATER_PRICE = 20;
+
+  // At the moment, the only define-able variables are lists, but let's not
+  // assume that'll hold true forever
+  Dictionary<string, ScriptExpr> _vars = [];
 
   public static List<string> ValidateDialogueFiles()
   {
@@ -1020,9 +1093,7 @@ class DialogueInterpreter
     }
     else if (Expr is ScriptPick pick)
     {
-      var opts = pick.List.Items;
-      ScriptExpr e = opts[gs.Rng.Next(opts.Count)];
-      return Eval(e, mob, gs);
+      result = EvalPick(pick, mob, gs);
     }
     else if (Expr is ScriptGive gift)
     {
@@ -1112,6 +1183,14 @@ class DialogueInterpreter
     else if (Expr is ScriptStartDragonCultQuest)
     {
       EvalStartDragonCultQuest(mob, gs);
+    }
+    else if (Expr is ScriptDef def)
+    {
+      EvalDef(def);  
+    }
+    else if (Expr is ScriptAppend append)
+    {
+      EvalAppend(append);
     }
 
     return result;
@@ -1418,7 +1497,21 @@ class DialogueInterpreter
     gs.Player.AddToInventory(item, gs);
   }
 
-  void EvalOffer(ScriptOffer offer, Actor mob, GameState gs)
+  void EvalDef(ScriptDef def)
+  {
+    // I'm just intentionally overwriting an existing var without warning 
+    // if I have multiple defs for the same identifier.
+    _vars[def.Identifier] = def.List;
+  }
+
+  // TODO: should probably add some actual error checking...
+  void EvalAppend(ScriptAppend append)
+  {
+    ScriptList list = (ScriptList) _vars[append.Identifier];
+    list.Items.Add(append.Value);
+  }
+
+  static void EvalOffer(ScriptOffer offer, Actor mob, GameState gs)
   {
     ulong itemId = (ulong) CheckVal(offer.Identifier.Name, mob, gs);
     if (itemId == ulong.MaxValue)
@@ -1468,6 +1561,19 @@ class DialogueInterpreter
     }
 
     return new ScriptBool(false);
+  }
+
+  // TODO: should probably add actual error checking/handling...
+  ScriptExpr EvalPick(ScriptPick pick, Actor mob, GameState gs)
+  {
+    List<ScriptExpr> options;
+    if (pick.List is not null) 
+      options = pick.List.Items;
+    else
+      options = ((ScriptList)_vars[pick.Identifier]).Items;
+    
+    ScriptExpr e = options[gs.Rng.Next(options.Count)];
+    return Eval(e, mob, gs);
   }
 
   void EvalCond(ScriptCond cond, Actor mob, GameState gs)
