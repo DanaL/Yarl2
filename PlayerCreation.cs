@@ -69,7 +69,7 @@ class PlayerCreator
       " (3) Elf\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t(4) Dwarf",
       "",
       " Magical, ethereal, fond of wine\t\t\t\t\t\t\t\tStout and bearded. Dwarves in Delve",
-      " and grammar. Elves also benefit\t\t\t\t\t\t\t\tabsoultely do not have Scottish",
+      " and grammar. Elves also benefit\t\t\t\t\t\t\t\tabsolutely do not have Scottish",
       " from mandatory archery classes\t\t\t\t\t\t\t\t\taccents. They are less prone to illness",
       " in Elf Grade School.\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tand poison, and accrue stress more",
       "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tslowly when exploring dungeons."
