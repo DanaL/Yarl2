@@ -368,7 +368,8 @@ namespace Yarl2
     public bool ShowHints { get; set; }
     public bool ShowTurns { get; set; }
     public bool DefaultMoveHints { get; set; }
-
+    public bool AutoPickupGold { get; set; }
+    
     public Dictionary<char, string> KeyRemaps { get; set; } = [];
 
     public Options() { }
@@ -399,7 +400,8 @@ namespace Yarl2
         HighlightPlayer = false,
         ShowHints = true,
         ShowTurns = false,
-        DefaultMoveHints = true
+        DefaultMoveHints = true,
+        AutoPickupGold = false,
       };
 
       DirectoryInfo userDir = Util.UserDir;

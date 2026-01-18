@@ -1607,6 +1607,12 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         FallToNextLevel(actor, stairs.Destination);
       }
     }
+
+    if (actor is Player && Options.AutoPickupGold && ObjDb.ItemsAt(Player.Loc).FirstOrDefault(i => i.Type == ItemType.Zorkmid) is Item gold)
+    {
+      var action = new PickupItemAction(this, actor) { ItemIDs = [ gold.ID ]};
+      Player.QueueAction(action);
+    }
   }
 
   public string ThingTouchesFloor(Loc loc)

@@ -640,7 +640,7 @@ class MapView : Inputer
 class OptionsScreen : Inputer
 {
   int row = 0;
-  const int numOfOptions = 7;
+  const int numOfOptions = 8;
 
   public OptionsScreen(GameState gs) : base(gs) => WritePopup();
 
@@ -677,6 +677,8 @@ class OptionsScreen : Inputer
         GS.Options.ShowTurns = !GS.Options.ShowTurns;
       else if (row == 6)
         GS.Options.DefaultMoveHints = !GS.Options.DefaultMoveHints;
+      else if (row == 7)
+        GS.Options.AutoPickupGold = !GS.Options.AutoPickupGold;
     }
 
     WritePopup();
@@ -691,6 +693,7 @@ class OptionsScreen : Inputer
     string hints = GS.Options.ShowHints ? "On" : "Off";
     string turns = GS.Options.ShowTurns ? "On" : "Off";
     string moveHints = GS.Options.DefaultMoveHints ? "On" : "Off";
+    string autoPickupGold = GS.Options.AutoPickupGold ? "On" : "Off";
 
     List<string> menuItems = [
       $"Bump to open doors: {bumpToOpen}",
@@ -700,6 +703,7 @@ class OptionsScreen : Inputer
       $"Show command hints: {hints}",
       $"Show turns: {turns}",
       $"Show move keys by default: {moveHints}",
+      $"Auto-Pickup Gold: {autoPickupGold}",
     ];
 
     GS.UIRef().SetPopup(new PopupMenu("Options", menuItems) { SelectedRow = row });
