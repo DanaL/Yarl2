@@ -251,7 +251,7 @@ class Popup : IPopup
       List<(Colour, string)> barLine = [(Colours.WHITE, $"│ {BarLabel} [")];
 
       double ratio = Value1 / (double)Value2;
-      int bar1Len = (int)(barWidth * ratio);
+      int bar1Len = int.Max(0, (int)(barWidth * ratio));
       int bar2Len = barWidth - bar1Len;
       string bar1 = new('█', bar1Len);
       barLine.Add((Colour1, bar1));

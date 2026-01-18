@@ -1412,8 +1412,8 @@
     ]
   },
   {
-    "Name": "PHALANX_PHOLIOS_2",
-    "DescriptiveName": "Phalanx Pholios Vol. 2",
+    "Name": "PHALANX_PHOLIO_2",
+    "DescriptiveName": "Phalanx Pholio Vol. 2",
     "Type": "Scroll",
     "Value": 100,
     "Glyph": "♪,white,lightgrey,black,false",

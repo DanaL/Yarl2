@@ -373,6 +373,8 @@ sealed class Player : Actor
         traitsToShow.Add("You [green heal] especially quick");
       else if (trait is WaterBreathingTrait)
         traitsToShow.Add("You can [blue breath in water]");
+      else if (trait is ShieldBashTrait)
+        traitsToShow.Add("You know how to [grey shield bash]");
     }
     
     if (alacrity < 0)

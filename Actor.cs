@@ -560,6 +560,12 @@ abstract class Actor : GameObj, IZLevel
   public abstract void TakeTurn(GameState gs);
   public abstract void CalcHP();
 
+  public int AbilityRoll(Attribute attr, Rng rng)
+  {
+    int statMod = Stats.TryGetValue(attr, out var stat) ? stat.Curr : 0;
+    return rng.Next(1, 21) + statMod;
+  }
+
   public bool AbilityCheck(Attribute attr, int dc, Rng rng)
   {
     int statMod = Stats.TryGetValue(attr, out var stat) ? stat.Curr : 0;

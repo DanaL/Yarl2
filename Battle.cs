@@ -404,6 +404,9 @@ class Battle
 
   static string ResolveKnockBack(Actor attacker, Actor target, GameState gs)
   {
+    if (target.HasTrait<HeavyTrait>())
+      return "";
+
     static bool CanPass(Loc loc, GameState gs)
     {
       var t = gs.TileAt(loc);
@@ -811,8 +814,23 @@ class Battle
     msg += $" into {tn}!";
     gs.UIRef().AlertPlayer(msg, gs, attacker.Loc);
 
+    int attackerStrRoll = attacker.AbilityRoll(Attribute.Strength, gs.Rng);
+    int targetStrRoll = attacker.AbilityRoll(Attribute.Strength, gs.Rng);
+    if (attackerStrRoll > targetStrRoll) 
+    {
+      string s = ResolveKnockBack(attacker, target, gs);
+      gs.UIRef().AlertPlayer(s, gs, attacker.Loc);
+    }
 
-    // ResolveKnockBack
+    int bashDmg = gs.Rng.Next(1, 7);
+    if (attacker.Stats.TryGetValue(Attribute.Strength, out var str))
+      bashDmg += str.Curr;
+    var (hpLeft, dmgMsg, _) =target.ReceiveDmg([(bashDmg, DamageType.Blunt)], 0, gs, attacker, 1.0);
+    gs.UIRef().AlertPlayer(dmgMsg, gs, attacker.Loc);
+    if (hpLeft < 1)
+    {
+      gs.ActorKilled(target, "a shield bash", null);
+    }    
   }
 
   static void HandleCutpurse(Actor attacker, Actor target, GameState gs)
