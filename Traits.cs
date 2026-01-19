@@ -2829,7 +2829,7 @@ class NondescriptTrait : TemporaryTrait, IGameEventListener
 
   public override List<string> Apply(GameObj target, GameState gs)
   {
-    if (target.HasTrait<NumbedTrait>())
+    if (target.HasTrait<NondescriptTrait>())
     {
       ExpiresOn += (ulong)gs.Rng.Next(25, 51);
       return [];
