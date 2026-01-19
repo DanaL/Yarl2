@@ -906,6 +906,27 @@ class DialogueInterpreter
     return 0;
   }
 
+  static bool PlayerHasHereticalItem(GameState gs)
+  {
+    foreach (Item i in gs.Player.Inventory.Items())
+    {
+      if (!i.Equipped)
+      {
+        continue;
+      }
+
+      switch (i.Name)
+      {
+        case "ward of the crimson king":
+        case "mantle of the Moon Daughter":
+        case "lyre of the Daughter":
+          return true;
+      }
+    }
+
+    return false;
+  }
+
   static object CheckVal(string name, Actor mob, GameState gs)
   {
     ulong trinketId;
@@ -953,6 +974,8 @@ class DialogueInterpreter
         return Util.RelativeDir(mob.Loc, dungoenLoc);
       case "ORCHARD_EXISTS":
         return gs.FactDb.FactCheck("OrchardExists") is SimpleFact;
+      case "HERETICAL_ITEM":
+        return PlayerHasHereticalItem(gs);
       case "PLAYER_PIETY":
         return gs.Player.Stats[Attribute.Piety].Max;
       case "MAGIC101":
@@ -1776,7 +1799,7 @@ class DialogueInterpreter
     int currTurn = (int)(gs.Turn % int.MaxValue);
     if (gs.Player.Inventory.Zorkmids >= HOLY_WATER_PRICE && currTurn - lastHWPurchase > 1750)
     {
-      Options.Add(new DialogueOption("Buy [ICEBLUE Holy Water] for a small donation - [YELLOW $]20", opt++, new ScriptBuyHolyWater()));
+      Options.Add(new DialogueOption($"Buy [ICEBLUE Holy Water] for a small donation - [YELLOW $]{HolyWaterPrice(gs)}", opt++, new ScriptBuyHolyWater()));
     }
 
     if (gs.Player.Inventory.Items().Where(i => i.Name == "skull").Any())
@@ -1784,6 +1807,8 @@ class DialogueInterpreter
       Options.Add(new DialogueOption("That [ICEBLUE skull]: please allow me to give those remains a proper burial!", opt++, new ScriptTurnInSkull()));
     }
   }
+
+  static int HolyWaterPrice(GameState gs) => PlayerHasHereticalItem(gs) ? (int)Math.Round(HOLY_WATER_PRICE * 1.5) : HOLY_WATER_PRICE;
 
   static void EvalChampionBlessing(Actor mob, GameState gs)
   {
@@ -1855,7 +1880,7 @@ class DialogueInterpreter
 
   static void EvalBuyHolyWater(Actor mob, GameState gs)
   {
-    gs.Player.Inventory.Zorkmids -= HOLY_WATER_PRICE;
+    gs.Player.Inventory.Zorkmids -= HolyWaterPrice(gs);
     mob.Stats[Attribute.ShopMenu] = new Stat((int)(gs.Turn % int.MaxValue));
     Item hw = ItemFactory.Get(ItemNames.HOLY_WATER, gs.ObjDb);
     gs.Player.AddToInventory(hw, gs);

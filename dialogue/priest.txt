@@ -14,9 +14,18 @@
           "Huntokar weeps for those whose bones lay in the depths without having proper funerary rites."
           "There were shrines to Huntokar below ground, but foul monsters have desecrated them. A terrible sin!")
   )
+
   (cond
     ((= ORCHARD_EXISTS true) 
       (append lines "It is said in ancient days the elves of old would grow magic fruit in their secret orchards.")
+    )
+  )
+
+  (cond
+    ((= HERETICAL_ITEM true) 
+      ((append lines "[YELLOW Please don't wear such things in this place.]")
+      (append lines "[YELLOW Are you straying from the path?]")
+      (append lines "[YELLOW You are not honouring Huntokar with such accoutrements.]"))
     )
   )
 
