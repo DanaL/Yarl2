@@ -130,6 +130,7 @@ class DebugCommand(GameState gs)
     {"potion of dragon breath", ItemNames.POTION_DRAGON_BREATH },
     {"phalanx pholio vol. 2", ItemNames.PHALANX_PHOLIO_2 },
     {"sneakers", ItemNames.SNEAKERS },
+    {"moon mantle", ItemNames.MOON_MANTLE },
   };
 
   public string DoCommand(string txt)

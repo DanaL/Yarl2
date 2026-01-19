@@ -1437,5 +1437,18 @@
       "Grants#Quiet&item",
       "Plural"
     ]
+  },
+  {
+    "Name": "MOON_MANTLE",
+    "DescriptiveName": "mantle of the Moon Daughter",
+    "Type": "Armour",
+    "Value": 10,
+    "Glyph": "[,grey,darkgrey,black,false",
+    "Traits": [
+      "Armour#Cloak#0#0",
+      "Grants#Quiet&item",
+      "CoolDown#30#0",
+      "UseSimple#blink"
+    ]
   }
 ]
