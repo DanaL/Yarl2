@@ -51,7 +51,7 @@ class Treasure
       ItemNames.SCROLL_TRAP_DETECTION, ItemNames.SCROLL_SCATTERING, ItemNames.POTION_OBSCURITY, ItemNames.POTION_DRAGON_BREATH,
       ItemNames.FEATHERFALL_BOOTS, ItemNames.WIND_FAN, ItemNames.SKELETON_KEY, ItemNames.POTION_HARDINESS,
       ItemNames.TINCTURE_CELERITY, ItemNames.POTION_HEROISM, ItemNames.POTION_DESCENT, ItemNames.SCROLL_STAINLESS,
-      ItemNames.HOLY_WATER
+      ItemNames.HOLY_WATER, ItemNames.SNEAKERS, ItemNames.MOON_MANTLE
   ];
 
   static readonly List<ItemNames> RareItems = [
@@ -64,7 +64,7 @@ class Treasure
       ItemNames.CRIMSON_KING_WARD, ItemNames.CROESUS_CHARM, ItemNames.CUTPURSE_CREST,
       ItemNames.GASTON_BADGE, ItemNames.LESSER_BURLY_CHARM, ItemNames.LESSER_GRACE_CHARM, ItemNames.LESSER_HEALTH_CHARM,
       ItemNames.SMOULDERING_CHARM, ItemNames.TALISMAN_OF_CIRCUMSPECTION, ItemNames.TROLL_BROOCH,
-      ItemNames.RUNE_OF_LASHING, ItemNames.FEARFUL_RUNE, ItemNames.RUNE_OF_PARRYING
+      ItemNames.RUNE_OF_LASHING, ItemNames.FEARFUL_RUNE, ItemNames.RUNE_OF_PARRYING, ItemNames.MOON_MANTLE
   ];
 
   public static readonly List<ItemNames> Consumables = [
@@ -104,7 +104,7 @@ class Treasure
 
   public static Item GoodMagicItem(Rng rng, GameObjectDB objDb)
   {
-    int roll = rng.Next(26);
+    int roll = rng.Next(28);
     return roll switch
     {
       0 => ItemFactory.Get(ItemNames.WAND_FIREBALLS, objDb),
@@ -132,6 +132,8 @@ class Treasure
       23 => ItemFactory.Get(ItemNames.CLOAK_OF_PROTECTION, objDb),
       24 => ItemFactory.Get(ItemNames.POTION_OBSCURITY, objDb),
       25 => ItemFactory.Get(ItemNames.CRIMSON_KING_WARD, objDb),
+      26 => ItemFactory.Get(ItemNames.SNEAKERS, objDb),
+      27 => ItemFactory.Get(ItemNames.MOON_MANTLE, objDb),
       _ => ItemFactory.Get(ItemNames.SILVER_LONGSWORD, objDb),
     };
   }
