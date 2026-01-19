@@ -437,8 +437,16 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     }
     else if (ch == 'a')
     {
-      GS.Player.Inventory.ShowMenu(ui, new InventoryOptions("Use which item?"));
-      ui.SetInputController(new Inventorier(GS, [.. GS.Player.Inventory.UsedSlots()]) { DeferredAction = new UseItemAction(GS, GS.Player) });
+      InvOption invOptions = InvOption.OnlyUseable;
+      GS.Player.Inventory.ShowMenu(ui, new InventoryOptions("Use which item?") { Options = invOptions });
+      HashSet<char> options = [];
+      foreach (char c in GS.Player.Inventory.UsedSlots())
+      {
+        var (item, _) = GS.Player.Inventory.ItemAt(c);
+        if (item is not null && item.IsUseableItem())
+          options.Add(c);
+      }
+      ui.SetInputController(new Inventorier(GS, options) { DeferredAction = new UseItemAction(GS, GS.Player) });
     }
     else if (ch == 'c')
     {

@@ -75,6 +75,26 @@ sealed class Item : GameObj, IEquatable<Item>
     return false;
   }
 
+  public bool IsUseableItem()
+  {
+    if (IsUseableTool())  
+      return true;
+
+    foreach (Trait t in Traits)
+    {
+      if (t is TorchTrait)
+        return true;
+      else if (t is ReadableTrait || t is ScrollTrait || t is BookTrait)
+        return true;
+      else if (t is IUSeable)
+        return true;
+      else if (t is CanApplyTrait)
+        return true;
+    }
+
+    return false;
+  }
+
   public void Identify()
   {
     if (IDInfo.TryGetValue(Name, out var idInfo))
@@ -1173,6 +1193,9 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       if (item is null)
         continue;
 
+      if ((options.Options & InvOption.OnlyUseable) != InvOption.None && !item.IsUseableItem())
+        continue;
+
       if ((options.Options & InvOption.UnidentifiedOnly) == InvOption.UnidentifiedOnly)
       {
         bool known = !Item.IDInfo.TryGetValue(item.Name, out var idInfo) || idInfo.Known;
@@ -1287,7 +1310,8 @@ enum InvOption
 {
   None = 0,
   MentionMoney = 1,
-  UnidentifiedOnly = 2
+  UnidentifiedOnly = 2,
+  OnlyUseable = 4
 }
 
 class InventoryOptions
