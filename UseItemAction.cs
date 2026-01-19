@@ -691,7 +691,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
           onCooldown = true;
       }
 
-      if (t is EquipableTrait && !item.Equipped)
+      if (t is EquipableTrait && !item.Equipped && item.Name != "torch")
         needsToBeEquiped = true;
     }
 
