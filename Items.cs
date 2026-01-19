@@ -325,6 +325,9 @@ class ItemFactory
         }
       }
 
+      // I defined the Equipable trait after my items.json file was gigantic
+      // and I was too lazy to go back and add the trait to all the appropriate
+      // item definitions...
       switch (item.Type)
       {
         case ItemType.Armour:

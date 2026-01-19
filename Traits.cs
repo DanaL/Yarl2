@@ -1022,7 +1022,7 @@ class PrisonerTrait : TemporaryTrait
   public override List<string> Apply(GameObj target, GameState gs) => [];
 }
 
-class QuietTrait : Trait
+sealed class QuietTrait : Trait
 {
   public override string AsText() => $"Quiet#{SourceId}";  
 }
@@ -2367,7 +2367,7 @@ class BoostMaxStatTrait : TemporaryTrait
   public override string AsText() => $"BoostMaxStat#{Stat}#{Amount}";
 }
 
-class CoolDownTrait : Trait
+sealed class CoolDownTrait : Trait
 {
   public ulong Time { get; set; } = 75;
   public ulong LastUse { get; set; } = ulong.MinValue;

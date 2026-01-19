@@ -673,6 +673,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
 
     bool torch = false, written = false, vaultKey = false;
     bool onCooldown = false;
+    bool needsToBeEquiped = false;
     foreach (Trait t in item.Traits)
     {
       if (t is TorchTrait)
@@ -689,6 +690,9 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
         else
           onCooldown = true;
       }
+
+      if (t is EquipableTrait && !item.Equipped)
+        needsToBeEquiped = true;
     }
 
     GameState!.ClearMenu();
@@ -699,6 +703,13 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     List<Trait> useableTraits = [.. item.Traits.Where(t => t is IUSeable)];
     if (useableTraits.Count != 0 || item.HasTrait<CanApplyTrait>())
     {
+      if (needsToBeEquiped)
+      {
+        string name = MsgFactory.CalcName(item, GameState.Player).Capitalize();
+        GameState.UIRef().AlertPlayer($"{name} needs to be equipped first.");
+        return 1.0;
+      }
+
       if (onCooldown)
       {
         string name = MsgFactory.CalcName(item, GameState.Player).Capitalize();
