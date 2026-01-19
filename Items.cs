@@ -1193,6 +1193,9 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       if (item is null)
         continue;
 
+      if ((options.Options & InvOption.OnlyEquipable) != InvOption.None && !item.HasTrait<EquipableTrait>())
+        continue;
+
       if ((options.Options & InvOption.OnlyUseable) != InvOption.None && !item.IsUseableItem())
         continue;
 
@@ -1311,7 +1314,8 @@ enum InvOption
   None = 0,
   MentionMoney = 1,
   UnidentifiedOnly = 2,
-  OnlyUseable = 4
+  OnlyUseable = 4,
+  OnlyEquipable = 8
 }
 
 class InventoryOptions

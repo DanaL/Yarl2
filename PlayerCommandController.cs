@@ -477,8 +477,18 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     }
     else if (ch == 'e')
     {
-      GS.Player.Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Equip what?" });
-      Inventorier inven = new(GS, [.. GS.Player.Inventory.UsedSlots()])
+      InvOption invOptions = InvOption.OnlyEquipable;
+      GS.Player.Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Equip what?", Options = invOptions });
+
+      HashSet<char> options = [];
+      foreach (char c in GS.Player.Inventory.UsedSlots())
+      {
+        var (item, _) = GS.Player.Inventory.ItemAt(c);
+        if (item is not null && item.Equipable())
+          options.Add(c);
+      }
+
+      Inventorier inven = new(GS, options)
       {
         DeferredAction = new ToggleEquippedAction(GS, GS.Player)
       };
