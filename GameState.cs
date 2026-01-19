@@ -1883,8 +1883,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         }
 
         // alert actors
-        var occ = ObjDb.Occupant(new Loc(CurrDungeonID, CurrLevel, n.Item1, n.Item2));
-        if (occ is not null)
+        if (ObjDb.Occupant(new Loc(CurrDungeonID, CurrLevel, n.Item1, n.Item2)) is Actor occ)
         {
           occ.HearNoise(volume, startRow, startCol, this);
           alerted.Add(occ.ID);

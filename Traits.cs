@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Diagnostics;
 using System.Text;
 
 namespace Yarl2;
@@ -1278,6 +1279,11 @@ class GrantsTrait : Trait
       {
         obj.Traits.Add(trait);
       }
+
+      if (obj is Player && trait is QuietTrait)
+      {
+        msgs.Add("Your steps are softer.");
+      }
     }
 
     // I can't remember why I am calling this hear D: Perhaps because of
@@ -1297,8 +1303,12 @@ class GrantsTrait : Trait
       {
         tt.Remove(gs);
       }
-
       obj.Traits.Remove(t);
+
+      if (obj is Player && t is QuietTrait)
+      {
+        gs.UIRef().AlertPlayer("You are noisier.");
+      }
     }
     
     gs.RemoveListenersBySourceId(src.ID);
@@ -4768,7 +4778,7 @@ class TraitFactory
     { "Polearm", (pieces, gameObj) => new PolearmTrait() },
     { "Polymorphed", (pieces, gameObj) => new PolymorphedTrait() { OriginalId = ulong.Parse(pieces[1]) } },
     { "Prisoner", (pieces, gameObj) => new PrisonerTrait() { SourceId = ulong.Parse(pieces[1]), Cell = Loc.FromStr(pieces[2]) } },
-    { "Quiet", (pieces, gameObj) => new QuietTrait() { SourceId = ulong.Parse(pieces[1])} },
+    { "Quiet", (pieces, gameObj) => new QuietTrait() { SourceId = pieces[1] == "item" ? gameObj!.ID : ulong.Parse(pieces[1])} },
     { "QuestItem1", (pieces, gameObj) => new QuestItem1() },
     { "QuestItem2", (pieces, gameObj) => new QuestItem2() },
     { "Rage", (pieces, gameObj) => new RageTrait(gameObj as Actor

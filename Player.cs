@@ -398,7 +398,7 @@ sealed class Player : Actor
       traitsToShow.Add("You deal more damage in melee");
 
     if (quiet)
-      traitsToShow.Add("You are quiet");
+      traitsToShow.Add("You are [grey quiet]");
 
     if (fireDmg)
       traitsToShow.Add("You deal extra fire damage");

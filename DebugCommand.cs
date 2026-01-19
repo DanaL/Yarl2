@@ -128,7 +128,8 @@ class DebugCommand(GameState gs)
     {"fearful rune", ItemNames.FEARFUL_RUNE },
     {"rune of parrying", ItemNames.RUNE_OF_PARRYING },
     {"potion of dragon breath", ItemNames.POTION_DRAGON_BREATH },
-    {"phalanx pholio vol. 2", ItemNames.PHALANX_PHOLIO_2 }
+    {"phalanx pholio vol. 2", ItemNames.PHALANX_PHOLIO_2 },
+    {"sneakers", ItemNames.SNEAKERS },
   };
 
   public string DoCommand(string txt)

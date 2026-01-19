@@ -1425,5 +1425,17 @@
       "CanApply",
       "Book"
     ]
+  },
+  {
+    "Name": "SNEAKERS",
+    "DescriptiveName": "shoes of sneaking",
+    "Type": "Armour",
+    "Value": 333,
+    "Glyph": "[,lightbrown,brown,black,false",
+    "Traits": [
+      "Armour#Boots#1#0",
+      "Grants#Quiet&item",
+      "Plural"
+    ]
   }
 ]
