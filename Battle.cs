@@ -59,12 +59,12 @@ class Battle
     return (total, dmg.Type);
   }
 
-  static void ExtraAttackAtLocation(Actor attacker, Loc loc, int attackRoll, GameState gs, int weaponBonus)
+  static void ExtraAttackAtLocation(Actor attacker, Loc loc, int attackRoll, GameState gs, int weaponBonus, string verb)
   {
     Actor? occ = gs.ObjDb.Occupant(loc);
     if (occ is not null && attackRoll >= occ.AC)
     {
-      ResolveMeleeHit(attacker, occ, gs, "lash", weaponBonus, null);
+      ResolveMeleeHit(attacker, occ, gs, verb, weaponBonus, null);
     }
   }
 
@@ -74,7 +74,7 @@ class Battle
     int diffRow = (attacker.Loc.Row - target.Loc.Row) * 2;
     int diffCol = (attacker.Loc.Col - target.Loc.Col) * 2;
     Loc checkLoc = attacker.Loc with { Row = attacker.Loc.Row - diffRow, Col = attacker.Loc.Col - diffCol };
-    ExtraAttackAtLocation(attacker, checkLoc, attackRoll, gs, weaponBonus);
+    ExtraAttackAtLocation(attacker, checkLoc, attackRoll, gs, weaponBonus, "impale");
   }
 
   // Really, Lash is just kind of super-impale
@@ -83,12 +83,12 @@ class Battle
     int diffRow = (attacker.Loc.Row - targetLoc.Row) * 2;
     int diffCol = (attacker.Loc.Col - targetLoc.Col) * 2;
     Loc loc = targetLoc with { Row = attacker.Loc.Row - diffRow, Col = attacker.Loc.Col - diffCol };
-    ExtraAttackAtLocation(attacker, loc, attackRoll, gs, weaponBonus);
+    ExtraAttackAtLocation(attacker, loc, attackRoll, gs, weaponBonus, "lash");
     
     diffRow = (attacker.Loc.Row - targetLoc.Row) * 3;
     diffCol = (attacker.Loc.Col - targetLoc.Col) * 3;
     loc = targetLoc with { Row = attacker.Loc.Row - diffRow, Col = attacker.Loc.Col - diffCol };
-    ExtraAttackAtLocation(attacker, loc, attackRoll, gs, weaponBonus);
+    ExtraAttackAtLocation(attacker, loc, attackRoll, gs, weaponBonus, "lash");
   }
 
   static bool ResolveCleave(Actor attacker, Actor target, int attackRoll, GameState gs, int weaponBonus)
