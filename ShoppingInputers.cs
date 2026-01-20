@@ -459,7 +459,7 @@ class SmithyInputer : ShopMenuInputer
         continue;
 
       double markup = CalcMarkup();
-      int price = (int)(50 * markup);
+      int price = (int)(25 * markup);
       menuItems.Add(item.Slot, new ShopMenuItem(item.Slot, item, 1, price));
     }
 
