@@ -652,3 +652,6 @@ Someday, when vocabulary technology is advanced enough, society will simply call
 #
 mantle of the Moon Daughter
 A soft clock that shimmers as though it were suffused with moonlight.
+#
+Lyre of the Moon Daughter
+A musical instrument inscribed with lunar glyphs and used in rituals venerating the Moon Daughter.\n\nWhen strummed, it produces soothing, soporific melodies.

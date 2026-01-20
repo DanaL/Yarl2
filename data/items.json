@@ -844,7 +844,8 @@
     "Glyph": "(,lightbrown,brown,black,false",
     "Traits": [
       "Stackable",
-      "Torch#owner#false#750"
+      "Torch#owner#false#750",
+      "Equipable"
     ]
   },
   {
@@ -1449,6 +1450,17 @@
       "Grants#Quiet&item",
       "CoolDown#30#0",
       "UseSimple#blink"
+    ]
+  },
+  {
+    "Name": "MOON_LYRE",
+    "DescriptiveName": "Lyre of the Moon Daughter",
+    "Type": "Tool",
+    "Value": 10,
+    "Glyph": "(,iceblue,lightblue,black,false",
+    "Traits": [
+      "UseSimple#castsleep",
+      "CoolDown#50#0"
     ]
   }
 ]

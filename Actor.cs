@@ -731,13 +731,15 @@ sealed class Mob : Actor
   {
     int threshold = volume - Util.Distance(sourceRow, sourceColumn, Loc.Row, Loc.Col);
     bool heard = gs.Rng.Next(11) <= threshold;
+    if (!heard)
+      return;
 
     if (Stats.TryGetValue(Attribute.MobAttitude, out var attitude) && !HasTrait<WorshiperTrait>() && !HasTrait<VillagerTrait>())
     {
       Stats[Attribute.MobAttitude].SetMax(AGGRESSIVE);
     }
 
-    if (heard && HasTrait<SleepingTrait>())
+    if (HasTrait<SleepingTrait>())
     {
       if (gs.LastPlayerFoV.ContainsKey(Loc))
         gs.UIRef().AlertPlayer($"{FullName.Capitalize()} wakes up.");

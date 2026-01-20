@@ -676,8 +676,6 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     bool needsToBeEquiped = false;
     foreach (Trait t in item.Traits)
     {
-      if (t is TorchTrait)
-        torch = true;
       if (t is ReadableTrait || t is ScrollTrait || t is BookTrait)
         written = true;
       if (t is VaultKeyTrait)
@@ -691,7 +689,20 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
           onCooldown = true;
       }
 
-      if (t is EquipableTrait && !item.Equipped && item.Name != "torch")
+      if (t is WandTrait)
+      {
+        needsToBeEquiped = false;
+        break;
+      }
+
+      if (t is TorchTrait)
+      {
+        torch = true;
+        needsToBeEquiped = false;
+        break;
+      }
+
+      if (t is EquipableTrait && !item.Equipped)
         needsToBeEquiped = true;
     }
 

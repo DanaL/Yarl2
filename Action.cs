@@ -495,6 +495,43 @@ class ApplyAffectAction(GameState gs, Actor actor, Loc target, string effectTemp
   }
 }
 
+class SleepSpellAction(GameState gs, Actor actor, int radius, int dc) : Action(gs, actor)
+{
+  int Radius { get; set; } = radius;
+  int DC { get; set; } = dc;
+
+  public override double Execute()
+  {
+    base.Execute();
+
+    UserInterface ui = GameState!.UIRef();
+    ui.AlertPlayer($"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "cast")} a sleep spell!");
+    var affected = GameState.Flood(Actor.Loc, Radius);
+    foreach (var loc in affected)
+    {
+      if (GameState.ObjDb.Occupant(loc) is Actor occ && occ != Actor)
+      {
+        if (occ.HasTrait<UndeadTrait>() || occ.HasTrait<ConstructTrait>())
+          continue;
+
+        if (!occ.AbilityCheck(Attribute.Constitution, DC, GameState.Rng))
+        {
+          occ.Traits.Add(new SleepingTrait());
+          if (occ.VisibleTo(GameState.Player))
+          {
+            string s = $"{occ.FullName.Capitalize()} {Grammar.Conjugate(occ, "fall")} asleep!";
+            ui.AlertPlayer(s, GameState, loc);
+            ui.RegisterAnimation(new BarkAnimation(gs, 350, occ, "Zzz"));
+            ui.RegisterAnimation(new SqAnimation(gs, occ.Loc, Colours.BLACK, Colours.PINK, '*'));
+          }
+        }
+      }
+    }
+
+    return 1.0;
+  }
+}
+
 class AoEAction(GameState gs, Actor actor, Loc target, string effectTemplate, int radius, string txt) : Action(gs, actor)
 {
   Loc Target { get; set; } = target;

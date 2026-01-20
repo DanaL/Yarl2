@@ -2036,6 +2036,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
               new EnchantItemAction(gs, user, item!)    
       )),
     "dragonbreath" => SetupDragonBreath(user, gs),
+    "castsleep" => new UseResult(new SleepSpellAction(gs, user, 4, 14)),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 }
