@@ -22,6 +22,17 @@
   )
 
   (cond
+    ((= MAIN_QUEST_STATUS 2)
+      (def lines '("The statue you descirbe sounds like an effigy of [BRIGHTRED Arioch]."
+                    "I don't know the language on that tablet, but it looks like spell-work. It may be best to seek the council of the [SOPHIEGREEN witches]."
+                    "I am deeply concerned about what all of this portends! Please continue seeking a way to defeat [BRIGHTRED Arioch]."
+                    "Huntokar helped us mortals defeat [BRIGHTRED Arioch] before and I have faith they will again!"
+                    "Huntokar grants mightier blessings to loyal followers.")
+      )
+    )
+  )
+
+  (cond
     ((= HERETICAL_ITEM true) 
       ((append lines "[YELLOW Please don't wear such things in this place.]")
       (append lines "[YELLOW Are you straying from the path?]")

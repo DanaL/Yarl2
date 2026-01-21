@@ -256,6 +256,14 @@ class DebugCommand(GameState gs)
 
       return "";
     }
+    else if (txt == "stats")
+    {
+      foreach (var k in _gs.Player.Stats.Keys)
+      {
+        Console.WriteLine($"{k} {_gs.Player.Stats[k].Curr}({_gs.Player.Stats[k].Curr})");
+      }
+      return "";
+    }
     
     var parts = txt.Split(' ', 2);
     if (parts.Length < 2)
