@@ -1101,7 +1101,7 @@ class FindWayToArea(HashSet<Loc> area) : BehaviourNode
     Loc goal = Area[gs.Rng.Next(Area.Count)];
 
     TravelCostFunction costFunc = DijkstraMap.Cost;
-    if (mob.HasTrait<IntelligentTrait>())
+    if (mob.HasTrait<IntelligentTrait>() || mob.HasTrait<VillagerTrait>())
       costFunc = DijkstraMap.CostWithDoors;
     else if (mob.HasTrait<FloatingTrait>() || mob.HasTrait<FlyingTrait>())
       costFunc = DijkstraMap.CostByFlight;
