@@ -660,7 +660,7 @@
     "Name": "LEMBAS",
     "DescriptiveName": "lembas",
     "Type": "Food",
-    "Value": 1,
+    "Value": 10,
     "Glyph": ",,yellow,yelloworange,black,false",
     "Traits": [
       "Edible",
