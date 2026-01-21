@@ -872,8 +872,8 @@ class WitchDialogue : Inputer
         break;
       case SORCERESS_HISTORY:
         magicWord = GS.FactDb.FactCheck("SorceressPassword") is SimpleFact mw ? mw.Value : "";
-        Blurb = "Long ago, a mighty sorceress sealed away a terrible demon but now it appears her arcane fetters grow weaker.\n\n";
-        Blurb += "However, her tower is nearby and still stands. I suggest you explore it and see what can be learned of her magic. Perhaps she left some hint we can use to restore her wards.\n\n";
+        Blurb = "It was a mighty sorceress who long ago sealed away [BRIGHTRED Arioch] but now it appears her arcane fetters grow weaker.\n\n";
+        Blurb += "There is some hope! Her tower is nearby and still stands. I suggest you explore it and see what can be learned of her magic. Perhaps she left some hint we can use to restore her wards.\n\n";
         Blurb += "The tablet you found contains a magic phrase that will grant access to her tower. Beware: the tower likely contains guardians and magical protections.\n";
         Blurb += $"\nThe words to speak at the tower's gate are: [ICEBLUE {magicWord}]";
         Witch.Stats[Attribute.NPCMenuState] = new Stat(NO_OPTIONS);
