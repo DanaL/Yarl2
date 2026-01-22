@@ -3296,6 +3296,45 @@ class DestressAction(GameState gs, Actor target, int amount) : Action(gs, target
   }
 }
 
+class ClarityAction(GameState gs, Actor target) : Action(gs, target)
+{
+  public override double Execute()
+  {
+    base.Execute();
+
+    bool anyRemoved = false;
+    List<Trait> traits = [.. Actor!.Traits];
+    foreach (Trait t in traits)
+    {
+      if (t is ConfusedTrait confused)
+      {
+        confused.Remove(GameState!);
+        anyRemoved = true;
+      }
+      else if (t is TipsyTrait tipsy)
+      {
+        tipsy.Remove(GameState!);
+        anyRemoved = true;
+      }
+    }
+
+    if (anyRemoved)
+    {
+      string name = MsgFactory.CalcName(Actor, GameState!.Player).Capitalize();
+      string msg = $"{name} {Grammar.Conjugate(Actor, "feel")} clear headed.";
+      GameState!.UIRef().AlertPlayer(msg, GameState, Actor.Loc);
+    }
+    else
+    {
+      string name = MsgFactory.CalcName(Actor, GameState!.Player).Capitalize();
+      string msg = $"{name} {Grammar.Conjugate(Actor, "feel")} refreshed.";
+      GameState!.UIRef().AlertPlayer(msg, GameState, Actor.Loc);
+    }
+    
+    return 1.0;
+  }
+}
+
 class SootheAction(GameState gs, Actor target, int amount) : Action(gs, target)
 {
   int Amount { get; set; } = amount;

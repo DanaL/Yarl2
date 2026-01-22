@@ -23,7 +23,7 @@ class Treasure
   static readonly List<ItemNames> UncommonItems = [
       ItemNames.TORCH, ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE,
       ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE, ItemNames.POTION_HEALING,
-      ItemNames.POTION_HEALING, ItemNames.ANTIDOTE, ItemNames.ANTIDOTE, ItemNames.DAGGER,
+      ItemNames.POTION_HEALING, ItemNames.ANTIDOTE, ItemNames.ANTIDOTE, ItemNames.DAGGER, ItemNames.POTION_CLARITY,
       ItemNames.SHORTSHORD, ItemNames.SHIELD, ItemNames.SCROLL_BLINK, ItemNames.SCROLL_BLINK, ItemNames.POTION_DRAGON_BREATH,
       ItemNames.SCROLL_BLINK, ItemNames.SCROLL_MAGIC_MAP, ItemNames.SCROLL_MAGIC_MAP, ItemNames.HAND_AXE,
       ItemNames.POTION_COLD_RES, ItemNames.POTION_FIRE_RES, ItemNames.POTION_MIND_READING, ItemNames.WAND_MAGIC_MISSILES,
@@ -89,7 +89,8 @@ class Treasure
     ItemNames.TINCTURE_CELERITY,
     ItemNames.POTION_DESCENT,
     ItemNames.SCROLL_STAINLESS,
-    ItemNames.SCROLL_ENCHANTING
+    ItemNames.SCROLL_ENCHANTING,
+    ItemNames.POTION_CLARITY
   ];
 
   public static Item GetTalisman(Rng rng, GameObjectDB objDb)

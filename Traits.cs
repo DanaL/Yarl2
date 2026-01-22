@@ -1994,8 +1994,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "disarm" => new UseResult(new DisarmAction(gs, user, user.Loc)),
     "minorheal" => new UseResult(new HealAction(gs, user, 4, 4)),
     "maxheal" => new UseResult(new HealAction(gs, user, int.MaxValue, -1)),
-    "trivialheal" => new UseResult(new HealAction(gs, user, 1, 1)),
-    "soothe" => new UseResult(new SootheAction(gs, user, 21)),
+    "trivialheal" => new UseResult(new HealAction(gs, user, 1, 1)),    
     "telepathy" => new UseResult(new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 })),
     "magicmap" => new UseResult(new MagicMapAction(gs, user)),
     "detecttreasure" => new UseResult(new DetectTreasureAction(gs, user)),
@@ -2030,6 +2029,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
           new ApplyStainlessnessAction(gs, user, item))),
     "alchemicalcompound" => new UseResult(new ConsumeAlchemicalCompound(gs, user, item!)),
     "refreshbinding" => new UseResult(new BindSpellAction(gs, gs.Player)),
+    "soothe" => new UseResult(new SootheAction(gs, user, 21)),
     "destress" => new UseResult(new DestressAction(gs, gs.Player, 125)),
     "enchant" => new UseResult(new InventoryChoiceAction(gs, user,
           new InventoryOptions() { Title = "Use on which item?" },
@@ -2037,6 +2037,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
       )),
     "dragonbreath" => SetupDragonBreath(user, gs),
     "castsleep" => new UseResult(new SleepSpellAction(gs, user, 4, 14)),
+    "clarity" => new UseResult(new ClarityAction(gs, user)),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 }

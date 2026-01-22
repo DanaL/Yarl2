@@ -574,7 +574,7 @@ class AlchemistBehaviour : NPCBehaviour
     int newStock = gs.Rng.Next(1, 5);
     for (int j = 0; j < newStock; j++)
     {      
-      ItemNames itemName = gs.Rng.Next(10) switch
+      ItemNames itemName = gs.Rng.Next(11) switch
       {
         0 or 1 => ItemNames.POTION_HEALING,
         2 => ItemNames.POTION_HEROISM,
@@ -584,6 +584,7 @@ class AlchemistBehaviour : NPCBehaviour
         6 => ItemNames.POTION_OBSCURITY,
         7 => ItemNames.TINCTURE_CELERITY,
         8 => ItemNames.HEARTY_SOUP,
+        9 => ItemNames.POTION_CLARITY,
         _ => ItemNames.MUSHROOM_STEW
       };
 

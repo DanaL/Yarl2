@@ -1462,5 +1462,17 @@
       "UseSimple#castsleep",
       "CoolDown#50#0"
     ]
+  },
+  {
+    "Name": "POTION_CLARITY",
+    "DescriptiveName": "potion of clarity",
+    "Type": "Potion",
+    "Value": 20,
+    "Glyph": "!,shamrock,green,black,false",
+    "Traits": [
+      "Consumable",
+      "Stackable",
+      "UseSimple#clarity"
+    ]
   }
 ]
