@@ -1017,6 +1017,15 @@ class DialogueInterpreter
       s = s.Replace("#EARLY_DENIZEN", monsters.Pluralize());
     }
 
+    if (s.Contains("#WIDOWER_NAME"))
+    {
+      string name = "";
+      if (gs.FactDb!.FactCheck("WidowerName") is SimpleFact wn)
+        name = wn.Value.Capitalize();
+
+      s = s.Replace("#WIDOWER_NAME", name);
+    }
+
     if (s.Contains("#PARTNER_NAME"))
     {
       s = s.Replace("#PARTNER_NAME", CheckVal("PARTNER_NAME", mob, gs).ToString());

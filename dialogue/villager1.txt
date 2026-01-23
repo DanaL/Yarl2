@@ -1,6 +1,5 @@
 ; Basic villager dialogue
-(cond
-  
+(cond  
   ((= MET_PLAYER true) ; pick from a couple different lines to display if we've met the player
     (say 
       (pick 
@@ -10,8 +9,9 @@
           "They say a sketchy, uncertified necromancer entered the dungeon and unleashed something terrible. Dark rituals and all that."
           "Ever hear the one about the whale? Well there's other monsters what can swallow you up too!"
           "I tried one of Sophie's cold rememdies once and woke up in a field hours later. My cold was gone, though."
+          "These days #WIDOWER_NAME just sits at home and mopes. This is what happens when you get involved with an adventurer. No offense."
+          "What did #WIDOWER_NAME expect? I guess there's no accounting for young love."
         ))))
-
   (else 
     (
       (say "Another adventurer come to town huh? You aren't the first, and you probably won't be the last...")

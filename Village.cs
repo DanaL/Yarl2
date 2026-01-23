@@ -394,6 +394,8 @@ class Village
     widower.Stats.Add(Attribute.HomeID, new Stat(homeID));
     widower.SetBehaviour(new WidowerBehaviour());
 
+    factDb.Add(new SimpleFact() { Name = "WidowerName", Value = widower.Name });
+
     if (factDb.FactCheck("TrinketId") is SimpleFact sf)
     {
       ulong trinketId = ulong.Parse(sf.Value);

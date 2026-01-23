@@ -34,6 +34,7 @@
                 "Constant #EARLY_DENIZEN raids are no way to build a tourism industry!"
                 "You've probably earned a little break and an ale at the tavern."
                 "You might consider spending some of your spoils on new gear in our helpful shops."
+                "Please be kind to #WIDOWER_NAME. Their partner has been missing for quite a while now. Poor thing."
           )))
       )
 
