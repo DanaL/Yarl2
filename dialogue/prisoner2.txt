@@ -17,6 +17,7 @@
         (
           "It's my saviour!"
           "Come, let me buy you a drink, fiend!"
+          "First thing I had when I made it back to town was bowl of Sophie's stew. Much better to eat stew than to become the stew!"
         )
       )
     )

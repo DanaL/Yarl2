@@ -21,7 +21,8 @@
                   "Unlike some other destinations, #TOWN_NAME does not tax treasure you bring out of the dungeon!"
                   "Many adventurers like to pay their respects at the local temple. Can't hurt having the gods on your side, am I right?"
                   "#TOWN_NAME has many amenities for dungeon delvers!"
-                  "Do you need some magical aid? Go and see Kylie and Sophie, who live just outside of town."                  
+                  "Do you need some magical aid? Go and see Kylie and Sophie, who live just outside of town."
+                  "Sophie's stew is my comfort food when things feel overwhelming."
             )))
         )
       )
