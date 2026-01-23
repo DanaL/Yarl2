@@ -3195,7 +3195,9 @@ class VersatileTrait(DamageTrait oneHanded, DamageTrait twoHanded) : Trait
   public override string AsText() => $"Versatile#{OneHanded.AsText()}#{TwoHanded.AsText()}";
 }
 
-class WeakenTrait : BasicTrait
+// This trait is for the ability whereby your attacks may also
+// apply a strength debuff to target
+sealed class WeakenTrait : BasicTrait
 {
   public int DC { get; set; }
   public int Amt { get; set; }
@@ -3367,7 +3369,7 @@ class StatDebuffTrait : TemporaryTrait
   public int DC { get; set; } = 10;
   public Attribute Attr { get; set; }
   public int Amt { get; set; }
-  public override string AsText() => $"StatDebuff#{OwnerID}#{ExpiresOn}#{Attr}#{Amt}";
+  public override string AsText() => $"StatDebuff#{OwnerID}#{ExpiresOn}#{Attr}#{Amt}#{SourceId}";
 
   string CalcMessage(Actor victim)
   {
@@ -4866,7 +4868,11 @@ class TraitFactory
     {
       Enum.TryParse(pieces[3], out Attribute attr);
       ulong expires = pieces[2] == "max" ? ulong.MaxValue : ulong.Parse(pieces[2]);
-      return new StatDebuffTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = expires, Attr = attr, Amt = int.Parse(pieces[4]) };
+      return new StatDebuffTrait() 
+      { 
+        OwnerID = ulong.Parse(pieces[1]), ExpiresOn = expires, Attr = attr, 
+        Amt = int.Parse(pieces[4]), SourceId = ulong.Parse(pieces[5]) 
+      };
     }},
     { "Sticky", (pieces, gameObj) => new StickyTrait() },
     { "StoneTablet", (pieces, gameObj) => new StoneTabletTrait(pieces[1].Replace("<br/>", "\n")) { OwnerID = ulong.Parse(pieces[2]) } },
