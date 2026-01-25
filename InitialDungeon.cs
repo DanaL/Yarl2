@@ -172,7 +172,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
   {
     bool graveyard = false;
     double chanceOfDesecratedAltar = 0.25;
-    bool artifactVault = false;
+    bool artifactVault = false, ckRoom = false;
     HashSet<TileType> vaultExists = [ TileType.ClosedDoor, TileType.LockedDoor ];
     for (int level = 0; level < levelMaps.Length; level++)
     {
@@ -207,7 +207,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
         roomIds.Remove(vaultId);
 
         // We could have found a false vault. Likely a spot separate from
-        // the rest of the dungoen by a river or chasm
+        // the rest of the dungeon by a river or chasm
         if (doorR >= 0 && doorC >= 0)
         {
           bool artifact = false;
@@ -275,6 +275,13 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
         roomIds.RemoveAt(0);
       }
 
+      if (level >= 4 && !ckRoom && rng.NextDouble() < 0.1)
+      {
+        CrimsonKingRoom(levelMaps[level], rooms[roomIds[0]], DungeonId, level, objDb, rng);
+        roomIds.RemoveAt(0);
+        ckRoom = true;  
+      }
+
       if (rng.NextDouble() < chanceOfDesecratedAltar)
       {
         List<(int, int)> room = rooms[roomIds[0]];
@@ -299,6 +306,39 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
         PlaceMistyPortal(levelMaps[level], rng);
       }
     }    
+  }
+
+  void CrimsonKingRoom(Map map, List<(int, int)> room, int dungeonId, int level, GameObjectDB objDb, Rng rng)
+  {
+    int loR = int.MaxValue, hiR = 0, loC = int.MaxValue, hiC = 0;
+    foreach (var sq in room)
+    {
+      if (sq.Item1 < loR) loR = sq.Item1;
+      if (sq.Item1 > hiR) hiR = sq.Item1;
+      if (sq.Item2 < loC) loC = sq.Item2;
+      if (sq.Item2 > hiC) hiC = sq.Item2;
+    }
+
+    int statueR = (loR + hiR) / 2;
+    int statueC = (loC + hiC) / 2;
+    Loc statueLoc = new(dungeonId, level, statueR, statueC);
+    Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
+    statue.Glyph = statue.Glyph with { Lit = Colours.BRIGHT_RED, Unlit = Colours.DULL_RED };
+    statue.Traits.Add(new DescriptionTrait("a figure in plate armour, gesturing with a broadsword."));
+    objDb.SetToLoc(statueLoc, statue);
+
+    room.Remove((statueR, statueC));
+    Item item = Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng);
+    var (itemR, itemC) = room[rng.Next(room.Count)];
+    Loc itemLoc = new(dungeonId, level, itemR, itemC);
+    objDb.SetToLoc(itemLoc, item);
+
+    Actor sword = MonsterFactory.Get("dancing sword", objDb, rng);
+    sword.Traits.Add(new RegenerationTrait() { Rate = 1, ExpiresOn = ulong.MaxValue, OwnerID = sword.ID, SourceId = sword.ID });
+    sword.Traits.Add(new HomebodyTrait() { Loc = statueLoc, Range = 4});
+    var (swordR, swordC) = room[rng.Next(room.Count)];
+    Loc swordLoc = new(dungeonId, level, swordR, swordC);
+    objDb.AddNewActor(sword, swordLoc);
   }
 
   void AddDecorations(Map[] levelMaps, GameObjectDB objDb, FactDb factDb, Rng rng)

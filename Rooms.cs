@@ -143,12 +143,12 @@ class Vaults
       switch (rulerInfo.Type)
       {
         case OGRulerType.ElfLord:
-          statueDesc = "a graffitied, defaced statue of an elf";
+          statueDesc = "a graffiti-ed, defaced statue of an elf";
           ch = '@';
           skullType = "elf";
           break;
         default:
-          statueDesc = "a graffitied, defaced statue of a dwarf";
+          statueDesc = "a graffiti-ed, defaced statue of a dwarf";
           ch = 'h';
           skullType = "dwarf";
           break;
@@ -974,7 +974,7 @@ class Rooms
     int statueC = (minCol + maxCol) / 2;
 
     // This stops a tree from being underneath the statue, which would
-    // seemweird to me
+    // seem weird to me
     map.SetTile(statueR, statueC, TileFactory.Get(TileType.Dirt));
 
     Loc statueLoc = new(dungeonId, level, statueR, statueC);
