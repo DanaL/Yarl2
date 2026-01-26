@@ -282,7 +282,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
         ckRoom = true;  
       }
 
-      if (level == 0)
+      if (rng.NextDouble() < 0.1)
       {
        MoonDaughterSpot(levelMaps[level], rooms[roomIds[0]], DungeonId, level, objDb, rng);
        roomIds.RemoveAt(0); 
