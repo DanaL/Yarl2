@@ -139,7 +139,7 @@ class Tutorial(UserInterface ui)
     You can pick it up with the ',' pickup command and equip it with the 'e' command.
     ";
     objDb.ConditionalEvents.Add(new MessageAtLoc(new Loc(1, 0, 1, 8), txt));
-    txt = @"Here is some armour, which will help keep you safe from harm.
+    txt = @"Here is some armour, which will help keep you safe from harm. Notice that once equiped, it also raises your maximum HP.
 
     You can pick it up with the ',' pickup command and equip it with the 'e' command.
     ";
@@ -159,7 +159,7 @@ class Tutorial(UserInterface ui)
     (i) inventory shows you what are you currently carrying
     (a) uses or applies an item. (Including such things as drinking a potion, zapping a wand, reading a scroll, ...)
 
-    [LIGHTBLUE Dungeons are dark, so let's light up a torch! Tap 'a' to open a menu of your current equipment and select the letter for a torch.]
+    [LIGHTBLUE Dungeons are dark, so let's light up a torch! Tap 'a' to open a menu of your current equipment and select 'b', the inventory slot for a torch.]
     ";
     UI.SetPopup(new Popup(welcomeText, "Tutorial", -3, -1, UserInterface.ScreenWidth - 8));
 

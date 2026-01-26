@@ -1210,7 +1210,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     PrepareFieldOfView();
 
-    CheckEndGameSetup();
+    if (!Tutorial)
+      CheckEndGameSetup();
     
     if (UI.PauseForResponse)
     {
