@@ -18,6 +18,37 @@ namespace Yarl2;
 // I think it makes sense to have the effects code in one place.
 class Effects
 {
+  public static void MoldSpores(GameState gs, Item spores, Loc loc)
+  {
+    gs.UIRef().AlertPlayer($"{spores.Name.DefArticle().Capitalize()} explodes in a cloud of spores!", gs, loc);
+    HashSet<Loc> affected = [.. Util.Adj8Locs(loc).Where(l => gs.TileAt(l).PassableByFlight())];
+    affected.Add(loc);
+    ExplosionAnimation explosion = new(gs)
+    {
+      MainColour = Colours.LIME_GREEN,
+      AltColour1 = Colours.YELLOW,
+      AltColour2 = Colours.YELLOW_ORANGE,
+      Highlight = Colours.DARK_GREEN,
+      Centre = loc,
+      Sqs = [.. affected.Where(l => gs.LastPlayerFoV.ContainsKey(l))],
+      Ch = '*'
+    };
+    gs.UIRef().PlayAnimation(explosion, gs);
+
+    foreach (Loc affectedLoc in affected)
+    {
+      if (gs.ObjDb.Occupant(affectedLoc) is Actor actor && !actor.HasTrait<ConstructTrait>() && !actor.HasTrait<UndeadTrait>())
+      {
+        List<string> msgs = [$"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "cough")}!" ];            
+        DiseasedTrait disease = new() { SourceId = spores.ID };
+        msgs.AddRange(disease.Apply(actor, gs));
+        gs.UIRef().AlertPlayer(string.Join(" ", msgs).Trim(), gs, affectedLoc);
+      }
+    }
+
+    gs.ObjDb.RemoveItemFromGame(loc, spores);
+  }
+
   public static string ExtinguishTorch(GameState gs, GameObj receiver)
   {
     StringBuilder sb = new();
