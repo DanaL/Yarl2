@@ -488,7 +488,7 @@ class MagicMapAnimation : Animation
                   : new Sqr(glyph.Lit, Colour, ch);
 
       var (scrR, scrC) = _ui.LocToScrLoc(loc.Row, loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
-      bool show = !(tile.Type == TileType.DungeonFloor || tile.IsHiddenSqr());
+      bool show = !(tile.Type == TileType.DungeonFloor || tile.Type == TileType.MoonDaughterSpot || tile.IsHiddenSqr());
       _sqsToMark.Enqueue(new HighlightSqr(scrR, scrC, sqr, loc, glyph, DateTime.UtcNow.AddMilliseconds(_delay), show));
 
       ++_index;

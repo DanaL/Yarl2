@@ -579,6 +579,7 @@ class ItemFactory
     };
     tile.SetZ(-100);
 
+    tile.Traits.Add(new MoonDaughterSpotTrait());
     tile.Traits.Add(new AffixedTrait());
     tile.Traits.Add(new LightSourceTrait()
     {

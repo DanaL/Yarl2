@@ -684,7 +684,7 @@ static class Util
     TileType.PermWall => new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     TileType.StoneWall => new Glyph('░', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     TileType.DungeonWall => new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
-    TileType.DungeonFloor => new Glyph('.', Colours.GREY, Colours.GREY, Colours.BLACK, true),
+    TileType.DungeonFloor or TileType.MoonDaughterSpot => new Glyph('.', Colours.GREY, Colours.GREY, Colours.BLACK, true),
     TileType.StoneFloor => new Glyph('.', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     TileType.StoneRoad => new Glyph('·', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     TileType.ClosedDoor => new Glyph('+', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false),

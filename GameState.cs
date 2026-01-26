@@ -1550,6 +1550,11 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       UI.SetPopup(new Popup("You step into the misty portal and become momentarily disoeriented.", "", -1, -1));
     }
 
+    if (actor is Player && tile.Type == TileType.MoonDaughterSpot)
+    {
+      Faiths.VisitMoonDaughterLocation(this);
+    }
+
     if (actor is Player && tile.Type == TileType.MysteriousMirror)
     {
       MysteriousMirror mm = (MysteriousMirror)TileAt(dest);
@@ -1643,7 +1648,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       if (item.HasTrait<MoldSporesTrait>())
       {
         Effects.MoldSpores(this, item, loc);
-      }
+      }     
     }
 
     return messages.Count > 0 ? string.Join(" ", messages) : "";

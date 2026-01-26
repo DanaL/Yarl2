@@ -319,6 +319,8 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     var sq = room[rng.Next(room.Count)];
     Loc loc = new(dungeonId, level, sq.Item1, sq.Item2);
 
+    map.SetTile(sq, TileFactory.Get(TileType.MoonDaughterSpot));
+
     Item mdt = ItemFactory.MoonDaughterTile();
     objDb.Add(mdt);
     objDb.SetToLoc(loc, mdt);

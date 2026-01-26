@@ -28,7 +28,7 @@ enum TileType
   BusinessSign, FakeStairs, HiddenSummonsTrap, RevealedSummonsTrap,
   HFence, VFence, CornerFence, MonsterWall, Lever, Crops, IllusoryWall,
   Underwater, Kelp, MistyPortal, MysteriousMirror, BellyFloor, ProfanePortal,
-  Lava, BridgeLever, Arioch, Shackle
+  Lava, BridgeLever, Arioch, Shackle, MoonDaughterSpot
 }
 
 interface ITriggerable
@@ -235,6 +235,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.MistyPortal => "misty portal",
     TileType.BellyFloor => "soft tissue",
     TileType.Arioch => "a writhing, imprisoned demon lord",
+    TileType.MoonDaughterSpot => "stone floor",
     _ => "unknown"
   };
 
@@ -667,6 +668,7 @@ class TileFactory
   static readonly Tile BellyFloor = new BasicTile(TileType.BellyFloor, true, false, true);
   static readonly Tile Lava = new BasicTile(TileType.Lava, false, false, true);
   static readonly Tile Arioch = new BasicTile(TileType.Arioch, false, false, false);
+  static readonly Tile MoonDaughterSpot = new BasicTile(TileType.MoonDaughterSpot, true, true, false);
 
   public static Tile Get(TileType type) => type switch
   {
@@ -738,6 +740,7 @@ class TileFactory
     TileType.BellyFloor => BellyFloor,
     TileType.Lava => Lava,
     TileType.Arioch => Arioch,
+    TileType.MoonDaughterSpot => MoonDaughterSpot,
     _ => Unknown
   };
 }
