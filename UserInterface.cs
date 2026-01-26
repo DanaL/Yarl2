@@ -579,7 +579,7 @@ abstract class UserInterface
     string tileText = " " + Tile.TileDesc(tile.Type).Capitalize();
     foreach (var item in gs.ObjDb.EnvironmentsAt(gs.Player.Loc))
     {
-      if (item.Type == ItemType.Environment && item.Name != "light" && item.Name != "photon")
+      if (item.Type == ItemType.Environment && item.Name != "light" && item.Name != "photon" && item.Name != "moon daughter tile" || item.Name == "darkness")
       {
         tileSq = new Sqr(item.Glyph.Lit, Colours.BLACK, item.Glyph.Ch);
         tileText = $" {item.Name.Capitalize()}";

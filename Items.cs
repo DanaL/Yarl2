@@ -555,6 +555,41 @@ class ItemFactory
     return mirror;
   }
 
+  public static Item Darkness()
+  {
+    Item darkness = new()
+    {
+      Name = "darkness", Type = ItemType.Environment,
+      Value = 0, Glyph = new(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
+    };
+
+    darkness.Traits.Add(new AffixedTrait());
+    darkness.Traits.Add(new OpaqueTrait());
+
+    return darkness;
+  }
+
+  public static Item MoonDaughterTile()
+  {
+    Item tile = new()
+    {
+      Name = "moon daughter tile", Type = ItemType.Environment,
+      Value = 0, Glyph = new(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
+    };
+    tile.SetZ(-100);
+
+    tile.Traits.Add(new AffixedTrait());
+    tile.Traits.Add(new LightSourceTrait()
+    {
+      Radius = 0,
+      OwnerID = tile.ID,
+      FgColour = Colours.WHITE,
+      BgColour = Colours.WHITE
+    });
+
+    return tile;
+  }
+
   public static Item Photon(GameState gs, ulong ownerID)
   {
     Item photon = new()

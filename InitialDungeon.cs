@@ -282,6 +282,12 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
         ckRoom = true;  
       }
 
+      if (level == 0)
+      {
+       MoonDaughterSpot(levelMaps[level], rooms[roomIds[0]], DungeonId, level, objDb, rng);
+       roomIds.RemoveAt(0); 
+      }
+
       if (rng.NextDouble() < chanceOfDesecratedAltar)
       {
         List<(int, int)> room = rooms[roomIds[0]];
@@ -308,7 +314,27 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     }    
   }
 
-  void CrimsonKingRoom(Map map, List<(int, int)> room, int dungeonId, int level, GameObjectDB objDb, Rng rng)
+  static void MoonDaughterSpot(Map map, List<(int, int)> room, int dungeonId, int level, GameObjectDB objDb, Rng rng)
+  {
+    var sq = room[rng.Next(room.Count)];
+    Loc loc = new(dungeonId, level, sq.Item1, sq.Item2);
+
+    Item mdt = ItemFactory.MoonDaughterTile();
+    objDb.Add(mdt);
+    objDb.SetToLoc(loc, mdt);
+
+    foreach (Loc adj in Util.Adj8Locs(loc))
+    {
+      if (map.TileAt(adj.Row, adj.Col).Passable())
+      {
+        Item dark = ItemFactory.Darkness();
+        objDb.Add(dark);
+        objDb.SetToLoc(adj, dark);
+      }
+    }
+  }
+
+  static void CrimsonKingRoom(Map map, List<(int, int)> room, int dungeonId, int level, GameObjectDB objDb, Rng rng)
   {
     int loR = int.MaxValue, hiR = 0, loC = int.MaxValue, hiC = 0;
     foreach (var sq in room)
