@@ -3,13 +3,13 @@
   ((> DIALOGUE_STATE 0)  ; the veteran is dispensing advice
     ((say (pick 
             ("Swords aren't so great against skeletons." "Owlbears definitely inherited the bear hug genes." "Someone once told me cloakers make their own flocks."
-              "Mind your torch around wooden structures!" "They say swinelings spread plague." "Never drink water. Fish pee in there." "It can be helpful to drink a potion of healing even when you're full."
+              "Mind your torch around wooden structures!" "They say swinelings spread plague." "Never drink water. Fish pee in there."
+              "You don't want to make a habit of it, but a little sip of booze helps steady your nerves in the depths." "Trolls are said to fear fire."
               "Sometimes dead ends aren't the end of the road." "They say they used to hunt wumpuses with a bow.")))
       (set DIALOGUE_STATE 0)
     )
   )
-
-  
+    
   (else ( 
     
     ; first, select the blurb
@@ -40,7 +40,9 @@
         ((>= PLAYER_WALLET 2) 
           (
             (say "\n\n")
-            (say (pick ("Buy me a drink and I'll repay you with wisdom." "For a taste of your whiskey, I'll give you some advice.")))
+            (say (pick ("Buy me a drink and I'll repay you with wisdom." 
+                          "For a taste of your whiskey, I'll give you some advice." "You might say I lost the Crimson King's favour."
+                          "Sometimes you eat the bar, and sometimes the bar eats you."" )))
             (option "Buy #NPC_NAME a drink. ([YELLOW $]2)" ((spend 2) (set DIALOGUE_STATE 1)))
           )
         )
