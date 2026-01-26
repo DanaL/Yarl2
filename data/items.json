@@ -653,7 +653,8 @@
       "Edible",
       "Consumable",
       "Stackable",
-      "UseSimple#trivialheal"
+      "UseSimple#trivialheal",
+      "Delicious"
     ]
   },
   {
@@ -666,7 +667,8 @@
       "Edible",
       "Consumable",
       "Stackable",
-      "UseSimple#destress"
+      "UseSimple#destress",
+      "Delicious"
     ]
   },
   {
@@ -1189,7 +1191,8 @@
       "Edible",
       "Consumable",
       "Stackable",
-      "UseSimple#soothe"
+      "UseSimple#soothe",
+      "Delicious"
     ]
   },
   {
@@ -1202,7 +1205,8 @@
       "Edible",
       "Consumable",
       "Stackable",
-      "UseSimple#curedisease"
+      "UseSimple#curedisease",
+      "Delicious"
     ]
   },
   {

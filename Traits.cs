@@ -2158,6 +2158,11 @@ class DeathMessageTrait : BasicTrait
   public override string AsText() => $"DeathMessage#{Message}";
 }
 
+class DeliciousTrait : Trait
+{
+  public override string AsText() => "Delicious";
+}
+
 class DemonVisageTrait : Trait
 {
   public override string AsText() => "DemonVisage";
@@ -4578,6 +4583,7 @@ class TraitFactory
     },
     { "Dead", (pieces, gameObj) => new DeadTrait() },
     { "DeathMessage", (pieces, gameObj) => new DeathMessageTrait() { Message = pieces[1] } },
+    { "Delicious", (pieces, gameObj) => new DeliciousTrait() },
     { "DemonVisage", (pieces, gameObj) => new DemonVisageTrait() },
     { "Description", (pieces, gameObj) => new DescriptionTrait(pieces[1]) },
     { "Desecrated", (pieces, gameObj) => new DesecratedTrait() },
