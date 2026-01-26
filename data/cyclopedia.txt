@@ -661,3 +661,6 @@ A piece of a stone tablet with inscriptions in a language you don't recognize.
 #
 potion of clarity
 This potion smells of pine tar and camphor, but it can clear your mind and snap you out of stupors.
+#
+darkness
+Inky blackness obscures your view of what lays beyond.

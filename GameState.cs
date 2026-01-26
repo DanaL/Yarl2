@@ -2148,7 +2148,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       if (objGlyph != GameObjectDB.EMPTY && z >= tile.Z())
       {
         glyph = objGlyph;        
-        if (itemType != ItemType.Ink && objGlyph.Lit != Colours.FAR_BELOW)
+        if (itemType != ItemType.Ink && objGlyph.Lit != Colours.FAR_BELOW && objGlyph.Ch != ' ')
           illuminateGlyph = true;
       }            
       else if (tile.Type == TileType.Chasm)

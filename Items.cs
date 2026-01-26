@@ -565,6 +565,7 @@ class ItemFactory
 
     darkness.Traits.Add(new AffixedTrait());
     darkness.Traits.Add(new OpaqueTrait());
+    darkness.Traits.Add(new PluralTrait());
 
     return darkness;
   }
