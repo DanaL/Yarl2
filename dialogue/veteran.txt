@@ -9,7 +9,8 @@
       (set DIALOGUE_STATE 0)
     )
   )
-    
+
+  
   (else ( 
     
     ; first, select the blurb
@@ -42,7 +43,7 @@
             (say "\n\n")
             (say (pick ("Buy me a drink and I'll repay you with wisdom." 
                           "For a taste of your whiskey, I'll give you some advice." "You might say I lost the Crimson King's favour."
-                          "Sometimes you eat the bar, and sometimes the bar eats you."" )))
+                          "Sometimes you eat the bar, and sometimes the bar eats you." )))
             (option "Buy #NPC_NAME a drink. ([YELLOW $]2)" ((spend 2) (set DIALOGUE_STATE 1)))
           )
         )
