@@ -257,12 +257,12 @@ class DebugCommand(GameState gs)
 
       return "";
     }
-    else if (txt == "stats")
+    else if (txt == "disease")
     {
-      foreach (var k in _gs.Player.Stats.Keys)
-      {
-        Console.WriteLine($"{k} {_gs.Player.Stats[k].Curr}({_gs.Player.Stats[k].Curr})");
-      }
+      DiseasedTrait disease = new() { SourceId = 1_000_000 };
+
+      foreach (string s in disease.Apply(_gs.Player, _gs))
+        _gs.UIRef().AlertPlayer(s, _gs, _gs.Player.Loc);
       return "";
     }
     

@@ -149,7 +149,7 @@ sealed class Player : Actor
     {
       if (t is StatBuffTrait sbt && sbt.Attr == Attribute.HP)
         baseHP += sbt.Amt;
-      if (t is StatDebuffTrait sdt && sdt.Attr == Attribute.HP)
+      else if (t is StatDebuffTrait sdt && sdt.Attr == Attribute.HP)
         baseHP += sdt.Amt;
     }
 
@@ -160,8 +160,16 @@ sealed class Player : Actor
 
     return baseHP;
   }
-  
-  public override void CalcHP() => Stats[Attribute.HP].SetMax(CalcMaxHP());
+
+  public override void CalcHP() 
+  {
+    int baseHP = CalcMaxHP();
+    Stat hp = Stats[Attribute.HP];
+    if (hp.Curr > baseHP)
+      hp.SetMax(baseHP);
+    else
+      hp.Max = baseHP;    
+  }
 
   public void CalcStress()
   {
