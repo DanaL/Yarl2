@@ -521,8 +521,8 @@ class SleepSpellAction(GameState gs, Actor actor, int radius, int dc) : Action(g
           {
             string s = $"{occ.FullName.Capitalize()} {Grammar.Conjugate(occ, "fall")} asleep!";
             ui.AlertPlayer(s, GameState, loc);
-            ui.RegisterAnimation(new BarkAnimation(gs, 350, occ, "Zzz"));
-            ui.RegisterAnimation(new SqAnimation(gs, occ.Loc, Colours.BLACK, Colours.PINK, '*'));
+            ui.RegisterAnimation(new BarkAnimation(GameState, 350, occ, "Zzz"));
+            ui.RegisterAnimation(new SqAnimation(GameState, occ.Loc, Colours.BLACK, Colours.PINK, '*'));
           }
         }
       }
