@@ -1327,17 +1327,7 @@ class MolochAltarTrait : Trait
   public override string AsText() => "MolochAltar";
 }
 
-sealed class MoonDaughterSpotTrait : Trait
-{
-  public override string AsText() => "MoonDaughterSpot";
-
-  public static void Visit(GameState gs)
-  {
-
-  }
-}
-
-class PlantTrait : Trait
+sealed class PlantTrait : Trait
 {
   public override string AsText() => "Plant";
 }
@@ -4740,7 +4730,6 @@ class TraitFactory
     { "Metal", (pieces, gameObj) => new MetalTrait() { Type = (Metals)int.Parse(pieces[1]) } },
     { "MoldSpores", (pieces, gameObj) => new MoldSporesTrait() },
     { "MolochAltar", (pieces, gameObj) => new MolochAltarTrait() },
-    { "MoonDaughterSpot", (pieces, gameObj) => new MoonDaughterSpotTrait() },
     { "Mosquito", (pieces, gameObj) => new MosquitoTrait() },
     { "Named", (pieces, gameObj) => new NamedTrait() },
     { "Nausea", (pieces, gameObj) => new NauseaTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
