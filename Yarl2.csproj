@@ -7,7 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <RuntimeIdentifiers>osx-x64;osx-arm64;win-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>osx-x64;osx-arm64;win-x64;linux-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,6 +26,11 @@
     <!--<PublishSingleFile>true</PublishSingleFile>-->
     <!--<SelfContained>true</SelfContained>-->
     <!--<PublishReadyToRun>true</PublishReadyToRun>-->
+</PropertyGroup>
+
+<!-- Linux-specific settings -->
+<PropertyGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+  <SelfContained>true</SelfContained>
 </PropertyGroup>
 
   <ItemGroup>
@@ -125,5 +130,8 @@
      <None Update="data\gaol.txt">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+    <None Update="DejaVuSansMono.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
