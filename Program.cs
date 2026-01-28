@@ -108,35 +108,35 @@ try
 catch (QuitGameException)
 {
 }
-// catch (Exception ex)
-// {
-//   List<string> lines = [];
-//   lines.Add("");
-//   lines.Add(" Uhoh, Delve seems to have crashed, likely due to Dana's incompetence :'( ");
-//   lines.Add(" The execption thrown was: ");
-//   lines.Add(" " + ex.Message);
+catch (Exception ex)
+{
+  List<string> lines = [];
+  lines.Add("");
+  lines.Add(" Uhoh, Delve seems to have crashed, likely due to Dana's incompetence :'( ");
+  lines.Add(" The execption thrown was: ");
+  lines.Add(" " + ex.Message);
 
-//   if (ex.InnerException is not null)
-//     lines.Add(" " + ex.InnerException.Message);
+  if (ex.InnerException is not null)
+    lines.Add(" " + ex.InnerException.Message);
 
-//   lines.Add("");
-//   lines.Add(" Delve will now need to exit.");
+  lines.Add("");
+  lines.Add(" Delve will now need to exit.");
   
-//   var userDir = Util.UserDir;
-//   if (!userDir.Exists)
-//     userDir.Create();
+  var userDir = Util.UserDir;
+  if (!userDir.Exists)
+    userDir.Create();
 
-//   string logPath = Path.Combine(userDir.FullName, "crash.txt");
-//   File.WriteAllLines(logPath, lines);
+  string logPath = Path.Combine(userDir.FullName, "crash.txt");
+  File.WriteAllLines(logPath, lines);
 
-//   if (ex.InnerException is not null)
-//     File.AppendAllText(logPath, ex.InnerException.StackTrace);
+  if (ex.InnerException is not null)
+    File.AppendAllText(logPath, ex.InnerException.StackTrace);
 
-//   display.ClosePopup();
-//   display.SetLongMessage(lines);
+  display.ClosePopup();
+  display.SetLongMessage(lines);
 
-//   display.BlockForInput(null);
-// }
+  display.BlockForInput(null);
+}
 
 static void GameLoop(UserInterface ui, GameState gameState)
 {
