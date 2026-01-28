@@ -640,7 +640,7 @@ class MapView : Inputer
 class OptionsScreen : Inputer
 {
   int row = 0;
-  const int numOfOptions = 8;
+  const int numOfOptions = 9;
 
   public OptionsScreen(GameState gs) : base(gs) => WritePopup();
 
@@ -660,6 +660,16 @@ class OptionsScreen : Inputer
       --row;
       if (row < 0)
         row = numOfOptions - 1;
+    }
+    else if ((ch == 'h' || ch == 'l') && row == 8)
+    {
+      int delta = ch == 'h' ? -2 : 2;
+      int newSize = Math.Clamp(GS.Options.FontSize + delta, 10, 30);
+      if (newSize != GS.Options.FontSize)
+      {
+        GS.Options.FontSize = newSize;
+        GS.UIRef().SetFontSize(newSize);
+      }
     }
     else if (ch == '\n' || ch == '\r' || ch == ' ')
     {
@@ -704,6 +714,7 @@ class OptionsScreen : Inputer
       $"Show turns: {turns}",
       $"Show move keys by default: {moveHints}",
       $"Auto-Pickup Gold: {autoPickupGold}",
+      $"Font size (h/l to adjust): {GS.Options.FontSize}",
     ];
 
     GS.UIRef().SetPopup(new PopupMenu("Options", menuItems) { SelectedRow = row });

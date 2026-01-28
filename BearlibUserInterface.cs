@@ -29,6 +29,13 @@ internal class BLUserInterface : UserInterface, IDisposable
     Terminal.Refresh();
   }
 
+  public override void SetFontSize(int newSize)
+  {
+    FontSize = newSize;
+    Terminal.Set($"font: DejaVuSansMono.ttf, size={FontSize}");
+    Terminal.Refresh();
+  }
+
   Color ToBearLibColour(Colour colour)
   {
     if (!_colours.TryGetValue(colour, out Color value))

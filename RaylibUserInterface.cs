@@ -18,8 +18,8 @@ namespace Yarl2;
 class RaylibUserInterface : UserInterface
 {
   Font _font;
-  readonly int _fontWidth;
-  readonly int _fontHeight;
+  int _fontWidth;
+  int _fontHeight;
   Dictionary<Colour, Color> _colours = [];
   Dictionary<char, string> _charCache = [];
   Queue<GameEvent> EventQ { get; set; } = [];
@@ -53,6 +53,26 @@ class RaylibUserInterface : UserInterface
     _fontHeight = FontSize;
 
     SetWindowPosition(100, 0);
+  }
+
+  public override void SetFontSize(int newSize)
+  {
+    UnloadFont(_font);
+
+    FontSize = newSize;
+    _fontWidth = FontSize / 2;
+    _fontHeight = FontSize;
+
+    string fontPath = ResourcePath.GetBaseFilePath("DejaVuSansMono.ttf");
+    const int GLYPH_COUNT = 65535;
+    int[] codepoints = new int[GLYPH_COUNT];
+    for (int i = 0; i < GLYPH_COUNT; i++)
+      codepoints[i] = i;
+    _font = LoadFontEx(fontPath, FontSize, codepoints, GLYPH_COUNT);
+
+    int width = ScreenWidth * _fontWidth + 2;
+    int height = ScreenHeight * _fontHeight + 2;
+    SetWindowSize(width, height);
   }
 
   protected override GameEvent PollForEvent(bool pause = true)

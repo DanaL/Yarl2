@@ -44,6 +44,7 @@ abstract class UserInterface
   public abstract void WriteLine(string message, int lineNum, int col, int width, Colour textColour, Colour bgColour);
   public abstract void WriteSq(int row, int col, Sqr sq);
   public abstract void ClearScreen();
+  public abstract void SetFontSize(int newSize);
 
   protected abstract GameEvent PollForEvent(bool pause = true);
   protected abstract void Blit(); // Is blit the right term for this? 'Presenting the screen'
