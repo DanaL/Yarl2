@@ -90,6 +90,8 @@ sealed class Item : GameObj, IEquatable<Item>
         return true;
       else if (t is CanApplyTrait)
         return true;
+      else if (t is VaultKeyTrait)
+        return true;
     }
 
     return false;
