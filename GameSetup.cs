@@ -610,7 +610,9 @@ class CampaignCreator(UserInterface ui)
       welcomeText += "\n\n";
       welcomeText += "Press [ICEBLUE ? for help], and [ICEBLUE x] will allow you to examine interesting features on screen.";
       welcomeText += "\n\n";
-      welcomeText += "Press [ICEBLUE /] to toggle between recent messages and command/movement key cheat sheets.";
+      welcomeText += "[ICEBLUE /] will toggle between recent messages and command/movement key cheat sheets.";
+      welcomeText += "\n\n";
+      welcomeText += "[ICEBLUE =] opens the Options menu.";
       UI.SetPopup(new Popup(welcomeText, "", -2, -1));
 
       gameState.ObjDb.SetActorToLoc(player.Loc, player.ID);
