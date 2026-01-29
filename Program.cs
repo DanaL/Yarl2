@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text;
 using System.Text.Json;
 using System.Runtime.InteropServices;
 
@@ -327,16 +328,52 @@ static void DrawGravestone(UserInterface ui, GameState gameState, List<string> m
   }
 }
 
+static List<string> WrapLines(List<string> lines, int maxWidth)
+{
+  List<string> wrapped = [];
+
+  foreach (string line in lines)
+  {
+    if (line.Length <= maxWidth)
+    {
+      wrapped.Add(line);
+      continue;
+    }
+
+    string[] words = line.Split(' ');
+    StringBuilder currentLine = new();
+
+    foreach (var word in words)
+    {
+      if (currentLine.Length + word.Length + 1 > maxWidth)
+      {
+        wrapped.Add(currentLine.ToString().TrimEnd());
+        currentLine.Clear();
+      }
+
+      if (currentLine.Length > 0)
+        currentLine.Append(' ');
+      currentLine.Append(word);
+    }
+
+    if (currentLine.Length > 0)
+      wrapped.Add(currentLine.ToString());
+  }
+
+  return wrapped;
+}
+
 static void ShowMessageLog(UserInterface ui, List<string> lines)
 {
+  List<string> wrappedLines = WrapLines(lines, UserInterface.ScreenWidth);
   int row = 0;
   int pageSize = UserInterface.ScreenHeight - 1;
 
-  while (row < lines.Count)
+  while (row < wrappedLines.Count)
   {
-    List<string> page = [.. lines.Skip(row).Take(pageSize)];
+    List<string> page = [.. wrappedLines.Skip(row).Take(pageSize)];
 
-    if (row + pageSize < lines.Count)
+    if (row + pageSize < wrappedLines.Count)
       page.Add("-- Press space for more, ESC to return --");
     else
       page.Add("-- Press any key to return --");
