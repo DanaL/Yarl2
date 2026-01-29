@@ -180,7 +180,7 @@
     "Value": 15,
     "Glyph": "),white,lightgrey,black,false",
     "Traits": [
-      "Damage#6#1#Slashing",
+      "Damage#5#1#Slashing",
       "Sword",
       "Metal#2",
       "WeaponSpeed#0.66"
