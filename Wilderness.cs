@@ -11,7 +11,7 @@
 
 namespace Yarl2;
 
-internal class Wilderness(Rng rng, int length)
+class Wilderness(Rng rng, int length)
 {
   readonly Rng Rng = rng;
   readonly int Length = length;

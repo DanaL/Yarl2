@@ -681,6 +681,7 @@ static class Util
 
   public static Glyph TileToGlyph(Tile tile) => tile.Type switch
   {
+    TileType.WorldBorder => new Glyph('}', Colours.BLUE, Colours.DARK_BLUE, Colours.BLACK, false),
     TileType.PermWall => new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     TileType.StoneWall => new Glyph('░', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     TileType.DungeonWall => new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
