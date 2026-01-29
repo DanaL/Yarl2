@@ -1353,7 +1353,7 @@ sealed class PlayerRegenTrait : TemporaryTrait
 
   public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
-    if (gs.Turn % 11 == 0 && !gs.Player.HasTrait<DiseasedTrait>())
+    if (gs.Turn % 13 == 0 && !gs.Player.HasTrait<DiseasedTrait>())
     {
       gs.Player.Stats[Attribute.HP].Change(1);
     }
