@@ -11,6 +11,7 @@
           "I tried one of Sophie's cold rememdies once and woke up in a field hours later. My cold was gone, though."
           "These days #WIDOWER_NAME just sits at home and mopes. This is what happens when you get involved with an adventurer. No offense."
           "What did #WIDOWER_NAME expect? I guess there's no accounting for young love."
+          "Sometimes you see lights in the windows of that old tower."
         ))))
   (else 
     (
