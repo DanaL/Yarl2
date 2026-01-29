@@ -132,7 +132,8 @@ class DebugCommand(GameState gs)
     {"sneakers", ItemNames.SNEAKERS },
     {"moon mantle", ItemNames.MOON_MANTLE },
     {"moon lyre", ItemNames.MOON_LYRE },
-    {"potion of clarity", ItemNames.POTION_CLARITY }
+    {"potion of clarity", ItemNames.POTION_CLARITY },
+    {"draught of forgetfulness", ItemNames.POTION_FORGETFULNESS }
   };
 
   public string DoCommand(string txt)

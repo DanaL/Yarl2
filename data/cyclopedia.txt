@@ -667,3 +667,6 @@ Inky blackness obscures your view of what lays beyond.
 #
 giant spider
 A really big spider. Big enough that you are only a small snack to it. Maybe even only an amuse-bouche.
+#
+draught of forgetfulness
+Sometimes an adventurer wants something a little stronger than ale. This concoction makes one forget what they've seen recently, and perhaps also their fears and concerns.

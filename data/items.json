@@ -1479,5 +1479,17 @@
       "Stackable",
       "UseSimple#clarity"
     ]
+  },
+  {
+    "Name": "POTION_FORGETFULNESS",
+    "DescriptiveName": "draught of forgetfulness",
+    "Type": "Potion",
+    "Value": 10,
+    "Glyph": "!,iceblue,blue,black,false",
+    "Traits": [
+      "Consumable",
+      "Stackable",
+      "UseSimple#amnesia"
+    ]
   }
 ]

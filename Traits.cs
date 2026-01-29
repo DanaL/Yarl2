@@ -1986,6 +1986,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
 
   public UseResult Use(Actor user, GameState gs, int row, int col, Item? item) => Spell switch
   {
+    "amnesia" => new UseResult(new ForgetAction(gs, user)),
     "antidote" => new UseResult(new AntidoteAction(gs, user)),
     "blink" => new UseResult(new BlinkAction(gs, user)),
     "booze" => new UseResult(new DrinkBoozeAction(gs, user)),

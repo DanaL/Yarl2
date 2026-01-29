@@ -3313,6 +3313,42 @@ class ClarityAction(GameState gs, Actor target) : Action(gs, target)
   }
 }
 
+class ForgetAction(GameState gs, Actor actor) : Action(gs, actor)
+{
+  public override double Execute()
+  {
+    base.Execute();
+    
+    if (Actor is Player)
+    {
+      foreach (Loc loc in GameState!.CurrentDungeon.RememberedLocs.Keys.Where(l => l.Level == GameState.CurrLevel).ToList())
+      {
+        GameState.CurrentDungeon.RememberedLocs.Remove(loc);
+      }
+      GameState!.UIRef().AlertPlayer("\"Huh? What?!\"");
+    }
+
+    foreach (Trait t in Actor!.Traits)
+    {
+      if (t is FrightenedTrait frightened)
+      {
+        frightened.Remove(GameState!);
+      }
+      else if (t is ConfusedTrait confused)
+      {
+        confused.Remove(GameState!);
+      }
+    }
+
+    if (Actor.Stats.TryGetValue(Attribute.Nerve, out Stat? nerve))
+    {
+      nerve.Reset();
+    }
+
+    return 1.0;
+  }
+}
+
 class SootheAction(GameState gs, Actor target, int amount) : Action(gs, target)
 {
   int Amount { get; set; } = amount;
