@@ -1667,7 +1667,8 @@ class LongMessagerInputer : Inputer
     else
     {
       List<string> page = [.. _wrappedLines.Skip(_row).Take(UserInterface.ScreenHeight - 1)];
-      string txt = $"~ page {++_pageCount} ~";
+      ++_pageCount;
+      string txt = $"~ page {_pageCount + 1} ~";
       txt = txt.PadLeft(UserInterface.ScreenWidth / 2 - txt.Length + txt.Length / 2, ' ');
       page.Insert(0, txt);
 
