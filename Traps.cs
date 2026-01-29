@@ -392,9 +392,10 @@ class Traps
         AltColour2 = Colours.YELLOW_ORANGE,
         Highlight = Colours.WHITE,
         Centre = start,
-        Sqs = affected
-      };      
-      gs.UIRef().PlayAnimation(explosion, gs);
+        Sqs = affected,
+        Ch = Constants.FIRE_CHAR
+      };
+      gs.UIRef().RegisterAnimation(explosion);
     }
 
     int total = 0;
