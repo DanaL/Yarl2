@@ -213,7 +213,7 @@ static void GameLoop(UserInterface ui, GameState gameState)
       ui.SetPopup(new Popup(s, "", -1, -1));
       ui.WriteAlerts();
       ui.BlockFoResponse(gameState);
-      DrawGravestone(ui, gameState, pke.Messages);
+      GravestoneScreen(ui, gameState, pke.Messages);
 
       return;
     }
@@ -240,7 +240,7 @@ static void GameLoop(UserInterface ui, GameState gameState)
   }
 }
 
-static void DrawGravestone(UserInterface ui, GameState gameState, List<string> messages)
+static void DrawGravestone(UserInterface ui, GameState gameState, List<string> messages, List<Colour> flowerColours)
 {
   List<string> text =
     [
@@ -297,8 +297,11 @@ static void DrawGravestone(UserInterface ui, GameState gameState, List<string> m
   }
 
   text.Add("");
-  text.Add(" See your inventory? (y/n)");
+  text.Add(" a) See your inventory");
+  text.Add(" b) View messages");
+  text.Add(" q) Quit");
 
+  int flower = 0;
   ui.ClosePopup();
   ui.CheatSheetMode = CheatSheetMode.Messages;
   ui.SqsOnScreen = new Sqr[UserInterface.ScreenHeight, UserInterface.ScreenWidth];
@@ -310,36 +313,100 @@ static void DrawGravestone(UserInterface ui, GameState gameState, List<string> m
     {
       Colour colour = Colours.WHITE;
       char ch = row[c];
-      if (r < text.Count - 1 && (ch == '(' || ch == ')'))
+      if (r < text.Count - 3 && (ch == '(' || ch == ')'))
         colour = Colours.GREEN;
-      else if (r == text.Count - 3 && (ch == '|' || ch == '\\' || ch == '/'))
+      else if (r == text.Count - 5 && (ch == '|' || ch == '\\' || ch == '/'))
         colour = Colours.GREEN;
-      else if (r == text.Count - 4 && (ch == '|' || ch == '\\' || ch == '/'))
+      else if (r == text.Count - 6 && (ch == '|' || ch == '\\' || ch == '/'))
         colour = Colours.GREEN;
       else if (ch == '*')
-      {
-        colour = gameState.Rng.Next(4) switch
-        {
-          0 => Colours.LIGHT_PURPLE,
-          1 => Colours.BLUE,
-          2 => Colours.PINK,
-          _ => Colours.YELLOW
-        };
-      }
+        colour = flowerColours[flower++];
       Sqr s = new(colour, Colours.BLACK, ch);
       ui.SqsOnScreen[r + 1, c + 1] = s;
     }
   }
+}
 
-  if (ui.Confirmation("", gameState))
+static void ShowMessageLog(UserInterface ui, List<string> lines)
+{
+  int row = 0;
+  int pageSize = UserInterface.ScreenHeight - 1;
+
+  while (row < lines.Count)
   {
-    ui.ClosePopup();
-    ui.ClearSqsOnScreen();
-    gameState.Player.Inventory.ShowMenu(gameState.UIRef(), new InventoryOptions() { Title = "You were carrying", Options = InvOption.MentionMoney });
-    ui.BlockForInput(gameState);
-    ui.CloseMenu();
+    List<string> page = [.. lines.Skip(row).Take(pageSize)];
+
+    if (row + pageSize < lines.Count)
+      page.Add("-- Press space for more, ESC to return --");
+    else
+      page.Add("-- Press any key to return --");
+
+    ui.SetLongMessage(page);
+    ui.UpdateDisplay(null);
+
+    char ch;
+    do
+    {
+      Thread.Sleep(30);
+      ch = ui.GetKeyInput();
+    } 
+    while (ch == '\0');
+
+    if (ch == Constants.ESC)
+      break;
+
+    row += pageSize;
   }
-  //BlockForInput(gameState);
+
+  ui.ClearLongMessage();
+}
+
+static void GravestoneScreen(UserInterface ui, GameState gameState, List<string> messages)
+{
+  static Colour RngColour(Rng rng) => rng.Next(4) switch
+  {
+    0 => Colours.LIGHT_PURPLE,
+    1 => Colours.BLUE,
+    2 => Colours.PINK,
+    _ => Colours.YELLOW
+  };
+
+  List<Colour> flowerColours = [ RngColour(gameState.Rng), RngColour(gameState.Rng), 
+    RngColour(gameState.Rng),  RngColour(gameState.Rng), RngColour(gameState.Rng) ];
+
+  DrawGravestone(ui, gameState, messages, flowerColours);
+
+  do
+  {
+    Thread.Sleep(30);
+    char ch = ui.GetKeyInput();
+
+    if (ch == 'a')
+    {
+      ui.ClosePopup();
+      ui.ClearSqsOnScreen();
+      gameState.Player.Inventory.ShowMenu(gameState.UIRef(), new InventoryOptions() { Title = "You were carrying", Options = InvOption.MentionMoney });
+      DrawGravestone(ui, gameState, messages, flowerColours);
+    }
+    else if (ch == 'b')
+    {
+      List<string> lines = [.. ui.MessageHistory.Select(m => m.Fmt)];
+      ShowMessageLog(ui, lines);
+      DrawGravestone(ui, gameState, messages, flowerColours);
+    }
+    else if (ch == ' ')
+    {
+      ui.CloseMenu();
+    }
+    else if (ch == 'q' || ch == Constants.ESC)
+    {
+      ui.CloseMenu();
+      break;
+    }
+    
+    ui.UpdateDisplay(gameState);
+  }
+  while (true);  
 }
 
 namespace Yarl2
