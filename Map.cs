@@ -112,6 +112,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.HiddenTeleportTrap => true,
     TileType.HiddenTrapDoor => true,
     TileType.HiddenWaterTrap => true,
+    TileType.JetTrigger => !((JetTrigger) this).Visible,
     _ => false  
   };
 
