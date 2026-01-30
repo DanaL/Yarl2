@@ -1600,16 +1600,16 @@ class LongPopUp : Inputer
   }
 }
 
-class PauseForMoreInputer(GameState gs) : Inputer(gs)
+sealed class PauseForMoreInputer(GameState gs) : Inputer(gs)
 {
   public override void Input(char ch) => Close();
 }
 
-class LongMessagerInputer : Inputer
+sealed class LongMessagerInputer : Inputer
 {
-  UserInterface _ui;
+  readonly UserInterface _ui;
   int _row;
-  List<string> _wrappedLines;
+  readonly List<string> _wrappedLines;
   int _pageCount;
   
   public LongMessagerInputer(GameState gs, UserInterface ui, IEnumerable<string> lines) : base(gs)

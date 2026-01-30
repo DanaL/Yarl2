@@ -69,7 +69,7 @@ abstract class UserInterface
   IPopup? _confirm = null;
 
   public List<MsgHistory> MessageHistory = [];
-  protected readonly int MaxHistory = 125;
+  protected readonly int MaxHistory = 120;
   protected bool HistoryUpdated = false;
 
   List<Animation> _animations = [];
