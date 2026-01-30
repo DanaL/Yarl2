@@ -3328,16 +3328,10 @@ class ForgetAction(GameState gs, Actor actor) : Action(gs, actor)
       GameState!.UIRef().AlertPlayer("\"Huh? What?!\"");
     }
 
-    foreach (Trait t in Actor!.Traits)
+    List<Trait> toRemove = [.. Actor!.Traits.Where(t => t is FrightenedTrait || t is ConfusedTrait)];
+    foreach (TemporaryTrait t in toRemove.Cast<TemporaryTrait>())
     {
-      if (t is FrightenedTrait frightened)
-      {
-        frightened.Remove(GameState!);
-      }
-      else if (t is ConfusedTrait confused)
-      {
-        confused.Remove(GameState!);
-      }
+      t.Remove(GameState!);
     }
 
     if (Actor.Stats.TryGetValue(Attribute.Nerve, out Stat? nerve))
