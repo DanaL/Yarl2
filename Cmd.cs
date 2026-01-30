@@ -49,7 +49,7 @@ class Cmd
     {
       ++wear.Wear;
 
-      int rustRoll = rusty ? 20 : 40;
+      int rustRoll = rusty ? 21 : 41;
       if (gs.Rng.Next(rustRoll) < wear.Wear)
       {
         actor.Inventory.ConsumeItem(tool, actor, gs);
