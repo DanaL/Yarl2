@@ -16,7 +16,7 @@ using System.Text.Json.Serialization;
 namespace Yarl2;
 
 record SaveFileInfo(string CharName, string Path);
-record SaveGameInfo(CampaignSaver Campaign, GameStateSave GameStateSave, GameObjDBSave ObjDb, Dictionary<string, ItemIDInfo> IDInfo, List<SqrSave> Preview);
+record SaveGameInfo(CampaignSaver Campaign, GameStateSave GameStateSave, GameObjDBSave ObjDb, Dictionary<string, ItemIDInfo> IDInfo, List<SqrSave> Preview, List<MsgHistory> MessageHistory);
 record SqrSave(int R, int G, int B, int A, int BgR, int BgG, int BgB, int BgA, char Ch);
 
 // When I started working on saving the game, I had a bunch of problems with
@@ -38,7 +38,8 @@ internal class Serialize
     GameObjDBSave objDbSave = GameObjDBSave.Shrink(gameState.ObjDb);
 
     var preview = GenPreview(ui);
-    var sgi = new SaveGameInfo(CampaignSaver.Shrink(gameState.Campaign), GameStateSave.Shrink(gameState), objDbSave, Item.IDInfo, preview);
+    var messageHistory = ui.MessageHistory.ToList();
+    var sgi = new SaveGameInfo(CampaignSaver.Shrink(gameState.Campaign), GameStateSave.Shrink(gameState), objDbSave, Item.IDInfo, preview, messageHistory);
 
     var bytes = JsonSerializer.SerializeToUtf8Bytes(sgi,
                     new JsonSerializerOptions { WriteIndented = false, IncludeFields = true });
@@ -110,6 +111,7 @@ internal class Serialize
     }
 
     Item.IDInfo = sgi.IDInfo;
+    ui.MessageHistory = sgi.MessageHistory;
 
     return gs;
   }
