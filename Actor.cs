@@ -294,7 +294,7 @@ abstract class Actor : GameObj, IZLevel
     total += bonusDamage;
     total = (int)(total * scale);
 
-    Console.WriteLine($"{FullName.Capitalize()} took {total} damage.");
+    //Console.WriteLine($"{FullName.Capitalize()} took {total} damage.");
     
     if (total > 0 && coldDamage && Traits.OfType<BoolTrait>().Any(t => t.Name == "WaterElemental" && t.Value))
     {

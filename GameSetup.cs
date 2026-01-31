@@ -398,7 +398,7 @@ class CampaignCreator(UserInterface ui)
         wildernessMap = tb.DrawnTown(wildernessMap, rng);
         town = tb.Town;
         town.Name = NameGenerator.TownName(rng);
-        Console.WriteLine(town.Name);
+        //Console.WriteLine(town.Name);
 
         wilderness.AddMap(wildernessMap);
         campaign.AddDungeon(wilderness);
@@ -522,7 +522,7 @@ class CampaignCreator(UserInterface ui)
       }                  
       catch (WildernessCreationException wce)
       {
-        Console.WriteLine(wce.Message);
+        //Console.WriteLine(wce.Message);
       }
     }
     while (true);
@@ -568,7 +568,7 @@ class CampaignCreator(UserInterface ui)
   public GameState? Create(Options options)
   {
     int seed = DateTime.UtcNow.GetHashCode();
-    Console.WriteLine($"Seed: {seed}");
+    //Console.WriteLine($"Seed: {seed}");
 
     try
     {

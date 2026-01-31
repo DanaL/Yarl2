@@ -74,7 +74,6 @@ class Artifacts
           break;
         case 2:
           sword.Traits.Add(new ViciousTrait() { Scale = 1.333 });
-          Console.WriteLine("Vicious");
           break;
         default:
           if (sword.Traits.OfType<WeaponBonusTrait>().FirstOrDefault() is WeaponBonusTrait wb)

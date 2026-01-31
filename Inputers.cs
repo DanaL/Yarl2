@@ -746,7 +746,6 @@ class WizardCommander : Inputer
       DebugCommand cmd = new(GS);
       ErrorMessage = cmd.DoCommand(Buffer.Trim());
 
-      Console.WriteLine(ErrorMessage);
       if (ErrorMessage == "")
       {
         GS.UIRef().ClosePopup();

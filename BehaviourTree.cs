@@ -132,9 +132,6 @@ class RandoSelector(List<BehaviourNode> nodes) : BehaviourNode
 
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
-    if (Label == "powers")
-      Console.WriteLine();
-
     int curr = 0;
 
     Children.Shuffle(gs.Rng);

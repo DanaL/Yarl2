@@ -599,9 +599,9 @@ internal class MapSaver
             break;
         }
       }
-      catch (Exception ex)
+      catch (Exception)
       {
-        Console.WriteLine(ex.Message);
+        //Console.WriteLine(ex.Message);
       }
 
       if (tile is not null)
