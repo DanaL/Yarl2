@@ -237,6 +237,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.BellyFloor => "soft tissue",
     TileType.Arioch => "a writhing, imprisoned demon lord",
     TileType.MoonDaughterSpot => "stone floor",
+    TileType.Lava => "lava",
     _ => "unknown"
   };
 
