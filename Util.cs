@@ -1501,7 +1501,7 @@ public static class ResourcePath
 
         if (contentsDir is not null)
         {
-          folderPath = Path.Combine(contentsDir, folder); 
+          folderPath = Path.Combine(contentsDir, "Resources", folder); 
         }
       }      
     }

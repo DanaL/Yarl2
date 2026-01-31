@@ -64,6 +64,8 @@ class Tutorial(UserInterface ui)
     Item armour = ItemFactory.Get(ItemNames.LEATHER_ARMOUR, objDb);
     objDb.SetToLoc(new Loc(1, 0, 2, 8), armour);
   
+    player.Stats[Attribute.HP].Reset();
+    
     return player;
   }
 
