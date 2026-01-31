@@ -320,5 +320,7 @@ class PlayerCreator
         }
       }
     }
+
+    player.Stats[Attribute.HP].Reset();
   }
 }
