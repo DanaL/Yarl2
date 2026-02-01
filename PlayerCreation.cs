@@ -50,6 +50,8 @@ class PlayerCreator
     PlayerRegenTrait prt = new();
     prt.Apply(player, gs);
 
+    player.Stats[Attribute.HP].Reset();
+    
     return player;
   }
 
@@ -320,7 +322,5 @@ class PlayerCreator
         }
       }
     }
-
-    player.Stats[Attribute.HP].Reset();
   }
 }
