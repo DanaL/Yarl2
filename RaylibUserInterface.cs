@@ -125,7 +125,17 @@ class RaylibUserInterface : UserInterface
       EventQ.Enqueue(new(GameEventType.KeyInput, 'h'));
       Delay(50);
     }
+    else if (IsKeyPressed(KeyboardKey.Kp4) || IsKeyPressedRepeat(KeyboardKey.Kp4))
+    {
+      EventQ.Enqueue(new(GameEventType.KeyInput, 'h'));
+      Delay(50);
+    }
     else if (IsKeyPressed(KeyboardKey.Right) || IsKeyPressedRepeat(KeyboardKey.Right))
+    {
+      EventQ.Enqueue(new(GameEventType.KeyInput, 'l'));
+      Delay(50);
+    }
+    else if (IsKeyPressed(KeyboardKey.Kp6) || IsKeyPressedRepeat(KeyboardKey.Kp6))
     {
       EventQ.Enqueue(new(GameEventType.KeyInput, 'l'));
       Delay(50);
@@ -135,12 +145,47 @@ class RaylibUserInterface : UserInterface
       EventQ.Enqueue(new(GameEventType.KeyInput, 'j'));
       Delay(50);
     }
+    else if (IsKeyPressed(KeyboardKey.Kp2) || IsKeyPressedRepeat(KeyboardKey.Kp2))
+    {
+      EventQ.Enqueue(new(GameEventType.KeyInput, 'j'));
+      Delay(50);
+    }
     else if (IsKeyPressed(KeyboardKey.Up) || IsKeyPressedRepeat(KeyboardKey.Up))
     {
       EventQ.Enqueue(new(GameEventType.KeyInput, 'k'));
       Delay(50);
     }
-    
+    else if (IsKeyPressed(KeyboardKey.Kp8) || IsKeyPressedRepeat(KeyboardKey.Kp8))
+    {
+      EventQ.Enqueue(new(GameEventType.KeyInput, 'k'));
+      Delay(50);
+    }
+    else if (IsKeyPressed(KeyboardKey.Kp7) || IsKeyPressedRepeat(KeyboardKey.Kp7))
+    {
+      EventQ.Enqueue(new(GameEventType.KeyInput, 'y'));
+      Delay(50);
+    }
+    else if (IsKeyPressed(KeyboardKey.Kp9) || IsKeyPressedRepeat(KeyboardKey.Kp9))
+    {
+      EventQ.Enqueue(new(GameEventType.KeyInput, 'u'));
+      Delay(50);
+    }
+    else if (IsKeyPressed(KeyboardKey.Kp1) || IsKeyPressedRepeat(KeyboardKey.Kp1))
+    {
+      EventQ.Enqueue(new(GameEventType.KeyInput, 'b'));
+      Delay(50);
+    }
+    else if (IsKeyPressed(KeyboardKey.Kp3) || IsKeyPressedRepeat(KeyboardKey.Kp3))
+    {
+      EventQ.Enqueue(new(GameEventType.KeyInput, 'n'));
+      Delay(50);
+    }
+    else if (IsKeyPressed(KeyboardKey.Kp5) || IsKeyPressedRepeat(KeyboardKey.Kp5))
+    {
+      EventQ.Enqueue(new(GameEventType.KeyInput, '.'));
+      Delay(50);
+    }
+
     if (EventQ.Count > 0)
     {
       return EventQ.Dequeue();
