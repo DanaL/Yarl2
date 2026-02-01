@@ -369,28 +369,42 @@ static void ShowMessageLog(UserInterface ui, List<string> lines)
   int row = 0;
   int pageSize = UserInterface.ScreenHeight - 1;
 
+  bool more;
   while (row < wrappedLines.Count)
   {
     List<string> page = [.. wrappedLines.Skip(row).Take(pageSize)];
 
-    if (row + pageSize < wrappedLines.Count)
+    if (row + pageSize < wrappedLines.Count) 
+    {
       page.Add("-- Press space for more, ESC to return --");
+      more = true;
+    }
     else
+    {
       page.Add("-- Press any key to return --");
-
-    ui.SetLongMessage(page);
-    ui.UpdateDisplay(null);
+      more = false;
+    }
 
     char ch;
     do
     {
+      ui.SetLongMessage(page);
+      ui.UpdateDisplay(null);
+
       Thread.Sleep(30);
       ch = ui.GetKeyInput();
-    } 
-    while (ch == '\0');
 
-    if (ch == Constants.ESC)
-      break;
+      if (ch == Constants.ESC || (!more && ch != '\0')) 
+      {
+        ui.ClearLongMessage();
+        return;
+      }
+      else if (more && (ch == ' ' || ch == '\n' || ch == '\r'))
+      {
+        break;
+      }
+    } 
+    while (true);
 
     row += pageSize;
   }

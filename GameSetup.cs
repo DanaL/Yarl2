@@ -520,7 +520,7 @@ class CampaignCreator(UserInterface ui)
 
         break;
       }                  
-      catch (WildernessCreationException wce)
+      catch (WildernessCreationException)
       {
         //Console.WriteLine(wce.Message);
       }
