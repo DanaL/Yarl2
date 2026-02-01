@@ -966,12 +966,7 @@ abstract class UserInterface
 
     if (e.Type == GameEventType.KeyInput)
     {
-      char ch;
-      if (gs.Options.KeyRemaps.TryGetValue(e.Value, out var cmd))
-        ch = KeyMapper.CmdToKey(cmd);
-      else
-        ch = e.Value;
-
+      char ch = e.Value;
       InputController!.Input(ch);
     }
 
@@ -987,54 +982,6 @@ abstract class UserInterface
     _animations = [.. _animations.Where(a => a.Expiry > DateTime.UtcNow)];
 
     UpdateDisplay(gs);
-  }
-}
-
-class KeyMapper
-{
-  public static char CmdToKey(string cmd)
-  {
-    return cmd.ToLower() switch
-    {
-      "pickup" => ',',
-      "showmap" => 'M',
-      "quit" => 'Q',
-      "save" => 'S',
-      "enterportal" => 'E',
-      "upstairs" => '<',
-      "downstars" => '>',
-      "firebow" => 'f',
-      "useitem" => 'a',
-      "dropitem" => 'd',
-      "throwitem" => 't',
-      "characterscheet" => '@',
-      "closedoor" => 'c',
-      "opendoor" => 'o',
-      "chat" => 'C',
-      "equipitem" => 'e',
-      "showmessages" => '*',
-      "showhelp" => '?',
-      "examine" => 'X',
-      "passturn" => '.',
-      "inventory" => 'i',
-      "move_north" => 'k',
-      "move_south" => 'j',
-      "move_west" => 'h',
-      "move_east" => 'l',
-      "move_nw" => 'y',
-      "move_ne" => 'u',
-      "move_sw" => 'b',
-      "move_se" => 'n',
-      "run_north" => 'K',
-      "run_south" => 'J',
-      "run_west" => 'H',
-      "run_east" => 'L',
-      "run_nw" => 'Y',
-      "run_ne" => 'U',
-      "run_sw" => 'B',
-      "run_se" => 'N',
-      _ => throw new Exception("Unknown command!")
-    };
   }
 }
 

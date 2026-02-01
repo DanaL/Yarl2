@@ -21,55 +21,55 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     return adj.Count() == 1 ? adj.First() : Loc.Nowhere;
   }
 
-  static char CalcStagger(GameState gs, char ch)
+  static KeyCmd CalcStagger(GameState gs, KeyCmd cmd)
   {
     double roll = gs.Rng.NextDouble();
-    return ch switch
+    return cmd switch
     {
-      'k' => roll < 0.5 ? 'y' : 'u',
-      'u' => roll < 0.5 ? 'k' : 'l',
-      'l' => roll < 0.5 ? 'u' : 'n',
-      'n' => roll < 0.5 ? 'l' : 'j',
-      'j' => roll < 0.5 ? 'n' : 'b',
-      'b' => roll < 0.5 ? 'j' : 'h',
-      'h' => roll < 0.5 ? 'b' : 'y',
-      _ => roll < 0.5 ? 'h' : 'k'
+      KeyCmd.MoveN => roll < 0.5 ? KeyCmd.MoveNW : KeyCmd.MoveNE,
+      KeyCmd.MoveNE => roll < 0.5 ? KeyCmd.MoveN : KeyCmd.MoveE,
+      KeyCmd.MoveE => roll < 0.5 ? KeyCmd.MoveNE : KeyCmd.MoveSE,
+      KeyCmd.MoveSE => roll < 0.5 ? KeyCmd.MoveE : KeyCmd.MoveS,
+      KeyCmd.MoveS => roll < 0.5 ? KeyCmd.MoveSE : KeyCmd.MoveSW,
+      KeyCmd.MoveSW => roll < 0.5 ? KeyCmd.MoveS : KeyCmd.MoveW,
+      KeyCmd.MoveW => roll < 0.5 ? KeyCmd.MoveSW : KeyCmd.MoveNW,
+      _ => roll < 0.5 ? KeyCmd.MoveW: KeyCmd.MoveS
     };
   }
 
-  static (int, int) KeyToDir(char ch) =>
-    MovementDirections.TryGetValue(ch, out var dir) ? dir : (0, 0);
-
-  List<(char, Loc, bool)> Turns(char ch, Loc loc, Actor p, Map m)
+  static List<(KeyCmd, Loc, bool)> Turns(KeyCmd cmd, Loc loc, Actor p, Map m)
   {
-    List<(char, Loc, bool)> turns = [];
+    List<(KeyCmd, Loc, bool)> turns = [];
     Loc a, b;
     bool valid;
-    switch (ch)
+    switch (cmd)
     {
-      case 'l':
-      case 'h':
+      case KeyCmd.RunE:
+      case KeyCmd.RunW:
+      case KeyCmd.MoveE:
+      case KeyCmd.MoveW:
         a = loc with { Row = loc.Row + 1};        
         valid = MoveAction.CanMoveTo(p, m, a, false);
-        turns.Add(('j', a, valid));
+        turns.Add((KeyCmd.MoveS, a, valid));
         b = loc with { Row = loc.Row - 1};
         valid = MoveAction.CanMoveTo(p, m, b, false);
-        turns.Add(('k', b, valid));
+        turns.Add((KeyCmd.MoveN, b, valid));
         break;
-      case 'j':
-      case 'k':
+      case KeyCmd.RunN:
+      case KeyCmd.RunS:
+      case KeyCmd.MoveN:
+      case KeyCmd.MoveS:
         a = loc with { Col = loc.Col + 1};        
         valid = MoveAction.CanMoveTo(p, m, a, false);
-        turns.Add(('l', a, valid));
+        turns.Add((KeyCmd.MoveE, a, valid));
         b = loc with { Col = loc.Col - 1};
         valid = MoveAction.CanMoveTo(p, m, b, false);
-        turns.Add(('h', b, valid));
+        turns.Add((KeyCmd.MoveW, b, valid));
         break;
     }
 
    return turns;
   }
-
 
   // Tiles that will cause the player to stop running
   static bool InterestingTiles( GameState gs, Loc loc)
@@ -112,7 +112,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     return false;    
   }
 
-  void SetUpTravelPath(GameState gs, char ch)
+  void SetUpTravelPath(GameState gs, KeyCmd cmd)
   {
     Player player = GS.Player;
 
@@ -135,8 +135,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
 
     Map map = gs.CurrentMap;
     List<Action> moves = [];
-    char dir = char.ToLower(ch);
-    var (dr, dc) = MovementDirections[dir];
+    var (dr, dc) = RunDirection[cmd];
     Loc loc = player.Loc with { Row = player.Loc.Row + dr, Col = player.Loc.Col + dc };
     while (MoveAction.CanMoveTo(player, map, loc, false))
     {
@@ -159,7 +158,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
 
       if (!MoveAction.CanMoveTo(player, map, loc, false))
       {
-        List<(char, Loc, bool)> turns = Turns(dir, prev, player, map);
+        var turns = Turns(cmd, prev, player, map);
         var (ndir1, nloc1, valid1) = turns[0];
         var (ndir2, nloc2, valid2) = turns[1];
 
@@ -172,14 +171,14 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
         else if (valid1)
         {
           loc = nloc1;
-          dir = ndir1;
-          (dr, dc) = MovementDirections[dir];
+          cmd = ndir1;
+          (dr, dc) = MovementDirections[cmd];
         }
         else if (valid2)
         {
           loc = nloc2;
-          dir = ndir2;
-          (dr, dc) = MovementDirections[dir];
+          cmd = ndir2;
+          (dr, dc) = MovementDirections[cmd];
         }
       }
     }
@@ -187,19 +186,27 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     player.Running = true;
   }
 
-  static readonly Dictionary<char, (int dr, int dc)> MovementDirections = new()
+  static readonly Dictionary<KeyCmd, (int dr, int dc)> RunDirection = new()
   {
-    ['h'] = (0, -1),   // left
-    ['j'] = (1, 0),    // down
-    ['k'] = (-1, 0),   // up
-    ['l'] = (0, 1),    // right
-    ['y'] = (-1, -1),  // up-left
-    ['u'] = (-1, 1),   // up-right
-    ['b'] = (1, -1),   // down-left
-    ['n'] = (1, 1)     // down-right
+    [KeyCmd.RunW] = (0, -1),   // left
+    [KeyCmd.RunS] = (1, 0),    // down
+    [KeyCmd.RunN] = (-1, 0),   // up
+    [KeyCmd.RunE] = (0, 1),    // right
   };
 
-  static bool IsMoveKey(char ch) => MovementDirections.ContainsKey(ch);
+  static readonly Dictionary<KeyCmd, (int dr, int dc)> MovementDirections = new()
+  {
+    [KeyCmd.MoveW] = (0, -1),   // left
+    [KeyCmd.MoveS] = (1, 0),    // down
+    [KeyCmd.MoveN] = (-1, 0),   // up
+    [KeyCmd.MoveE] = (0, 1),    // right
+    [KeyCmd.MoveNW] = (-1, -1),  // up-left
+    [KeyCmd.MoveNE] = (-1, 1),   // up-right
+    [KeyCmd.MoveSW] = (1, -1),   // down-left
+    [KeyCmd.MoveSE] = (1, 1)     // down-right
+  };
+
+  static bool IsMoveKey(KeyCmd cmd) => MovementDirections.ContainsKey(cmd);
 
   static bool AttackingWithReach(Player player)
   {
@@ -209,27 +216,28 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     return false;
   }
 
-  void CalcMovementAction(GameState gs, char ch)
+  void CalcMovementAction(GameState gs, KeyCmd cmd)
   {
     bool involuntary = false;
     if (GS.Player.HasTrait<ConfusedTrait>())
     {
       gs.UIRef().AlertPlayer("You are confused!");
-      char[] dirs = ['h', 'j', 'k', 'l', 'y', 'u', 'b', 'n'];
-      char nch = dirs[gs.Rng.Next(dirs.Length)];
-      if (nch != ch)
+      KeyCmd[] dirs = [ KeyCmd.MoveN, KeyCmd.MoveS, KeyCmd.MoveE, KeyCmd.MoveW,
+        KeyCmd.MoveNE, KeyCmd.MoveNW, KeyCmd.MoveSE, KeyCmd.MoveSW];
+      KeyCmd nch = dirs[gs.Rng.Next(dirs.Length)];
+      if (nch != cmd)
         involuntary = true;
-      ch = nch;
+      cmd = nch;
     }
     
     if (GS.Player.HasTrait<TipsyTrait>() && gs.Rng.NextDouble() < 0.15)
     {
       gs.UIRef().AlertPlayer("You stagger!");
-      ch = CalcStagger(gs, ch);
+      cmd = CalcStagger(gs, cmd);
       involuntary = true;
     }
 
-    (int dr, int dc) = KeyToDir(ch);
+    (int dr, int dc) = MovementDirections[cmd];
 
     // I'm not sure this is the best spot for this but it is a convenient place
     // to calculate attacking with Reach
@@ -427,15 +435,17 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     UserInterface ui = GS.UIRef();
     ui.ClosePopup();
 
-    if (IsMoveKey(ch))
+    KeyMap map = KeyMap.Default();
+    KeyCmd cmd = map.ToCmd(ch);
+    if (IsMoveKey(cmd))
     {
-      CalcMovementAction(GS, ch);
+      CalcMovementAction(GS, cmd);
     }
-    else if (ch == 'H' || ch == 'J' || ch == 'K' || ch == 'L')
+    else if (cmd == KeyCmd.RunW || cmd == KeyCmd.RunS || cmd == KeyCmd.RunN || cmd == KeyCmd.RunE)
     {
-      SetUpTravelPath(GS, ch);
+      SetUpTravelPath(GS, cmd);
     }
-    else if (ch == 'a')
+    else if (cmd == KeyCmd.UseItem)
     {
       InvOption invOptions = InvOption.OnlyUseable;
       GS.Player.Inventory.ShowMenu(ui, new InventoryOptions("Use which item?") { Options = invOptions });
@@ -448,7 +458,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
       }
       ui.SetInputController(new Inventorier(GS, options) { DeferredAction = new UseItemAction(GS, GS.Player) });
     }
-    else if (ch == 'c')
+    else if (cmd == KeyCmd.CastSpell)
     {
       if (GS.Player.SpellsKnown.Count == 0)
       {
@@ -463,19 +473,19 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
         ui.SetInputController(new SpellcastMenu(GS));
       }
     }
-    else if (ch == 'C')
+    else if (cmd == KeyCmd.Chat)
     {
       DirectionalInputer dir = new(GS, true) { DeferredAction = new ChatAction(GS, GS.Player) };
       ui.SetInputController(dir);
     }
-    else if (ch == 'd')
+    else if (cmd == KeyCmd.Drop)
     {
       GS.Player.Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Drop what?", Options = InvOption.MentionMoney });
       HashSet<char> slots = [.. GS.Player.Inventory.UsedSlots()];
       slots.Add('$');
       ui.SetInputController(new Inventorier(GS, slots) { DeferredAction = new DropItemAction(GS, GS.Player) });      
     }
-    else if (ch == 'e')
+    else if (cmd == KeyCmd.Equip)
     {
       InvOption invOptions = InvOption.OnlyEquipable;
       GS.Player.Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Equip what?", Options = invOptions });
@@ -494,7 +504,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
       };
       ui.SetInputController(inven);      
     }
-    else if (ch == 'f')
+    else if (cmd == KeyCmd.Fire)
     {
       // If the player has an equipped bow, automatically select that, otherwise
       // have them pick a bow (and then equip it)
@@ -513,11 +523,11 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
         GS.UIRef().SetInputController(inv);
       }
     }
-    else if (ch == 'F')
+    else if (cmd == KeyCmd.Force)
     {
       ui.SetInputController(new DirectionalInputer(GS, false) { DeferredAction = new BashAction(GS, GS.Player) });      
     }
-    else if (ch == 'i')
+    else if (cmd == KeyCmd.Inv)
     {
       InventoryDetails details = new(GS, "You are carrying", InvOption.MentionMoney)
       {
@@ -525,33 +535,33 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
       };
       ui.SetInputController(details);
     }
-    else if (ch == 'M')
+    else if (cmd == KeyCmd.Map)
     {
       ui.SetInputController(new MapView(GS));
     }    
-    else if (ch == 'o')
+    else if (cmd == KeyCmd.Interact)
     {
       ProcessInteractCmd(ui);
     }
-    else if (ch == 'Q')
+    else if (cmd == KeyCmd.Quit)
     {
       ui.SetInputController(new YesOrNoInputer(GS) { DeferredAction = new QuitAction() });
       ui.SetPopup(new Popup("Really quit?\n\nYour game won't be saved! (y/n)", "", -1, -1));
     }
-    else if (ch == 'S' && !ui.InTutorial)
+    else if (cmd == KeyCmd.Save && !ui.InTutorial)
     {
       ui.SetInputController(new YesOrNoInputer(GS) { DeferredAction = new SaveGameAction() });
       ui.SetPopup(new Popup("Quit & Save? (y/n)", "", -1, -1));
     }
-    else if (ch == 'S' && ui.InTutorial)
+    else if (cmd == KeyCmd.Save && ui.InTutorial)
     {
       ui.SetPopup(new Popup("Saving is disabled in the tutorial.", "", -1, -1));
     }
-    else if (ch == 's')
+    else if (cmd == KeyCmd.Search)
     {
       GS.Player.QueueAction(new SearchAction(GS, GS.Player));
     }
-    else if (ch == 't')
+    else if (cmd == KeyCmd.Throw)
     {
       // Eventually I'll want to remember the last item thrown
       // so the player doesn't need to always select an item if
@@ -563,26 +573,26 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
       };
       ui.SetInputController(inv);
     }
-    else if (ch == 'W')
+    else if (cmd == KeyCmd.Debug)
     {
       ui.SetInputController(new WizardCommander(GS));
     }
-    else if (ch == 'x')
+    else if (cmd == KeyCmd.Examine)
     {
       ui.SetInputController(new Examiner(GS, GS.Player.Loc));
     }
-    else if (ch == ',')
+    else if (cmd == KeyCmd.Pickup)
     {
       PickupCommand(GS, ui);
     }
-    else if (ch == '>')
+    else if (cmd == KeyCmd.Descend)
     {
       Action action = GS.CurrentMap.HasFeature(MapFeatures.Submerged) || GS.TileAt(GS.Player.Loc).Type == TileType.Lake
         ? new SwimAction(GS, GS.Player, false)
         : new DownstairsAction(GS);
       GS.Player.QueueAction(action);
     }
-    else if (ch == '<')
+    else if (cmd == KeyCmd.Climb)
     {
       Action action;
       if (!GS.CurrentMap.HasFeature(MapFeatures.Submerged) || GS.TileAt(GS.Player.Loc).Type == TileType.Upstairs)
@@ -591,30 +601,30 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
         action = new SwimAction(GS, GS.Player, true);
       GS.Player.QueueAction(action);
     }
-    else if (ch == '*')
+    else if (cmd == KeyCmd.Messages)
     {
       var lines = ui.MessageHistory.Select(m => m.Fmt);
       ui.SetInputController(new LongMessagerInputer(GS, ui, lines));
     }
-    else if (ch == '@')
+    else if (cmd == KeyCmd.CharacterSheet)
     {
       List<string> lines = GS.Player.CharacterSheet();
       ui.SetInputController(new LongMessagerInputer(GS, ui, lines));
     }
-    else if (ch == '/')
+    else if (cmd == KeyCmd.CheatSheetMode)
     {
       int x = (int)ui.CheatSheetMode + 1;
       ui.CheatSheetMode = (CheatSheetMode)(x % 4);
     }
-    else if (ch == '?')
+    else if (cmd == KeyCmd.Help)
     {
       ui.SetInputController(new HelpScreen(GS, ui));
     }
-    else if (ch == '=')
+    else if (cmd == KeyCmd.Options)
     {
       ui.SetInputController(new OptionsScreen(GS));
     }
-    else if (ch == ' ' || ch == '.')
+    else if (cmd == KeyCmd.Pass)
     {
       GS.Player.QueueAction(new PassAction());
     }
