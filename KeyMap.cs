@@ -26,6 +26,85 @@ class KeyMap
 
   KeyMap(Dictionary<char, KeyCmd> map) => _map = map;
 
+  public static KeyMap LoadKeyMap()
+  {
+    DirectoryInfo userDir = Util.UserDir;
+    string path = Path.Combine(userDir.FullName, "keymap.txt");
+
+    if (File.Exists(path))
+    {
+      var map = new Dictionary<char, KeyCmd>();
+      foreach (string line in File.ReadAllLines(path))
+      {
+        string trimmed = line.Trim();
+        if (trimmed.Length == 0 || trimmed.StartsWith('#'))
+          continue;
+
+        int eq = trimmed.LastIndexOf('=');
+        if (eq < 1 || eq >= trimmed.Length - 1)
+          continue;
+
+        string keyPart = trimmed[..eq];
+        string cmdPart = trimmed[(eq + 1)..];
+
+        char key = ParseKey(keyPart);
+        if (key != '\0' && Enum.TryParse<KeyCmd>(cmdPart, out var cmd))
+          map[key] = cmd;
+      }
+
+      return new KeyMap(map);
+    }
+
+    KeyMap defaultMap = Default();
+    defaultMap.Save(path);
+    
+    return defaultMap;
+  }
+
+  static char ParseKey(string s)
+  {
+    if (s.Length == 1)
+      return s[0];
+
+    return s.ToLower() switch
+    {
+      "space" => ' ',
+      "comma" => ',',
+      "period" => '.',
+      "dot" => '.',
+      _ => '\0'
+    };
+  }
+
+  static string KeyToString(char ch)
+  {
+    return ch switch
+    {
+      ' ' => "space",
+      ',' => "comma",
+      '.' => "period",
+      _ => ch.ToString()
+    };
+  }
+
+  void Save(string path)
+  {
+    var lines = new List<string>
+    {
+      "# Delve key mappings",
+      "# Format: key=Command",
+      "# Use 'space', 'comma', 'period' for those keys",
+      ""
+    };
+
+    foreach (var (key, cmd) in _map.OrderBy(kv => kv.Value.ToString()))
+    {
+      lines.Add($"{KeyToString(key)}={cmd}");
+    }
+
+    File.WriteAllLines(path, lines);
+  }
+
   public static KeyMap Default() => new(new Dictionary<char, KeyCmd>
   {
     ['k'] = KeyCmd.MoveN,

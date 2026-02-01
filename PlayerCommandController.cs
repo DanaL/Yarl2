@@ -435,8 +435,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     UserInterface ui = GS.UIRef();
     ui.ClosePopup();
 
-    KeyMap map = KeyMap.Default();
-    KeyCmd cmd = map.ToCmd(ch);
+    KeyCmd cmd = GS.KeyMap.ToCmd(ch);
     if (IsMoveKey(cmd))
     {
       CalcMovementAction(GS, cmd);
