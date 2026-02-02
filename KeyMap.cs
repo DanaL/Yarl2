@@ -147,8 +147,8 @@ class KeyMap
     ['/'] = KeyCmd.CheatSheetMode,
     ['?'] = KeyCmd.Help,
     ['='] = KeyCmd.Options,
-    [' '] = KeyCmd.Pass,
     ['.'] = KeyCmd.Pass,
+    [' '] = KeyCmd.Pass,    
   });
 
   public KeyCmd ToCmd(char ch) => _map.TryGetValue(ch, out KeyCmd cmd) ? cmd : KeyCmd.Nil;

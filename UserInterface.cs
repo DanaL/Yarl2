@@ -180,7 +180,9 @@ abstract class UserInterface
       [(Colours.LIGHT_BLUE, K(KeyCmd.CharacterSheet)), (Colours.LIGHT_GREY, ": character info  "), (Colours.LIGHT_BLUE, K(KeyCmd.Climb)),
         (Colours.LIGHT_GREY, " or"), (Colours.LIGHT_BLUE, K(KeyCmd.Descend)), (Colours.LIGHT_GREY, ": use stairs, or swim up or down  ")],
 
-      [(Colours.LIGHT_BLUE, K(KeyCmd.Messages)), (Colours.LIGHT_GREY, ": message history  "), (Colours.LIGHT_BLUE, K(KeyCmd.Options)), (Colours.LIGHT_GREY, ": options")]
+      [(Colours.LIGHT_BLUE, K(KeyCmd.Messages)), (Colours.LIGHT_GREY, ": message history  "), 
+        (Colours.LIGHT_BLUE, K(KeyCmd.Options)), (Colours.LIGHT_GREY, ": options  "),
+        (Colours.LIGHT_BLUE, K(KeyCmd.Pass)), (Colours.LIGHT_GREY, ": pass turn")]
     ];
     _cheatSheetKeyMap = keyMap;
   }
