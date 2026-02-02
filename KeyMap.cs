@@ -26,14 +26,18 @@ class KeyMap
 
   KeyMap(Dictionary<char, KeyCmd> map) => _map = map;
 
-  public static KeyMap LoadKeyMap()
+  public static (KeyMap, string) LoadKeyMap()
   {
     DirectoryInfo userDir = Util.UserDir;
     string path = Path.Combine(userDir.FullName, "keymap.txt");
     KeyMap kmap;
+    string warning = "";
+
     if (File.Exists(path))
     {
-      var map = new Dictionary<char, KeyCmd>();
+      Dictionary<char, KeyCmd> map = [];
+      List<string> errors = [];
+
       foreach (string line in File.ReadAllLines(path))
       {
         string trimmed = line.Trim();
@@ -48,11 +52,35 @@ class KeyMap
         string cmdPart = trimmed[(eq + 1)..];
 
         char key = ParseKey(keyPart);
-        if (key != '\0' && Enum.TryParse<KeyCmd>(cmdPart, out var cmd))
+        if (key == '\0' || !Enum.TryParse<KeyCmd>(cmdPart, out var cmd))
+          continue;
+
+        if (map.TryGetValue(key, out var existing))
+        {
+          errors.Add($"Key '{KeyToString(key)}' is mapped to both {existing} and {cmd}.");
+        }
+        else
+        {
           map[key] = cmd;
+        }
       }
 
-      kmap = new KeyMap(map);
+      // Check for commands that have no key binding
+      HashSet<KeyCmd> allCommands = [.. Enum.GetValues<KeyCmd>().Where(c => c != KeyCmd.Nil)];
+      var mappedCommands = new HashSet<KeyCmd>(map.Values);
+      List<KeyCmd> missing = [.. allCommands.Except(mappedCommands).OrderBy(c => c.ToString())];
+      if (missing.Count > 0)
+        errors.Add($"Missing bindings for: {string.Join(", ", missing)}.");
+
+      if (errors.Count > 0)
+      {
+        warning = "Keymap errors in keymap.txt (default mappings will be used): " + string.Join(" ", errors);
+        kmap = Default();
+      }
+      else
+      {
+        kmap = new KeyMap(map);
+      }
     }
     else
     {
@@ -69,7 +97,7 @@ class KeyMap
     kmap._map.Add(Constants.ARROW_SW, KeyCmd.MoveSW);
     kmap._map.Add(Constants.ARROW_SE, KeyCmd.MoveSE);
 
-    return kmap;
+    return (kmap, warning);
   }
 
   static char ParseKey(string s)

@@ -42,7 +42,9 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   DijkstraMap? DMapFlight { get; set; }
   DijkstraMap? DMapSwimming { get; set; }
   
-  public KeyMap KeyMap { get; init; } = KeyMap.LoadKeyMap();
+  static readonly (KeyMap, string) _keymapResult = KeyMap.LoadKeyMap();
+  public KeyMap KeyMap { get; init; } = _keymapResult.Item1;
+  public string KeyMapWarning { get; init; } = _keymapResult.Item2;
 
   public DijkstraMap? GetDMap(string map = "")
   {

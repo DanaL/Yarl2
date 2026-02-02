@@ -145,7 +145,10 @@ static void GameLoop(UserInterface ui, GameState gameState)
   if (opts.DefaultMoveHints)
     ui.CheatSheetMode = CheatSheetMode.MvMixed;
 
-  ui.SetInputController(new PlayerCommandController(gameState));  
+  if (gameState.KeyMapWarning.Length > 0)
+    ui.AlertPlayer(gameState.KeyMapWarning);
+
+  ui.SetInputController(new PlayerCommandController(gameState));
   ui.RegisterAnimation(new CloudAnimation(ui, gameState));
   ui.RegisterAnimation(new RoofAnimation(gameState));
   ui.RegisterAnimation(new LavaAnimation(ui, gameState));
