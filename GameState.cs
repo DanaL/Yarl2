@@ -1695,7 +1695,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       UIRef().SetPopup(new Popup(tile.StepMessage, "", 6, -1));
     }
-
+    
     foreach (Item item in ObjDb.ItemsAt(loc))
     {
       if (item.HasTrait<MolochAltarTrait>())
@@ -1792,6 +1792,11 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         sb.Append(" here.");
       }
     }
+
+    if (tile.Type == TileType.Upstairs)
+      sb.Append(" There are stairs up here.");
+    else if (tile.Type == TileType.Downstairs)
+      sb.Append(" There are stairs down here.");
 
     return sb.ToString().Trim();
   }
