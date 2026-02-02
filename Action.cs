@@ -3785,7 +3785,7 @@ class ApplyStainlessnessAction(GameState gs, Actor actor, Item? item) : Action(g
       string s = $"{name} {verb} a spell on {objName}.";
       GameState.UIRef().AlertPlayer(s);
 
-      s = $"A glow envelops {objName}";
+      s = $"A glow envelopes {objName}";
       if (!item.HasTrait<MetalTrait>() || item.HasTrait<RustProofTrait>())
         s += " but it seems to have little effect.";
       else
