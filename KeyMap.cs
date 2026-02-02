@@ -152,4 +152,23 @@ class KeyMap
   });
 
   public KeyCmd ToCmd(char ch) => _map.TryGetValue(ch, out KeyCmd cmd) ? cmd : KeyCmd.Nil;
+
+  public string KeyForCmd(KeyCmd cmd)
+  {
+    foreach (var (key, c) in _map)
+    {
+      if (c == cmd) 
+      {
+        string s = KeyToString(key);
+        return s switch
+        {
+          "comma" => ",",
+          "period" => ".",
+          "space" => " ",
+          _ => KeyToString(key),
+        };
+      }
+    }
+    return "?";
+  }
 }

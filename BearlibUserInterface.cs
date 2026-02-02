@@ -186,7 +186,7 @@ internal class BLUserInterface : UserInterface, IDisposable
         WriteSideBar(gs);
       }
 
-      WriteMessagesSection();
+      WriteMessagesSection(gs);
 
       if (MenuRows.Count > 0)
       {

@@ -269,7 +269,7 @@ class RaylibUserInterface : UserInterface
         }
       }
 
-      WriteMessagesSection();
+      WriteMessagesSection(gs);
 
       if (MenuRows.Count > 0)
       {

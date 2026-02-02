@@ -74,6 +74,11 @@ abstract class UserInterface
 
   List<Animation> _animations = [];
 
+  static (Colour, string)[][]? _cheatSheetLines;
+  static (Colour, string)[][]? _mvCheatSheetLines;
+  static (Colour, string)[][]? _mvCheatSheetOverlayLines;
+  static KeyMap? _cheatSheetKeyMap;
+
   public bool InTutorial { get; set; } = false;
   public bool PauseForResponse { get; set; } = false;
 
@@ -154,35 +159,43 @@ abstract class UserInterface
     }
   }
 
-  void WriteCommandCheatSheet()
+  static void BuildCheatSheetLines(KeyMap keyMap)
   {
-    (Colour, string)[] w;
+    string K(KeyCmd cmd) => " " + keyMap.KeyForCmd(cmd);
+
+    _cheatSheetLines =
+    [
+      [(Colours.LIGHT_BLUE, K(KeyCmd.UseItem)), (Colours.LIGHT_GREY, ": use item  "), (Colours.LIGHT_BLUE, K(KeyCmd.CastSpell)), (Colours.LIGHT_GREY, ": cast spell  "),
+        (Colours.LIGHT_BLUE, K(KeyCmd.Chat)), (Colours.LIGHT_GREY, ": chat  "), (Colours.LIGHT_BLUE, K(KeyCmd.Drop)), (Colours.LIGHT_GREY, ": drop item  "),
+        (Colours.LIGHT_BLUE, K(KeyCmd.Equip)), (Colours.LIGHT_GREY, ": equip/unequip item")],
+
+      [(Colours.LIGHT_BLUE, K(KeyCmd.Fire)), (Colours.LIGHT_GREY, ": fire bow  "), (Colours.LIGHT_BLUE, K(KeyCmd.Force)), (Colours.LIGHT_GREY, ": bash door  "),
+        (Colours.LIGHT_BLUE, K(KeyCmd.Inv)), (Colours.LIGHT_GREY, ": view inventory  "), (Colours.LIGHT_BLUE, K(KeyCmd.Map)), (Colours.LIGHT_GREY, ": view map  "),
+        (Colours.LIGHT_BLUE, K(KeyCmd.Interact)), (Colours.LIGHT_GREY, ": open door  ")],
+
+      [(Colours.LIGHT_BLUE, K(KeyCmd.Save)), (Colours.LIGHT_GREY, ": save game  "), (Colours.LIGHT_BLUE, K(KeyCmd.Quit)), (Colours.LIGHT_GREY, ": quit "),
+        (Colours.LIGHT_BLUE, K(KeyCmd.Throw)), (Colours.LIGHT_GREY, ": throw item "), (Colours.LIGHT_BLUE, K(KeyCmd.Examine)), (Colours.LIGHT_GREY, ": examine "),
+        (Colours.LIGHT_BLUE, K(KeyCmd.Pickup)), (Colours.LIGHT_GREY, ": pickup item")],
+
+      [(Colours.LIGHT_BLUE, K(KeyCmd.CharacterSheet)), (Colours.LIGHT_GREY, ": character info  "), (Colours.LIGHT_BLUE, K(KeyCmd.Climb)),
+        (Colours.LIGHT_GREY, " or"), (Colours.LIGHT_BLUE, K(KeyCmd.Descend)), (Colours.LIGHT_GREY, ": use stairs, or swim up or down  ")],
+
+      [(Colours.LIGHT_BLUE, K(KeyCmd.Messages)), (Colours.LIGHT_GREY, ": message history  "), (Colours.LIGHT_BLUE, K(KeyCmd.Options)), (Colours.LIGHT_GREY, ": options")]
+    ];
+    _cheatSheetKeyMap = keyMap;
+  }
+
+  void WriteCommandCheatSheet(GameState gs)
+  {
+    if (_cheatSheetLines is null || _cheatSheetKeyMap != gs.KeyMap)
+      BuildCheatSheetLines(gs.KeyMap);
+
     WriteLine("Commands:", ScreenHeight - 6, 0, ScreenWidth, Colours.WHITE);
-    w = [(Colours.LIGHT_BLUE, " a"), (Colours.LIGHT_GREY, ": use item  "), (Colours.LIGHT_BLUE, "c"), (Colours.LIGHT_GREY, ": close door  "),
-      (Colours.LIGHT_BLUE, "C"), (Colours.LIGHT_GREY, ": chat  "), (Colours.LIGHT_BLUE, "d"), (Colours.LIGHT_GREY, ": drop item  "),
-      (Colours.LIGHT_BLUE, "e"), (Colours.LIGHT_GREY, ": equip/unequip item")];
-    //s = "a - Use item  c - close door  C - chat  d - drop item  e - equip/unequip item"; 
-    WriteText(w, ScreenHeight - 5, 0);
-
-    w = [(Colours.LIGHT_BLUE, " f"), (Colours.LIGHT_GREY, ": fire bow  "), (Colours.LIGHT_BLUE, "F"), (Colours.LIGHT_GREY, ": bash door  "),
-      (Colours.LIGHT_BLUE, "i"), (Colours.LIGHT_GREY, ": view inventory  "), (Colours.LIGHT_BLUE, "M"), (Colours.LIGHT_GREY, ": view map  "),
-      (Colours.LIGHT_BLUE, "o"), (Colours.LIGHT_GREY, ": open door  ")
-    ];
-    WriteText(w, ScreenHeight - 4, 0);
-
-    w = [(Colours.LIGHT_BLUE, " S"), (Colours.LIGHT_GREY, ": save game  "), (Colours.LIGHT_BLUE, "Q"), (Colours.LIGHT_GREY, ": quit "),
-      (Colours.LIGHT_BLUE, "t"), (Colours.LIGHT_GREY, ": throw item "), (Colours.LIGHT_BLUE, "x"), (Colours.LIGHT_GREY, ": examine "),
-      (Colours.LIGHT_BLUE, "z"), (Colours.LIGHT_GREY, ": cast spell "),
-      (Colours.LIGHT_BLUE, ","), (Colours.LIGHT_GREY, ": pickup item")
-    ];
-    WriteText(w, ScreenHeight - 3, 0);
-
-    w = [(Colours.LIGHT_BLUE, " @"), (Colours.LIGHT_GREY, ": character info  "), (Colours.LIGHT_BLUE, "<"),
-      (Colours.LIGHT_GREY, " or "), (Colours.LIGHT_BLUE, ">"), (Colours.LIGHT_GREY, ": use stairs, or swim up or down  ")];
-    WriteText(w, ScreenHeight - 2, 0);
-
-    w = [(Colours.LIGHT_BLUE, " *"), (Colours.LIGHT_GREY, ": message history  "), (Colours.LIGHT_BLUE, "="), (Colours.LIGHT_GREY, ": options")];
-    WriteText(w, ScreenHeight - 1, 0);
+    WriteText(_cheatSheetLines![0], ScreenHeight - 5, 0);
+    WriteText(_cheatSheetLines[1], ScreenHeight - 4, 0);
+    WriteText(_cheatSheetLines[2], ScreenHeight - 3, 0);
+    WriteText(_cheatSheetLines[3], ScreenHeight - 2, 0);
+    WriteText(_cheatSheetLines[4], ScreenHeight - 1, 0);
   }
 
   void WriteMessages()
@@ -228,43 +241,68 @@ abstract class UserInterface
     }
   }
 
-  protected void WriteMovementCheatSheet()
+  static void BuildMvCheatSheetLines(KeyMap keyMap)
   {
-    (Colour, string)[] w;
+    string K(KeyCmd cmd) => keyMap.KeyForCmd(cmd);
 
-    w = [(Colours.WHITE, "Movement keys:   "), (Colours.LIGHT_BLUE, "y  k  u")];
-    WriteText(w, ScreenHeight - 5, 0);
-    WriteLine(@"                  \ | /      SHIFT-mv key will move you in", ScreenHeight - 4, 0, ScreenWidth, Colours.WHITE);
-    w = [(Colours.LIGHT_BLUE, "                h"), (Colours.WHITE, " - @ - "), (Colours.LIGHT_BLUE, "l"),
-      (Colours.WHITE, "      that direction until interrupted")];
-    WriteText(w, ScreenHeight - 3, 0);
-    WriteLine(@"                  / | \", ScreenHeight - 2, 0, ScreenWidth, Colours.WHITE);
-    WriteLine(@"                 b  j  n", ScreenHeight - 1, 0, ScreenWidth, Colours.LIGHT_BLUE);
+    string nw = K(KeyCmd.MoveNW), n = K(KeyCmd.MoveN), ne = K(KeyCmd.MoveNE);
+    string w = K(KeyCmd.MoveW), e = K(KeyCmd.MoveE);
+    string sw = K(KeyCmd.MoveSW), s = K(KeyCmd.MoveS), se = K(KeyCmd.MoveSE);
+
+    _mvCheatSheetLines =
+    [
+      [(Colours.WHITE, "Movement keys:   "), (Colours.LIGHT_BLUE, $"{nw}  {n}  {ne}")],
+      [(Colours.WHITE, @"                  \ | /      SHIFT-mv key will move you in")],
+      [(Colours.LIGHT_BLUE, $"                {w}"), (Colours.WHITE, " - @ - "), (Colours.LIGHT_BLUE, e),
+        (Colours.WHITE, "      that direction until interrupted")],
+      [(Colours.WHITE, @"                  / | \")],
+      [(Colours.LIGHT_BLUE, $"                 {sw}  {s}  {se}")]
+    ];
+
+    _mvCheatSheetOverlayLines =
+    [
+      [(Colours.WHITE, "Movement keys:   "), (Colours.LIGHT_BLUE, $"{nw}  {n}  {ne}")],
+      [(Colours.WHITE, @"                  \ | /      ")],
+      [(Colours.LIGHT_BLUE, $"                {w}"), (Colours.WHITE, " - @ - "), (Colours.LIGHT_BLUE, e)],
+      [(Colours.WHITE, @"                  / | \")],
+      [(Colours.LIGHT_BLUE, $"                 {sw}  {s}  {se}")]
+    ];
   }
 
-  protected void WriteMovementCheatSheetOverlay()
+  protected void WriteMovementCheatSheet(GameState gs)
   {
-    (Colour, string)[] w;
+    if (_mvCheatSheetLines is null || _cheatSheetKeyMap != gs.KeyMap)
+      BuildMvCheatSheetLines(gs.KeyMap);
 
-    w = [(Colours.WHITE, "Movement keys:   "), (Colours.LIGHT_BLUE, "y  k  u")];
-    WriteText(w, ScreenHeight - 5, ScreenWidth - 26);
-    WriteLine(@"                  \ | /      ", ScreenHeight - 4, ScreenWidth - 26, ScreenWidth, Colours.WHITE);
-    w = [(Colours.LIGHT_BLUE, "                h"), (Colours.WHITE, " - @ - "), (Colours.LIGHT_BLUE, "l")];
-    WriteText(w, ScreenHeight - 3, ScreenWidth - 26);
-    WriteLine(@"                  / | \", ScreenHeight - 2, ScreenWidth - 26, ScreenWidth, Colours.WHITE);
-    WriteLine(@"                 b  j  n", ScreenHeight - 1, ScreenWidth - 26, ScreenWidth, Colours.LIGHT_BLUE);
+    WriteText(_mvCheatSheetLines![0], ScreenHeight - 5, 0);
+    WriteLine(_mvCheatSheetLines[1][0].Item2, ScreenHeight - 4, 0, ScreenWidth, Colours.WHITE);
+    WriteText(_mvCheatSheetLines[2], ScreenHeight - 3, 0);
+    WriteLine(_mvCheatSheetLines[3][0].Item2, ScreenHeight - 2, 0, ScreenWidth, Colours.WHITE);
+    WriteText(_mvCheatSheetLines[4], ScreenHeight - 1, 0);
   }
 
-  protected void WriteMessagesSection()
+  protected void WriteMovementCheatSheetOverlay(GameState gs)
   {
-    if (CheatSheetMode == CheatSheetMode.Commands)
+    if (_mvCheatSheetOverlayLines is null || _cheatSheetKeyMap != gs.KeyMap)
+      BuildMvCheatSheetLines(gs.KeyMap);
+
+    WriteText(_mvCheatSheetOverlayLines![0], ScreenHeight - 5, ScreenWidth - 26);
+    WriteLine(_mvCheatSheetOverlayLines[1][0].Item2, ScreenHeight - 4, ScreenWidth - 26, ScreenWidth, Colours.WHITE);
+    WriteText(_mvCheatSheetOverlayLines[2], ScreenHeight - 3, ScreenWidth - 26);
+    WriteLine(_mvCheatSheetOverlayLines[3][0].Item2, ScreenHeight - 2, ScreenWidth - 26, ScreenWidth, Colours.WHITE);
+    WriteText(_mvCheatSheetOverlayLines[4], ScreenHeight - 1, ScreenWidth - 26);
+  }
+
+  protected void WriteMessagesSection(GameState? gs)
+  {
+    if (gs is not null && CheatSheetMode == CheatSheetMode.Commands)
     {
-      WriteCommandCheatSheet();
+      WriteCommandCheatSheet(gs);
       return;
     }
-    else if (CheatSheetMode == CheatSheetMode.Movement)
+    else if (gs is not null && CheatSheetMode == CheatSheetMode.Movement)
     {
-      WriteMovementCheatSheet();
+      WriteMovementCheatSheet(gs);
       return;
     }
 
@@ -273,9 +311,9 @@ abstract class UserInterface
       WriteMessages();
     }
 
-    if (CheatSheetMode == CheatSheetMode.MvMixed)
+    if (gs is not null && CheatSheetMode == CheatSheetMode.MvMixed)
     {
-      WriteMovementCheatSheetOverlay();
+      WriteMovementCheatSheetOverlay(gs);
     }
   }
 
