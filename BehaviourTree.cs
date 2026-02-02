@@ -1618,7 +1618,7 @@ class WalkPath(Stack<Loc> path) : BehaviourNode
       {
         action = new OpenDoorAction(gs, mob, next);
       }
-      else if (prevTile is Door prevDoor && prevDoor.Open)
+      else if (prevTile is Door prevDoor && prevDoor.Open && !gs.ObjDb.Occupied(PrevLoc))
       {
         action = new CloseDoorAction(gs, mob, PrevLoc);
 
