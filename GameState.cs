@@ -72,10 +72,13 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
   public void ActorEntersLevel(Actor actor, int dungeonId, int level)
   {
+    if (actor is not Yarl2.Player)
+      return;
+
     Map prevMap = CurrentMap;
-    if (actor is Player && prevMap.HasFeature(MapFeatures.Foggy))
+    if (prevMap.HasFeature(MapFeatures.Foggy))
       UI.ClearFoggyAnimation();
-    else if (actor is Player && prevMap.HasFeature(MapFeatures.Submerged))
+    else if (prevMap.HasFeature(MapFeatures.Submerged))
       UI.ClearUnderwaterAnimation();
 
     CurrLevel = level;
@@ -87,7 +90,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       Player.Stats[Attribute.Depth] = new Stat(level + 1);
     }
 
-    if (dungeonId == 1 && actor is Player)
+    if (dungeonId == 1)
     {
       // When the player reaches certain details for the first time, raise
       // their nerve.
@@ -107,17 +110,17 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       CurrentMap.Alerts = [];
     }
 
-    if (actor is Player && CurrentMap.HasFeature(MapFeatures.Foggy))
+    if (CurrentMap.HasFeature(MapFeatures.Foggy))
     {
       UI.RegisterAnimation(new FogAnimation(UI, this, CurrentMap.Height, CurrentMap.Width));
     }
-    else if (actor is Player && CurrentMap.HasFeature(MapFeatures.Submerged))
+    else if (CurrentMap.HasFeature(MapFeatures.Submerged))
     {
       UI.RegisterAnimation(new UnderwaterAnimation(UI, this, CurrentMap.Height, CurrentMap.Width));
     }
     
     // If the player is returning to the overworld, is there any maintenance we need to do?
-    if (actor is Player && dungeonId == 0)
+    if (dungeonId == 0)
     {
       RefreshOverworld();
     }

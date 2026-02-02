@@ -945,7 +945,36 @@ abstract class PortalAction : Action
 {  
   public PortalAction(GameState gameState) => GameState = gameState;
 
-  protected void UsePortal(Portal portal)
+  protected Actor? AdjacentActor(Loc loc)
+  {
+    List<Actor> crowd = [];
+    foreach (Loc adj in Util.Adj8Locs(loc))
+    {
+      if (GameState!.ObjDb.Occupant(adj) is not Actor adjActor)
+        continue;
+
+      bool canFollow = false;
+      foreach (Trait trait in adjActor.Traits)
+      {
+        if (trait is ImmobileTrait || trait is ParalyzedTrait || trait is FrightenedTrait)
+        {
+          canFollow = false;
+          break;
+        }
+        else if (trait is IntelligentTrait)
+        {
+          canFollow = true;
+        }
+      }
+
+      if (canFollow)
+        crowd.Add(adjActor);
+    }
+
+    return crowd.Count == 0 ? null : crowd[GameState!.Rng.Next(crowd.Count)];
+  }
+
+  protected void UsePortal(Portal portal, bool stairs = false)
   {
     Player player = GameState!.Player;
     Loc start = player.Loc;        
@@ -954,7 +983,6 @@ abstract class PortalAction : Action
     bool trip = level > start.Level && GameState.Player.HasTrait<TipsyTrait>() && GameState.Rng.NextDouble() < 0.33;
 
     GameState.ActorEntersLevel(GameState.Player!, dungeon, level);
-    GameState.Player!.Loc = portal.Destination;
     GameState.ResolveActorMove(GameState.Player!, start, portal.Destination);
     
     if (trip)
@@ -970,6 +998,16 @@ abstract class PortalAction : Action
       }
     }
 
+    if (stairs && start.DungeonID == dungeon && AdjacentActor(start) is Actor follower)
+    {
+      start = follower.Loc;
+      Loc dest = Util.NearestUnoccupiedLoc(GameState, portal.Destination);
+      GameState.ResolveActorMove(follower, start, dest);
+
+      if (GameState.Rng.NextDouble() < 0.5)
+        GameState.SwapActors(player, follower);
+    }
+
     GameState.FlushPerformers();
     GameState.PrepareFieldOfView();
 
@@ -983,11 +1021,11 @@ class DownstairsAction(GameState gameState) : PortalAction(gameState)
   public override double Execute()
   {
     var p = GameState!.Player!;
-    var t = GameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
-
+       
+    Tile t = GameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
     if (t.Type == TileType.Downstairs || t.Type == TileType.Portal || t.Type == TileType.ProfanePortal)
     {
-      UsePortal((Portal)t);
+      UsePortal((Portal)t, true);
     }
     else
     {
@@ -1010,7 +1048,7 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
 
     if (t.Type == TileType.Upstairs)
     {
-      UsePortal((Portal)t);
+      UsePortal((Portal)t, true);
     }
     else
     {
