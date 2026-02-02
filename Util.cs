@@ -223,7 +223,7 @@ static class Constants
   public const char SEPARATOR = '\u001F';
   public static int PRACTICE_RATIO = 100; // how skill use count translates into a bonus
   public const int TELEPATHY_RANGE = 40; // I don't really have a better spot for this right now
-  public static readonly string VERSION = "0.5.1";
+  public static readonly string VERSION = "0.5.2";
   public const char TOP_LEFT_CORNER = '┍';
   public const char TOP_RIGHT_CORNER = '┑';
   public const char BOTTOM_LEFT_CORNER = '┕';
@@ -243,6 +243,15 @@ static class Constants
   // I am kind of assuming here that there will never be enough items generated
   // in game to conflict with values this high...
   public const ulong DRAGON_GOD_ID = ulong.MaxValue - 1;
+
+  public const char ARROW_N = '\u2191';
+  public const char ARROW_S = '\u2193';
+  public const char ARROW_E = '\u2192';
+  public const char ARROW_W = '\u2190';
+  public const char ARROW_NE = '\u2197';
+  public const char ARROW_NW = '\u2196';
+  public const char ARROW_SE = '\u2198';
+  public const char ARROW_SW = '\u2199';
 }
 
 static class Util
@@ -644,16 +653,16 @@ static class Util
       return 4;
   }
 
-  public static (int, int) KeyToDir(char key) => key switch
+  public static (int, int) KeyCmdToDir(KeyCmd cmd) => cmd switch
   {
-    'y' => (-1, -1),
-    'u' => (-1, 1),
-    'h' => (0, -1),
-    'j' => (1, 0),
-    'k' => (-1, 0),
-    'l' => (0, 1),
-    'b' => (1, -1),
-    'n' => (1, 1),
+    KeyCmd.MoveNW => (-1, -1),
+    KeyCmd.MoveNE => (-1, 1),
+    KeyCmd.MoveW => (0, -1),
+    KeyCmd.MoveS => (1, 0),
+    KeyCmd.MoveN => (-1, 0),
+    KeyCmd.MoveE => (0, 1),
+    KeyCmd.MoveSW => (1, -1),
+    KeyCmd.MoveSE => (1, 1),
     _ => (0, 0)
   };
 

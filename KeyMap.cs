@@ -30,7 +30,7 @@ class KeyMap
   {
     DirectoryInfo userDir = Util.UserDir;
     string path = Path.Combine(userDir.FullName, "keymap.txt");
-
+    KeyMap kmap;
     if (File.Exists(path))
     {
       var map = new Dictionary<char, KeyCmd>();
@@ -52,13 +52,24 @@ class KeyMap
           map[key] = cmd;
       }
 
-      return new KeyMap(map);
+      kmap = new KeyMap(map);
     }
+    else
+    {
+      kmap = Default();
+      kmap.Save(path);
+    }
+      
+    kmap._map.Add(Constants.ARROW_N, KeyCmd.MoveN);
+    kmap._map.Add(Constants.ARROW_S, KeyCmd.MoveS);
+    kmap._map.Add(Constants.ARROW_W, KeyCmd.MoveW);
+    kmap._map.Add(Constants.ARROW_E, KeyCmd.MoveE);
+    kmap._map.Add(Constants.ARROW_NW, KeyCmd.MoveNW);
+    kmap._map.Add(Constants.ARROW_NE, KeyCmd.MoveNE);
+    kmap._map.Add(Constants.ARROW_SW, KeyCmd.MoveSW);
+    kmap._map.Add(Constants.ARROW_SE, KeyCmd.MoveSE);
 
-    KeyMap defaultMap = Default();
-    defaultMap.Save(path);
-    
-    return defaultMap;
+    return kmap;
   }
 
   static char ParseKey(string s)

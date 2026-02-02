@@ -122,62 +122,62 @@ class RaylibUserInterface : UserInterface
     }
     else if (IsKeyPressed(KeyboardKey.Left) || IsKeyPressedRepeat(KeyboardKey.Left))
     {
-      EventQ.Enqueue(new(GameEventType.KeyInput, 'h'));
+      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_W));
       Delay(50);
     }
     else if (IsKeyPressed(KeyboardKey.Kp4) || IsKeyPressedRepeat(KeyboardKey.Kp4))
     {
-      EventQ.Enqueue(new(GameEventType.KeyInput, 'h'));
+      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_W));
       Delay(50);
     }
     else if (IsKeyPressed(KeyboardKey.Right) || IsKeyPressedRepeat(KeyboardKey.Right))
     {
-      EventQ.Enqueue(new(GameEventType.KeyInput, 'l'));
+      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_E));
       Delay(50);
     }
     else if (IsKeyPressed(KeyboardKey.Kp6) || IsKeyPressedRepeat(KeyboardKey.Kp6))
     {
-      EventQ.Enqueue(new(GameEventType.KeyInput, 'l'));
+      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_E));
       Delay(50);
     }
     else if (IsKeyPressed(KeyboardKey.Down) || IsKeyPressedRepeat(KeyboardKey.Down))
     {
-      EventQ.Enqueue(new(GameEventType.KeyInput, 'j'));
+      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_S));
       Delay(50);
     }
     else if (IsKeyPressed(KeyboardKey.Kp2) || IsKeyPressedRepeat(KeyboardKey.Kp2))
     {
-      EventQ.Enqueue(new(GameEventType.KeyInput, 'j'));
+      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_S));
       Delay(50);
     }
     else if (IsKeyPressed(KeyboardKey.Up) || IsKeyPressedRepeat(KeyboardKey.Up))
     {
-      EventQ.Enqueue(new(GameEventType.KeyInput, 'k'));
+      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_N));
       Delay(50);
     }
     else if (IsKeyPressed(KeyboardKey.Kp8) || IsKeyPressedRepeat(KeyboardKey.Kp8))
     {
-      EventQ.Enqueue(new(GameEventType.KeyInput, 'k'));
+      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_N));
       Delay(50);
     }
     else if (IsKeyPressed(KeyboardKey.Kp7) || IsKeyPressedRepeat(KeyboardKey.Kp7))
     {
-      EventQ.Enqueue(new(GameEventType.KeyInput, 'y'));
+      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_NW));
       Delay(50);
     }
     else if (IsKeyPressed(KeyboardKey.Kp9) || IsKeyPressedRepeat(KeyboardKey.Kp9))
     {
-      EventQ.Enqueue(new(GameEventType.KeyInput, 'u'));
+      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_NE));
       Delay(50);
     }
     else if (IsKeyPressed(KeyboardKey.Kp1) || IsKeyPressedRepeat(KeyboardKey.Kp1))
     {
-      EventQ.Enqueue(new(GameEventType.KeyInput, 'b'));
+      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_SW));
       Delay(50);
     }
     else if (IsKeyPressed(KeyboardKey.Kp3) || IsKeyPressedRepeat(KeyboardKey.Kp3))
     {
-      EventQ.Enqueue(new(GameEventType.KeyInput, 'n'));
+      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_SE));
       Delay(50);
     }
     else if (IsKeyPressed(KeyboardKey.Kp5) || IsKeyPressedRepeat(KeyboardKey.Kp5))

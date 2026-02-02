@@ -301,7 +301,8 @@ class Aimer : Inputer
       return;
     }
 
-    var dir = KeyToDir(ch);
+    KeyCmd cmd = GS.KeyMap.ToCmd(ch);    
+    var dir = KeyCmdToDir(cmd);
     if (dir != (0, 0))
     {
       Loc mv = _target with
@@ -657,6 +658,8 @@ class OptionsScreen : Inputer
 
   public override void Input(char ch)
   {
+    KeyCmd cmd = GS.KeyMap.ToCmd(ch);
+
     if (ch == Constants.ESC)
     {
       Close();
@@ -672,9 +675,9 @@ class OptionsScreen : Inputer
       if (row < 0)
         row = numOfOptions - 1;
     }
-    else if ((ch == 'h' || ch == 'l') && row == 8)
+    else if ((cmd == KeyCmd.MoveW || cmd == KeyCmd.MoveE) && row == 8)
     {
-      int delta = ch == 'h' ? -2 : 2;
+      int delta = cmd == KeyCmd.MoveW ? -2 : 2;
       int newSize = Math.Clamp(GS.Options.FontSize + delta, 10, 30);
       if (newSize != GS.Options.FontSize)
       {
@@ -715,6 +718,8 @@ class OptionsScreen : Inputer
     string turns = GS.Options.ShowTurns ? "On" : "Off";
     string moveHints = GS.Options.DefaultMoveHints ? "On" : "Off";
     string autoPickupGold = GS.Options.AutoPickupGold ? "On" : "Off";
+    string leftKey = GS.KeyMap.KeyForCmd(KeyCmd.MoveW);
+    string rightKey = GS.KeyMap.KeyForCmd(KeyCmd.MoveE);
 
     List<string> menuItems = [
       $"Bump to open doors: {bumpToOpen}",
@@ -725,7 +730,7 @@ class OptionsScreen : Inputer
       $"Show turns: {turns}",
       $"Show move keys by default: {moveHints}",
       $"Auto-Pickup Gold: {autoPickupGold}",
-      $"Font size (h/l to adjust): {GS.Options.FontSize}",
+      $"Font size ({leftKey}/{rightKey} to adjust): {GS.Options.FontSize}",
     ];
 
     GS.UIRef().SetPopup(new PopupMenu("Options", menuItems) { SelectedRow = row });
@@ -1733,7 +1738,7 @@ class DirectionalInputer : Inputer
   bool TargetSelf { get; set; }
   bool OnlyOpenLocs { get; set; }
   HashSet<(int, int)> ValidLocs { get; set; }
-
+  
   public DirectionalInputer(GameState gs, bool targetSelf, bool onlyOpen = false) : base(gs)
   {
     TargetSelf = targetSelf;
@@ -1771,7 +1776,8 @@ class DirectionalInputer : Inputer
     }
     else
     {
-      var dir = KeyToDir(ch);
+      KeyCmd cmd = GS.KeyMap.ToCmd(ch);
+      var dir = KeyCmdToDir(cmd);
       bool valid = ValidLocs.Contains(dir);
       if (dir != (0, 0) && valid)
       {
@@ -1848,7 +1854,8 @@ class ConeTargeter : Inputer
       return;
     }
 
-    var dir = KeyToDir(ch);
+    KeyCmd cmd = GS.KeyMap.ToCmd(ch);
+    var dir = KeyCmdToDir(cmd);
     if (dir != (0, 0))
     {
       Target = Origin with { Row = Origin.Row + Range * dir.Item1, Col = Origin.Col + Range * dir.Item2 };
