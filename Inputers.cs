@@ -438,13 +438,24 @@ class HelpScreen : Inputer
   Dictionary<char, HelpEntry> Entries { get; set; } = [];
   char _selected;
   TwoPanelPopup Popup { get; set; }
-  
+
+  static string ReplaceKeyPlaceholders(string text, KeyMap keyMap)
+  {
+    foreach (KeyCmd cmd in Enum.GetValues<KeyCmd>())
+    {
+      string placeholder = $"{{{cmd}}}";
+      if (text.Contains(placeholder))
+        text = text.Replace(placeholder, keyMap.KeyForCmd(cmd));
+    }
+    return text;
+  }
+
   public HelpScreen(GameState gs, UserInterface ui) : base(gs)
   {
     _ui = ui;
 
     string[] lines = [.. File.ReadAllLines(ResourcePath.GetDataFilePath("help.txt"))
-                              .Select(line => line.TrimEnd())];
+                              .Select(line => ReplaceKeyPlaceholders(line.TrimEnd(), gs.KeyMap))];
     int l = 0;
     char ch = 'a';
     string title;
