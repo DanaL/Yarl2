@@ -182,7 +182,7 @@ class RaylibUserInterface : UserInterface
     }
     else if (IsKeyPressed(KeyboardKey.Kp5) || IsKeyPressedRepeat(KeyboardKey.Kp5))
     {
-      EventQ.Enqueue(new(GameEventType.KeyInput, '.'));
+      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.PASS));
       Delay(50);
     }
 

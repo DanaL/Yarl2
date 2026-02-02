@@ -252,6 +252,7 @@ static class Constants
   public const char ARROW_NW = '\u2196';
   public const char ARROW_SE = '\u2198';
   public const char ARROW_SW = '\u2199';
+  public const char PASS = '\u2205';
 }
 
 static class Util

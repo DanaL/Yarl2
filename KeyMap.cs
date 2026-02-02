@@ -96,7 +96,8 @@ class KeyMap
     kmap._map.Add(Constants.ARROW_NE, KeyCmd.MoveNE);
     kmap._map.Add(Constants.ARROW_SW, KeyCmd.MoveSW);
     kmap._map.Add(Constants.ARROW_SE, KeyCmd.MoveSE);
-
+    kmap._map.Add(Constants.PASS, KeyCmd.Pass);
+    
     return (kmap, warning);
   }
 

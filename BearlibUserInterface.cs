@@ -82,7 +82,7 @@ internal class BLUserInterface : UserInterface, IDisposable
     KeyToChar.Add((int)TKCodes.InputEvents.TK_KP_2, Constants.ARROW_S);
     KeyToChar.Add((int)TKCodes.InputEvents.TK_KP_3, Constants.ARROW_SE);
     KeyToChar.Add((int)TKCodes.InputEvents.TK_KP_4, Constants.ARROW_W);
-    KeyToChar.Add((int)TKCodes.InputEvents.TK_KP_5, '.');
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_KP_5, Constants.PASS);
     KeyToChar.Add((int)TKCodes.InputEvents.TK_KP_6, Constants.ARROW_E);
     KeyToChar.Add((int)TKCodes.InputEvents.TK_KP_7, Constants.ARROW_NW);
     KeyToChar.Add((int)TKCodes.InputEvents.TK_KP_8, Constants.ARROW_N);
