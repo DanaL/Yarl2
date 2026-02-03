@@ -671,12 +671,19 @@ class BreathWeaponAction(GameState gs, Actor actor, DamageType dmgType, string d
           GameState.UIRef().AlertPlayer(dmgMsg);
         if (hpLeft < 1)
         {
-          GameState.ActorKilled(victim, "fiery breath", null);
+          GameState.ActorKilled(victim, DeathDesc(_damageType), null);
         }
       }
     }
 
     return 1.0;
+
+    static string DeathDesc(DamageType dt) => dt switch
+    {
+      DamageType.Fire => "fiery breath",
+      DamageType.Cold => "freezing breath",
+      _ => "a breath weapon"
+    };
   }
 
   public override void ReceiveUIResult(UIResult result)
