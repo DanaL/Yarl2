@@ -1214,7 +1214,9 @@ class Power
       case "Entangle":
         return new EntangleAction(gs, mob, MaxRange);
       case "FireBreath":
-        return new BreathWeaponAction(gs, mob, DamageType.Fire, "a gout of flame", DmgDie, NumOfDice, MaxRange, new(Colours.BRIGHT_RED, Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.WHITE, Constants.FIRE_CHAR));
+        return new BreathWeaponAction(gs, mob, DamageType.Fire, "a gout of flame", DmgDie, NumOfDice, MaxRange, new(Colours.BRIGHT_RED, Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.WHITE, Constants.FIRE_CHAR)) { Loc = loc };
+      case "FrostyBreath":
+        return new BreathWeaponAction(gs, mob, DamageType.Cold, "a blast of cold", DmgDie, NumOfDice, MaxRange, new(Colours.ICE_BLUE, Colours.BLUE, Colours.MYSTIC_AURA, Colours.WHITE, Constants.WIND_CHAR)) { Loc = loc };
       case "FearsomeBellow":
         txt = $"{mob.FullName.Capitalize()} bellows fearsomely!";
         return new AoEAction(gs, mob, mob.Loc, $"Frightened#0#{DC}#0", MaxRange, txt);

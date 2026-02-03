@@ -642,7 +642,7 @@ rune of parrying
 This rune hums faintly and is shaped into a protective sigil.
 #
 potion of dragon breath
-Magicians have always been jealous of dragons. Their giant gold of treasure, their wings, their teeth. So, they invented this potion that at least lets them replicate a dragon's breath weapon.
+Magicians have always been jealous of dragons. Their giant hoard of treasure, their wings, their teeth. So, they invented this potion that at least lets them replicate a dragon's breath weapon.
 #
 Phalanx Pholio Vol. 2
 In this issue of Phalanx Pholio, we teach the Shield Bash technique! You paid good zorkmids for that shield, why use it only to block enemies' attacks?
@@ -670,3 +670,6 @@ A really big spider. Big enough that you are only a small snack to it. Maybe eve
 #
 draught of forgetfulness
 Sometimes an adventurer wants something a little stronger than ale. This concoction makes one forget what they've seen recently, and perhaps also their fears and concerns.
+#
+winter wolf
+Aside from ambulatory snowmen and perhaps frost dragons, few creatures from the frozen north are as feared as winter wolves. Their sharp teeth, their icy breath...

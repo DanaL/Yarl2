@@ -572,7 +572,7 @@ class CastGustOfWindAction(GameState gs, Actor actor, Item? item) : CastSpellAct
       Highlight = Colours.BLUE,
       Centre = Actor!.Loc,
       Sqs = animLocs,
-      Ch = '≈'
+      Ch = Constants.WIND_CHAR
     };
     blast.Sqs.Add(Actor.Loc);
     GameState!.UIRef().PlayAnimation(blast, GameState);
