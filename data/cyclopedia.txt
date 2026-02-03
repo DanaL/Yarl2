@@ -673,3 +673,6 @@ Sometimes an adventurer wants something a little stronger than ale. This concoct
 #
 winter wolf
 Aside from ambulatory snowmen and perhaps frost dragons, few creatures from the frozen north are as feared as winter wolves. Their sharp teeth, their icy breath...
+#
+python
+One of the cuddlier creatures you'll find in dungeons, but not in a good way.
