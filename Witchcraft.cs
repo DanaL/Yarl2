@@ -936,17 +936,19 @@ class SpellcastMenu : Inputer
 
   public override void Input(char ch)
   {
+    KeyCmd cmd = GS.KeyMap.ToCmd(ch);
+
     if (ch == Constants.ESC)
     {
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
       return;
     }
-    else if (ch == 'j')
+    else if (cmd == KeyCmd.MoveS)
     {
       row = (row + 1 ) % SpellList.Count;
     }
-    else if (ch == 'k')
+    else if (cmd == KeyCmd.MoveN)
     {
       --row;
       if (row < 0)

@@ -61,11 +61,11 @@ class GameLoader(UserInterface ui)
 
       Thread.Sleep(30);
       char ch = UI.GetKeyInput();
-      if (files.Count > 0 && ch == 'j')
+      if (files.Count > 0 && (ch == 'j' || ch == Constants.ARROW_S))
       {
         selected = (++selected) % files.Count;
       }
-      else if (files.Count > 0 && ch == 'k')
+      else if (files.Count > 0 && (ch == 'k' || ch == Constants.ARROW_N))
       {
         selected = selected > 0 ? selected - 1 : files.Count - 1;        
       }
