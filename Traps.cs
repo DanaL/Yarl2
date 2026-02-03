@@ -155,7 +155,7 @@ class Traps
     {
       if (actor is Player player)
         gs.Player.HaltTravel();
-      TriggerJetTrap((JetTrigger) tile, gs, actor);
+      FireJetTrigger((JetTrigger) tile, gs, actor);
     }
     else if (tile.Type == TileType.HiddenWaterTrap || tile.Type == TileType.WaterTrap)
     {      
@@ -340,18 +340,12 @@ class Traps
     _ => throw new Exception("RevealedTrapType() shouldn't be called on a non-trap square")
   };
 
-  static void TriggerJetTrap(JetTrigger trigger, GameState gs, Actor actor)
+  public static void SetOffFireJet(FireJetTrap trap, Loc jetLoc, GameState gs, Actor actor)
   {
-    if (gs.LastPlayerFoV.ContainsKey(actor.Loc))
-    {
-      trigger.Visible = true;
-    }
-
-    FireJetTrap jet = (FireJetTrap) gs.TileAt(trigger.JetLoc);
     // Reveal the jet even if the player didn't see it get triggered
     // (presumbly there are scorch marks, etc)
-    jet.Seen = true;
-    (int, int) delta = jet.Dir switch 
+    trap.Seen = true;
+    (int, int) delta = trap.Dir switch
     {
       Dir.North => (-1, 0),
       Dir.South => (1, 0),
@@ -365,10 +359,10 @@ class Traps
                                          .Any(rt => rt.Type == DamageType.Fire);
       player.Stats[Attribute.Nerve].Change(fireResistance ? -5 : -15);
     }
-    
+
     HashSet<Loc> affected = [];
     HashSet<Loc> seen = [];
-    Loc start = trigger.JetLoc with { Row = trigger.JetLoc.Row + delta.Item1, Col = trigger.JetLoc.Col + delta.Item2 };
+    Loc start = jetLoc with { Row = jetLoc.Row + delta.Item1, Col = jetLoc.Col + delta.Item2 };
     affected.Add(start);
     Loc loc = start;
     for (int j = 0; j < 5; j++)
@@ -380,7 +374,7 @@ class Traps
       if (gs.LastPlayerFoV.ContainsKey(loc))
         seen.Add(loc);
     }
-    
+
     if (seen.Count > 0)
     {
       gs.UIRef().AlertPlayer("Whoosh!! A fire trap!");
@@ -410,7 +404,7 @@ class Traps
       {
         if (gs.LastPlayerFoV.ContainsKey(loc))
           gs.UIRef().AlertPlayer($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!");
-        
+
         var (hpLeft, _, _) = victim.ReceiveDmg(dmg, 0, gs, null, 1.0);
         if (hpLeft < 1)
         {
@@ -418,5 +412,21 @@ class Traps
         }
       }
     }
+  }
+
+  static void FireJetTrigger(JetTrigger trigger, GameState gs, Actor actor)
+  {
+    if (gs.LastPlayerFoV.ContainsKey(actor.Loc))
+    {
+      trigger.Visible = true;
+    }
+
+    if (gs.TileAt(trigger.JetLoc) is not FireJetTrap jet)
+    {
+      gs.UIRef().AlertPlayer("Click.", gs, actor.Loc, actor);
+      return;
+    }
+    
+    SetOffFireJet(jet, trigger.JetLoc, gs, actor);
   }
 }

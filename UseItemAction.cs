@@ -29,7 +29,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       }
       else
       {
-        GameState!.UIRef().AlertPlayer($"{Tool.Name.DefArticle()}.");
+        GameState!.UIRef().AlertPlayer($"You equip {Tool.Name.DefArticle()}.");
       }
     }
 
@@ -75,6 +75,11 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     else if (tile.Type == TileType.ClosedDoor || tile.Type == TileType.LockedDoor)
     {
       ChopDoor(targetLoc);
+    }
+    else if (tile.Type == TileType.FireJetTrap)
+    {
+      DigFireJet(targetLoc);
+      Cmd.CheckWear(Tool, Actor, GameState);
     }
     else if (tile.Type == TileType.DungeonWall)
     {
@@ -123,7 +128,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     {
       DigBlock(targetLoc, GameState, Actor);
       Cmd.CheckWear(Tool, Actor, GameState);
-    }    
+    }
     else
     {
       GameState!.UIRef().AlertPlayer("You swing your pickaxe through the air.");
@@ -340,6 +345,45 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       digger.Traits.Add(new InPitTrait());
 
       gs.Noise(loc.Row, loc.Col, 5);
+  }
+
+  void DigFireJet(Loc loc)
+  {
+    int dc = 16 + GameState!.CurrLevel / 4;
+    if (Actor is Player && GameState.Player.Lineage == PlayerLineage.Dwarf)
+      dc -= 2;
+
+    FireJetTrap tile = (FireJetTrap) GameState.TileAt(loc);
+    
+    if (Actor!.AbilityCheck(Attribute.Strength, dc, GameState.Rng))
+    {
+      string s;
+      if (tile.Seen)
+        s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "destroy")} the fire trap!";
+      else
+        s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "tunnel")} into the wall!";
+      GameState.UIRef().AlertPlayer(s);
+      if (Actor == GameState.Player)
+        GameState.UIRef().SetPopup(new Popup(s, "", -1, -1, s.Length));
+      GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
+    }
+    else
+    {
+      string s;
+      if (!tile.Seen && Actor is Player)
+      {
+        s = "You discover a fire jet trap!";
+        tile.Seen = true;
+      }
+      else
+        s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "chip")} away at the fire trap!";      
+      GameState.UIRef().AlertPlayer(s);
+      GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
+
+      Traps.SetOffFireJet(tile, loc, GameState, Actor);
+    }
+
+    GameState.Noise(loc.Row, loc.Col, 5);
   }
 
   void DigDungeonWall(Loc loc)

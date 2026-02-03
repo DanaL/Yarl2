@@ -4049,6 +4049,7 @@ class DigRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, ac
         case TileType.PermWall:
           stop = true;
           break;
+        case TileType.FireJetTrap:
         case TileType.DungeonWall:
           GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
           break;
