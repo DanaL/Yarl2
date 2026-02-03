@@ -665,11 +665,11 @@ class OptionsScreen : Inputer
       Close();
       return;
     }
-    else if (ch == 'j')
+    else if (cmd == KeyCmd.MoveS)
     {
       row = (row + 1) % numOfOptions;
     }
-    else if (ch == 'k')
+    else if (cmd == KeyCmd.MoveN)
     {
       --row;
       if (row < 0)
@@ -1103,6 +1103,8 @@ class LockedDoorMenu : Inputer
 
   public override void Input(char ch)
   {
+    KeyCmd cmd = GS.KeyMap.ToCmd(ch);
+
     if (ch == Constants.ESC)
     {
       Close();
@@ -1118,11 +1120,11 @@ class LockedDoorMenu : Inputer
       SetUpCommand(Options[Row]);
       return;
     }
-    else if (ch == 'j')
+    else if (cmd == KeyCmd.MoveS)
     {
       Row = (Row + 1) % Options.Count;
     }
-    else if (ch == 'k')
+    else if (cmd == KeyCmd.MoveN)
     {
       --Row;
       if (Row < 0)
