@@ -1211,8 +1211,6 @@ class Power
         return new AoEAction(gs, mob, mob.Loc, $"Confused#0#{DC}#0", DmgDie, txt);
       case "DrainTorch":
         return new DrainTorchAction(gs, mob, loc);
-      case "Entangle":
-        return new EntangleAction(gs, mob, MaxRange);
       case "FireBreath":
         return new BreathWeaponAction(gs, mob, DamageType.Fire, "a gout of flame", DmgDie, NumOfDice, MaxRange, new(Colours.BRIGHT_RED, Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.WHITE, Constants.FIRE_CHAR)) { Loc = loc };
       case "FrostyBreath":

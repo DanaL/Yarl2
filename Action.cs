@@ -2827,33 +2827,6 @@ class DrainTorchAction(GameState gs, Actor caster, Loc target) : Action(gs, cast
   }
 }
 
-class EntangleAction(GameState gs, Actor caster, int range) : Action(gs, caster)
-{
-  int Range { get; set; } = range;
-
-  public override double Execute()
-  {
-    Loc targetLoc = Actor!.PickRangedTargetLoc(GameState!, Range);
-    foreach (var (r, c) in Util.Adj8Sqs(targetLoc.Row, targetLoc.Col))
-    {
-      var loc = targetLoc with { Row = r, Col = c };
-      var tile = GameState!.TileAt(loc);
-      if (tile.Type != TileType.Unknown && tile.Passable() && !GameState.ObjDb.Occupied(loc))
-      {
-        Actor vines = MonsterFactory.Get("vines", GameState.ObjDb, GameState.Rng);
-        vines.Loc = loc;
-        GameState.ObjDb.Add(vines);
-        GameState.ObjDb.SetActorToLoc(loc, vines.ID);
-      }
-    }
-
-    string txt = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "cast")} Entangle!";
-    GameState!.UIRef().AlertPlayer(txt);
-
-    return 1.0;
-  }
-}
-
 class FireboltAction(GameState gs, Actor caster, Loc target) : Action(gs, caster)
 {
   readonly Loc _target = target;
