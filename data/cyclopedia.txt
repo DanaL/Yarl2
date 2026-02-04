@@ -83,6 +83,9 @@ A common dungeon predator. Its screams are known to temporarily scramble the bra
 deep one
 Strange humanoid fish people who worship strange, alien gods in darkness.
 #
+deep one shaman
+A fish-person shaking a staff made of driftwood and shells.
+#
 ghoul
 An noxious undead creature with a taste for bones.
 #
@@ -545,6 +548,9 @@ A minor incarnation of Pure Fire.
 super bat
 A rare species of bat, some say a throwback to ancient times. They are very fast.
 #
+ogre
+A large, brutish and -- not to be judgmental -- ugly humanoid. Their favourite food is adventurer stew.
+#
 wumpus
 A cave-dwelling ogre with a stench even worse than a regular ogre.
 #
@@ -679,3 +685,51 @@ Aside from ambulatory snowmen and perhaps frost dragons, few creatures from the 
 #
 python
 One of the cuddlier creatures you'll find in dungeons, but not in a good way.
+#
+cloaker
+Is it some species of bat? A flying manta ray? Scholars debate.
+#
+owlbear
+Part owl, part bear. Unfortunately for you, one of the bear parts it got was the size.
+#
+will-o-wisp
+A glowing fire spirit that feeds on flames and heat. Attracted to adventurers and their tasty, tasty torches.
+#
+troll
+Tall, spindly, green humanoids with very sharp claws. Trolls regenrate health quickly after being injured.
+#
+the Great Goblin
+The big boss of the goblins, meaning he is the largest bully of them all.
+#
+wyrmling
+A young dragon. But even a young dragon is rather dangerous.
+#
+the Kobold Regional Manager
+In charge of dungeon operations in this local franchise.
+#
+frog
+Ribbit.
+#
+zombie frog
+An undead amphibian. It's croak sounds unnervingly like "brains".
+#
+cultist
+Some people fall into a bad crowd and up living in dungeons worshipping weird, minor gods.
+#
+cult leader
+Fond of robes and curvy daggers. This one has enough favour from their god to know a little magic.
+#
+dire wolf
+A bigger, meaner version of a wolf.
+#
+swarm of bees
+You probably won't see them unless you disturb their nest somehow.
+#
+displacer beast
+A shadowy, eight-legged panther that seems to shimmer in and out of existence.
+#
+fire elemental
+An animated swirl of intense flames.
+#
+Dagon
+Resembles an enormous deep one with glowing green eyes. Worshipped as a god by the fish folk.
