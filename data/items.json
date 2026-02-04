@@ -569,7 +569,7 @@
     "Name": "POTION_OF_LEVITATION",
     "DescriptiveName": "potion of levitation",
     "Type": "Potion",
-    "Value": 100,
+    "Value": 40,
     "Glyph": "!,pink,dullred,black,false",
     "Traits": [
       "UseSimple#levitation",
