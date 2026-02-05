@@ -855,7 +855,7 @@
     "DescriptiveName": "campfire",
     "Type": "Tool",
     "Value": 0,
-    "Glyph": "^,brightred,dullred,torchorange,true",
+    "Glyph": "⋏,brightred,dullred,torchorange,true",
     "Traits": [
       "LightSource#owner#1#yellow#torchorange",
       "OnFire#false#owner#max#false",
