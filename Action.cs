@@ -3412,13 +3412,14 @@ class ThrowBombAction(GameState gs, Actor actor, Loc target) : Action(gs, actor)
   }
 }
 
-class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
+class ThrowAction(GameState gs, Actor actor, char slot) : TargetedAction(gs, actor)
 {
   readonly char _slot = slot;
-  Loc Target { get; set; }
-
+  
   public override double Execute()
   {
+    base.Execute();
+
     var ammo = Actor!.Inventory.Remove(_slot, 1, GameState!).First();
     if (ammo != null)
     {
@@ -4175,6 +4176,23 @@ class MagicMissleAction(GameState gs, Actor actor, Trait? src) : TargetedAction(
 abstract class TargetedAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   public Loc Target { get; set; }
+
+  public override double Execute()
+  {    
+    if (Actor!.HasTrait<TipsyTrait>() && GameState!.Rng.NextDouble() < 0.25)
+    {
+      string s = $"{Grammar.Possessive(Actor).Capitalize()} aim is wobbly...";
+      GameState.UIRef().AlertPlayer(s, GameState, Actor.Loc);
+
+      Loc[] options = [.. Util.Adj8Locs(Actor.Loc).Where(l => l != Actor.Loc)];
+      if (options.Length > 0)
+      {
+        Target = options[GameState.Rng.Next(options.Length)];
+      }
+    }
+
+    return 0.0;
+  }
 
   // As in, clear of obstacles, not opacity
   bool ClearTileAt(Loc loc)

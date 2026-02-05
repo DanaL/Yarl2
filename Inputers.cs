@@ -325,10 +325,7 @@ class Aimer : Inputer
 
   public override UIResult GetResult()
   {
-    var result = new LocUIResult()
-    {
-      Loc = _target
-    };
+    LocUIResult result = new() { Loc = _target };
 
     var occ = GS.ObjDb.Occupant(_target);
     if (occ is not null)
