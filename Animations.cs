@@ -572,16 +572,16 @@ class LavaAnimation(UserInterface ui, GameState gs) : Animation
     for (int r = 0; r < UserInterface.ViewHeight; r++)
     {
       for (int c = 0; c < UserInterface.ViewWidth; c++)
-      {        
+      {
         int mapRow = r + rowOffset;
         int mapCol = c + colOffset;
         Loc loc = new(GS.CurrDungeonID, GS.CurrLevel, mapRow, mapCol);
         Tile tile = GS.TileAt(loc);
         if (tile.Type != TileType.Lava || !GS.LastPlayerFoV.ContainsKey(loc))
           continue;
-        
+
         if (LavaSqs.TryGetValue(loc, out var bgColour))
-          UI.SqsOnScreen[r, c] = UI.SqsOnScreen[r, c] with {Bg = bgColour};
+          UI.SqsOnScreen[r, c] = UI.SqsOnScreen[r, c] with { Bg = bgColour };
         else
         {
           Colour colour = PickLavaColour(GS.Rng);
@@ -592,7 +592,7 @@ class LavaAnimation(UserInterface ui, GameState gs) : Animation
         // If player is over a lava sqr, make them more visible
         if (loc == GS.Player.Loc)
         {
-         UI.SqsOnScreen[r, c] = UI.SqsOnScreen[r, c] with { Fg = Colours.DARK_GREY }; 
+          UI.SqsOnScreen[r, c] = UI.SqsOnScreen[r, c] with { Fg = Colours.DARK_GREY };
         }
       }
     }
@@ -641,7 +641,7 @@ class UnderwaterAnimation(UserInterface ui, GameState gs, int h, int w) : Animat
     for (int r = 0; r < UserInterface.ViewHeight; r++)
     {
       for (int c = 0; c < UserInterface.ViewWidth; c++)
-      {        
+      {
         int mapRow = r + rowOffset;
         int mapCol = c + colOffset;
         Loc loc = new(GS.CurrDungeonID, GS.CurrLevel, mapRow, mapCol);
@@ -663,7 +663,7 @@ class UnderwaterAnimation(UserInterface ui, GameState gs, int h, int w) : Animat
         {
           baseColour = Colours.UNDERWATER;
         }
-        
+
         Colour fgColour = sqr.Fg;
 
         double density = Density[mapRow, mapCol];
@@ -696,7 +696,7 @@ class UnderwaterAnimation(UserInterface ui, GameState gs, int h, int w) : Animat
         else if (!GS.LastPlayerFoV.ContainsKey(loc))
           alpha /= 2;
 
-        Colour bgColour = baseColour with { Alpha = alpha };         
+        Colour bgColour = baseColour with { Alpha = alpha };
         UI.SqsOnScreen[r, c] = sqr with { Fg = fgColour, Bg = bgColour };
       }
     }
@@ -820,7 +820,7 @@ class CloudAnimation(UserInterface ui, GameState gs) : Animation
   {
     int count = 0;
     Span<int> locs = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-    
+
     foreach (var k in locs)
     {
       if (count < 7 && _gs.Rng.NextDouble() < 0.7)
@@ -855,6 +855,30 @@ class CloudAnimation(UserInterface ui, GameState gs) : Animation
 
   void DrawCloud()
   {
+    // If the player is inside a building, don't draw clouds above that building
+    HashSet<Loc>? building = null;
+    if (_gs.Town.Market.Contains(_gs.Player.Loc))
+      building = _gs.Town.Market;
+    else if (_gs.Town.Shrine.Contains(_gs.Player.Loc))
+      building = _gs.Town.Shrine;
+    else if (_gs.Town.Smithy.Contains(_gs.Player.Loc))
+      building = _gs.Town.Smithy;
+    else if (_gs.Town.Tavern.Contains(_gs.Player.Loc))
+      building = _gs.Town.Tavern;
+    else if (_gs.Town.WitchesCottage.Contains(_gs.Player.Loc))
+      building = _gs.Town.WitchesCottage;
+    else
+    {
+      foreach (var home in _gs.Town.Homes)
+      {
+        if (home.Contains(_gs.Player.Loc))
+        {
+          building = home;
+          break;
+        }
+      }
+    }
+
     for (int r = 0; r < 3; r++)
     {
       for (int c = 0; c < 3; c++)
@@ -865,8 +889,10 @@ class CloudAnimation(UserInterface ui, GameState gs) : Animation
 
         int cloudRow = _row + r;
         int cloudCol = _col + c;
-
-        if (!_gs.LastPlayerFoV.ContainsKey(new Loc(0, 0, cloudRow, cloudCol)))
+        Loc cloudLoc = new(0, 0, cloudRow, cloudCol);
+        if (!_gs.LastPlayerFoV.ContainsKey(cloudLoc))
+          continue;
+        if (building != null && building.Contains(cloudLoc))
           continue;
 
         var (scrR, scrC) = _ui.LocToScrLoc(cloudRow, cloudCol, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
@@ -915,7 +941,7 @@ class RoofAnimation(GameState gs) : Animation
 
     var ui = GS.UIRef();
     (_, _, int pr, int pc) = GS.Player.Loc;
-    for (int r = 0;  r < UserInterface.ViewHeight; r++)
+    for (int r = 0; r < UserInterface.ViewHeight; r++)
     {
       for (int c = 0; c < UserInterface.ViewWidth; c++)
       {
@@ -936,7 +962,7 @@ class RoofAnimation(GameState gs) : Animation
 class ScreenShakeAnimation : Animation
 {
   readonly GameState _gs;
-  readonly (int, int)[] _shakePattern = [ (0, 2), (0, -1), (1, 1), (-1, 0), (-1, -1), (-2, 0), (0, 1), (-2, 0), (0, 1), (0, 0) ];
+  readonly (int, int)[] _shakePattern = [(0, 2), (0, -1), (1, 1), (-1, 0), (-1, -1), (-2, 0), (0, 1), (-2, 0), (0, 1), (0, 0)];
   int _currentShake = 0;
   DateTime _lastFrame = DateTime.UtcNow;
   const double _shakeInterval = 50;
