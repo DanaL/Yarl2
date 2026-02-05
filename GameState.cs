@@ -1611,7 +1611,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       string msg = actor.Inventory.ApplyEffectToInv(DamageType.Wet, this, actor.Loc);
       UI.AlertPlayer(msg);
     }
-    else if (tile.Type == TileType.Downstairs && actor is Player && actor.HasTrait<TipsyTrait>())
+    else if (tile.Type == TileType.Downstairs && start.Level == dest.Level && actor is Player && actor.HasTrait<TipsyTrait>())
     {
       if (actor.AbilityCheck(Attribute.Dexterity, 13, Rng))
       {
