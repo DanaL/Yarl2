@@ -515,6 +515,51 @@ class CleansingAction(GameState gs, Actor actor, Item source) : Action(gs, actor
   }
 }
 
+class CreateDoorAction(GameState gs, Actor actor, Item src) : Action(gs, actor)
+{
+  int Row;
+  int Col;
+  Item Src { get; set; } = src;
+
+  public override double Execute()
+  {
+    Loc loc = Actor!.Loc with { Row = Actor.Loc.Row + Row, Col = Actor.Loc.Col + Col };
+
+    if (GameState!.ObjDb.Occupied(loc) || GameState!.ObjDb.BlockersAtLoc(loc).Any())
+    {
+      GameState.UIRef().AlertPlayer("There's something in the way!", GameState, loc);
+
+      return 0.0;
+    }
+
+    string mw = GameState!.Rng.Next(3) switch
+    {
+      0 => "jysk",
+      1 => "rona",
+      _ => "ikea"
+    };
+    string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "whisper")} the command word '{mw}' and a door springs into being!";
+    GameState.UIRef().AlertPlayer(s, GameState, loc);
+
+    GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.LockedDoor));
+
+    if (Src.HasTrait<ConsumableTrait>())
+    {
+      Actor!.Inventory.RemoveByID(Src.ID, GameState!);
+      GameState.ObjDb.RemoveItemFromGame(Actor.Loc, Src);
+    }
+
+    return 1.0;
+  }
+
+  public override void ReceiveUIResult(UIResult result)
+  {
+    var dir = (DirectionUIResult)result;
+    Row = dir.Row;
+    Col = dir.Col;
+  }
+}
+
 class SetExplosiveAction(GameState gs, Actor actor, Item bomb) : Action(gs, actor)
 {
   int Row;
@@ -704,6 +749,10 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       else if (item.HasTrait<ExplosiveTrait>())
       {
         dir = new(GameState, true, true) { DeferredAction = new SetExplosiveAction(GameState, Actor, item) };
+      }
+      else if (item.HasTrait<EmergencyDoorTrait>())
+      {
+        dir = new(GameState, false, true) { DeferredAction = new CreateDoorAction(GameState, Actor, item) };
       }
       else
       {

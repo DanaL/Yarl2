@@ -32,7 +32,7 @@ class Treasure
       ItemNames.SCROLL_DISARM, ItemNames.BEETLE_CARAPACE, ItemNames.LEATHER_GLOVES, ItemNames.MITHRIL_ORE,
       ItemNames.SCROLL_TREASURE_DETECTION, ItemNames.SCROLL_TRAP_DETECTION, ItemNames.SKELETON_KEY, ItemNames.PICKAXE,
       ItemNames.POTION_HARDINESS, ItemNames.POTION_HEROISM, ItemNames.POTION_DESCENT, ItemNames.SCROLL_STAINLESS,
-      ItemNames.POTION_FORGETFULNESS
+      ItemNames.POTION_FORGETFULNESS, ItemNames.EMERGENCY_DOOR
   ]; 
 
   static readonly List<ItemNames> GoodItems = [ 
@@ -92,7 +92,8 @@ class Treasure
     ItemNames.SCROLL_STAINLESS,
     ItemNames.SCROLL_ENCHANTING,
     ItemNames.POTION_CLARITY,
-    ItemNames.POTION_FORGETFULNESS
+    ItemNames.POTION_FORGETFULNESS,
+    ItemNames.EMERGENCY_DOOR
   ];
 
   public static Item GetTalisman(Rng rng, GameObjectDB objDb)

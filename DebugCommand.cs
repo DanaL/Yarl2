@@ -133,7 +133,8 @@ class DebugCommand(GameState gs)
     {"moon mantle", ItemNames.MOON_MANTLE },
     {"moon lyre", ItemNames.MOON_LYRE },
     {"potion of clarity", ItemNames.POTION_CLARITY },
-    {"draught of forgetfulness", ItemNames.POTION_FORGETFULNESS }
+    {"draught of forgetfulness", ItemNames.POTION_FORGETFULNESS },
+    {"emergency door", ItemNames.EMERGENCY_DOOR }
   };
 
   public string DoCommand(string txt)

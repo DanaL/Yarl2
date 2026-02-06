@@ -920,6 +920,11 @@ sealed class ElectrocutesTrait : Trait
   public override string AsText() => $"Electrocutes#{DC}#{Duration}";
 }
 
+sealed class EmergencyDoorTrait : Trait
+{
+  public override string AsText() => "EmergencyDoor";
+}
+
 sealed class EndGameTriggerTrait : TemporaryTrait
 {
   public override string AsText() => $"EndGameTrigger#{ExpiresOn}#{OwnerID}";
@@ -4625,6 +4630,7 @@ class TraitFactory
     { "Edible", (pieces, gameObj) => new EdibleTrait() },
     { "Electrocutes", (pieces, gameObj) => new ElectrocutesTrait() { DC = int.Parse(pieces[1]), Duration = int.Parse(pieces[2]) }},
     { "EmberBlessing", (pieces, gameObj) => new EmberBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) }},
+    { "EmergencyDoor", (pieces, gameObj) => new EmergencyDoorTrait() },
     { "EndGameTrigger", (pieces, gameObj) => new EndGameTriggerTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) }},
     { "Equipable", (pieces, gameObj) => new EquipableTrait() },
     { "Exhausted", (pieces, gameObj) =>  new ExhaustedTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},

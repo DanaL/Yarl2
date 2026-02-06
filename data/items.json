@@ -1491,5 +1491,17 @@
       "Stackable",
       "UseSimple#amnesia"
     ]
+  },
+  {
+    "Name": "EMERGENCY_DOOR",
+    "DescriptiveName": "emergency door",
+    "Type": "Tool",
+    "Value": 20,
+    "Glyph": "(,brown,dullred,black,false",
+    "Traits": [
+      "Stackable",
+      "EmergencyDoor",
+      "Consumable"
+    ]
   }
 ]
