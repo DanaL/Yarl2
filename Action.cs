@@ -734,6 +734,8 @@ class BashAction(GameState gs, Actor actor) : Action(gs, actor)
     if (tile.Type == TileType.ClosedDoor || tile.Type == TileType.LockedDoor)
     {
       ui.AlertPlayer("Bam!");
+      Glyph glyph = Util.TileToGlyph(tile);
+      ui.RegisterAnimation(new SqAnimation(gs, Target, Colours.WHITE, glyph.Lit, '*'));
 
       int dc = 14 + gs.CurrLevel/4;
       int roll = gs.Rng.Next(1, 21) + Actor!.Stats[Attribute.Strength].Curr;
