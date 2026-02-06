@@ -524,8 +524,15 @@ class CreateDoorAction(GameState gs, Actor actor, Item src) : Action(gs, actor)
   public override double Execute()
   {
     Loc loc = Actor!.Loc with { Row = Actor.Loc.Row + Row, Col = Actor.Loc.Col + Col };
+    Tile tile = GameState!.TileAt(loc);
 
-    if (GameState!.ObjDb.Occupied(loc) || GameState!.ObjDb.BlockersAtLoc(loc).Any())
+    if (!(tile.PassableByFlight() || tile.Type == TileType.DungeonWall || tile.Type == TileType.StoneWall || tile.Type == TileType.WoodWall))
+    {
+      GameState.UIRef().AlertPlayer("There's nowhere to put a door there!", GameState, loc);
+
+      return 0.0;
+    }
+    else if (GameState.ObjDb.Occupied(loc) || GameState.ObjDb.BlockersAtLoc(loc).Any())
     {
       GameState.UIRef().AlertPlayer("There's something in the way!", GameState, loc);
 
@@ -752,7 +759,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       }
       else if (item.HasTrait<EmergencyDoorTrait>())
       {
-        dir = new(GameState, false, true) { DeferredAction = new CreateDoorAction(GameState, Actor, item) };
+        dir = new(GameState, false, false) { DeferredAction = new CreateDoorAction(GameState, Actor, item) };
       }
       else
       {
