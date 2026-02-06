@@ -270,6 +270,27 @@ class BarkAnimation : Animation
     _ui = gs.UIRef();
   }
 
+  (string, string) SplitBark(string bark)
+  {
+    int center = bark.Length / 2;
+
+    if (bark[center] == ' ')
+      return (bark[..center], bark[(center + 1)..]);
+
+    for (int offset = 1; offset < bark.Length; offset++)
+    {
+      int left = center - offset;
+      int right = center + offset;
+
+      if (left >= 0 && bark[left] == ' ')
+        return (bark[..left], bark[(left + 1)..]);
+      if (right < bark.Length && bark[right] == ' ')
+        return (bark[..right], bark[(right + 1)..]);
+    }
+
+    return ("", bark);
+  }
+
   void RenderLine(int screenRow, int screenCol, string message)
   {
     int pointerCol = screenCol + 1;
@@ -292,7 +313,9 @@ class BarkAnimation : Animation
     }
     else if (col + message.Length >= UserInterface.ViewWidth)
     {
-      col = UserInterface.ViewWidth - message.Length - 1;
+      (msg2, message) = SplitBark(message);
+      int len = int.Max(msg2.Length, message.Length);
+      col = screenCol - len / 3;
     }
 
     if (msg2.Length > 0)
