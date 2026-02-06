@@ -416,6 +416,9 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     if (Actor is Player && GameState.Player.Lineage == PlayerLineage.Dwarf)
       dc -= 2;
 
+    Glyph glyph = Util.TileToGlyph(GameState.TileAt(loc));
+    GameState.UIRef().RegisterAnimation(new SqAnimation(gs, loc, Colours.WHITE, glyph.Lit, '*'));
+
     if (Actor!.AbilityCheck(Attribute.Strength, dc, GameState.Rng))
     {
       string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "chop")} the door to pieces!";
