@@ -147,8 +147,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     // For now we clear the blockage. For something like a boulder it might
     // break up into rocks. But I'll only do that if rocks have some use in
     // the game.
-    Item blockage = gs.ObjDb.ItemsAt(loc).Where(i => i.HasTrait<BlockTrait>())
-                                         .First();
+    Item blockage = gs.ObjDb.ItemsAt(loc).First(i => i.HasTrait<BlockTrait>());
     string verb = blockage.Type == ItemType.Statue ? "destroy" : "clear";
     if (digger.AbilityCheck(Attribute.Strength, dc, gs.Rng))
     {
@@ -417,7 +416,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       dc -= 2;
 
     Glyph glyph = Util.TileToGlyph(GameState.TileAt(loc));
-    GameState.UIRef().RegisterAnimation(new SqAnimation(gs, loc, Colours.WHITE, glyph.Lit, '*'));
+    GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, loc, Colours.WHITE, glyph.Lit, '*'));
 
     if (Actor!.AbilityCheck(Attribute.Strength, dc, GameState.Rng))
     {
