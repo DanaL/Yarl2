@@ -489,6 +489,8 @@ class HelpScreen : Inputer
 
   public override void Input(char ch)
   {
+    KeyCmd cmd = GS.KeyMap.ToCmd(ch);
+
     if (ch == Constants.ESC)
     {
       Close();
@@ -500,7 +502,7 @@ class HelpScreen : Inputer
       Popup.SetRightPanel(Entries[_selected].Entry);
       Popup.Selected = _selected - 'a';
     }
-    else if (ch == ' ')
+    else if (ch == ' ' || cmd == KeyCmd.MoveE || cmd == KeyCmd.MoveS)
     {
       Popup.NextPage();
     }
