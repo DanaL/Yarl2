@@ -41,7 +41,7 @@ class PlayerCreator
     if (lineage == PlayerLineage.Human)
     {
       Item money = ItemFactory.Get(ItemNames.ZORKMIDS, gs.ObjDb);
-      money.Value = 20;
+      money.Value = 40;
       player.Inventory.Add(money, player.ID);
     }
 
