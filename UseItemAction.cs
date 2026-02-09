@@ -416,7 +416,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       dc -= 2;
 
     Glyph glyph = Util.TileToGlyph(GameState.TileAt(loc));
-    GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, loc, Colours.WHITE, glyph.Lit, '*'));
+    GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, loc, Colours.WHITE, glyph.Lit, '*', 150));
 
     if (Actor!.AbilityCheck(Attribute.Strength, dc, GameState.Rng))
     {
