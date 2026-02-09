@@ -343,19 +343,6 @@
     ]
   },
   {
-    "Name": "POTION_HARDINESS",
-    "DescriptiveName": "potion of hardiness",
-    "Type": "Potion",
-    "Value": 25,
-    "Glyph": "!,brightred,dullred,black,false",
-    "Traits": [
-      "Consumable",
-      "Stackable",
-      "CanApply",
-      "SideEffect#100#BoostMaxStat#BaseHP#5"
-    ]
-  },
-  {
     "Name": "POTION_HEALING",
     "DescriptiveName": "potion of healing",
     "Type": "Potion",

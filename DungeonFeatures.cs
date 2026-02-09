@@ -399,9 +399,9 @@ class IdolAltarMaker
       }
     }
 
-    Item PickPrize(GameObjectDB objDb, Rng rng) => rng.Next(5) switch
+    static Item PickPrize(GameObjectDB objDb, Rng rng) => rng.Next(5) switch
     {
-      0 => ItemFactory.Get(ItemNames.POTION_HARDINESS, objDb),
+      0 => ItemFactory.Get(ItemNames.HILL_GIANT_ESSENCE, objDb),
       1 => ItemFactory.Get(ItemNames.HILL_GIANT_ESSENCE, objDb),
       2 => ItemFactory.Get(ItemNames.FIRE_GIANT_ESSENCE, objDb),
       3 => ItemFactory.Get(ItemNames.FROST_GIANT_ESSENCE, objDb),

@@ -41,7 +41,6 @@ class DebugCommand(GameState gs)
     {"lock pick", ItemNames.LOCK_PICK},
     {"torch", ItemNames.TORCH},
     {"potion of healing", ItemNames.POTION_HEALING},
-    {"potion of hardiness", ItemNames.POTION_HARDINESS},
     {"potion of mind reading", ItemNames.POTION_MIND_READING},
     {"potion of fire resistance", ItemNames.POTION_FIRE_RES},
     {"potion of cold resistance", ItemNames.POTION_COLD_RES},
