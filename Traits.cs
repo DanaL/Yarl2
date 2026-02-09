@@ -353,8 +353,6 @@ class ChampionBlessingTrait : BlessingTrait
     
     gs.Player.Traits.Add(this);
 
-    gs.RegisterForEvent(GameEventType.EndOfRound, this);
-
     return [];
   }
 
@@ -369,7 +367,7 @@ class ChampionBlessingTrait : BlessingTrait
     gs.Player.Traits = [.. gs.Player.Traits.Where(t => t.SourceId != SourceId)];
   }
 
-  public override string AsText() => $"ChampionBlessing#{SourceId}#{ExpiresOn}#{OwnerID}";
+  public override string AsText() => $"ChampionBlessing#{SourceId}#{OwnerID}";
 
   public override string Description(Actor owner)
   {
@@ -2961,7 +2959,7 @@ class PaladinBlessingTrait : ChampionBlessingTrait
     return s;
   }
 
-  public override string AsText() => $"PaladinBlessing#{SourceId}#{ExpiresOn}#{OwnerID}";
+  public override string AsText() => $"PaladinBlessing#{SourceId}#{OwnerID}";
 }
 
 class ParalyzedTrait : TemporaryTrait
@@ -4548,7 +4546,7 @@ class TraitFactory
     {
       "Celerity", (pieces, gameObj) => new CelerityTrait() { SourceId = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) }
     },
-    { "ChampionBlessing", (pieces, gameObj) => new ChampionBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
+    { "ChampionBlessing", (pieces, gameObj) => new ChampionBlessingTrait() { SourceId = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[3]) } },
     { "Cleansing", (pieces, gamObj) => new CleansingTrait() },
     { "Cleave", (pieces, gameObj) => new CleaveTrait() },
     { "CoolDown", (pieces, gameObj) => new CoolDownTrait() { Time = ulong.Parse(pieces[1]), LastUse = ulong.Parse(pieces[2])}},
@@ -4771,7 +4769,7 @@ class TraitFactory
     },
     { "Owned", (pieces, gameObj) => new OwnedTrait() { OwnerIDs = [..pieces[1].Split(',').Select(ulong.Parse)] } },
     { "Opaque", (pieces, gameObj) => new OpaqueTrait() { Visibility = int.Parse(pieces[1]) } },
-    { "PaladinBlessing", (pieces, gameObj) => new PaladinBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
+    { "PaladinBlessing", (pieces, gameObj) => new PaladinBlessingTrait() { SourceId = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[3]) } },
     { "Paralyzed", (pieces, gameObj) => new ParalyzedTrait()
     {
         OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]),
