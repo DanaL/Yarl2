@@ -4614,9 +4614,10 @@ sealed class PassAction : Action
   }      
 }
 
-class HighlightLocAction(GameState gs, Actor actor) : Action(gs, actor)
+class HighlightLocAction(GameState gs, Actor actor, HighlightLocAnimation anim) : Action(gs, actor)
 {
   Loc Loc { get; set; }
+  HighlightLocAnimation _anim = anim;
 
   readonly Dictionary<string, Util.CyclopediaEntry> _cyclopedia = Util.LoadCyclopedia();
 
@@ -4634,8 +4635,9 @@ class HighlightLocAction(GameState gs, Actor actor) : Action(gs, actor)
       popup.Value1 = details.HpCurr;
       popup.Value2 = details.HpMax;
     }
-
-    GameState.UIRef().ZLayer[r, c] = new Sqr(Colours.WHITE, Colours.EXAMINE, details.Ch);
+    
+    _anim.Ch = details.Ch;
+    _anim.Loc = Loc;
     GameState.UIRef().SetPopup(popup);
 
     return 0.0;

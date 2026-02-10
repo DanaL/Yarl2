@@ -65,6 +65,7 @@ class Examiner : Inputer
   int _currTarget;
   (int, int) _curr;
   Loc Target { get; set; }
+  readonly HighlightLocAnimation _highlight;
 
   public Examiner(GameState gs, Loc start) : base(gs)
   {
@@ -72,6 +73,9 @@ class Examiner : Inputer
 
     if (gs.Options.ShowHints)
       gs.UIRef().SetPopup(new Hint(["Hit TAB to see info", "about dungeon features"], gs.UIRef().PlayerScreenRow - 4));
+
+    _highlight = new(gs);
+    gs.UIRef().RegisterAnimation(_highlight);
   }
 
   void FindTargets(Loc start)
@@ -113,7 +117,7 @@ class Examiner : Inputer
           if (CyclopediaEntryExists(form))
             pq.Enqueue(loc, distance);
         }
-        else if (mem.ObjId != 0 && GS.ObjDb.ItemsAt(loc).Where(p => p.Type == ItemType.Landscape).Any())
+        else if (mem.ObjId != 0 && GS.ObjDb.ItemsAt(loc).Any(p => p.Type == ItemType.Landscape))
         {
           pq.Enqueue(loc, distance);
         }
@@ -180,6 +184,7 @@ class Examiner : Inputer
   {
     if (ch == Constants.ESC || ch == '\n' || ch == '\r')
     {
+      _highlight.Expiry = DateTime.MinValue;
       ClearHighlight();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
     }
@@ -191,13 +196,13 @@ class Examiner : Inputer
       var (r, c) = GS.UIRef().LocToScrLoc(Target.Row, Target.Col, GS.Player.Loc.Row, GS.Player.Loc.Col);
       _curr = (r, c);
 
-      DeferredAction = new HighlightLocAction(GS, GS.Player);
+      DeferredAction = new HighlightLocAction(GS, GS.Player, _highlight);
       QueueDeferredAction();      
     }
   }
 
   void ClearHighlight()
-  {
+  {    
     GS.UIRef().ZLayer[_curr.Item1, _curr.Item2] = Constants.BLANK_SQ;
     GS.UIRef().ClosePopup();
   }

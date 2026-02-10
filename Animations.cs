@@ -1043,3 +1043,19 @@ class ScreenShakeAnimation : Animation
     }
   }
 }
+
+class HighlightLocAnimation(GameState gs) : Animation
+{
+  public Loc Loc { get; set; } = Loc.Nowhere;
+  public char Ch { get; set; }
+  readonly GameState _gs = gs;
+  
+  public override void Update()
+  {    
+    if (Loc != Loc.Nowhere)
+    {
+      var (r, c) = _gs.UIRef().LocToScrLoc(Loc.Row, Loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
+      _gs.UIRef().SqsOnScreen[r, c] = new Sqr(Colours.WHITE, Colours.EXAMINE, Ch);
+    }
+  }
+}
