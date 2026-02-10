@@ -603,10 +603,7 @@ class RumBreathAction(GameState gs, Actor actor, Loc target, int range) : Action
     foreach (var pt in affected)
     {
       if (GameState.ObjDb.Occupant(pt) is Actor victim)
-      {
-        foreach (string s in Battle.HandleTipsy(victim, GameState))
-          ui.AlertPlayer(s);
-      }
+        Effects.HandleTipsy(victim, GameState);      
     }
 
     return 1.0;
@@ -3163,10 +3160,9 @@ class DrinkBoozeAction(GameState gs, Actor target) : Action(gs, target)
     if (Actor is Player)
       ui.AlertPlayer("Glug! Glug! Glug!");
     else if (canSeeLoc)
-      ui.AlertPlayer($"{Actor.FullName.Capitalize()} drinks some booze!");
+      ui.AlertPlayer($"{Actor.FullName.Capitalize()} drinks some booze!", GameState, Actor.Loc);
 
-    foreach (string s in Battle.HandleTipsy(Actor, GameState))
-      ui.AlertPlayer(s);
+    Effects.HandleTipsy(Actor, GameState);
 
     return 1.0;
   }

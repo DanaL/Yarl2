@@ -1542,12 +1542,9 @@ class TipsyTrait : TemporaryTrait
 
   public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
-    if (gs.ObjDb.GetObj(OwnerID) is Actor actor)
+    if (gs.ObjDb.GetObj(OwnerID) is Actor && eventType == GameEventType.EndOfRound && gs.Turn > ExpiresOn)
     {
-      if (eventType == GameEventType.EndOfRound && gs.Turn > ExpiresOn)
-      {
-        Remove(gs);
-      }
+      Remove(gs);
     }
   }
 }
