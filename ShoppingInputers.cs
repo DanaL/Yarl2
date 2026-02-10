@@ -125,7 +125,7 @@ class ShopMenuInputer : Inputer
                                     .Select(i => (i.Slot, i.SelectedCount))]
   };
 
-  protected int TotalInvoice() => MenuItems.Values.Select(mi => mi.SelectedCount * mi.Price).Sum();
+  protected int TotalInvoice() => MenuItems.Values.Sum(mi => mi.SelectedCount * mi.Price);
 
   protected virtual string MenuScreen(string blurb, string noInventory = "")
   {

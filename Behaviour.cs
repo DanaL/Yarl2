@@ -428,23 +428,25 @@ class SmithBehaviour : NPCBehaviour
     var sb = new StringBuilder();
     sb.Append('"');
 
-    string blurb;
+    List<string> blurbs = [
+      "If you're looking for arms or armour, I'm the only game in town!",
+      "Weapons or armour showing signs of wear and tear? I can help with that!",
+      "If you find weird gems or monster parts, I may be able to use them to spruce up your gear!"
+    ];
 
     if (gs.FactDb.FactCheck("DwarfMine") is not null && gs.Rng.NextDouble() < 0.25)
     {
-      blurb = "The ancient dwarves used to mine mithril in their tunnels. I could do some keen work with mithril!";
-    }
-    else
-    {
-      blurb = gs.Rng.Next(3) switch
-      {
-        0 => "If you're looking for arms or armour, I'm the only game in town!",
-        1 => "Weapons or armour showing signs of wear and tear? I can help with that!",
-        _ => "If you find weird gems or monster parts, I may be able to use them to spruce up your gear!"
-      };
+      blurbs.Add("The ancient dwarves used to mine mithril in their tunnels. I could do some keen work with mithril!");
     }
 
-    sb.Append(blurb);
+    if (gs.Player.HasTrait<RepugnantTrait>())
+    {
+      blurbs.Add("Do you smell something?");
+      blurbs.Add("Ugh.");
+      blurbs.Add("The quality of clientele is really going downhill.");
+    }
+    
+    sb.Append(blurbs[gs.Rng.Next(blurbs.Count)]);
     sb.Append('"');
 
     return sb.ToString();
@@ -620,13 +622,19 @@ class GrocerBehaviour : NPCBehaviour
     {
       return (new NullAction(), new PauseForMoreInputer(gs));
     }
-    var sb = new StringBuilder();
-    sb.Append("\"Welcome to the ");
-    sb.Append(gs.Town.Name);
-    sb.Append(" market!\"");
-
-    var acc = new ShopMenuInputer(actor, sb.ToString(), gs);
-    var action = new ShoppingCompletedAction(gs, actor);
+    
+    string blurb = $"\"Welcome to the {gs.Town.Name} market!\"";
+    if (gs.Player.HasTrait<RepugnantTrait>()) 
+    {
+      blurb = gs.Rng.Next(3) switch
+      {
+        0 => "Welcome to...oh.",
+        1 => "Do you need something?",
+        _ => "No loitering."
+      };      
+    }
+    ShopMenuInputer acc = new(actor, blurb, gs);
+    ShoppingCompletedAction action = new(gs, actor);
 
     return (action, acc);
   }
