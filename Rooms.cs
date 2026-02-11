@@ -933,6 +933,10 @@ class Rooms
       boss.Traits.Add(new NamedTrait());
     }
 
+    boss.Traits.Add(new AttackModTrait() { Amt = 2, SourceId = boss.ID });
+    boss.Stats[Attribute.HP].ChangeMax(5);
+    boss.Stats[Attribute.HP].Reset();
+    
     int i = rng.Next(spotsNearFire.Count);
     boss.Traits.Add(new HomebodyTrait() { Loc = fireLoc, Range = 3 });
     objDb.AddNewActor(boss, spotsNearFire[i]);
