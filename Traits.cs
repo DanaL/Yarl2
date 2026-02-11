@@ -2192,6 +2192,10 @@ class DiseasedTrait : TemporaryTrait
         disease.ExpiresOn += (ulong) gs.Rng.Next(50, 101);
         return [];
       }
+      else if (t is ConstructTrait || t is PlantTrait || t is UndeadTrait)
+      {
+        return [];
+      }
     }
 
     StatDebuffTrait str = new() { OwnerID = target.ID, SourceId = SourceId, DC = int.MaxValue, ExpiresOn = uint.MaxValue, Attr = Attribute.Strength, Amt = -2 };

@@ -37,12 +37,16 @@ class Effects
 
     foreach (Loc affectedLoc in affected)
     {
-      if (gs.ObjDb.Occupant(affectedLoc) is Actor actor && !actor.HasTrait<ConstructTrait>() && !actor.HasTrait<UndeadTrait>())
-      {
-        List<string> msgs = [$"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "cough")}!" ];            
+      if (gs.ObjDb.Occupant(affectedLoc) is Actor actor)
+      {                
         DiseasedTrait disease = new() { SourceId = spores.ID };
-        msgs.AddRange(disease.Apply(actor, gs));
-        gs.UIRef().AlertPlayer(string.Join(" ", msgs).Trim(), gs, affectedLoc);
+        var res = disease.Apply(actor, gs);
+        if (res.Count > 0) 
+        {
+          List<string> msgs = [$"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "cough")}!" ];            
+          msgs.AddRange(res);
+          gs.UIRef().AlertPlayer(string.Join(" ", msgs).Trim(), gs, affectedLoc);
+        }
       }
     }
 
