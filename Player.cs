@@ -488,9 +488,6 @@ sealed class Player : Actor
     if (result > 0.0)
     {
       gs.PrepareFieldOfView();
-
-      if (!gs.InWilderness)
-        gs.SetDMaps(Loc);
     }
   }
 

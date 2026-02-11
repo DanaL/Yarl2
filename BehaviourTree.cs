@@ -548,20 +548,51 @@ class TryToEscape : BehaviourNode
 {
   Loc GoalLoc { get; set; } = Loc.Nowhere;
 
-  static (Loc, Loc) PickLocToFleeTo(Mob mob, DijkstraMap map, TravelCostFunction costFunc, GameState gs)
+  static (Loc, Loc) PickLocToFleeTo(Mob mob, TravelCostFunction costFunc, GameState gs)
   {
+    Dictionary<(int, int), int> extraLocCosts = [];
+    foreach (GameObj obj in gs.ObjDb.ObjectsOnLevel(mob.Loc.DungeonID, mob.Loc.Level))
+    {
+      foreach (Trait t in obj.Traits)
+      {
+        if (t is BlockTrait)
+        {
+          extraLocCosts[(obj.Loc.Row, obj.Loc.Col)] = DijkstraMap.IMPASSABLE;
+        }
+        else if (t is OnFireTrait)
+        {
+          (int, int) sq = (obj.Loc.Row, obj.Loc.Col);
+          extraLocCosts[sq] = extraLocCosts.GetValueOrDefault(sq, 0) + 15;
+        }
+        else if (t is MoldSporesTrait)
+        {
+          (int, int) sq = (obj.Loc.Row, obj.Loc.Col);
+          extraLocCosts[sq] = extraLocCosts.GetValueOrDefault(sq, 0) + 5;
+        }
+      }
+    }
+
+    foreach (Loc occ in gs.ObjDb.OccupantsOnLevel(mob.Loc.DungeonID, mob.Loc.Level))
+    {
+      extraLocCosts[(occ.Row, occ.Col)] = DijkstraMap.IMPASSABLE;
+    }
+
+    Map map = gs.MapForActor(mob);
+    DijkstraMap dmap = new(map, extraLocCosts, map.Height, map.Width, false);
+    dmap.Generate(costFunc, (mob.Loc.Row, mob.Loc.Col), 10);
+    
     int furthest = 0;
     (int, int) best = (-1, -1);    
     for (int r = int.Max(0, mob.Loc.Row - 10); r <= int.Min(map.Height - 1, mob.Loc.Row + 10); r++)
     {
       for (int c = int.Max(0, mob.Loc.Col - 10); c <= int.Min(map.Width - 1, mob.Loc.Col + 10); c++)
       {
-        if (map.Sqrs[r, c] < int.MaxValue && map.Sqrs[r, c] > furthest)
+        if (dmap.Sqrs[r, c] < int.MaxValue && dmap.Sqrs[r, c] > furthest)
         {
           best = (r, c);
-          furthest = map.Sqrs[r, c];
+          furthest = dmap.Sqrs[r, c];
         }
-        else if (map.Sqrs[r, c] == furthest && gs.Rng.Next(6) == 0)
+        else if (dmap.Sqrs[r, c] == furthest && gs.Rng.Next(6) == 0)
         {
           best = (r, c);
         }          
@@ -576,7 +607,7 @@ class TryToEscape : BehaviourNode
     if (path is not null && path.Count > 0)
       return (path.Peek(), goal);
 
-    return (Loc.Nowhere, Loc.Nowhere);;
+    return (Loc.Nowhere, Loc.Nowhere);
   }
 
   public override PlanStatus Execute(Mob mob, GameState gs)
@@ -591,7 +622,6 @@ class TryToEscape : BehaviourNode
     if (mob.Loc == GoalLoc)
       GoalLoc = Loc.Nowhere;
 
-    DijkstraMap? map = gs.GetDMap();
     TravelCostFunction costFunc = DijkstraMap.Cost;
     bool smart = false;
     bool immobile = false;
@@ -600,22 +630,23 @@ class TryToEscape : BehaviourNode
       if (t is IntelligentTrait)
       {
         smart = true;
-        map = gs.GetDMap("doors");
         costFunc = DijkstraMap.CostWithDoors;
+        break;
       }
       else if (t is FloatingTrait || t is FlyingTrait)
       {
-        map = gs.GetDMap("flying");
         costFunc = DijkstraMap.CostByFlight;
+        break;
       }
       else if (t is ImmobileTrait)
       {
         immobile = true;
+        break;
       }
       else if (t is SwimmerTrait)
       {
-        map = gs.GetDMap("swim");
         costFunc = DijkstraMap.CostForSwimming;
+        break;
       }
     }
 
@@ -650,14 +681,11 @@ class TryToEscape : BehaviourNode
     }
 
     if (!immobile)
-    {      
-      if (map is null)
-        throw new Exception("Dijkstra maps should never be null");
-
+    {
       Loc loc = Loc.Nowhere;
       if (GoalLoc == Loc.Nowhere)
       {
-        var (first, goal) = PickLocToFleeTo(mob, map, costFunc, gs);
+        var (first, goal) = PickLocToFleeTo(mob, costFunc, gs);
         GoalLoc = goal;
         loc = first;
       }
@@ -672,9 +700,9 @@ class TryToEscape : BehaviourNode
         Tile tile = gs.TileAt(loc);
         if (tile is Door door && !door.Open)
           mob.ExecuteAction(new OpenDoorAction(gs, mob, loc));
-        else
+        else 
           mob.ExecuteAction(new MoveAction(gs, mob, loc, false));
-
+        
         return PlanStatus.Running;
       }
       else

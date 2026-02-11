@@ -543,8 +543,7 @@ class GameObjectDB
     [.. _actorLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level)];
 
   public int LevelCensus(int dungeonID, int level) =>
-    _actorLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level)
-                   .Count();
+    _actorLocs.Keys.Count(k => k.DungeonID == dungeonID && k.Level == level);
 
   public void RemoveItemFromLoc(Loc loc, Item item)
   {

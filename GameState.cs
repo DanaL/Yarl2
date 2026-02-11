@@ -37,28 +37,10 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
   public HashSet<ulong> RecentlySeenMonsters { get; set; } = [];
   public Dictionary<Loc, Glyph> LastPlayerFoV = [];
-  DijkstraMap? DMap { get; set; }
-  DijkstraMap? DMapDoors { get; set; }
-  DijkstraMap? DMapFlight { get; set; }
-  DijkstraMap? DMapSwimming { get; set; }
   
   static readonly (KeyMap, string) _keymapResult = KeyMap.LoadKeyMap();
   public KeyMap KeyMap { get; init; } = _keymapResult.Item1;
   public string KeyMapWarning { get; init; } = _keymapResult.Item2;
-
-  public DijkstraMap? GetDMap(string map = "")
-  {
-    if (DMap is null || DMapDoors is null || DMapFlight is null)
-      SetDMaps(Player.Loc);
-
-    return map switch
-    {
-      "doors" => DMapDoors,
-      "flying" => DMapFlight,
-      "swim" => DMapSwimming,
-      _ => DMap
-    };
-  }
 
   public ulong LastTarget { get; set; } = 0;
   public FactDb FactDb => Campaign.FactDb ?? throw new Exception("FactDb should never be null!");
@@ -1366,51 +1348,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     return deck.Monsters[Rng.Next(deck.Monsters.Count)];
   }
 
-  Dictionary<(int, int), int> _extraCosts = [];
-  public void SetDMaps(Loc loc)
-  {    
-    // Mold, fire, etc shouldn't incur extra costs for brainless monsters
-    // but I'd have to do individual pathfinding at that point
-    foreach (GameObj obj in ObjDb.ObjectsOnLevel(loc.DungeonID, loc.Level))
-    {
-      foreach (Trait t in obj.Traits)
-      {
-        if (t is BlockTrait)
-        {
-          _extraCosts[(obj.Loc.Row, obj.Loc.Col)] = DijkstraMap.IMPASSABLE;
-        }
-        else if (t is OnFireTrait)
-        {
-          (int, int) sq = (obj.Loc.Row, obj.Loc.Col);
-          _extraCosts[sq] = _extraCosts.GetValueOrDefault(sq, 0) + 15;
-        }
-        else if (t is MoldSporesTrait)
-        {
-          (int, int) sq = (obj.Loc.Row, obj.Loc.Col);
-          _extraCosts[sq] = _extraCosts.GetValueOrDefault(sq, 0) + 5;
-        }
-      }
-    }
-
-    foreach (Loc occ in ObjDb.OccupantsOnLevel(loc.DungeonID, loc.Level))
-    {
-      _extraCosts[(occ.Row, occ.Col)] = DijkstraMap.IMPASSABLE;
-    }
-
-    DMap = new(CurrentMap, _extraCosts, CurrentMap.Height, CurrentMap.Width, false);
-    DMap.Generate(DijkstraMap.Cost, (loc.Row, loc.Col), 25);
-
-    // I wonder how complicated it would be to generate the maps in parallel...
-    DMapDoors = new(CurrentMap, _extraCosts, CurrentMap.Height, CurrentMap.Width, false);
-    DMapDoors.Generate(DijkstraMap.CostWithDoors, (loc.Row, loc.Col), 25);
-
-    DMapFlight = new(CurrentMap, _extraCosts, CurrentMap.Height, CurrentMap.Width, false);
-    DMapFlight.Generate(DijkstraMap.CostByFlight, (loc.Row, loc.Col), 25);
-
-    DMapSwimming = new(CurrentMap, _extraCosts, CurrentMap.Height, CurrentMap.Width, false);
-    DMapSwimming.Generate(DijkstraMap.CostForSwimming, (loc.Row, loc.Col), 25);
-  }
-
   // At the moment I can't use ResolveActorMove because it calls
   // ObjDb.ActorMoved() which clears out GameObjDb's memory of who
   // is at a particular location, which doesn't work while trying to
@@ -1509,14 +1446,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   public void ResolveActorMove(Actor actor, Loc start, Loc dest)
   {
     ObjDb.ActorMoved(actor, start, dest);
-
-    // Not making dijkstra maps for the otherworld just yet.
-    // Eventually I need to take into account whether or not
-    // monsters can open doors, fly, etc. Multiple maps??
-    if (actor is Player && dest.DungeonID > 0)
-    {
-      SetDMaps(dest);
-    }
 
     Map map = Campaign.Dungeons[dest.DungeonID].LevelMaps[dest.Level];
     Tile tile = map.TileAt(dest.Row, dest.Col);
