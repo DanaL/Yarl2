@@ -1,2 +1,2 @@
 LEVEL 1
-deep one 3,deep one shaman 1,water elemental 1,wraith 1,mud golem 1,giant beetle 1,evil eye 1,winter wolf 1
+deep one 3,deep one shaman 1,water elemental 1,wraith 1,mud golem 1,giant beetle 1,evil eye 1,winter wolf 1,infected mushroom 1

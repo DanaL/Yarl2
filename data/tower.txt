@@ -1,14 +1,14 @@
 LEVEL 1
-giant spider 1,drow warrior 2,shadow 1,ghoul 2,giant toad 1,phantom 1,mud golem 1,lard golem 1,displacer beast 1,hellhound pup 1,killer bee 1,wraith 1,owlbear 1,imp 1,duergar spearfisher 1,dancing sword 1
+giant spider 1,drow warrior 2,shadow 1,ghoul 2,giant toad 1,phantom 1,mud golem 1,lard golem 1,displacer beast 1,hellhound pup 1,killer bee 1,wraith 1,owlbear 1,imp 1,duergar spearfisher 1,dancing sword 1,infected mushroom 1
 LEVEL 2
-giant spider 1,drow warrior 2,shadow 1,ghoul 2,giant toad 1,flame beetle 1,mud golem 1,lard golem 1,phantom summoner 1,displacer beast 1,hellhound pup 1,killer bee 1,wraith 1,owlbear 1,imp 1,duergar spearfisher 1,dancing sword 1
+giant spider 1,drow warrior 2,shadow 1,ghoul 2,giant toad 1,flame beetle 1,mud golem 1,lard golem 1,phantom summoner 1,displacer beast 1,hellhound pup 1,killer bee 1,wraith 1,owlbear 1,imp 1,duergar spearfisher 1,dancing sword 1,infected mushroom 1
 LEVEL 3
-giant spider 1,drow warrior 2,shadow 1,ghoul 2,displacer beast 1,flame spirit 1,flame beetle 1,mud golem 1,lard golem 1,phantom summoner 1,displacer beast 1,hellhound pup 1,killer bee 1,invisible stalker 1,wraith 1,owlbear 1,imp 1,duergar spearfisher 1,dancing sword 1,dancing greatsword 1
+giant spider 1,drow warrior 2,shadow 1,ghoul 2,displacer beast 1,flame spirit 1,flame beetle 1,mud golem 1,lard golem 1,phantom summoner 1,displacer beast 1,hellhound pup 1,killer bee 1,invisible stalker 1,wraith 1,owlbear 1,imp 1,duergar spearfisher 1,dancing sword 1,dancing greatsword 1,infected mushroom 1
 LEVEL 4
-shadow 1,displacer beast 1,flame spirit 1,flame beetle 1,mud golem 1,lard golem 1,phantom summoner 1,displacer beast 1,hellhound 1,killer bee 1,invisible stalker 1,wraith 1,owlbear 1,imp 1,duergar spearfisher 1,dancing sword 1,dancing greatsword 1
+shadow 1,displacer beast 1,flame spirit 1,flame beetle 1,mud golem 1,lard golem 1,phantom summoner 1,displacer beast 1,hellhound 1,killer bee 1,invisible stalker 1,wraith 1,owlbear 1,imp 1,duergar spearfisher 1,dancing sword 1,dancing greatsword 1,infected mushroom 1
 LEVEL 5
-displacer beast 1,flame beetle 1,flame spirit 1,troll 1,mud golem 1,phantom summoner 1,displacer beast 1,hellhound 1,killer bee 1,invisible stalker 1,wraith 1,owlbear 1,duergar spearfisher 1,dancing sword 1,dancing greatsword 1
+displacer beast 1,flame beetle 1,flame spirit 1,troll 1,mud golem 1,phantom summoner 1,displacer beast 1,hellhound 1,killer bee 1,invisible stalker 1,wraith 1,owlbear 1,duergar spearfisher 1,dancing sword 1,dancing greatsword 1,infected mushroom 1
 LEVEL 6
-troll 1,mud golem 1,flame spirit 1,clay golem 1,phantom summoner 1,displacer beast 1,hellhound 1,killer bee 1,invisible stalker 1,wraith 1,owlbear 1,duergar spearfisher 1,dancing sword 1,dancing greatsword 1,evil eye 1,winter wolf 1
+troll 1,mud golem 1,flame spirit 1,clay golem 1,phantom summoner 1,displacer beast 1,hellhound 1,killer bee 1,invisible stalker 1,wraith 1,owlbear 1,duergar spearfisher 1,dancing sword 1,dancing greatsword 1,evil eye 1,winter wolf 1,infected mushroom 1
 LEVEL 7
-troll 1,mud golem 1,clay golem 1,flame spirit 1,phantom summoner 1,displacer beast 1,hellhound 1,killer bee 1,invisible stalker 1,wraith 1,owlbear 1,duergar spearfisher 1,dancing sword 1,dancing greatsword 1,evil eye 1,winter wolf 1
+troll 1,mud golem 1,clay golem 1,flame spirit 1,phantom summoner 1,displacer beast 1,hellhound 1,killer bee 1,invisible stalker 1,wraith 1,owlbear 1,duergar spearfisher 1,dancing sword 1,dancing greatsword 1,evil eye 1,winter wolf 1,infected mushroom 1

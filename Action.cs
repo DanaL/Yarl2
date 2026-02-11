@@ -436,6 +436,51 @@ class ApplyTraitAction : Action
   }
 }
 
+class ReleaseSporesAction(GameState gs, Actor actor, int radius) : Action(gs, actor)
+{
+  readonly int _radius = radius;
+
+  public override double Execute()
+  {
+    base.Execute();
+
+    Map map = GameState!.MapForActor(Actor!);
+    List<Loc> nearby = [.. FieldOfView.CalcVisible(_radius, Actor!.Loc, map, GameState.ObjDb).Keys
+                                      .Where(loc => GameState.TileAt(loc).Passable())];
+
+    if (nearby.Count > 0)
+    {
+      nearby.Shuffle(GameState.Rng);
+      string n = MsgFactory.CalcName(Actor, GameState.Player).Capitalize();
+      GameState.UIRef().AlertPlayer($"{n} {Grammar.Conjugate(Actor, "release")} spores!", GameState, Actor.Loc);
+      int amt = int.Min(nearby.Count, GameState.Rng.Next(1, 4));
+
+      foreach (Loc loc in nearby.Take(amt))
+      {
+        if (!AlreadyMold(GameState, loc))
+        {
+          Item mold = ItemFactory.YellowMold();
+          GameState.ObjDb.Add(mold);
+          GameState.ObjDb.SetToLoc(loc, mold);
+        }
+      }
+    }
+    
+    return 1.0;
+  }
+
+  static bool AlreadyMold(GameState gs, Loc loc)
+  {
+    foreach (Item item in gs.ObjDb.EnvironmentsAt(loc))
+    {
+      if (item.Name == "patch of yellow mold")
+        return true;
+    }
+
+    return false;
+  }
+}
+
 class ShriekAction(GameState gs, Actor actor, int radius) : Action(gs, actor)
 {
   int Radius { get; set; } = radius;

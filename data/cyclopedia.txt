@@ -736,3 +736,6 @@ Resembles an enormous deep one with glowing green eyes. Worshipped as a god by t
 #
 emergency door
 Wizards love to say, "Anything a carpenter can do, I can do better!" and so invented a way to install doors in their homes without paying a contractor. Adventurers did find them useful for creating a barricade in dungeons in a pinch though.
+#
+infected mushroom
+A grotesque, bloated mushroom that seems to shiver and twitch. It does not look delicious at all.

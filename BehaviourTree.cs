@@ -390,6 +390,40 @@ class GulpPower(Power power) : UsePower(power)
   }
 }
 
+class SporesPower(Power power) : UsePower(power)
+{
+  protected override bool Available(Mob mob, GameState gs)
+  {
+    if (mob.LastPowerUse.TryGetValue(Power.Name, out ulong lastUse))
+    {
+      if (gs.Turn < lastUse + Power.Cooldown)
+        return false;
+    }
+
+    Map map = gs.MapForActor(mob);
+    for (int r = mob.Loc.Row - 2; r <= mob.Loc.Row + 2; r++)
+    {
+      for (int c = mob.Loc.Col - 2; c <= mob.Loc.Col + 2; c++)
+      {
+        if (!map.InBounds(r, c))
+          continue;
+        
+        Loc nearby = mob.Loc with { Row = r, Col = c };
+
+        if (nearby == mob.Loc)
+          continue;
+        if (!ClearShot(gs, mob.Loc, nearby))
+          continue;
+
+        if (gs.ObjDb.Occupied(nearby))
+          return true;
+      }
+    }
+
+    return false;
+  }
+}
+
 class HealAlliesPower(Power power) : UsePower(power)
 {
   protected override bool Available(Mob mob, GameState gs)
@@ -1825,6 +1859,7 @@ class Planner
         "Gulp" => new GulpPower(p),
         "Crush" => new CrushPower(p),
         "HealAllies" => new HealAlliesPower(p),
+        "Spores" => new SporesPower(p),
         "TurnIntoBats" => new UseTurnIntoBatsPower(p),
         "Nudity" or "FogCloud" => new SeeToTargetPower(p),
         "Whirlpool" => 
@@ -1909,6 +1944,7 @@ class Planner
         "Gulp" => new GulpPower(p),
         "Crush" => new CrushPower(p),
         "HealAllies" => new HealAlliesPower(p),
+        "Spores" => new SporesPower(p),
         "TurnIntoBats" => new UseTurnIntoBatsPower(p),
         "Nudity" or "FogCloud" => new SeeToTargetPower(p),
         _ => new UsePower(p)

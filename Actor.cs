@@ -774,11 +774,9 @@ sealed class Mob : Actor
         if (item is not null && item.Equipped)
         {
           armour += item.Traits.OfType<ArmourTrait>()
-                               .Select(t => t.ArmourMod + t.Bonus)
-                               .Sum();
+                               .Sum(t => t.ArmourMod + t.Bonus);
           armour += item.Traits.OfType<ACModTrait>()
-                               .Select(t => t.ArmourMod)
-                               .Sum();
+                               .Sum(t => t.ArmourMod);
         }
       }
 
@@ -1240,6 +1238,8 @@ class Power
         txt = $"{mob.FullName.Capitalize()} inflicts poison!";
         string poisoned = $"Poisoned#{DC}#2#0#0#10";
         return new ApplyAffectAction(gs, mob, loc, poisoned, txt);
+      case "Spores":
+        return new ReleaseSporesAction(gs, mob, MaxRange);
       default:
         return new PassAction();
     }
