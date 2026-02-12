@@ -3284,6 +3284,11 @@ class ClarityAction(GameState gs, Actor target) : Action(gs, target)
         tipsy.Remove(GameState!);
         anyRemoved = true;
       }
+      else if (t is FrightenedTrait scared)
+      {
+        scared.Remove(GameState!);
+        anyRemoved = true;
+      }
     }
 
     if (anyRemoved)
