@@ -303,7 +303,7 @@ static void DrawGravestone(UserInterface ui, GameState gameState, List<string> m
   text.Add("");
   text.Add(" a) See your inventory");
   text.Add(" b) View messages");
-  text.Add(" q) Quit");
+  text.Add(" q) Main menu");
 
   int flower = 0;
   ui.ClosePopup();
