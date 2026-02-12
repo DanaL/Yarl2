@@ -2032,6 +2032,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     bool playerSeeInvisible = false;
     bool blind = false;
     StressLevel stress = StressLevel.None;
+    ulong grapplerID = 0;
     foreach (Trait t in Player.Traits)
     {
       if (t is TelepathyTrait)
@@ -2042,6 +2043,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         blind = true;
       else if (t is StressTrait s)
         stress = s.Stress;
+      else if (t is GrappledTrait gt)
+        grapplerID = gt.GrapplerID;
     }
 
     //var stackTrace = new System.Diagnostics.StackTrace();
@@ -2125,6 +2128,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
       if (ObjDb.Occupant(loc) is Actor actor && (actor.Z() > z || playerTelepathic) && Player.GlyphSeen(actor, playerTelepathic, playerSeeInvisible) is Glyph vg)
       {
+        if (grapplerID != 0 && actor.ID == grapplerID)
+          vg = vg with { Lit = vg.Lit with { Alpha = 150 } };
         LastPlayerFoV[loc] = vg;
       }
       else
