@@ -610,6 +610,14 @@ class TryToEscape : BehaviourNode
     return (Loc.Nowhere, Loc.Nowhere);
   }
 
+  static int FleeWithTeleportTraps(Tile tile)
+  {
+    if (tile.Type == TileType.TeleportTrap)
+      return 500;
+
+    return DijkstraMap.CostWithDoors(tile);
+  }
+
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
     if (gs.Rng.Next(10) == 0)
@@ -630,7 +638,7 @@ class TryToEscape : BehaviourNode
       if (t is IntelligentTrait)
       {
         smart = true;
-        costFunc = DijkstraMap.CostWithDoors;
+        costFunc = FleeWithTeleportTraps;
         break;
       }
       else if (t is FloatingTrait || t is FlyingTrait)
