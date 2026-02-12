@@ -75,6 +75,7 @@ static class Colours
   public static readonly Colour BRIGHT_ORANGE = new(255, 127, 0, 255);
   public static readonly Colour BURNT_ORANGE = new(204, 85, 0, 255);
   public static readonly Colour AMBER = new(255, 191, 0, 255);
+  public static readonly Colour LIGHT_BEIGE = new (229, 206, 180, 255); 
 
   public static string ColourToText(Colour colour)
   {
@@ -122,6 +123,7 @@ static class Colours
     else if (colour == BRIGHT_ORANGE) return "brightorange";
     else if (colour == BURNT_ORANGE) return "burntorange";
     else if (colour == AMBER) return "amber";
+    else if (colour == LIGHT_BEIGE) return "lightbeige";
     else throw new Exception($"Hmm I don't know that colour {colour}");
   }
 
@@ -171,6 +173,7 @@ static class Colours
     "brightorange" => BRIGHT_ORANGE,
     "burntorange" => BURNT_ORANGE,
     "amber" => AMBER,
+    "lightbeige" => LIGHT_BEIGE,
     _ => throw new Exception($"Hmm I don't know that colour {colour}")
   };
 

@@ -1484,7 +1484,7 @@
     "DescriptiveName": "emergency door",
     "Type": "Tool",
     "Value": 20,
-    "Glyph": "(,brown,dullred,black,false",
+    "Glyph": "(,lightbeige,lightbrown,black,false",
     "Traits": [
       "Stackable",
       "EmergencyDoor",
