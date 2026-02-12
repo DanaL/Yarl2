@@ -528,7 +528,8 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
   static void AddTreasure(GameObjectDB objDb, List<Loc> floors, int levelNum, Rng rng)
   {
     int zorkmidPiles = 3;
-
+    floors = [.. floors.Where(loc => !objDb.HazardsAtLoc(loc))];
+    
     if (levelNum == 0)
     {
       int numItems = rng.Next(1, 4);
