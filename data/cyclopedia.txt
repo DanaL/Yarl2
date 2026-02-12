@@ -443,6 +443,9 @@ A kobold dressed in officiant robes and carrying a donation box.
 kobold foreman
 A kobold wearing a hard hat and carrying a clipboard. Prefers to delegate taking care of adventurers to underlings.
 #
+kobold supervisor
+This kobold has a nametag indicating its rank and is deeply concerned that the other kobolds aren't meeting their KPIs.
+#
 skeleton key
 So-called because it can unlock many of the doors in the dungeon, but also because it is made out of bones. It doesn't seem very sturdy.
 #

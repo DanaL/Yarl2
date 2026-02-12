@@ -1003,6 +1003,19 @@ class MonsterFactory
     return m;
   }
 
+  public static Actor NamedActor(string name, string template, GameObjectDB objDb, Rng rng)
+  {
+    Actor actor = Get(template, objDb, rng);
+    actor.Name = name;
+    actor.Traits.Add(new NamedTrait());
+    
+    var cyclopedia = Util.LoadCyclopedia();
+    string desc = cyclopedia.TryGetValue(template, out var ce) ? ce.Text : "";
+    actor.Traits.Add(new DescriptionTrait(desc));
+
+    return actor;
+  }
+
   // I didn't put mimics in the monster data file because they're going they
   // need to be placed and configured specifcally anyhow.
   public static Actor Mimic(bool random, Rng rng)

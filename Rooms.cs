@@ -922,15 +922,11 @@ class Rooms
     Actor boss;
     if (ed.Value == "kobold")
     {
-      boss = MonsterFactory.Get("kobold foreman", objDb, rng);
-      boss.Name = ng.BossName();
-      boss.Traits.Add(new NamedTrait());
+      boss = MonsterFactory.NamedActor(ng.BossName(), "kobold foreman", objDb, rng);
     }
     else // goblins
     {
-      boss = MonsterFactory.Get("hobgoblin", objDb, rng);
-      boss.Name = ng.BossName();
-      boss.Traits.Add(new NamedTrait());
+      boss = MonsterFactory.NamedActor(ng.BossName(), "hobgoblin", objDb, rng);      
     }
 
     boss.Traits.Add(new AttackModTrait() { Amt = 2, SourceId = boss.ID });

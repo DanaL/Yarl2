@@ -529,7 +529,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
   {
     int zorkmidPiles = 3;
     floors = [.. floors.Where(loc => !objDb.HazardsAtLoc(loc))];
-    
+
     if (levelNum == 0)
     {
       int numItems = rng.Next(1, 4);
@@ -744,9 +744,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
     if (earlyDenizen == "kobold")
     {
-      Actor ks = MonsterFactory.Get("kobold supervisor", objDb, rng);
-      ks.Name = "the Kobold Regional Manager";
-      ks.Traits.Add(new NamedTrait());
+      Actor ks = MonsterFactory.NamedActor("the Kobold Regional Manager", "kobold supervisor", objDb, rng);
       ks.Traits.Add(new ImmunityTrait() { ExpiresOn = ulong.MaxValue, SourceId = ks.ID, Type = DamageType.Fire });
       ks.Stats[Attribute.AttackBonus] = new Stat(6);
       ks.Stats[Attribute.HP] = new Stat(35);
