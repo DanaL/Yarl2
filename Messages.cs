@@ -102,7 +102,10 @@ class MsgFactory
     }
     else if (obj is Actor actor)
     {
-      if (actor.IsDisguised())
+      bool disguised = actor.IsDisguised();
+      bool visible = actor.VisibleTo(player);
+
+      if (disguised)
       {
         DisguiseTrait dt = actor.Traits.OfType<DisguiseTrait>().First();
 
@@ -114,7 +117,11 @@ class MsgFactory
             _ => dt.DisguiseForm
           });
       }
-      else if (actor.VisibleTo(player))
+      else if (visible && actor.HasTrait<NamedTrait>())
+      {
+        sb.Append(actor.FullName);
+      }
+      else if (visible)
       {
         sb.Append(
           article switch
