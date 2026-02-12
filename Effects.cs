@@ -481,7 +481,7 @@ class Effects
     {
       if (t is TipsyTrait tt)
         tipsy = tt;
-      else if (t is UndeadTrait || t is ConstructTrait || t is PlantTrait)
+      else if (t is UndeadTrait || t is ConstructTrait || t is PlantTrait || t is BrainlessTrait)
         immuneToBooze = true;
     }
 
