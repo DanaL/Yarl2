@@ -89,15 +89,10 @@ class Examiner : Inputer
     {
       for (int c = 0; c < UserInterface.ViewWidth; c++)
       {
-        Loc loc = new(start.DungeonID, start.Level, startRow + r, startCol + c);
-        
-        if (!GS.CurrentDungeon.RememberedLocs.TryGetValue(loc, out var mem))
-          continue;
-        
+        Loc loc = new(start.DungeonID, start.Level, startRow + r, startCol + c);        
         int distance = Distance(GS.Player.Loc, loc);
-
         Actor? occupant = GS.ObjDb.Occupant(loc);
-
+          
         if (occupant is not null && PlayerAwareOfActor(occupant, GS))
         {
           if (loc == GS.Player.Loc)
@@ -116,6 +111,10 @@ class Examiner : Inputer
                                        .First().DisguiseForm;
           if (CyclopediaEntryExists(form))
             pq.Enqueue(loc, distance);
+        }
+        if (!GS.CurrentDungeon.RememberedLocs.TryGetValue(loc, out var mem)) 
+        {
+          continue;
         }
         else if (mem.ObjId != 0 && GS.ObjDb.ItemsAt(loc).Any(p => p.Type == ItemType.Landscape))
         {
