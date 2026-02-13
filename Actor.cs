@@ -539,12 +539,17 @@ abstract class Actor : GameObj, IZLevel
 
     if (candidateSqs.Count > 0)
     {
-      var spot = candidateSqs[gs.Rng.Next(candidateSqs.Count)];
-      var other = MonsterFactory.Get(Name, gs.ObjDb, gs.Rng);
-      var hp = Stats[Attribute.HP].Curr / 2;
-      var half = Stats[Attribute.HP].Curr - hp;
+      Loc spot = candidateSqs[gs.Rng.Next(candidateSqs.Count)];
+      Actor other = MonsterFactory.Get(Name, gs.ObjDb, gs.Rng);
+      int hp = Stats[Attribute.HP].Curr / 2;
+      int half = Stats[Attribute.HP].Curr - hp;
       Stats[Attribute.HP].Curr = hp;
       other.Stats[Attribute.HP].SetMax(half);
+
+      if (other.Stats.TryGetValue(Attribute.MobAttitude, out Stat? attitude))
+      {
+        attitude.SetMax(Mob.AGGRESSIVE);
+      }
 
       string msg = $"{Name.DefArticle().Capitalize()} divides in two!!";
       gs.UIRef().AlertPlayer(msg, gs, Loc);
