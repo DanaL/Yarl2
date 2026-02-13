@@ -681,7 +681,7 @@ class OptionsScreen : Inputer
     else if ((cmd == KeyCmd.MoveW || cmd == KeyCmd.MoveE) && row == 8)
     {
       int delta = cmd == KeyCmd.MoveW ? -2 : 2;
-      int newSize = Math.Clamp(GS.Options.FontSize + delta, 10, 30);
+      int newSize = Math.Clamp(GS.Options.FontSize + delta, 10, 64);
       if (newSize != GS.Options.FontSize)
       {
         GS.Options.FontSize = newSize;

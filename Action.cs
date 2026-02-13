@@ -983,7 +983,8 @@ abstract class PortalAction : Action
       start = follower.Loc;
       Loc dest = Util.NearestUnoccupiedLoc(GameState, portal.Destination);
       GameState.ResolveActorMove(follower, start, dest);
-
+      follower.Energy = 0.0;
+      
       if (GameState.Rng.NextDouble() < 0.5)
         GameState.SwapActors(player, follower);
     }
