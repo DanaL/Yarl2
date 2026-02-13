@@ -4719,7 +4719,7 @@ class HighlightLocAction(GameState gs, Actor actor, HighlightLocAnimation anim) 
       }
       else
       {
-        name = actor.Name.IndefArticle().Capitalize();
+        name = MsgFactory.CalcName(actor, GameState.Player, Article.InDef).Capitalize();
         if (_cyclopedia.TryGetValue(actor.Name, out var v))
           desc = v.Text;
         if (actor.Traits.OfType<DescriptionTrait>().FirstOrDefault() is DescriptionTrait dt)
