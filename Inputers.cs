@@ -1628,18 +1628,18 @@ sealed class PauseForMoreInputer(GameState gs) : Inputer(gs)
 sealed class LongMessagerInputer : Inputer
 {
   readonly UserInterface _ui;
-  int _row;
   readonly List<string> _wrappedLines;
+  int _page;
   int _pageCount;
-  
+
   public LongMessagerInputer(GameState gs, UserInterface ui, IEnumerable<string> lines) : base(gs)
   {
     _ui = ui;
-    _wrappedLines = WrapLines(lines);
+    _wrappedLines = WrapLines(lines);    
+    _page = 0;
+    _pageCount = _wrappedLines.Count / (UserInterface.ScreenHeight - 1) + 1;
 
-    List<string> page = [.. _wrappedLines.Take(UserInterface.ScreenHeight)];
-    ui.SetLongMessage(page);
-    _row = page.Count;
+    WriteScreen();
   }
 
   static List<string> WrapLines(IEnumerable<string> lines)
@@ -1679,22 +1679,37 @@ sealed class LongMessagerInputer : Inputer
 
   public override void Input(char ch)
   {
-    if (_row >= _wrappedLines.Count)
+    KeyCmd cmd = GS.KeyMap.ToCmd(ch);
+
+    if (cmd == KeyCmd.MoveN || cmd == KeyCmd.MoveW)
+    {
+      _page = int.Max(0, --_page);
+    }
+    else if (ch == ' ' || cmd == KeyCmd.MoveE || cmd == KeyCmd.MoveS)
+    {
+      ++_page;
+    }
+
+    if (ch == Constants.ESC || _page >= _pageCount)
     {
       _ui.ClearLongMessage();
       _ui.SetInputController(new PlayerCommandController(GS));
-    }
-    else
-    {
-      List<string> page = [.. _wrappedLines.Skip(_row).Take(UserInterface.ScreenHeight - 1)];
-      ++_pageCount;
-      string txt = $"~ page {_pageCount + 1} ~";
-      txt = txt.PadLeft(UserInterface.ScreenWidth / 2 - txt.Length + txt.Length / 2, ' ');
-      page.Insert(0, txt);
 
-      _ui.SetLongMessage(page);
-      _row += page.Count;
+      return;
     }
+
+    WriteScreen();
+  }
+
+  void WriteScreen()
+  {
+    List<string> lines = [];
+    string header = $"~ page {_page + 1} ~";  
+    header = header.PadLeft(UserInterface.ScreenWidth / 2 - header.Length / 2, '_');
+    lines.Add(header);
+    lines.AddRange(_wrappedLines.Skip(_page * (UserInterface.ScreenHeight - 1)).Take(UserInterface.ScreenHeight - 1));
+    
+    _ui.SetLongMessage(lines);    
   }
 }
 
