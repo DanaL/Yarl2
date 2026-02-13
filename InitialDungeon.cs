@@ -420,7 +420,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
         Loc loc = candidates[rng.Next(candidates.Count)];
         Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
-        statue.Traits.Add(new DescriptionTrait(decoration.Desc.Capitalize()));
+        statue.Traits.Add(new DescriptionTrait(decoration.Desc));
         objDb.SetToLoc(loc, statue);
       }
       else if (decoration.Type == DecorationType.Mosaic)
@@ -429,7 +429,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
           continue;
 
         Loc loc = floors[rng.Next(floors.Count)];
-        Landmark mosaic = new(decoration.Desc.Capitalize());
+        Landmark mosaic = new(decoration.Desc);
         map.SetTile(loc.Row, loc.Col, mosaic);
       }
       else if (decoration.Type == DecorationType.Fresco)
