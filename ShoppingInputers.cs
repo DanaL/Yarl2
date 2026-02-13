@@ -236,10 +236,12 @@ class InnkeeperInputer : Inputer
   bool InsufficentFunds { get; set; }
   string Selection { get; set; } = "";
   int Zorkmids { get; set; }
+  string _blurb;
 
   public InnkeeperInputer(Actor shopkeeper, GameState gs) : base(gs)
   {
     Shopkeeper = shopkeeper;
+    _blurb = Blurb();
     WritePopup();
   }
 
@@ -307,7 +309,7 @@ class InnkeeperInputer : Inputer
     sb.Append(".\n\nWelcome to [LIGHTBLUE ");
     sb.Append(tavernName.Value);
     sb.Append("]!\n\n");
-    sb.Append(Blurb());
+    sb.Append(_blurb);
     sb.Append("\n\n");
     sb.Append("a) Purchase a flagon of booze. [YELLOW $]2\n");
     sb.Append("b) Rent a bed and rest. [YELLOW $]5\n");
