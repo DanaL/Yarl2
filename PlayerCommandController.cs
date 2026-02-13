@@ -86,6 +86,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
         case TileType.Landmark:
         case TileType.Upstairs:
         case TileType.Downstairs:
+        case TileType.MistyPortal:
           return true;
       }
 
