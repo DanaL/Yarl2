@@ -472,6 +472,11 @@ abstract class UserInterface
         row = WriteSideBarLine(Colours.BRIGHT_RED, "BERZERK", statusLineNum--);
         _statuses.Add("BERZERK");
       }
+      else if (!_statuses.Contains("SEE INVISIBLE") && trait is SeeInvisibleTrait)
+      {
+        row = WriteSideBarLine(Colours.ICE_BLUE, "SEE INVISIBLE", statusLineNum--);
+        _statuses.Add("SEE INVISIBLE");        
+      }
       else if (!_statuses.Contains("PROTECTION") && trait is AuraOfProtectionTrait aura)
       {
         Colour colour;
