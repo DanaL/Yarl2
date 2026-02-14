@@ -585,7 +585,12 @@ abstract class UserInterface
     {
       WriteSideBarLine(Colours.GREEN, "FAST", statusLineNum--);
       _statuses.Add("FAST");
-    }    
+    }
+    if (!_statuses.Contains("BLESSED") && gs.Player.HasTrait<BlessingTrait>())
+    {
+      WriteSideBarLine(Colours.ICE_BLUE, "BLESSED", statusLineNum--);
+      _statuses.Add("YELLOW");
+    }
     if (!_statuses.Contains("DISEASED") && gs.Player.HasTrait<DiseasedTrait>())
     {
       WriteSideBarLine(Colours.LIME_GREEN, "DISEASED", statusLineNum--);
