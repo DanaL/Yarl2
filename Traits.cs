@@ -212,10 +212,12 @@ class AuraOfProtectionTrait : TemporaryTrait
   public override string AsText() => $"AuraOfProtection#{HP}";
 }
 
-abstract class BlessingTrait : TemporaryTrait
+abstract class BlessingTrait : Trait
 {
-  protected override string ExpiryMsg => "Your blessing fades.";
+  public ulong OwnerID {  get; set; }
+
   public abstract string Description(Actor owner);
+  public abstract void Apply(GameObj granter, GameState gs);
 }
 
 // For items that can be used by the Apply command but don't need to
@@ -277,10 +279,12 @@ class DragonCultBlessingTrait : BlessingTrait
 {
   const int MP_COST = 3;
 
-  public override string Description(Actor owner) => "Dragon cult clessing";
+  public override string Description(Actor owner) => "Dragon cult blessing";
 
-  public override List<string> Apply(GameObj _, GameState gs)
+  public override void Apply(GameObj _, GameState gs)
   {
+    OwnerID = gs.Player.ID;
+
     ACModTrait ac = new() { ArmourMod = 3, SourceId = Constants.DRAGON_GOD_ID };
     gs.Player.Traits.Add(ac);
 
@@ -302,42 +306,16 @@ class DragonCultBlessingTrait : BlessingTrait
     gs.Player.Traits.Add(sniffer);
 
     gs.Player.Traits.Add(this);
-
-    gs.RegisterForEvent(GameEventType.EndOfRound, this);
-
-    return [];
   }
 
-  public override void Remove(GameState gs)
-  {
-    base.Remove(gs);
-
-    gs.Player.SpellsKnown.Remove("breather fire");
-    if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var mp))
-    {
-      mp.ChangeMax(-MP_COST);
-    }
-
-    List<Trait> playerTraits = [.. gs.Player.Traits];
-    foreach (Trait t in playerTraits)
-    {
-      if (t is TemporaryTrait temp && temp.SourceId == SourceId)
-      {
-        temp.Remove(gs);
-      }
-    }
-
-    gs.Player.Traits = [.. gs.Player.Traits.Where(t => t.SourceId != SourceId)];
-  }
-
-  public override string AsText() => $"DragonCultBlessing#{SourceId}#{ExpiresOn}#{OwnerID}";
+  public override string AsText() => $"DragonCultBlessing#{OwnerID}";
 }
 
 class ChampionBlessingTrait : BlessingTrait
 {
   protected virtual string Title => "Champion";
 
-  public override List<string> Apply(GameObj granter, GameState gs)
+  public override void Apply(GameObj granter, GameState gs)
   {
     int piety = gs.Player.Stats[Attribute.Piety].Max;
 
@@ -352,19 +330,6 @@ class ChampionBlessingTrait : BlessingTrait
     gs.Player.Traits.Add(amt);
     
     gs.Player.Traits.Add(this);
-
-    return [];
-  }
-
-  public override void Remove(GameState gs)
-  {
-    base.Remove(gs);
-
-    StatBuffTrait hpBuff = (StatBuffTrait) gs.Player.Traits.Where(t => t is StatBuffTrait sbt && sbt.SourceId == SourceId && sbt.Attr == Attribute.HP)
-                                                           .First();
-    hpBuff.Remove(gs);
-
-    gs.Player.Traits = [.. gs.Player.Traits.Where(t => t.SourceId != SourceId)];
   }
 
   public override string AsText() => $"ChampionBlessing#{SourceId}#{OwnerID}";
@@ -957,13 +922,13 @@ class EquipableTrait : Trait
 
 class EmberBlessingTrait : BlessingTrait
 {
-  public override List<string> Apply(GameObj granter, GameState gs)
+  public override void Apply(GameObj granter, GameState gs)
   {
     ResistanceTrait resist = new()
     {
       SourceId = granter.ID,
       OwnerID = gs.Player.ID,
-      ExpiresOn = ExpiresOn,
+      ExpiresOn = ulong.MaxValue,
       Type = DamageType.Fire
     };
     // I'm not calling the Apply() method here because I don't want a separate listener
@@ -984,21 +949,9 @@ class EmberBlessingTrait : BlessingTrait
     gs.Player.Traits.Add(rebuke);
 
     gs.Player.Traits.Add(this);
-
-    gs.RegisterForEvent(GameEventType.EndOfRound, this);
-
-    return [];
   }
 
-  public override void Remove(GameState gs)
-  {
-    base.Remove(gs);
-
-    gs.Player.Traits = [.. gs.Player.Traits.Where(t => t.SourceId != SourceId)];
-  }
-
-  public override string AsText() => $"EmberBlessing#{SourceId}#{ExpiresOn}#{OwnerID}";
-  
+  public override string AsText() => $"EmberBlessing#{SourceId}#{OwnerID}";
   public override string Description(Actor owner) => "Ember blessing";
 }
 
@@ -2937,15 +2890,13 @@ class PaladinBlessingTrait : ChampionBlessingTrait
 {
   protected override string Title => "Paladin";
 
-  public override List<string> Apply(GameObj granter, GameState gs)
+  public override void Apply(GameObj granter, GameState gs)
   {
     base.Apply(granter, gs);
 
     int numOfDie = 1 + gs.Player.Stats[Attribute.Piety].Max - 3;
     DamageTrait dt = new() { SourceId = granter.ID, DamageType = DamageType.Holy, DamageDie = 6, NumOfDie = numOfDie };
     gs.Player.Traits.Add(dt);
-
-    return [];
   }
 
   public override string Description(Actor owner)
@@ -3521,7 +3472,7 @@ class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
 
 class ReaverBlessingTrait : BlessingTrait
 {
-  public override List<string> Apply(GameObj granter, GameState gs)
+  public override void Apply(GameObj granter, GameState gs)
   {
     int piety = gs.Player.Stats[Attribute.Piety].Max;
 
@@ -3532,20 +3483,9 @@ class ReaverBlessingTrait : BlessingTrait
     gs.Player.Traits.Add(fright);
 
     gs.Player.Traits.Add(this);
-
-    gs.RegisterForEvent(GameEventType.EndOfRound, this);
-
-    return [];
   }
 
-  public override void Remove(GameState gs)
-  {
-    base.Remove(gs);
-
-    gs.Player.Traits = [.. gs.Player.Traits.Where(t => t.SourceId != SourceId)];
-  }
-
-  public override string AsText() => $"ReaverBlessing#{SourceId}#{ExpiresOn}#{OwnerID}";
+  public override string AsText() => $"ReaverBlessing#{SourceId}#{OwnerID}";
 
   public override string Description(Actor owner)
   {
@@ -4306,7 +4246,7 @@ class TransformedTrait : TemporaryTrait
 
 class TricksterBlessingTrait : BlessingTrait
 {
-  public override List<string> Apply(GameObj granter, GameState gs)
+  public override void Apply(GameObj granter, GameState gs)
   {
     QuietTrait quiet = new() { SourceId = granter.ID };
     gs.Player.Traits.Add(quiet);
@@ -4325,27 +4265,9 @@ class TricksterBlessingTrait : BlessingTrait
     }
 
     gs.Player.Traits.Add(this);
-
-    gs.RegisterForEvent(GameEventType.EndOfRound, this);
-
-    return [];
   }
 
-  public override void Remove(GameState gs)
-  {
-    base.Remove(gs);
-
-    gs.Player.SpellsKnown.Remove("phase door");
-    if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var mp))
-    {
-      mp.ChangeMax(-2);
-    }
-
-    gs.Player.Traits = [.. gs.Player.Traits.Where(t => t.SourceId != SourceId)];
-  }
-
-  public override string AsText() => $"TricksterBlessing#{SourceId}#{ExpiresOn}#{OwnerID}";
-
+  public override string AsText() => $"TricksterBlessing#{SourceId}#{OwnerID}";
   public override string Description(Actor owner) => "Trickster blessing";
 }
 
@@ -4407,13 +4329,12 @@ class WeaponBonusTrait : Trait
 
 class WinterBlessingTrait : BlessingTrait
 {
-  public override List<string> Apply(GameObj granter, GameState gs)
+  public override void Apply(GameObj granter, GameState gs)
   {
     ResistanceTrait resist = new()
     {
       SourceId = granter.ID,
       OwnerID = gs.Player.ID,
-      ExpiresOn = ExpiresOn,
       Type = DamageType.Cold
     };
     gs.Player.Traits.Add(resist);
@@ -4434,28 +4355,9 @@ class WinterBlessingTrait : BlessingTrait
     }
 
     gs.Player.Traits.Add(this);
-
-    gs.RegisterForEvent(GameEventType.EndOfRound, this);
-
-    return [];
   }
 
-  public override void Remove(GameState gs)
-  {
-    base.Remove(gs);
-
-    gs.Player.SpellsKnown.Remove("cone of cold");
-    gs.Player.SpellsKnown.Remove("gust of wind");
-    if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var mp))
-    {
-      mp.ChangeMax(-2);
-    }
-
-    gs.Player.Traits = [.. gs.Player.Traits.Where(t => t.SourceId != SourceId)];
-  }
-
-  public override string AsText() => $"WinterBlessing#{SourceId}#{ExpiresOn}#{OwnerID}";
-
+  public override string AsText() => $"WinterBlessing#{SourceId}#{OwnerID}";
   public override string Description(Actor owner) => "Winter blessing";
 }
 
@@ -4619,16 +4521,14 @@ class TraitFactory
     { "DoorKey", (pieces, gameObj) => new DoorKeyTrait() { DCMod = int.Parse(pieces[1])} },
     { "DragonCultBlessing", (pieces, gameObj) => new DragonCultBlessingTrait()
       {
-        SourceId = ulong.Parse(pieces[1]),
-        ExpiresOn = ulong.Parse(pieces[2]),
-        OwnerID = ulong.Parse(pieces[3])
+        OwnerID = ulong.Parse(pieces[1])
       }
     },
     { "Drop", (pieces, gameObj) => new DropTrait() { ItemName = pieces[1], Chance = int.Parse(pieces[2]) }},
     { "Drowning", (pieces, gameObj) => new DrowningTrait() },
     { "Edible", (pieces, gameObj) => new EdibleTrait() },
     { "Electrocutes", (pieces, gameObj) => new ElectrocutesTrait() { DC = int.Parse(pieces[1]), Duration = int.Parse(pieces[2]) }},
-    { "EmberBlessing", (pieces, gameObj) => new EmberBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) }},
+    { "EmberBlessing", (pieces, gameObj) => new EmberBlessingTrait() { SourceId = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) }},
     { "EmergencyDoor", (pieces, gameObj) => new EmergencyDoorTrait() },
     { "EndGameTrigger", (pieces, gameObj) => new EndGameTriggerTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) }},
     { "Equipable", (pieces, gameObj) => new EquipableTrait() },
@@ -4800,7 +4700,7 @@ class TraitFactory
         ?? throw new ArgumentException("gameObj must be an Actor for RageTrait")) },
     { "Reach", (pieces, gameObj) => new ReachTrait() },
     { "Readable", (pieces, gameObj) => new ReadableTrait(pieces[1].Replace("<br/>", "\n")) { OwnerID = ulong.Parse(pieces[2]) } },
-    { "ReaverBlessing", (pieces, gameObj) => new ReaverBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
+    { "ReaverBlessing", (pieces, gameObj) => new ReaverBlessingTrait() { SourceId = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
     { "Recall", (pieces, gameObj) => new RecallTrait() { ExpiresOn = ulong.Parse(pieces[1]), Expired = bool.Parse(pieces[2]) } },
     { "Regeneration", (pieces, gameObj) => {
       ulong sourceId = pieces.Length > 5 ? ulong.Parse(pieces[5]) : 0;
@@ -4925,7 +4825,7 @@ class TraitFactory
         TransformedIds = pieces[4] == "" ? [] : [..pieces[3].Split(',').Select(ulong.Parse)]
       }
     },
-    { "TricksterBlessing", (pieces, gameObj) => new TricksterBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
+    { "TricksterBlessing", (pieces, gameObj) => new TricksterBlessingTrait() { SourceId = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
     { "TwoHanded", (pieces, gameObj) => new TwoHandedTrait() },
     { "Undead", (pieces, gameObj) => new UndeadTrait() },
     { "UseSimple", (pieces, gameObj) => new UseSimpleTrait(pieces[1]) },
@@ -4956,7 +4856,7 @@ class TraitFactory
     { "WeaponBonus", (pieces, gameObj) => new WeaponBonusTrait() { Bonus = int.Parse(pieces[1]) } },
     { "WeaponSpeed", (pieces, gameObj) => new WeaponSpeedTrait() { Cost = Util.ToDouble(pieces[1]) } },
     { "WearAndTear", (pieces, gameObj) => new WearAndTearTrait() { Wear = int.Parse(pieces[1])} },
-    { "WinterBlessing", (pieces, gameObj) => new WinterBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
+    { "WinterBlessing", (pieces, gameObj) => new WinterBlessingTrait() { SourceId = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[3]) } },
     { "Worshiper", (pieces, gameObj) => new WorshiperTrait() { AltarLoc = Loc.FromStr(pieces[1]), AltarId = ulong.Parse(pieces[2]), Chant = pieces[3] } }
   };
 

@@ -164,16 +164,6 @@ class DebugCommand(GameState gs)
       _gs.Player.Stats[Attribute.HP].Reset();
       return "";
     }
-    else if (txt == "nobless")
-    {
-      List<Trait> traits = [.. _gs.Player.Traits.Where(t => t is BlessingTrait)];
-      foreach (BlessingTrait t in traits.Cast<BlessingTrait>())
-      {
-        t.ExpiresOn = 1;
-      }
-
-      return "";
-    }
     else if (txt == "pit")
     {
       List<Loc> adj = AdjSpots(_gs.Player.Loc);

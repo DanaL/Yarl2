@@ -154,12 +154,7 @@ class Kobold
       gs.UIRef().AlertPlayer("Savour this taste of the power of dragonkind!");
       gs.UIRef().SetPopup(new Popup("Savour this taste of the power of dragonkind!", "", -1, -1));
 
-      DragonCultBlessingTrait cultBlessing = new() 
-      { 
-        SourceId = Constants.DRAGON_GOD_ID, ExpiresOn = gs.Turn + 2000, 
-        OwnerID = gs.Player.ID
-      };
-
+      DragonCultBlessingTrait cultBlessing = new() { SourceId = Constants.DRAGON_GOD_ID, OwnerID = gs.Player.ID };
       cultBlessing.Apply(gs.Player, gs);
     }
 

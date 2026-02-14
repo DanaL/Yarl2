@@ -1784,7 +1784,6 @@ class DialogueInterpreter
     {
       int piety = gs.Player.Stats[Attribute.Piety].Max;
       Sb.Append("\n\nIf you would seek to drive back the darkness, I can offer you a blessing!");
-      Sb.Append("\n\n(Blessings are buffs that will eventually wear off, and you'll need to return if you want another)");
       
       if (piety < 3)
         Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Champion]: Huntokar's grace shall protect you and lead your blade to strike true!", opt++, new ScriptChampionBlessing()));
@@ -1821,7 +1820,7 @@ class DialogueInterpreter
 
   static void EvalChampionBlessing(Actor mob, GameState gs)
   {
-    ChampionBlessingTrait blessing = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 2000, OwnerID = gs.Player.ID };
+    ChampionBlessingTrait blessing = new() { SourceId = mob.ID, OwnerID = gs.Player.ID };
     blessing.Apply(mob, gs);
     gs.Player.Stats[Attribute.LastBlessing].SetMax(1);
     
@@ -1830,7 +1829,7 @@ class DialogueInterpreter
 
   static void EvalPaladinBlessing(Actor mob, GameState gs)
   {
-    PaladinBlessingTrait blessing = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 2000, OwnerID = gs.Player.ID };
+    PaladinBlessingTrait blessing = new() { SourceId = mob.ID, OwnerID = gs.Player.ID };
     blessing.Apply(mob, gs);
     gs.Player.Stats[Attribute.LastBlessing].SetMax(1);
     
@@ -1839,7 +1838,7 @@ class DialogueInterpreter
 
   static void EvalReaverBlessing(Actor mob, GameState gs)
   {
-    ReaverBlessingTrait reaver = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 2000, OwnerID = gs.Player.ID };
+    ReaverBlessingTrait reaver = new() { SourceId = mob.ID, OwnerID = gs.Player.ID };
     reaver.Apply(mob, gs);
     gs.Player.Stats[Attribute.LastBlessing].SetMax(1);
 
@@ -1848,7 +1847,7 @@ class DialogueInterpreter
 
   static void EvalEmberBlessing(Actor mob, GameState gs)
   {
-    EmberBlessingTrait ember = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 2000, OwnerID = gs.Player.ID };
+    EmberBlessingTrait ember = new() { SourceId = mob.ID, OwnerID = gs.Player.ID };
     ember.Apply(mob, gs);
     gs.Player.Stats[Attribute.LastBlessing].SetMax(2);
 
@@ -1857,7 +1856,7 @@ class DialogueInterpreter
 
   static void EvalTricksterBlessing(Actor mob, GameState gs)
   {
-    TricksterBlessingTrait trickster = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 2000, OwnerID = gs.Player.ID };
+    TricksterBlessingTrait trickster = new() { SourceId = mob.ID, OwnerID = gs.Player.ID };
     trickster.Apply(mob, gs);
     gs.Player.Stats[Attribute.LastBlessing].SetMax(4);
 
@@ -1866,7 +1865,7 @@ class DialogueInterpreter
 
   static void EvalWinterBlessing(Actor mob, GameState gs)
   {
-    WinterBlessingTrait winter = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 2000, OwnerID = gs.Player.ID };
+    WinterBlessingTrait winter = new() { SourceId = mob.ID, OwnerID = gs.Player.ID };
     winter.Apply(mob, gs);
     gs.Player.Stats[Attribute.LastBlessing].SetMax(5);
     

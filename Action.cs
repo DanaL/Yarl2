@@ -984,7 +984,7 @@ abstract class PortalAction : Action
       Loc dest = Util.NearestUnoccupiedLoc(GameState, portal.Destination);
       GameState.ResolveActorMove(follower, start, dest);
       follower.Energy = 0.0;
-      
+
       if (GameState.Rng.NextDouble() < 0.5)
         GameState.SwapActors(player, follower);
     }
@@ -1184,7 +1184,7 @@ class InnkeeperServiceAction : Action
 
       // Resting at an inn cures poison. It's part of room service.
       List<TemporaryTrait> toRemove = [.. GameState.Player.Traits.OfType<TemporaryTrait>()
-                                                  .Where(t => t is PoisonedTrait || t is BlessingTrait)];
+                                                  .Where(t => t is PoisonedTrait)];
       foreach (TemporaryTrait t in toRemove)
       {
         t.Remove(GameState);
