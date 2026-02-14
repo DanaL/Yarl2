@@ -604,12 +604,12 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     else if (cmd == KeyCmd.Messages)
     {
       var lines = ui.MessageHistory.Select(m => m.Fmt);
-      ui.SetInputController(new LongMessagerInputer(GS, ui, lines));
+      ui.SetInputController(new LongMessagerInputer(GS, ui, lines, true));
     }
     else if (cmd == KeyCmd.CharacterSheet)
     {
       List<string> lines = GS.Player.CharacterSheet();
-      ui.SetInputController(new LongMessagerInputer(GS, ui, lines));
+      ui.SetInputController(new LongMessagerInputer(GS, ui, lines, false));
     }
     else if (cmd == KeyCmd.CheatSheetMode)
     {

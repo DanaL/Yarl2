@@ -1630,14 +1630,19 @@ sealed class LongMessagerInputer : Inputer
   readonly UserInterface _ui;
   readonly List<string> _wrappedLines;
   int _page;
-  int _pageCount;
+  readonly int _pageCount;
+  readonly int _pageSize;
 
-  public LongMessagerInputer(GameState gs, UserInterface ui, IEnumerable<string> lines) : base(gs)
+  readonly bool _showPageCount = false;
+
+  public LongMessagerInputer(GameState gs, UserInterface ui, IEnumerable<string> lines, bool showPageCount) : base(gs)
   {
     _ui = ui;
     _wrappedLines = WrapLines(lines);    
     _page = 0;
-    _pageCount = _wrappedLines.Count / (UserInterface.ScreenHeight - 1) + 1;
+    _pageSize = showPageCount ? (UserInterface.ScreenHeight - 1) : UserInterface.ScreenHeight;
+    _pageCount = _wrappedLines.Count / _pageSize + 1;
+    _showPageCount = showPageCount;
 
     WriteScreen();
   }
@@ -1704,10 +1709,14 @@ sealed class LongMessagerInputer : Inputer
   void WriteScreen()
   {
     List<string> lines = [];
-    string header = $"~ page {_page + 1} ~";  
-    header = header.PadLeft(UserInterface.ScreenWidth / 2 - header.Length / 2, '_');
-    lines.Add(header);
-    lines.AddRange(_wrappedLines.Skip(_page * (UserInterface.ScreenHeight - 1)).Take(UserInterface.ScreenHeight - 1));
+    if (_showPageCount)
+    {
+      string header = $"~ page {_page + 1} ~";  
+      header = header.PadLeft(UserInterface.ScreenWidth / 2 - header.Length / 2, '_');
+      lines.Add(header);  
+    }
+    
+    lines.AddRange(_wrappedLines.Skip(_page * (UserInterface.ScreenHeight - 1)).Take(_pageSize));
     
     _ui.SetLongMessage(lines);    
   }
