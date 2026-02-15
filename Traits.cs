@@ -317,16 +317,14 @@ class ChampionBlessingTrait : BlessingTrait
 
   public override void Apply(GameObj granter, GameState gs)
   {
-    int piety = gs.Player.Stats[Attribute.Piety].Max;
-
-    ACModTrait ac = new() { ArmourMod = 1 + piety, SourceId = granter.ID };
+    
+    ACModTrait ac = new() { ArmourMod = 1, SourceId = granter.ID };
     gs.Player.Traits.Add(ac);
 
-    int hpAmt = int.Max(1, piety) * 5;
-    StatBuffTrait sbt = new() { Attr = Attribute.HP, Amt = hpAmt, ExpiresOn = ulong.MaxValue, SourceId = granter.ID, MaxHP = true };
+    StatBuffTrait sbt = new() { Attr = Attribute.HP, Amt = 5, ExpiresOn = ulong.MaxValue, SourceId = granter.ID, MaxHP = true };
     sbt.Apply(gs.Player, gs);
 
-    AttackModTrait amt = new() { Amt = 1 + piety, SourceId = granter.ID };
+    AttackModTrait amt = new() { Amt = 1, SourceId = granter.ID };
     gs.Player.Traits.Add(amt);
     
     gs.Player.Traits.Add(this);
@@ -2894,8 +2892,7 @@ class PaladinBlessingTrait : ChampionBlessingTrait
   {
     base.Apply(granter, gs);
 
-    int numOfDie = 1 + gs.Player.Stats[Attribute.Piety].Max - 3;
-    DamageTrait dt = new() { SourceId = granter.ID, DamageType = DamageType.Holy, DamageDie = 6, NumOfDie = numOfDie };
+    DamageTrait dt = new() { SourceId = granter.ID, DamageType = DamageType.Holy, DamageDie = 6, NumOfDie = 1 };
     gs.Player.Traits.Add(dt);
   }
 
@@ -3474,12 +3471,10 @@ class ReaverBlessingTrait : BlessingTrait
 {
   public override void Apply(GameObj granter, GameState gs)
   {
-    int piety = gs.Player.Stats[Attribute.Piety].Max;
-
-    MeleeDamageModTrait dmg = new() { Amt = 2 + piety, SourceId = granter.ID };
+    MeleeDamageModTrait dmg = new() { Amt = 2, SourceId = granter.ID };
     gs.Player.Traits.Add(dmg);
 
-    FrighteningTrait fright = new() { DC = 10 + piety, SourceId = granter.ID };
+    FrighteningTrait fright = new() { DC = 13, SourceId = granter.ID };
     gs.Player.Traits.Add(fright);
 
     gs.Player.Traits.Add(this);

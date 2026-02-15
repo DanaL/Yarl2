@@ -976,8 +976,6 @@ class DialogueInterpreter
         return gs.FactDb.FactCheck("OrchardExists") is SimpleFact;
       case "HERETICAL_ITEM":
         return PlayerHasHereticalItem(gs);
-      case "PLAYER_PIETY":
-        return gs.Player.Stats[Attribute.Piety].Max;
       case "MAGIC101":
         return gs.Player.Stats.ContainsKey(Attribute.MagicPoints);
       case "IMPRISONED_BY":
@@ -1313,7 +1311,6 @@ class DialogueInterpreter
         Attribute.Strength => "You feel stronger!",
         Attribute.Dexterity => "You feel more agile!",
         Attribute.Constitution => "You feel hardier!",
-        Attribute.Piety => "You feel appropriately pious!",
         _ => "You feel a little different!"
       };
       gs.UIRef().AlertPlayer(msg);
@@ -1782,18 +1779,14 @@ class DialogueInterpreter
 
     if (!blessed)
     {
-      int piety = gs.Player.Stats[Attribute.Piety].Max;
       Sb.Append("\n\nIf you would seek to drive back the darkness, I can offer you a blessing!");
       
-      if (piety < 3)
-        Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Champion]: Huntokar's grace shall protect you and lead your blade to strike true!", opt++, new ScriptChampionBlessing()));
-      else
-        Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Paladin]: You will bring Huntokar's wrath to your foes!", opt++, new ScriptPaladinBlessing()));
+      Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Champion]: Huntokar's grace shall protect you and lead your blade to strike true!", opt++, new ScriptChampionBlessing()));
+      //else
+      //  Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Paladin]: You will bring Huntokar's wrath to your foes!", opt++, new ScriptPaladinBlessing()));
       
       //Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Reaver]: Bring Huntokar's wrath to your foes, turning you into a frightening presence!", opt++, new ScriptReaverBlessing()));
-
-      if (gs.Player.Stats[Attribute.Piety].Max >= 2)
-        Options.Add(new DialogueOption("The [ICEBLUE Winter's Blessing]: Use the power of arctic storms to aid your quest!", opt++, new ScriptWinterBlessing()));
+      //Options.Add(new DialogueOption("The [ICEBLUE Winter's Blessing]: Use the power of arctic storms to aid your quest!", opt++, new ScriptWinterBlessing()));
 
       //Options.Add(new DialogueOption("The [ICEBLUE Blessing of Embers]: Huntokar will surround you in holy fire and immolate evil you face!", opt++, new ScriptEmberBlessing()));
       //Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Trickster]: Draw upon Huntokars's mischevious aspects and elude your foes!", opt++, new ScriptTricksterBlessing()));      
@@ -1880,10 +1873,9 @@ class DialogueInterpreter
       Item skull = skulls[0];
       gs.Player.Inventory.RemoveByID(skull.ID, gs);
       gs.ObjDb.RemoveItemFromGame(Loc.Nowhere, skull);
-      gs.Player.Stats[Attribute.Piety].ChangeMax(1);
     }
 
-    throw new ConversationEnded("I'll see to it that these remains are sancitified and given a proper burial.");
+    throw new ConversationEnded("I'll see to it that these remains are sanctified and given a proper burial.");
   }
 
   static void EvalBuyHolyWater(Actor mob, GameState gs)

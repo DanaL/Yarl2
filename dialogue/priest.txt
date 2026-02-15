@@ -1,9 +1,5 @@
 ﻿(
-  (cond
-    ((= PLAYER_PIETY 0) (say "Greetings, child. "))
-    ((= PLAYER_PIETY 1) (say "Greetings, [GREEN Seeker]. "))
-    (else (say "Greetings, oh [BLUE righteous faithful]. "))
-  )
+   (say "Greetings, [GREEN Seeker]. ")
   
   (def lines '("It is my duty to look after the spiritual well-being of #TOWN_NAME." 
           "Have you heard the good word about Huntokar?"

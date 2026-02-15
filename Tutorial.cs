@@ -22,7 +22,6 @@ class Tutorial(UserInterface ui)
       { Attribute.Strength, new Stat(3) },
       { Attribute.Constitution, new Stat(1) },
       { Attribute.Dexterity, new Stat(1) },
-      { Attribute.Piety, new Stat(0) },
       { Attribute.Will, new Stat(0) },
       { Attribute.Depth, new Stat(0) },
       { Attribute.HP, new Stat(1) },

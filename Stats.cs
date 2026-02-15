@@ -22,7 +22,6 @@ enum Attribute
   Strength,
   Dexterity,
   Constitution,
-  Piety, // What I renamed D&D's Wisdom to
   Will,
   AttackBonus,
   Depth,
