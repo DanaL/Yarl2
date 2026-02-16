@@ -1,18 +1,29 @@
 ﻿(
   (cond
-    ((= BLESSED false) (say "Greetings, [GREEN Seeker]. If you wish to help out #TOWN_NAME, Huntokar can guide and protect you. Will you accept Huntokar's [LIGHTBLUE blessing]? "))
-    (else (say "Greetings, [GREEN Child]. "))
-  )
-   
-  (def lines '("It is my duty to look after the spiritual well-being of #TOWN_NAME." 
+    ((= BLESSED false) (
+        (say "Greetings, [GREEN Seeker]. ")
+        
+        (def lines '("If you wish to help out #TOWN_NAME, Huntokar can guide and protect you. Will you accept Huntokar's [LIGHTBLUE blessing]?"
+          "It is my duty to look after the spiritual well-being of #TOWN_NAME." 
           "Have you heard the good word about Huntokar?"
           "I feel in my bones that the [BRIGHTRED old evil] begins to stir once more."
+          "Adventurers defeated Arioch but they appear to be waking again."
+          )
+        )
+      ))
+    (else (
+        (say "Greetings, [GREEN Child]. ")
+    
+        (def lines '(
           "Long ago, the ruins were a mighty kindgom. But then a great evil arose deep underground."
           "Adventurers defeated Arioch but they appear to be waking again."
           "Huntokar weeps for those whose bones lay in the depths without having proper funerary rites."
           "There were shrines to Huntokar below ground, but foul monsters have desecrated them. A terrible sin!")
+        )
+      )
+    )
   )
-
+  
   (cond
     ((= ORCHARD_EXISTS true) 
       (append lines "It is said in ancient days the elves of old would grow magic fruit in their secret orchards.")
