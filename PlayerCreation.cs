@@ -123,67 +123,57 @@ class PlayerCreator
     };
   }
 
-  // If I use this enough, move it to Utils?
-  static int Roll3d6(Rng rng) => rng.Next(1, 7) + rng.Next(1, 7) + rng.Next(1, 7);
-  static int StatRoll(Rng rng) => Util.StatRollToMod(Roll3d6(rng));
-
   static Dictionary<Attribute, Stat> RollStats(PlayerLineage lineage, PlayerBackground background, Rng rng)
   {
-    // First, set the basic stats
     var stats = new Dictionary<Attribute, Stat>()
     {
-      { Attribute.Strength, new Stat(StatRoll(rng)) },
-      { Attribute.Constitution, new Stat(StatRoll(rng)) },
-      { Attribute.Dexterity, new Stat(StatRoll(rng)) },      
-      { Attribute.Will, new Stat(StatRoll(rng)) },
       { Attribute.Depth, new Stat(0) },
       { Attribute.Nerve, new Stat(1250) },
       { Attribute.LastBlessing, new Stat(0) },
       { Attribute.BaseHP, new Stat(10) }
     };
 
-    int roll;
+    int[] arr = [-2, -1, -1, -1, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2];
+    switch (background)
+    {
+      case PlayerBackground.Warrior: 
+        stats[Attribute.Strength] = new Stat(int.Min(2, rng.Next(0, 4)));
+        stats[Attribute.Constitution] = new Stat(arr[rng.Next(arr.Length)]);
+        stats[Attribute.Dexterity] = new Stat(arr[rng.Next(arr.Length)]);
+        stats[Attribute.Will] = new Stat(arr[rng.Next(arr.Length - 2)]);
+        break;
+      case PlayerBackground.Skullduggery:
+        stats[Attribute.Dexterity] = new Stat(int.Min(2, rng.Next(0, 4)));
+        stats[Attribute.Constitution] = new Stat(arr[rng.Next(arr.Length)]);
+        stats[Attribute.Strength] = new Stat(arr[rng.Next(arr.Length - 2)]);
+        stats[Attribute.Will] = new Stat(arr[rng.Next(arr.Length - 2)]);
+        break;
+      case PlayerBackground.Scholar:
+        stats[Attribute.Will] = new Stat(int.Min(2, rng.Next(0, 4)));
+        stats[Attribute.Constitution] = new Stat(arr[rng.Next(arr.Length)]);
+        stats[Attribute.Dexterity] = new Stat(arr[rng.Next(arr.Length)]);
+        stats[Attribute.Strength] = new Stat(arr[rng.Next(arr.Length - 2)]);
+        stats.Add(Attribute.MagicPoints, new Stat(rng.Next(2, 5)));
+        break;      
+    }
 
     switch (lineage)
     {
       case PlayerLineage.Orc:
-        roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
-        if (roll > stats[Attribute.Strength].Curr)
-          stats[Attribute.Strength].SetMax(roll);
+        stats[Attribute.Strength].ChangeMax(1);
+        stats[Attribute.Strength].Reset();
         break;
       case PlayerLineage.Elf:
-        roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
-        if (roll > stats[Attribute.Dexterity].Curr)
-          stats[Attribute.Dexterity].SetMax(roll);
+        stats[Attribute.Dexterity].ChangeMax(1);
+        stats[Attribute.Dexterity].Reset();
         stats.Add(Attribute.ArcheryBonus, new Stat(2));
         break;
       case PlayerLineage.Dwarf:
-        roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
-        if (roll > stats[Attribute.Constitution].Curr)
-          stats[Attribute.Constitution].SetMax(roll);
+        stats[Attribute.Constitution].ChangeMax(1);
+        stats[Attribute.Constitution].Reset();
         break;
     }
-
-    switch (background)
-    {
-      case PlayerBackground.Warrior:
-        roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
-        if (roll > stats[Attribute.Strength].Curr)
-          stats[Attribute.Strength].SetMax(roll);
-        break;
-      case PlayerBackground.Skullduggery:
-        roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
-        if (roll > stats[Attribute.Dexterity].Curr)
-          stats[Attribute.Dexterity].SetMax(roll);
-        break;
-      case PlayerBackground.Scholar:
-        roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
-        if (roll > stats[Attribute.Will].Curr)
-          stats[Attribute.Will].SetMax(roll);
-        stats.Add(Attribute.MagicPoints, new Stat(rng.Next(2, 5)));
-        break;      
-    }
-    
+ 
     stats.Add(Attribute.HP, new Stat(1));
 
     return stats;
