@@ -898,7 +898,7 @@ class Dialoguer : Inputer
     if (string.IsNullOrEmpty(blurb))
       return "";
 
-    StringBuilder sb = new(_interlocutor.Appearance.Capitalize());
+    StringBuilder sb = new(_interlocutor.Appearance.IndefArticle().Capitalize());
     sb.Append("\n\n");
 
     sb.Append('"');
