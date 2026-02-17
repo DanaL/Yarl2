@@ -311,5 +311,11 @@ class PlayerCreator
         }
       }
     }
+
+    if (player.Background == PlayerBackground.Skullduggery)
+    {
+      Item lockpick = ItemFactory.Get(ItemNames.LOCK_PICK, gs.ObjDb);
+      player.Inventory.Add(lockpick, player.ID);
+    }
   }
 }
