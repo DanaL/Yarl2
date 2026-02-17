@@ -3,11 +3,10 @@
     ((= BLESSED false) (
         (say "Greetings, [GREEN Seeker]. ")
         
-        (def lines '("If you wish to help out #TOWN_NAME, Huntokar can guide and protect you. Will you accept Huntokar's [LIGHTBLUE blessing]?"
-          "It is my duty to look after the spiritual well-being of #TOWN_NAME." 
-          "Have you heard the good word about Huntokar?"
-          "I feel in my bones that the [BRIGHTRED old evil] begins to stir once more."
-          "Adventurers defeated Arioch but they appear to be waking again."
+        (def lines '("If you wish to help out #TOWN_NAME, Huntokar can guide and protect you.\n\nFollowing Huntokar's teachings lead you on a path of bravery and justice."
+          "It is my duty to look after the spiritual well-being of #TOWN_NAME.\n\nFollowing Huntokar's teachings lead you on a path of bravery and justice." 
+          "Have you heard the good word about Huntokar?\n\nIf you accept Their ways, you will be protected on your heroic journey."
+          "I feel in my bones that the [BRIGHTRED old evil] begins to stir once more.\n\nHuntokar can provide aid to one who would seek to battle that darkness."
           )
         )
       ))

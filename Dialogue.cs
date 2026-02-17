@@ -1785,10 +1785,8 @@ class DialogueInterpreter
     char opt = 'a';
 
     if (!blessed)
-    {
-      Sb.Append("\n\nIf you would seek to drive back the darkness, I can offer you a blessing!");
-      
-      Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Champion]: Huntokar's grace shall protect you and lead your blade to strike true!", opt++, new ScriptChampionBlessing()));
+    {      
+      Options.Add(new DialogueOption("Accept the [ICEBLUE Blessing of the Champion]: Huntokar's grace shall protect you and lead your blade to strike true!", opt++, new ScriptChampionBlessing()));
       //else
       //  Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Paladin]: You will bring Huntokar's wrath to your foes!", opt++, new ScriptPaladinBlessing()));
       
