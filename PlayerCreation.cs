@@ -27,16 +27,55 @@ class PlayerCreator
       Energy = 1.0,
       ID = Constants.PLAYER_ID
     };
-    player.Stats = RollStats(player.Lineage, player.Background, rng);
+
+    player.Stats = new Dictionary<Attribute, Stat>()
+    {
+      { Attribute.Depth, new Stat(0) },
+      { Attribute.Nerve, new Stat(1250) },
+      { Attribute.LastBlessing, new Stat(0) },
+      { Attribute.BaseHP, new Stat(10) }
+    };
+
     player.Stats[Attribute.MainQuestState] = new Stat(0);
     player.Traits.Add(new SwimmerTrait());
     player.Inventory = new Inventory(player.ID, gs.ObjDb);
 
     gs.ObjDb.Add(player);
 
-    SetInitialAbilities(player);
-    SetStartingGear(player, gs, rng);
+    switch (background)
+    {
+      case PlayerBackground.Warrior:
+        CreateWarrior(lineage, player, gs, rng);
+        break;
+      case PlayerBackground.Skullduggery:
+        CreateRogue(player, gs, rng);
+        break;
+      case PlayerBackground.Scholar:
+        CreateScholar(player, gs.ObjDb, rng);
+        break;
+    }
 
+    switch (lineage)
+    {
+      case PlayerLineage.Orc:
+        player.Stats[Attribute.Strength].ChangeMax(1);
+        player.Stats[Attribute.Strength].Reset();
+        player.Traits.Add(new RageTrait(player));
+        break;
+      case PlayerLineage.Elf:
+        player.Stats[Attribute.Dexterity].ChangeMax(1);
+        player.Stats[Attribute.Dexterity].Reset();
+        player.Stats.Add(Attribute.ArcheryBonus, new Stat(2));
+        player.Stats.Add(Attribute.FinesseUse, new Stat(100));
+        break;
+      case PlayerLineage.Dwarf:
+        player.Stats[Attribute.Constitution].ChangeMax(1);
+        player.Stats[Attribute.Constitution].Reset();
+        break;
+    }
+ 
+    player.Stats.Add(Attribute.HP, new Stat(1));
+    
     // Humans start with a little more money than the others
     if (lineage == PlayerLineage.Human)
     {
@@ -53,6 +92,167 @@ class PlayerCreator
     player.Stats[Attribute.HP].Reset();
     
     return player;
+  }
+
+  static int[] _basicStatArray = [-2, -1, -1, -1, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2];
+  static void CreateWarrior(PlayerLineage lineage, Player player, GameState gs, Rng rng)
+  {
+    player.Stats[Attribute.Strength] = new Stat(int.Min(2, rng.Next(0, 4)));
+    player.Stats[Attribute.Constitution] = new Stat(_basicStatArray[rng.Next(_basicStatArray.Length)]);
+    player.Stats[Attribute.Dexterity] = new Stat(_basicStatArray[rng.Next(_basicStatArray.Length)]);
+    player.Stats[Attribute.Will] = new Stat(_basicStatArray[rng.Next(_basicStatArray.Length - 2)]);
+
+    char slot;
+    Item leather = ItemFactory.Get(ItemNames.LEATHER_ARMOUR, gs.ObjDb);
+    leather.Traits.Add(new AdjectiveTrait("battered"));
+    leather.Slot = 'b';
+
+    Item startWeapon;
+
+    switch (lineage)
+    {
+      case PlayerLineage.Orc:
+        startWeapon = ItemFactory.Get(ItemNames.SHORTSHORD, gs.ObjDb);
+        slot = player.Inventory.Add(leather, player.ID);
+        player.Inventory.ToggleEquipStatus(slot);
+        player.Stats.Add(Attribute.SwordUse, new Stat(100));
+        break;
+      case PlayerLineage.Dwarf:
+        startWeapon = ItemFactory.Get(ItemNames.HAND_AXE, gs.ObjDb);
+        Item studded = ItemFactory.Get(ItemNames.RINGMAIL, gs.ObjDb);
+        studded.Slot = 'b';
+        slot = player.Inventory.Add(studded, player.ID);
+        player.Inventory.ToggleEquipStatus(slot);
+        Item helmet = ItemFactory.Get(ItemNames.HELMET, gs.ObjDb);
+        helmet.Slot = 'c';
+        slot = player.Inventory.Add(helmet, player.ID);
+        player.Inventory.ToggleEquipStatus(slot);
+        player.Stats.Add(Attribute.AxeUse, new Stat(100));
+        break;
+      case PlayerLineage.Elf:
+        startWeapon = ItemFactory.Get(ItemNames.DAGGER, gs.ObjDb);
+        Item bow = ItemFactory.Get(ItemNames.LONGBOW, gs.ObjDb);
+        bow.Slot = 'b';
+        slot = player.Inventory.Add(bow, player.ID);
+        player.Inventory.ToggleEquipStatus(slot);
+        player.Stats.Add(Attribute.BowUse, new Stat(100));        
+        leather.Slot = 'c';
+        slot = player.Inventory.Add(leather, player.ID);
+        player.Inventory.ToggleEquipStatus(slot);
+        break;
+      default:
+        startWeapon = ItemFactory.Get(ItemNames.SPEAR, gs.ObjDb);
+        startWeapon.Traits.Add(new AdjectiveTrait("old"));
+        slot = player.Inventory.Add(leather, player.ID);
+        player.Inventory.ToggleEquipStatus(slot);
+        player.Stats.Add(Attribute.PolearmsUse, new Stat(100));
+        break;
+    }
+
+    startWeapon.Slot = 'a';
+    slot = player.Inventory.Add(startWeapon, player.ID);
+    player.Inventory.ToggleEquipStatus(slot);
+
+    // Everyone gets 3 to 5 torches to start with
+    for (int i = 0; i < rng.Next(3, 6); i++)
+    {
+      player.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, gs.ObjDb), player.ID);
+    }
+
+    Item money = ItemFactory.Get(ItemNames.ZORKMIDS, gs.ObjDb);
+    money.Value = rng.Next(25, 51);
+    player.Inventory.Add(money, player.ID);
+
+    foreach (Item item in player.Inventory.Items())
+    {
+      if (item.Equipped && item.HasTrait<GrantsTrait>())
+      {
+        foreach (Trait t in item.Traits)
+        {
+          if (t is GrantsTrait grants)
+            grants.Grant(player, gs, item);
+        }
+      }
+    }
+  }
+
+  static void CreateScholar(Player player, GameObjectDB objDb, Rng rng)
+  {
+    player.Stats[Attribute.Will] = new Stat(int.Min(2, rng.Next(0, 4)));
+    player.Stats[Attribute.Constitution] = new Stat(_basicStatArray[rng.Next(_basicStatArray.Length)]);
+    player.Stats[Attribute.Dexterity] = new Stat(_basicStatArray[rng.Next(_basicStatArray.Length)]);
+    player.Stats[Attribute.Strength] = new Stat(_basicStatArray[rng.Next(_basicStatArray.Length - 2)]);
+    player.Stats.Add(Attribute.MagicPoints, new Stat(rng.Next(2, 5)));
+    player.SpellsKnown.Add("arcane spark");
+
+    char slot;
+
+    Item dagger = ItemFactory.Get(ItemNames.DAGGER, objDb);
+    slot = player.Inventory.Add(dagger, player.ID);
+    player.Inventory.ToggleEquipStatus(slot);
+
+    Item focus = ItemFactory.Get(ItemNames.GENERIC_WAND, objDb);
+    slot = player.Inventory.Add(focus, player.ID);
+    player.Inventory.ToggleEquipStatus(slot);
+
+    for (int i = 0; i < rng.Next(3, 6); i++)
+    {
+      player.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), player.ID);
+    }
+
+    // Scholars start off with less money because they are still paying off
+    // their student loans
+    Item money = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+    money.Value = rng.Next(10, 26);
+    player.Inventory.Add(money, player.ID);
+  }
+
+  static void CreateRogue(Player player, GameState gs, Rng rng)
+  {
+    player.Stats[Attribute.Dexterity] = new Stat(int.Min(2, rng.Next(0, 4)));
+    player.Stats[Attribute.Constitution] = new Stat(_basicStatArray[rng.Next(_basicStatArray.Length)]);
+    player.Stats[Attribute.Strength] = new Stat(_basicStatArray[rng.Next(_basicStatArray.Length - 2)]);
+    player.Stats[Attribute.Will] = new Stat(_basicStatArray[rng.Next(_basicStatArray.Length - 2)]);
+    player.Traits.Add(new LightStepTrait());
+    
+    if (!player.Stats.ContainsKey(Attribute.FinesseUse))
+      player.Stats.Add(Attribute.FinesseUse, new Stat(100));
+    
+    Item startWeapon = ItemFactory.Get(ItemNames.DAGGER, gs.ObjDb);    
+    startWeapon.Slot = 'a';
+    player.Inventory.Add(startWeapon, player.ID);
+    player.Inventory.ToggleEquipStatus('a');
+
+    Item leather = ItemFactory.Get(ItemNames.LEATHER_ARMOUR, gs.ObjDb);
+    leather.Traits.Add(new AdjectiveTrait("battered"));
+    leather.Slot = 'b';
+    player.Inventory.Add(leather, player.ID);
+    player.Inventory.ToggleEquipStatus('b');
+
+    Item lockpick = ItemFactory.Get(ItemNames.LOCK_PICK, gs.ObjDb);
+    player.Inventory.Add(lockpick, player.ID);
+
+    // Everyone gets 3 to 5 torches to start with
+    for (int i = 0; i < rng.Next(3, 6); i++)
+    {
+      player.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, gs.ObjDb), player.ID);
+    }
+
+    Item money = ItemFactory.Get(ItemNames.ZORKMIDS, gs.ObjDb);
+    money.Value = rng.Next(25, 51);
+    player.Inventory.Add(money, player.ID);
+
+    foreach (Item item in player.Inventory.Items())
+    {
+      if (item.Equipped && item.HasTrait<GrantsTrait>())
+      {
+        foreach (Trait t in item.Traits)
+        {
+          if (t is GrantsTrait grants)
+            grants.Grant(player, gs, item);
+        }
+      }
+    }
   }
 
   static PlayerLineage PickLineage(UserInterface ui)
@@ -121,201 +321,5 @@ class PlayerCreator
       '2' => PlayerBackground.Scholar,
       _ => PlayerBackground.Skullduggery
     };
-  }
-
-  static Dictionary<Attribute, Stat> RollStats(PlayerLineage lineage, PlayerBackground background, Rng rng)
-  {
-    var stats = new Dictionary<Attribute, Stat>()
-    {
-      { Attribute.Depth, new Stat(0) },
-      { Attribute.Nerve, new Stat(1250) },
-      { Attribute.LastBlessing, new Stat(0) },
-      { Attribute.BaseHP, new Stat(10) }
-    };
-
-    int[] arr = [-2, -1, -1, -1, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2];
-    switch (background)
-    {
-      case PlayerBackground.Warrior: 
-        stats[Attribute.Strength] = new Stat(int.Min(2, rng.Next(0, 4)));
-        stats[Attribute.Constitution] = new Stat(arr[rng.Next(arr.Length)]);
-        stats[Attribute.Dexterity] = new Stat(arr[rng.Next(arr.Length)]);
-        stats[Attribute.Will] = new Stat(arr[rng.Next(arr.Length - 2)]);
-        break;
-      case PlayerBackground.Skullduggery:
-        stats[Attribute.Dexterity] = new Stat(int.Min(2, rng.Next(0, 4)));
-        stats[Attribute.Constitution] = new Stat(arr[rng.Next(arr.Length)]);
-        stats[Attribute.Strength] = new Stat(arr[rng.Next(arr.Length - 2)]);
-        stats[Attribute.Will] = new Stat(arr[rng.Next(arr.Length - 2)]);
-        break;
-      case PlayerBackground.Scholar:
-        stats[Attribute.Will] = new Stat(int.Min(2, rng.Next(0, 4)));
-        stats[Attribute.Constitution] = new Stat(arr[rng.Next(arr.Length)]);
-        stats[Attribute.Dexterity] = new Stat(arr[rng.Next(arr.Length)]);
-        stats[Attribute.Strength] = new Stat(arr[rng.Next(arr.Length - 2)]);
-        stats.Add(Attribute.MagicPoints, new Stat(rng.Next(2, 5)));
-        break;      
-    }
-
-    switch (lineage)
-    {
-      case PlayerLineage.Orc:
-        stats[Attribute.Strength].ChangeMax(1);
-        stats[Attribute.Strength].Reset();
-        break;
-      case PlayerLineage.Elf:
-        stats[Attribute.Dexterity].ChangeMax(1);
-        stats[Attribute.Dexterity].Reset();
-        stats.Add(Attribute.ArcheryBonus, new Stat(2));
-        break;
-      case PlayerLineage.Dwarf:
-        stats[Attribute.Constitution].ChangeMax(1);
-        stats[Attribute.Constitution].Reset();
-        break;
-    }
- 
-    stats.Add(Attribute.HP, new Stat(1));
-
-    return stats;
-  }
-
-  public static void SetInitialAbilities(Player player)
-  {
-    switch (player.Lineage)
-    {
-      case PlayerLineage.Orc:
-        player.Traits.Add(new RageTrait(player));
-        break;
-    }
-
-    switch (player.Background)
-    {
-      case PlayerBackground.Skullduggery:
-        player.Traits.Add(new LightStepTrait());
-        break;
-      case PlayerBackground.Scholar:
-        player.SpellsKnown.Add("arcane spark");
-        break;
-    }
-  }
-
-  static void StartingGearForScholar(Player player, GameObjectDB objDb, Rng rng)
-  {
-    char slot;
-
-    Item dagger = ItemFactory.Get(ItemNames.DAGGER, objDb);
-    slot = player.Inventory.Add(dagger, player.ID);
-    player.Inventory.ToggleEquipStatus(slot);
-
-    Item focus = ItemFactory.Get(ItemNames.GENERIC_WAND, objDb);
-    slot = player.Inventory.Add(focus, player.ID);
-    player.Inventory.ToggleEquipStatus(slot);
-
-    for (int i = 0; i < rng.Next(3, 6); i++)
-    {
-      player.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), player.ID);
-    }
-
-    // Scholars start off with less money because they are still paying off
-    // their student loans
-    Item money = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
-    money.Value = rng.Next(10, 26);
-    player.Inventory.Add(money, player.ID);
-  }
-
-  public static void SetStartingGear(Player player, GameState gs, Rng rng)
-  {
-    if (player.Background == PlayerBackground.Scholar)
-    {
-      StartingGearForScholar(player, gs.ObjDb, rng);
-      return;
-    }
-
-    char slot;
-    Item leather = ItemFactory.Get(ItemNames.LEATHER_ARMOUR, gs.ObjDb);
-    leather.Traits.Add(new AdjectiveTrait("battered"));
-    leather.Slot = 'b';
-
-    Item startWeapon;
-
-    switch (player.Lineage)
-    {
-      case PlayerLineage.Orc:
-        startWeapon = ItemFactory.Get(ItemNames.SHORTSHORD, gs.ObjDb);
-        slot = player.Inventory.Add(leather, player.ID);
-        player.Inventory.ToggleEquipStatus(slot);
-        player.Stats.Add(Attribute.SwordUse, new Stat(100));
-        break;
-      case PlayerLineage.Dwarf:
-        startWeapon = ItemFactory.Get(ItemNames.HAND_AXE, gs.ObjDb);
-        Item studded = ItemFactory.Get(ItemNames.RINGMAIL, gs.ObjDb);
-        studded.Slot = 'b';
-        slot = player.Inventory.Add(studded, player.ID);
-        player.Inventory.ToggleEquipStatus(slot);
-        Item helmet = ItemFactory.Get(ItemNames.HELMET, gs.ObjDb);
-        helmet.Slot = 'c';
-        slot = player.Inventory.Add(helmet, player.ID);
-        player.Inventory.ToggleEquipStatus(slot);
-        player.Stats.Add(Attribute.AxeUse, new Stat(100));
-        break;
-      case PlayerLineage.Elf:
-        startWeapon = ItemFactory.Get(ItemNames.DAGGER, gs.ObjDb);
-        Item bow = ItemFactory.Get(ItemNames.LONGBOW, gs.ObjDb);
-        bow.Slot = 'b';
-        slot = player.Inventory.Add(bow, player.ID);
-        player.Inventory.ToggleEquipStatus(slot);
-        player.Stats.Add(Attribute.BowUse, new Stat(100));
-        player.Stats.Add(Attribute.FinesseUse, new Stat(100));
-        leather.Slot = 'c';
-        slot = player.Inventory.Add(leather, player.ID);
-        player.Inventory.ToggleEquipStatus(slot);
-        break;
-      default:
-        startWeapon = ItemFactory.Get(ItemNames.SPEAR, gs.ObjDb);
-        startWeapon.Traits.Add(new AdjectiveTrait("old"));
-        slot = player.Inventory.Add(leather, player.ID);
-        player.Inventory.ToggleEquipStatus(slot);
-        player.Stats.Add(Attribute.PolearmsUse, new Stat(100));
-        break;
-    }
-
-    if (player.Background == PlayerBackground.Skullduggery)
-    {
-      startWeapon = ItemFactory.Get(ItemNames.DAGGER, gs.ObjDb);
-      if (!player.Stats.ContainsKey(Attribute.FinesseUse))
-        player.Stats.Add(Attribute.FinesseUse, new Stat(100));
-    }
-
-    startWeapon.Slot = 'a';
-    slot = player.Inventory.Add(startWeapon, player.ID);
-    player.Inventory.ToggleEquipStatus(slot);
-
-    // Everyone gets 3 to 5 torches to start with
-    for (int i = 0; i < rng.Next(3, 6); i++)
-    {
-      player.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, gs.ObjDb), player.ID);
-    }
-
-    Item money = ItemFactory.Get(ItemNames.ZORKMIDS, gs.ObjDb);
-    money.Value = rng.Next(25, 51);
-    player.Inventory.Add(money, player.ID);
-
-    foreach (Item item in player.Inventory.Items())
-    {
-      if (item.Equipped && item.HasTrait<GrantsTrait>())
-      {
-        foreach (Trait t in item.Traits)
-        {
-          if (t is GrantsTrait grants)
-            grants.Grant(player, gs, item);
-        }
-      }
-    }
-
-    if (player.Background == PlayerBackground.Skullduggery)
-    {
-      Item lockpick = ItemFactory.Get(ItemNames.LOCK_PICK, gs.ObjDb);
-      player.Inventory.Add(lockpick, player.ID);
-    }
   }
 }
