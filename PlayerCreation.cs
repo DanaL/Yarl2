@@ -33,7 +33,8 @@ class PlayerCreator
       { Attribute.Depth, new Stat(0) },
       { Attribute.Nerve, new Stat(1250) },
       { Attribute.LastBlessing, new Stat(0) },
-      { Attribute.BaseHP, new Stat(10) }
+      { Attribute.BaseHP, new Stat(10) },
+      { Attribute.HP, new Stat(1) }
     };
 
     player.Stats[Attribute.MainQuestState] = new Stat(0);
@@ -66,16 +67,15 @@ class PlayerCreator
         player.Stats[Attribute.Dexterity].ChangeMax(1);
         player.Stats[Attribute.Dexterity].Reset();
         player.Stats.Add(Attribute.ArcheryBonus, new Stat(2));
-        player.Stats.Add(Attribute.FinesseUse, new Stat(100));
+        if (!player.Stats.ContainsKey(Attribute.FinesseUse))
+          player.Stats.Add(Attribute.FinesseUse, new Stat(100));
         break;
       case PlayerLineage.Dwarf:
         player.Stats[Attribute.Constitution].ChangeMax(1);
         player.Stats[Attribute.Constitution].Reset();
         break;
     }
- 
-    player.Stats.Add(Attribute.HP, new Stat(1));
-    
+     
     // Humans start with a little more money than the others
     if (lineage == PlayerLineage.Human)
     {
