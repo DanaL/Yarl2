@@ -94,7 +94,7 @@ class PlayerCreator
     return player;
   }
 
-  static int[] _basicStatArray = [-2, -1, -1, -1, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2];
+  static readonly int[] _basicStatArray = [-2, -1, -1, -1, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2];
   static void CreateWarrior(PlayerLineage lineage, Player player, GameState gs, Rng rng)
   {
     player.Stats[Attribute.Strength] = new Stat(int.Min(2, rng.Next(0, 4)));
@@ -205,6 +205,14 @@ class PlayerCreator
     Item money = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
     money.Value = rng.Next(10, 26);
     player.Inventory.Add(money, player.ID);
+
+    Item scroll = rng.Next(3) switch
+    {
+      0 => ItemFactory.Get(ItemNames.SCROLL_SCATTERING, objDb),
+      1 => ItemFactory.Get(ItemNames.SCROLL_PROTECTION, objDb),
+      _ => ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb)
+    };
+    player.Inventory.Add(scroll, player.ID);
   }
 
   static void CreateRogue(Player player, GameState gs, Rng rng)
