@@ -4356,6 +4356,11 @@ class WinterBlessingTrait : BlessingTrait
   public override string Description(Actor owner) => "Winter blessing";
 }
 
+class WoodChopperTrait : Trait
+{
+  public override string AsText() => "WoodChopper";
+}
+
 class WorshiperTrait : Trait
 {
   public Loc AltarLoc { get; set; }
@@ -4852,6 +4857,7 @@ class TraitFactory
     { "WeaponSpeed", (pieces, gameObj) => new WeaponSpeedTrait() { Cost = Util.ToDouble(pieces[1]) } },
     { "WearAndTear", (pieces, gameObj) => new WearAndTearTrait() { Wear = int.Parse(pieces[1])} },
     { "WinterBlessing", (pieces, gameObj) => new WinterBlessingTrait() { SourceId = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[3]) } },
+    { "WoodChopper", (pieces, gameObj) => new WoodChopperTrait() },
     { "Worshiper", (pieces, gameObj) => new WorshiperTrait() { AltarLoc = Loc.FromStr(pieces[1]), AltarId = ulong.Parse(pieces[2]), Chant = pieces[3] } }
   };
 

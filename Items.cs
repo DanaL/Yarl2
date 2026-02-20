@@ -64,6 +64,8 @@ sealed class Item : GameObj, IEquatable<Item>
     {
       if (t is DiggingToolTrait)
         return true;
+      else if (t is WoodChopperTrait)
+        return true;
       else if (t is DoorKeyTrait)
         return true;
       else if (t is CleansingTrait)

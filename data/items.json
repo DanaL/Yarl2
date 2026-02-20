@@ -75,7 +75,8 @@
     "Traits": [
       "Damage#6#1#Slashing",
       "Axe",
-      "Metal#1"
+      "Metal#1",
+      "WoodChopper"
     ]
   },
   {
@@ -89,7 +90,8 @@
       "Axe",
       "Metal#1",
       "DiggingTool",
-      "WearAndTear#0"
+      "WearAndTear#0",
+      "WoodChopper"
     ]
   },
   {
@@ -103,7 +105,8 @@
       "Axe",
       "Metal#2",
       "TwoHanded",
-      "Cleave"
+      "Cleave",
+      "WoodChopper"
     ]
   },
   {

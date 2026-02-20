@@ -24,7 +24,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       var (equipResult, _) = ((Player)Actor!).Inventory.ToggleEquipStatus(Tool.Slot);
       if (equipResult != EquipingResult.Equipped)
       {
-        GameState!.UIRef().SetPopup(new Popup("You are unable to ready the pickaxe!", "", -1, -1));
+        GameState!.UIRef().SetPopup(new Popup($"You are unable to ready {Tool.Name.DefArticle()}!", "", -1, -1));
         return 0.0;
       }
       else
@@ -58,7 +58,8 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       }
       else
       {
-        string msg = $"{occ.FullName.Capitalize()} is neither tree, nor rock.";
+        // When I later on add earth elementals...
+        string msg = $"{occ.FullName.Capitalize()} is not a stone.";
         GameState!.UIRef().AlertPlayer(msg);
         GameState.UIRef().SetPopup(new Popup(msg, "", -1, -1));
       }
@@ -68,15 +69,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
 
     double energyCost = 1.0;
     Tile tile = GameState!.TileAt(targetLoc);
-    if (tile.IsTree())
-    {
-      ChopTree(targetLoc, tile);
-    }
-    else if (tile.Type == TileType.ClosedDoor || tile.Type == TileType.LockedDoor)
-    {
-      ChopDoor(targetLoc);
-    }
-    else if (tile.Type == TileType.FireJetTrap)
+    if (tile.Type == TileType.FireJetTrap)
     {
       DigFireJet(targetLoc);
       Cmd.CheckWear(Tool, Actor, GameState);
@@ -131,8 +124,8 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     }
     else
     {
-      GameState!.UIRef().AlertPlayer("You swing your pickaxe through the air.");
-      GameState.UIRef().SetPopup(new Popup("You swing your pickaxe through the air.", "", -1, -1));
+      GameState!.UIRef().AlertPlayer($"You swing your {Tool.FullName} through the air.");
+      GameState.UIRef().SetPopup(new Popup($"You swing your {Tool.FullName} through the air.", "", -1, -1));
     }
 
     return energyCost;
@@ -409,6 +402,82 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     GameState.Noise(loc.Row, loc.Col, 5);
   }
 
+  public override void ReceiveUIResult(UIResult result) 
+  {
+    var dir = (DirectionUIResult)result;
+    Row = dir.Row;
+    Col = dir.Col;
+  }
+}
+
+class ChopWoodAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
+{
+  Item Tool { get; set; } = tool;
+  int Row;
+  int Col;
+
+  public override double Execute()
+  {
+    if (!Tool.Equipped)
+    {
+      var (equipResult, _) = ((Player)Actor!).Inventory.ToggleEquipStatus(Tool.Slot);
+      if (equipResult != EquipingResult.Equipped)
+      {
+        GameState!.UIRef().SetPopup(new Popup($"You are unable to ready {Tool.Name.DefArticle()}!", "", -1, -1));
+        return 0.0;
+      }
+      else
+      {
+        GameState!.UIRef().AlertPlayer($"You equip {Tool.Name.DefArticle()}.");
+      }
+    }
+
+    if (Actor!.Traits.OfType<SwallowedTrait>().FirstOrDefault() is SwallowedTrait swallowed)
+    {
+      if (GameState!.ObjDb.GetObj(swallowed.SwallowerID) is Actor target)
+      {
+        MeleeAttackAction attackAction = new(GameState, Actor, target.Loc);
+        Actor.QueueAction(attackAction);
+        return 0.0;
+      }
+    }
+
+    Loc targetLoc = Actor.Loc with { Row = Actor.Loc.Row + Row, Col = Actor.Loc.Col + Col };
+    if (targetLoc != Actor.Loc && GameState!.ObjDb.Occupant(targetLoc) is Actor occ)
+    {
+      if (Battle.PlayerWillAttack(occ))
+      {
+        GameState!.UIRef().AlertPlayer($"When you have an axe, every {occ.Name} looks like a tree.");
+        Actor.QueueAction(new MeleeAttackAction(GameState, Actor, targetLoc));
+      }
+      else
+      {
+        string msg = $"{occ.FullName.Capitalize()} is not a tree.";
+        GameState!.UIRef().AlertPlayer(msg);
+        GameState.UIRef().SetPopup(new Popup(msg, "", -1, -1));
+      }
+
+      return 0.0;
+    }
+
+    Tile tile = GameState!.TileAt(targetLoc);
+    if (tile.IsTree())
+    {
+      ChopTree(targetLoc, tile);
+    }
+    else if (tile.Type == TileType.ClosedDoor || tile.Type == TileType.LockedDoor)
+    {
+      ChopDoor(targetLoc);
+    }
+    else
+    {
+      GameState!.UIRef().AlertPlayer($"You swing your {Tool.FullName} through the air.");
+      GameState.UIRef().SetPopup(new Popup($"You swing your {Tool.FullName} through the air.", "", -1, -1));
+    }
+
+    return 1.0;
+  }
+
   void ChopDoor(Loc loc)
   {
     int dc = 11 + GameState!.CurrLevel / 4;
@@ -431,7 +500,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       GameState.UIRef().AlertPlayer("Splinters fly but the door remains intact.");
       GameState.UIRef().SetPopup(new Popup("Splinters fly but the door remains intact.", "", -1, -1));
     }
-    
+
     GameState.Noise(loc.Row, loc.Col, 5);
   }
 
@@ -446,7 +515,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       Item staff = ItemFactory.Get(ItemNames.QUARTERSTAFF, GameState.ObjDb);
       GameState.ItemDropped(staff, loc);
     }
-    
+
     if (tile.Type != TileType.Conifer && GameState.Rng.NextDouble() < 0.1)
     {
       Item apple = ItemFactory.Get(ItemNames.APPLE, GameState.ObjDb);
@@ -473,14 +542,14 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
   {
     var opts = Util.Adj8Locs(loc)
                    .Where(l => gs.TileAt(l).PassableByFlight() && !gs.ObjDb.Occupied(l));
-    
+
     if (opts.Any())
       return opts.ElementAt(gs.Rng.Next(opts.Count()));
 
     return Loc.Nowhere;
   }
 
-  public override void ReceiveUIResult(UIResult result) 
+  public override void ReceiveUIResult(UIResult result)
   {
     var dir = (DirectionUIResult)result;
     Row = dir.Row;
@@ -750,6 +819,10 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       if (item.HasTrait<DiggingToolTrait>())
       {
         dir.DeferredAction = new DigAction(GameState, Actor, item);
+      }
+      else if (item.HasTrait<WoodChopperTrait>())
+      {
+        dir.DeferredAction = new ChopWoodAction(GameState, Actor, item);
       }
       else if (item.HasTrait<CleansingTrait>())
       {
