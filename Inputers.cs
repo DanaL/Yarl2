@@ -1158,19 +1158,27 @@ class LockedDoorMenu : Inputer
 
   void SetUpAxe()
   {
+    Item? axe = null;
     foreach (Item item in GS.Player.Inventory.Items())
     {
       if (item.HasTrait<WoodChopperTrait>())
       {
-        Loc playerLoc = GS.Player.Loc;
-        ChopWoodAction chop = new(GS, GS.Player, item);
-        DirectionUIResult res = new() { Row = Loc.Row - playerLoc.Row, Col = Loc.Col - playerLoc.Col };
-        chop.ReceiveUIResult(res);
-        GS.Player.QueueAction(chop);
-        Close();
-        return;
+        axe = item;
+        if (axe.Equipped)
+          break;
       }
     }
+
+    if (axe is not null)
+    {
+      Loc playerLoc = GS.Player.Loc;
+      ChopWoodAction chop = new(GS, GS.Player, axe);
+      DirectionUIResult res = new() { Row = Loc.Row - playerLoc.Row, Col = Loc.Col - playerLoc.Col };
+      chop.ReceiveUIResult(res);
+      GS.Player.QueueAction(chop);
+    }
+
+    Close();
   }
 
   void SetUpPickLock()
