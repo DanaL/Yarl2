@@ -143,6 +143,9 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     if (factDb.FactCheck("EarlyDenizen") is SimpleFact earlyOcc)
     {
       SetBoss(dungeon, objDb, factDb, earlyOcc.Value, rng);
+
+      if (earlyOcc.Value == "goblin" && rng.Next(3) == 0)
+        AddRealtorGoblin(levels[2], DungeonId, 2, rng, objDb);
     }
 
     // The idol 'puzzle' gives a guaranteed Potion of Hardiness, but I think 
@@ -166,6 +169,16 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     }
     
     return dungeon;
+  }
+
+  static void AddRealtorGoblin(Map map, int dungeonId, int level, Rng rng, GameObjectDB objDb)
+  {
+    Actor g = MonsterFactory.NamedActor("Sussex Banfield", "goblin outcast", objDb, rng);
+    g.Inventory.Zorkmids = 25;
+    g.Glyph = g.Glyph with { Lit = Colours.FADED_PURPLE, Unlit = Colours.PURPLE };
+    var floors = map.ClearFloors(dungeonId, level, objDb);
+    Loc loc = floors[rng.Next(floors.Count)];
+    objDb.AddNewActor(g, loc);
   }
 
   void AddRooms(Map[] levelMaps, GameObjectDB objDb, FactDb factDb, Rng rng)
