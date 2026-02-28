@@ -1050,13 +1050,25 @@ class PickupMenu : Inputer
 
   HashSet<(char, string)> CalcPickupMenu(UserInterface ui)
   {
-    Dictionary<Item, int> counts = [];
+    List<(Item Item, int Count)> counts = [];
     foreach (var item in Items)
     {
-      if (item.HasTrait<StackableTrait>() && counts.TryGetValue(item, out int value))
-        counts[item] = value + 1;
-      else
-        counts.Add(item, 1);
+      bool stackable = item.HasTrait<StackableTrait>();
+      bool stacked = false;
+      for (int i = 0; i < counts.Count; i++)
+      {
+        if (stackable && counts[i].Item == item)
+        {
+          counts[i] = counts[i] with { Count = counts[i].Count + 1 };
+          stacked = true;
+          break;
+        }
+      }
+
+      if (!stacked)
+      {
+        counts.Add((item, 1));
+      }
     }
 
     HashSet<(char, string)> options = [];
