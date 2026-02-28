@@ -173,7 +173,8 @@ abstract class UserInterface
         (Colours.LIGHT_BLUE, K(KeyCmd.Inv)), (Colours.LIGHT_GREY, ": view inventory  "), (Colours.LIGHT_BLUE, K(KeyCmd.Map)), (Colours.LIGHT_GREY, ": view map  "),
         (Colours.LIGHT_BLUE, K(KeyCmd.Interact)), (Colours.LIGHT_GREY, ": open door  ")],
 
-      [(Colours.LIGHT_BLUE, K(KeyCmd.Save)), (Colours.LIGHT_GREY, ": save game  "), (Colours.LIGHT_BLUE, K(KeyCmd.Quit)), (Colours.LIGHT_GREY, ": quit "),
+      [(Colours.LIGHT_BLUE, K(KeyCmd.Search)), (Colours.LIGHT_GREY, ": search  "),
+        (Colours.LIGHT_BLUE, K(KeyCmd.Save)), (Colours.LIGHT_GREY, ": save game  "), (Colours.LIGHT_BLUE, K(KeyCmd.Quit)), (Colours.LIGHT_GREY, ": quit "),
         (Colours.LIGHT_BLUE, K(KeyCmd.Throw)), (Colours.LIGHT_GREY, ": throw item "), (Colours.LIGHT_BLUE, K(KeyCmd.Examine)), (Colours.LIGHT_GREY, ": examine "),
         (Colours.LIGHT_BLUE, K(KeyCmd.Pickup)), (Colours.LIGHT_GREY, ": pickup item")],
 

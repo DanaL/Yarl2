@@ -74,6 +74,8 @@ Other commands you'll need to know:
     cycle through monsters and items that you can see to
     learn some information about them.
 
+[LIGHTBLUE {Search}] search nearby for traps and secrets.
+
 [LIGHTBLUE {Save}]   Save and exit.
 
 [LIGHTBLUE {Quit}]   Quit without saving. Please remember this will

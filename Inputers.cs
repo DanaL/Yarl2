@@ -898,7 +898,7 @@ class Dialoguer : Inputer
     if (string.IsNullOrEmpty(blurb))
       return "";
 
-    StringBuilder sb = new(_interlocutor.Appearance.Capitalize());
+    StringBuilder sb = new(_interlocutor.Appearance.IndefArticle().Capitalize());
     sb.Append("\n\n");
 
     sb.Append('"');
@@ -1151,26 +1151,34 @@ class LockedDoorMenu : Inputer
         SetUpKnock();
         break;
       case 'c':
-        SetUpPickAxe();
+        SetUpAxe();
         break;
     }
   }
 
-  void SetUpPickAxe()
+  void SetUpAxe()
   {
+    Item? axe = null;
     foreach (Item item in GS.Player.Inventory.Items())
     {
-      if (item.HasTrait<DiggingToolTrait>())
+      if (item.HasTrait<WoodChopperTrait>())
       {
-        Loc playerLoc = GS.Player.Loc;        
-        DigAction dig = new(GS, GS.Player, item);
-        DirectionUIResult res = new() { Row = Loc.Row - playerLoc.Row, Col = Loc.Col - playerLoc.Col };
-        dig.ReceiveUIResult(res);
-        GS.Player.QueueAction(dig);
-        Close();
-        return;
+        axe = item;
+        if (axe.Equipped)
+          break;
       }
     }
+
+    if (axe is not null)
+    {
+      Loc playerLoc = GS.Player.Loc;
+      ChopWoodAction chop = new(GS, GS.Player, axe);
+      DirectionUIResult res = new() { Row = Loc.Row - playerLoc.Row, Col = Loc.Col - playerLoc.Col };
+      chop.ReceiveUIResult(res);
+      GS.Player.QueueAction(chop);
+    }
+
+    Close();
   }
 
   void SetUpPickLock()
@@ -1211,18 +1219,24 @@ class LockedDoorMenu : Inputer
 
     bool lockpick = false;
     bool knock = false;
-    bool pickaxe = false;
+    bool axe = false;
+    string axeName = "";
     foreach (Item item in GS.Player.Inventory.Items())
     {
-      if (item.HasTrait<DoorKeyTrait>())
+      if (!lockpick && item.HasTrait<DoorKeyTrait>())
       {
         Tool = item;
         lockpick = true;
       }
-      else if (item.Name == "scroll of knock")
+      else if (item.Name == "scroll of knock") 
+      {
         knock = true;
-      else if (item.HasTrait<DiggingToolTrait>())
-        pickaxe = true;
+      }
+      else if (item.HasTrait<WoodChopperTrait>() && (!axe || item.Equipped))
+      {
+        axe = true;
+        axeName = item.FullName;
+      }
     }
 
     if (lockpick)
@@ -1237,10 +1251,10 @@ class LockedDoorMenu : Inputer
       MenuItems.Add("r) read scroll of knock");
     }
 
-    if (pickaxe)
+    if (axe)
     {
       Options.Add('c');
-      MenuItems.Add("c) chop door with pickaxe");
+      MenuItems.Add($"c) chop door with {axeName}");
     }
   }
 
