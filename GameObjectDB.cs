@@ -547,7 +547,12 @@ class GameObjectDB
 
   public void RemoveItemFromLoc(Loc loc, Item item)
   {
-    _itemLocs[loc].Remove(item);
+    if (_itemLocs.TryGetValue(loc, out var stack))
+    {
+      int idx = stack.FindIndex(i => i.ID == item.ID);
+      if (idx >= 0)
+        stack.RemoveAt(idx);
+    }
     item.Loc = Loc.Nowhere;
   }
 
