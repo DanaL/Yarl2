@@ -779,7 +779,7 @@ abstract class UserInterface
     while (true)
     {
       char ch = GetKeyInput();
-      if (ch == '\n' || ch == ' ')
+      if (ch == '\n' || ch == '\r' || ch == ' ' || ch == Constants.ESC)
         break;
       gs.PrepareFieldOfView();
       SetSqsOnScreen(gs);
