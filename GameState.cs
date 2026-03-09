@@ -110,66 +110,62 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
   void RefreshOverworld()
   {
-    SimpleFact fact = FactDb.FactCheck("SmithId") as SimpleFact ?? throw new Exception("SmithId should never be null!");
-    ulong smithId = ulong.Parse(fact.Value);
-    if (ObjDb.GetObj(smithId) is Mob smith)
+    if (FactDb.FactCheck("SmithId") is SimpleFact sf && ObjDb.GetObj(ulong.Parse(sf.Value)) is Mob smith)
     {
       ((NPCBehaviour)smith.Behaviour).RefreshShop(smith, this);
     }
-
-    fact = FactDb.FactCheck("GrocerId") as SimpleFact ?? throw new Exception("GrocerId should never be null!");
-    ulong grocerId = ulong.Parse(fact.Value);
-    if (ObjDb.GetObj(grocerId) is Mob grocer)
-    {
+    
+    if (FactDb.FactCheck("GrocerId") is SimpleFact gf && ObjDb.GetObj(ulong.Parse(gf.Value)) is Mob grocer)
+    {      
       ((NPCBehaviour)grocer.Behaviour).RefreshShop(grocer, this);
     }
-
+    
     // Sometimes the witch is invisible after experimenting with one of their
     // partner's potions
-    fact = FactDb.FactCheck("WitchId") as SimpleFact ?? throw new Exception("WitchId should not be null!");
-    ulong witchId = ulong.Parse(fact.Value);
-    if (ObjDb.GetObj(witchId) is Mob witch)
+    if (FactDb.FactCheck("WitchId") is SimpleFact witchFact)
     {
-      if (!witch.HasTrait<InvisibleTrait>() && Rng.NextDouble() < 0.2)
+      if (ObjDb.GetObj(ulong.Parse(witchFact.Value)) is Mob witch)
       {
-        InvisibleTrait it = new() { ExpiresOn = Turn + (ulong)Rng.Next(500, 1000) };
-        it.Apply(witch, this);
-
-        witch.ClearPlan();
-      }
-    }
-
-    fact = FactDb.FactCheck("AlchemistId") as SimpleFact ?? throw new Exception("AlchemistId should not be null!");
-    ulong alchemistId = ulong.Parse(fact.Value);
-    if (ObjDb.GetObj(alchemistId) is Mob alchemist)
-    {
-      ((NPCBehaviour)alchemist.Behaviour).RefreshShop(alchemist, this);
-    }
-
-    fact = FactDb.FactCheck("PeddlerId") as SimpleFact ?? throw new Exception("PeddlerId should not be null!");
-    ulong peddlerId = ulong.Parse(fact.Value);
-    if (ObjDb.GetObj(peddlerId) is Mob peddler)
-    {
-      // Sometimes the peddler will be out of town when the player returns from a dungeon
-      // and sometimes he'll be back with more money to spend
-      int timeSinceLastVisit = ((int)Turn % int.MaxValue) - peddler.Stats[Attribute.LastVisit].Curr;
-      if (timeSinceLastVisit > 250 && peddler.Loc.DungeonID == 0 && Rng.NextDouble() < 0.5)
-      {
-        ObjDb.ClearActorLoc(peddler.Loc);
-        peddler.Loc = Loc.Nowhere;
-      }
-      else if (timeSinceLastVisit > 250 && peddler.Loc == Loc.Nowhere && Rng.NextDouble() < 0.75)
-      {
-        List<Loc> tavernSqs = [.. Town.Tavern.Where(l => TileAt(l).Type == TileType.WoodFloor && !ObjDb.Occupied(l))];
-        tavernSqs.Shuffle(Rng);
-        peddler.Loc = tavernSqs[Rng.Next(tavernSqs.Count)];
-        ObjDb.SetActorToLoc(peddler.Loc, peddler.ID);
-
-        if (peddler.Inventory.Zorkmids < 50)
+        if (!witch.HasTrait<InvisibleTrait>() && Rng.NextDouble() < 0.2)
         {
-          peddler.Inventory.Zorkmids = Rng.Next(51, 101);
+          InvisibleTrait it = new() { ExpiresOn = Turn + (ulong)Rng.Next(500, 1000) };
+          it.Apply(witch, this);
+
+          witch.ClearPlan();
+        }  
+      }    
+    }
+
+    if (FactDb.FactCheck("AlchemistId") is SimpleFact af && ObjDb.GetObj(ulong.Parse(af.Value)) is Mob alc)
+    {
+      ((NPCBehaviour)alc.Behaviour).RefreshShop(alc, this);
+    }
+
+    if (FactDb.FactCheck("PeddlerId") is SimpleFact peddlerFact)
+    {
+      if (ObjDb.GetObj(ulong.Parse(peddlerFact.Value)) is Mob peddler)
+      {
+        // Sometimes the peddler will be out of town when the player returns from a dungeon
+        // and sometimes he'll be back with more money to spend
+        int timeSinceLastVisit = ((int)Turn % int.MaxValue) - peddler.Stats[Attribute.LastVisit].Curr;
+        if (timeSinceLastVisit > 250 && peddler.Loc.DungeonID == 0 && Rng.NextDouble() < 0.5)
+        {
+          ObjDb.ClearActorLoc(peddler.Loc);
+          peddler.Loc = Loc.Nowhere;
         }
-      }
+        else if (timeSinceLastVisit > 250 && peddler.Loc == Loc.Nowhere && Rng.NextDouble() < 0.75)
+        {
+          List<Loc> tavernSqs = [.. Town.Tavern.Where(l => TileAt(l).Type == TileType.WoodFloor && !ObjDb.Occupied(l))];
+          tavernSqs.Shuffle(Rng);
+          peddler.Loc = tavernSqs[Rng.Next(tavernSqs.Count)];
+          ObjDb.SetActorToLoc(peddler.Loc, peddler.ID);
+
+          if (peddler.Inventory.Zorkmids < 50)
+          {
+            peddler.Inventory.Zorkmids = Rng.Next(51, 101);
+          }
+        }  
+      }  
     }
   }
 
