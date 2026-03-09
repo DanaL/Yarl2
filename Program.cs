@@ -187,23 +187,15 @@ static string GameLoop(UserInterface ui, GameState gameState)
         case GameSignal.PlayerKilled:
           PlayerKilled(gameState, ui);
           return "";
+        case GameSignal.Victory:
+          PlayerVictory(gameState, ui);
+          return "";
       }
     }
     catch (QuitGameException)
     {
       // If the players quits the game while playing, we bump them 
       // back to the main menu.
-      return "";
-    }
-    catch (VictoryException)
-    {
-      string s = "As you read the final incantation, the remaining chain becomes infused with the binding spell.\n\nArioch belows in rage as his arcane prison is renewed once more!";
-      ui.SetPopup(new Popup(s, "", -1, -1));
-      ui.WriteAlerts();
-      ui.BlockFoResponse(gameState);
-
-      Victory.VictoryScreen(gameState);
-
       return "";
     }
 
@@ -218,6 +210,16 @@ static string GameLoop(UserInterface ui, GameState gameState)
   }
 
   return "";
+}
+
+static void PlayerVictory(GameState gs, UserInterface ui)
+{
+  string s = "As you read the final incantation, the remaining chain becomes infused with the binding spell.\n\nArioch belows in rage as his arcane prison is renewed once more!";
+    ui.SetPopup(new Popup(s, "", -1, -1));
+    ui.WriteAlerts();
+    ui.BlockFoResponse(gs);
+
+    Victory.VictoryScreen(gs);
 }
 
 static void SaveGame(GameState gs, UserInterface ui)

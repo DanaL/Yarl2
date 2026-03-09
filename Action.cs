@@ -3082,7 +3082,8 @@ class BindSpellAction(GameState gs, Actor caster) : Action(gs, caster)
 
     if (shackleCount == 4)
     {
-      throw new VictoryException();
+      GameState.GameSignal = GameSignal.Victory;
+      return 1.0;
     }
     
     GameState.UIRef().SetPopup(new Popup(msg, "", -1, -1));  

@@ -1288,11 +1288,6 @@ class MapUtils
 
 class QuitGameException : Exception { }
 class GameNotLoadedException : Exception { }
-class PlayerKilledException : Exception
-{
-  public List<string> Messages { get; set; } = [];
-}
-class VictoryException : Exception { }
 class InvalidRoomException : Exception { }
 class WildernessCreationException(string msg) : Exception(msg) { }
 
@@ -1300,6 +1295,7 @@ class AbnormalMovement(Loc dest) : Exception
 {
   public Loc Dest { get; set; } = dest;
 }
+
 class UnknownMonsterException(string name) : Exception
 {
   public string Name { get; set; } = name;
