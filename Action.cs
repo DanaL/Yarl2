@@ -19,6 +19,7 @@ abstract class Action
   public int QuipDuration { get; set; } = 2500;
 
   public Action() { }
+  public Action(GameState gs) => GameState = gs;
   public Action(GameState gs, Actor actor)
   {
     Actor = actor;
@@ -4838,14 +4839,24 @@ class CloseMenuAction : Action
 
 // I guess I can later add extra info about whether or not the player died, quit,
 // or quit and saved?
-class QuitAction : Action
+class QuitAction(GameState gs) : Action(gs)
 {
-  public override double Execute() => throw new QuitGameException();
+  public override double Execute()
+  {
+    GameState!.GameSignal = GameSignal.Quit;
+
+    return 0.0;
+  } 
 }
 
-class SaveGameAction : Action
+class SaveGameAction(GameState gs) : Action(gs)
 {
-  public override double Execute() => throw new SaveGameException();
+  public override double Execute()
+  {
+    GameState!.GameSignal = GameSignal.SaveGame;
+
+    return 0.0;
+  }
 }
 
 class NullAction : Action

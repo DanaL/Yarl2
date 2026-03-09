@@ -175,39 +175,31 @@ static void GameLoop(UserInterface ui, GameState gameState)
       }
 
       ui.WriteAlerts();
+
+      switch (gameState.GameSignal)
+      {
+        case GameSignal.Quit:
+          return;
+        case GameSignal.SaveGame:
+          try
+          {
+            Serialize.WriteSaveGame(gameState, ui);
+            Serialize.WriteOptions(gameState.Options);
+
+          }
+          catch (Exception ex)
+          {
+            ui.SetPopup(new Popup(ex.Message, "", -1, -1));
+          }
+
+          return;
+      }
     }
     catch (QuitGameException)
     {
       // If the players quits the game while playing, we bump them 
-      // back to the main menu. (Whereas saving also exits the program)
+      // back to the main menu.
       return;
-    }
-    catch (SaveGameException)
-    {
-      ui.WriteAlerts();
-
-      bool success;
-      try
-      {
-        Serialize.WriteSaveGame(gameState, ui);
-        Serialize.WriteOptions(gameState.Options);
-
-        success = true;
-
-        ui.SetLongMessage([" Be seeing you..."]);
-        ui.BlockForInput(gameState);
-        success = true;
-      }
-      catch (Exception ex)
-      {
-        ui.SetPopup(new Popup(ex.Message, "", -1, -1));
-        success = false;
-      }
-      
-      if (success)
-      {
-        throw new QuitGameException();
-      }
     }
     catch (PlayerKilledException pke)
     {

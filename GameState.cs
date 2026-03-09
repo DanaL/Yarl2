@@ -13,6 +13,8 @@ using System.Text;
 
 namespace Yarl2;
 
+enum GameSignal { None, Victory, PlayerKilled, SaveGame, Quit }
+
 // The queue of actors to act will likely need to go here.
 class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 {
@@ -52,6 +54,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
   public int MainQuestState => Player.Stats[Attribute.MainQuestState].Curr;
 
+  public GameSignal GameSignal { get; set; } = GameSignal.None;
+  
   public void ActorEntersLevel(Actor actor, int dungeonId, int level)
   {
     if (actor is not Yarl2.Player)

@@ -545,12 +545,12 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     }
     else if (cmd == KeyCmd.Quit)
     {
-      ui.SetInputController(new YesOrNoInputer(GS) { DeferredAction = new QuitAction() });
+      ui.SetInputController(new YesOrNoInputer(GS) { DeferredAction = new QuitAction(GS)});
       ui.SetPopup(new Popup("Really quit?\n\nYour game won't be saved! (y/n)", "", -1, -1));
     }
     else if (cmd == KeyCmd.Save && !ui.InTutorial)
     {
-      ui.SetInputController(new YesOrNoInputer(GS) { DeferredAction = new SaveGameAction() });
+      ui.SetInputController(new YesOrNoInputer(GS) { DeferredAction = new SaveGameAction(GS) });
       ui.SetPopup(new Popup("Quit & Save? (y/n)", "", -1, -1));
     }
     else if (cmd == KeyCmd.Save && ui.InTutorial)

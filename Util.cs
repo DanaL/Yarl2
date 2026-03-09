@@ -1287,7 +1287,6 @@ class MapUtils
 }
 
 class QuitGameException : Exception { }
-class SaveGameException : Exception { }
 class GameNotLoadedException : Exception { }
 class PlayerKilledException : Exception
 {
