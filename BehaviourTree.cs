@@ -241,7 +241,7 @@ class MoveLevel : BehaviourNode
     Loc dest = floors[gs.Rng.Next(floors.Count)];
 
     // This is to expend the actor's energy
-    mob.ExecuteAction(new PassAction());
+    mob.ExecuteAction(new PassAction(gs));
 
     gs.RemovePerformerFromGame(mob);
     // We don't actually want to remove them from the game, just from the
@@ -536,7 +536,7 @@ class PassTurn : BehaviourNode
     if (bark != "")
       action = new PassAction(gs, mob) { Quip = bark };
     else
-      action = new PassAction();
+      action = new PassAction(gs);
 
     mob.ExecuteAction(action);
 
@@ -731,7 +731,7 @@ class TryToEscape : BehaviourNode
     if (status == PlanStatus.Success)
       return PlanStatus.Running;
 
-    mob.ExecuteAction(new PassAction());
+    mob.ExecuteAction(new PassAction(gs));
 
     return PlanStatus.Running;
   }
@@ -1360,7 +1360,7 @@ class RandomMove : BehaviourNode
   {
     if (mob.HasTrait<ImmobileTrait>())
     {
-      mob.ExecuteAction(new PassAction());
+      mob.ExecuteAction(new PassAction(gs));
       return PlanStatus.Success;
     }
 
@@ -1396,7 +1396,7 @@ class JumpToTavern() : BehaviourNode
 
     Loc dest = opts[gs.Rng.Next(opts.Count)];
     gs.ResolveActorMove(mob, mob.Loc, dest);
-    mob.ExecuteAction(new PassAction());
+    mob.ExecuteAction(new PassAction(gs));
     gs.FlushPerformers();
 
     return PlanStatus.Success;

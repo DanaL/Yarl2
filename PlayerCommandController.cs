@@ -626,7 +626,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     }
     else if (cmd == KeyCmd.Pass)
     {
-      GS.Player.QueueAction(new PassAction());
+      GS.Player.QueueAction(new PassAction(GS));
     }
   }
 }

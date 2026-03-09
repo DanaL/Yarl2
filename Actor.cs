@@ -824,7 +824,7 @@ sealed class Mob : Actor
       if (CurrPlan.Execute(this, gs) == PlanStatus.Failure)
       {
         CurrPlan = null;
-        ExecuteAction(new PassAction());
+        ExecuteAction(new PassAction(gs));
       }
     }
     
@@ -1137,13 +1137,13 @@ class Power
         var arrow = ItemFactory.Get(ItemNames.ARROW, gs.ObjDb);
         return new MissileAttackAction(gs, mob, loc, arrow);
       case "CastCurse":
-        return new CastCurse(loc, DC)
+        return new CastCurse(loc, DC, gs)
         {
           GameState = gs,
           Actor = mob
         };
       case "CastTeleportAway":
-        return new CastTeleportAway(loc) { GameState = gs, Actor = mob };
+        return new CastTeleportAway(loc, gs, mob);
       case "RumBreath":
         return new RumBreathAction(gs, mob, loc, MaxRange);
       case "Nudity":
@@ -1166,23 +1166,20 @@ class Power
         if (mob.Loc.Level > 4)
           kobolds.Add("kobold artillerist");
 
-        return new SummonAction(mob.Loc, kobolds[gs.Rng.Next(kobolds.Count)], 1)
+        return new SummonAction(mob.Loc, kobolds[gs.Rng.Next(kobolds.Count)], 1, gs)
         {
-          GameState = gs,
           Actor = mob,
           Quip = Quip
         };
       case "SummonCaveLizard":
-        return new SummonAction(mob.Loc, "cave lizard", 1)
+        return new SummonAction(mob.Loc, "cave lizard", 1, gs)
         {
-          GameState = gs,
           Actor = mob,
           Quip = Quip
         };
       case "SummonCentipede":
-        return new SummonAction(mob.Loc, "centipede", 2)
+        return new SummonAction(mob.Loc, "centipede", 2, gs)
         {
-          GameState = gs,
           Actor = mob,
           Quip = Quip
         };
@@ -1208,10 +1205,10 @@ class Power
 
         string summons = undead[gs.Rng.Next(undead.Count)];
 
-        return new SummonAction(mob.Loc, summons, 1) { GameState = gs, Actor = mob, Quip = Quip };
+        return new SummonAction(mob.Loc, summons, 1, gs) { Actor = mob, Quip = Quip };
       case "SummonBats":
         int batCount = gs.Rng.Next(1, 4);
-        return new SummonAction(gs.Player.Loc, "dire bat", batCount) { GameState = gs, Actor = mob, Quip = Quip };
+        return new SummonAction(gs.Player.Loc, "dire bat", batCount, gs) { Actor = mob, Quip = Quip };
       case "MinorSummon":
         return new MinorSummonAction(gs, mob);
       case "Web":
@@ -1259,7 +1256,7 @@ class Power
       case "Spores":
         return new ReleaseSporesAction(gs, mob, MaxRange);
       default:
-        return new PassAction();
+        return new PassAction(gs);
     }
   }
 }

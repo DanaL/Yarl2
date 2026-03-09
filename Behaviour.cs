@@ -79,7 +79,7 @@ class MonsterBehaviour : IBehaviour, IDialoguer
 
     gameState.UIRef().AlertPlayer(s);
 
-    return (new NullAction(), null);
+    return (new NullAction(gameState), null);
   }
 
   public virtual (string, string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
@@ -123,7 +123,7 @@ class VillagePupBehaviour : NPCBehaviour
     sb.Append("Arf! Arf!");
 
     gs.UIRef().SetPopup(new Popup(sb.ToString(), "", -1, -1));
-    return (new PassAction(), new PauseForMoreInputer(gs));
+    return (new PassAction(gs), new PauseForMoreInputer(gs));
   }
 }
 
@@ -456,7 +456,7 @@ class SmithBehaviour : NPCBehaviour
   {
     if (gs.Player.HasTrait<ShunnedTrait>())
     {
-      return (new NullAction(), new PauseForMoreInputer(gs));
+      return (new NullAction(gs), new PauseForMoreInputer(gs));
     }
 
     SmithyInputer acc = new(actor, Blurb(gs), gs);
@@ -620,7 +620,7 @@ class GrocerBehaviour : NPCBehaviour
   {
     if (gs.Player.HasTrait<ShunnedTrait>())
     {
-      return (new NullAction(), new PauseForMoreInputer(gs));
+      return (new NullAction(gs), new PauseForMoreInputer(gs));
     }
     
     string blurb = $"\"Welcome to the {gs.Town.Name} market!\"";
@@ -710,7 +710,7 @@ class NPCBehaviour : IBehaviour, IDialoguer
   {
     if (gameState.Player.HasTrait<ShunnedTrait>())
     {
-      return (new NullAction(), new PauseForMoreInputer(gameState));
+      return (new NullAction(gameState), new PauseForMoreInputer(gameState));
     }
 
     Dialoguer acc = new(actor, gameState);
@@ -720,7 +720,7 @@ class NPCBehaviour : IBehaviour, IDialoguer
     // gracefully
     if (!gameState.UIRef().ActivePopup)
     {
-      return (new NullAction(), new PauseForMoreInputer(gameState));
+      return (new NullAction(gameState), new PauseForMoreInputer(gameState));
     }
 
     CloseMenuAction action = new(gameState, 1.0);

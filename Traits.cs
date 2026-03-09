@@ -4293,7 +4293,7 @@ class WandTrait : Trait, IUSeable, INeedsID, IDesc, ICharged
     if (Charges == 0) 
     {
       IDed = true;
-      return new UseResult(new PassAction(), "Nothing happens");
+      return new UseResult(new PassAction(gs), "Nothing happens");
     }
 
     ulong itemId = item is not null ? item.ID : 0;

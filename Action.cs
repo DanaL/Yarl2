@@ -14,11 +14,10 @@ namespace Yarl2;
 abstract class Action
 {
   public Actor? Actor { get; set; }
-  public GameState? GameState { get; set; }
+  public GameState GameState { get; set; }
   public string Quip { get; set; } = "";
   public int QuipDuration { get; set; } = 2500;
 
-  public Action() { }
   public Action(GameState gs) => GameState = gs;
   public Action(GameState gs, Actor actor)
   {
@@ -83,7 +82,7 @@ class GulpAction(GameState gs, Actor actor, int dc, int dmgDie, int numOfDice) :
   {
     base.Execute();
 
-    UserInterface ui = GameState!.UIRef();
+    UserInterface ui = GameState.UIRef();
     Loc targetLoc = Actor!.PickTargetLoc(GameState!, 1);
     if (GameState.ObjDb.Occupant(targetLoc) is not Actor victim)
     {
@@ -165,7 +164,7 @@ class TransFormIntoBatsAction(GameState gs, Actor actor) : Action(gs, actor)
     {
       for (int c = Actor.Loc.Col - 2; c <= Actor.Loc.Col + 2; c++)
       {
-        if (!GameState!.CurrentMap.InBounds(r, c))
+        if (!GameState.CurrentMap.InBounds(r, c))
           continue;
         Loc loc = Actor.Loc with { Row = r, Col = c };
         if (GameState.CurrentMap.TileAt(r, c).PassableByFlight() && !GameState.ObjDb.Occupied(loc))
@@ -225,11 +224,11 @@ class ArrowShotAction(GameState gs, Actor actor, Item? bow, Item ammo, int attac
     for (int j = 0; j < trajectory.Count; j++)
     {
       var pt = trajectory[j];
-      Tile tile = GameState!.TileAt(pt);
+      Tile tile = GameState.TileAt(pt);
       if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
       {
         pts.Add(pt);
-        bool attackSuccessful = Battle.MissileAttack(Actor!, occ, GameState, _ammo, _attackBonus, new ArrowAnimation(GameState!, pts, _ammo.Glyph.Lit));
+        bool attackSuccessful = Battle.MissileAttack(Actor!, occ, GameState, _ammo, _attackBonus, new ArrowAnimation(GameState, pts, _ammo.Glyph.Lit));
         creatureTargeted = true;
         
         if (attackSuccessful)
@@ -250,8 +249,8 @@ class ArrowShotAction(GameState gs, Actor actor, Item? bow, Item ammo, int attac
 
     if (pts.Count > 0)
     {
-      var anim = new ArrowAnimation(GameState!, pts, _ammo.Glyph.Lit);
-      GameState!.UIRef().PlayAnimation(anim, GameState);
+      var anim = new ArrowAnimation(GameState, pts, _ammo.Glyph.Lit);
+      GameState.UIRef().PlayAnimation(anim, GameState);
     }
    
     if (creatureTargeted && !targetHit && Actor is Player player && bow is Item && bow.HasTrait<BowTrait>())
@@ -271,10 +270,10 @@ class MissileAttackAction(GameState gs, Actor actor, Loc loc, Item ammo) : Actio
   public override double Execute()
   {
     double result = 0.0;
-    ArrowAnimation arrowAnim = new(GameState!, Util.Trajectory(Actor!.Loc, _loc), _ammo.Glyph.Lit);
-    GameState!.UIRef().RegisterAnimation(arrowAnim);
+    ArrowAnimation arrowAnim = new(GameState, Util.Trajectory(Actor!.Loc, _loc), _ammo.Glyph.Lit);
+    GameState.UIRef().RegisterAnimation(arrowAnim);
 
-    if (GameState!.ObjDb.Occupant(_loc) is Actor target)
+    if (GameState.ObjDb.Occupant(_loc) is Actor target)
     {
       if (Actor is not Player)
       {
@@ -315,13 +314,13 @@ class GetOverHereAction(GameState gs, Actor actor, Loc loc, int dmgDie, int numO
     sqs = [.. sqs.Skip(1)];
     sqs = [.. sqs.Take(sqs.Count - 1)];
 
-    GameState!.UIRef().RegisterAnimation(new SqAnimation(GameState, sqs[0], Colours.GREY, Colours.BLACK, Util.ArrowChar(sqs[0], Loc)));
+    GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, sqs[0], Colours.GREY, Colours.BLACK, Util.ArrowChar(sqs[0], Loc)));
     foreach (Loc seg in sqs.Skip(1))
     {
       char ch = '―';
       if (int.Abs(Actor.Loc.Row - Loc.Row) > int.Abs(Actor.Loc.Col - Loc.Col))
         ch = '|';
-      GameState.UIRef().RegisterAnimation(new SqAnimation(GameState!, seg, Colours.GREY, Colours.BLACK, ch));
+      GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, seg, Colours.GREY, Colours.BLACK, ch));
     }
     
     if (GameState.ObjDb.Occupant(Loc) is Actor target)
@@ -366,7 +365,7 @@ class AssumeDisguiseAction(GameState gs, Actor actor) : Action(gs, actor)
 
     string disguiseForm;
     Glyph glyph;
-    switch (GameState!.Rng.Next(8))
+    switch (GameState.Rng.Next(8))
     {
       case 0:
         disguiseForm = "chainmail";        
@@ -421,7 +420,7 @@ class ApplyTraitAction : Action
 
   public override double Execute()
   {
-    UserInterface ui = GameState!.UIRef();
+    UserInterface ui = GameState.UIRef();
 
     if (Actor is not null)
     {
@@ -445,7 +444,7 @@ class ReleaseSporesAction(GameState gs, Actor actor, int radius) : Action(gs, ac
   {
     base.Execute();
 
-    Map map = GameState!.MapForActor(Actor!);
+    Map map = GameState.MapForActor(Actor!);
     List<Loc> nearby = [.. FieldOfView.CalcVisible(_radius, Actor!.Loc, map, GameState.ObjDb).Keys
                                       .Where(loc => GameState.TileAt(loc).Passable())];
 
@@ -491,7 +490,7 @@ class ShriekAction(GameState gs, Actor actor, int radius) : Action(gs, actor)
     base.Execute();
 
     string msg;
-    if (GameState!.LastPlayerFoV.ContainsKey(Actor!.Loc))
+    if (GameState.LastPlayerFoV.ContainsKey(Actor!.Loc))
       msg = $"{Actor.FullName.Capitalize()} lets out a piercing shriek!";
     else
       msg = "You hear a piercing shriek!";
@@ -526,7 +525,7 @@ class ApplyAffectAction(GameState gs, Actor actor, Loc target, string effectTemp
   {
     base.Execute();
 
-    GameState!.UIRef().AlertPlayer(EffectText);
+    GameState.UIRef().AlertPlayer(EffectText);
 
     if (GameState.ObjDb.Occupant(TargetLoc) is Actor victim)
     {      
@@ -550,7 +549,7 @@ class SleepSpellAction(GameState gs, Actor actor, int radius, int dc) : Action(g
   {
     base.Execute();
 
-    UserInterface ui = GameState!.UIRef();
+    UserInterface ui = GameState.UIRef();
     ui.AlertPlayer($"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "cast")} a sleep spell!");
     var affected = GameState.Flood(Actor.Loc, Radius);
     foreach (var loc in affected)
@@ -589,7 +588,7 @@ class AoEAction(GameState gs, Actor actor, Loc target, string effectTemplate, in
   {
     base.Execute();
     
-    GameState!.UIRef().AlertPlayer(EffectText);
+    GameState.UIRef().AlertPlayer(EffectText);
     
     var affected = GameState.Flood(Target, Radius);
     foreach (var loc in affected)
@@ -619,10 +618,10 @@ class RumBreathAction(GameState gs, Actor actor, Loc target, int range) : Action
   {
     base.Execute();
 
-    if (GameState!.LastPlayerFoV.ContainsKey(Actor!.Loc))
+    if (GameState.LastPlayerFoV.ContainsKey(Actor!.Loc))
     {
       string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "spew")} a gout of alcohol!";
-      GameState!.UIRef().AlertPlayer(s);
+      GameState.UIRef().AlertPlayer(s);
     }
 
     // Actor targets a specific loc, but the cone of the breath weapon extends
@@ -669,7 +668,7 @@ class BreathWeaponAction(GameState gs, Actor actor, DamageType dmgType, string d
   {
     base.Execute();
 
-    if (GameState!.LastPlayerFoV.ContainsKey(Actor!.Loc))
+    if (GameState.LastPlayerFoV.ContainsKey(Actor!.Loc))
     {
       string n = MsgFactory.CalcName(Actor, GameState.Player).Capitalize();
       string s = $"{n} {Grammar.Conjugate(Actor, "breath")} {_desc}!";
@@ -678,7 +677,7 @@ class BreathWeaponAction(GameState gs, Actor actor, DamageType dmgType, string d
 
     List<Loc> affected = ConeCalculator.Affected(_range, Actor.Loc, Loc, GameState.CurrentMap, GameState.ObjDb, []);
     affected.Insert(0, Actor.Loc);
-    var explosion = new ExplosionAnimation(GameState!)
+    var explosion = new ExplosionAnimation(GameState)
     {
       MainColour = _colours.Main,
       AltColour1 = _colours.Alt1,
@@ -763,7 +762,7 @@ class BashAction(GameState gs, Actor actor) : Action(gs, actor)
   public override double Execute()
   {
     base.Execute();
-    var gs = GameState!;
+    var gs = GameState;
     UserInterface ui = gs.UIRef();
 
     // I'll probably want to do a knock-back ki nd of thing?
@@ -839,7 +838,7 @@ class DisarmAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
     base.Execute();
     UserInterface ui = GameState!.UIRef();
 
-    Map map = GameState!.CurrentMap;
+    Map map = GameState.CurrentMap;
     int trapCount = 0;
     foreach (Loc loc in Util.LocsInRadius(Origin, 3, map.Height, map.Width))
     {
@@ -908,7 +907,7 @@ class DiveAction(GameState gs, Actor actor, Loc loc, bool voluntary) : Action(gs
   {
     base.Execute();
 
-    var tile = GameState!.TileAt(Loc);
+    var tile = GameState.TileAt(Loc);
     if (tile.Type == TileType.DeepWater)
     {
       PlungeIntoWater(Actor!, GameState);
@@ -922,16 +921,14 @@ class DiveAction(GameState gs, Actor actor, Loc loc, bool voluntary) : Action(gs
   }
 }
 
-abstract class PortalAction : Action
+abstract class PortalAction(GameState gs) : Action(gs)
 {  
-  public PortalAction(GameState gameState) => GameState = gameState;
-
   protected Actor? AdjacentActor(Loc loc)
   {
     List<Actor> crowd = [];
     foreach (Loc adj in Util.Adj8Locs(loc))
     {
-      if (GameState!.ObjDb.Occupant(adj) is not Actor adjActor)
+      if (GameState.ObjDb.Occupant(adj) is not Actor adjActor)
         continue;
 
       bool canFollow = false;
@@ -957,7 +954,7 @@ abstract class PortalAction : Action
 
   protected void UsePortal(Portal portal, bool stairs = false)
   {
-    Player player = GameState!.Player;
+    Player player = GameState.Player;
     Loc start = player.Loc;        
     var (dungeon, level, _, _) = portal.Destination;
     
@@ -1048,12 +1045,8 @@ class UpgradeItemAction : Action
   readonly Mob _shopkeeper;
   int Total { get; set; }
 
-  public UpgradeItemAction(GameState gs, Mob shopkeeper)
-  {
-    GameState = gs;
-    _shopkeeper = shopkeeper;
-  }
-
+  public UpgradeItemAction(GameState gs, Mob shopkeeper) : base(gs) => _shopkeeper = shopkeeper;
+  
   public override double Execute()
   {
     base.Execute();
@@ -1098,17 +1091,11 @@ class UpgradeItemAction : Action
 }
 
 // This is the action for paying an NPC to repair an item
-class RepairItemAction : Action
+class RepairItemAction(GameState gs, Mob shopkeeper) : Action(gs)
 {
-  readonly Mob _shopkeeper;
+  readonly Mob _shopkeeper = shopkeeper;
   int Total { get; set; }
   HashSet<ulong> ToRepair { get; set; } = [];
-
-  public RepairItemAction(GameState gs, Mob shopkeeper)
-  {
-    GameState = gs;
-    _shopkeeper = shopkeeper;
-  }
 
   public override double Execute()
   {
@@ -1154,17 +1141,11 @@ class RepairItemAction : Action
   }
 }
 
-class InnkeeperServiceAction : Action
+class InnkeeperServiceAction(GameState gs, Mob innkeeper) : Action(gs)
 {
-  readonly Mob _innkeeper;
+  readonly Mob _innkeeper = innkeeper;
   int Invoice { get; set; } = 0;
   string Service { get; set; } = "";
-
-  public InnkeeperServiceAction(GameState gs, Mob innkeeper)
-  {
-    GameState = gs;
-    _innkeeper = innkeeper;
-  }
 
   public override double Execute()
   {
@@ -1214,17 +1195,11 @@ class InnkeeperServiceAction : Action
   }
 }
 
-class PriestServiceAction : Action
+class PriestServiceAction(GameState gs, Mob priest) : Action(gs)
 {
-  readonly Mob _priest;
+  readonly Mob _priest = priest;
   int Invoice { get; set; } = 0;
   string Service { get; set; } = "";
-
-  public PriestServiceAction(GameState gs, Mob priest)
-  {
-    GameState = gs;
-    _priest = priest;
-  }
 
   public override double Execute()
   {
@@ -1232,7 +1207,7 @@ class PriestServiceAction : Action
 
     if (Service == "Absolution")
     {
-      GameState!.Player.Inventory.Zorkmids -= Invoice;
+      GameState.Player.Inventory.Zorkmids -= Invoice;
 
       string s = $"{_priest.FullName.Capitalize()} accepts your donation, chants a prayer while splashing you with holy water.";
       s += "\n\nYou feel cleansed.";
@@ -1318,21 +1293,15 @@ class WitchServiceAction(GameState gs, Mob witch) : Action(gs, witch)
   }
 }
 
-class ShoppingCompletedAction : Action
+class ShoppingCompletedAction(GameState gs, Mob shopkeeper) : Action(gs)
 {
-  readonly Mob _shopkeeper;
+  readonly Mob _shopkeeper = shopkeeper;
   int _invoice;
   List<(char, int)> _selections = [];
 
-  public ShoppingCompletedAction(GameState gs, Mob shopkeeper)
-  {
-    GameState = gs;
-    _shopkeeper = shopkeeper;
-  }
-
   public override double Execute()
   {
-    GameState!.Player.Inventory.Zorkmids -= _invoice;
+    GameState.Player.Inventory.Zorkmids -= _invoice;
     
     string txt = $"You pay {_shopkeeper.FullName} {_invoice} zorkmid";
     if (_invoice > 1)
@@ -1431,7 +1400,7 @@ class SayAloudAction(GameState gs, Actor actor) : Action(gs, actor)
     }
 
     Loc towerGate = Loc.Nowhere;
-    if (GameState!.FactDb.FactCheck("Tower Gate") is LocationFact lf)
+    if (GameState.FactDb.FactCheck("Tower Gate") is LocationFact lf)
     {
       towerGate = lf.Loc;
     }
@@ -1515,7 +1484,7 @@ class ChatAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
   {
     base.Execute();
 
-    Actor? other = GameState!.ObjDb.Occupant(Loc);
+    Actor? other = GameState.ObjDb.Occupant(Loc);
 
     if (other is Player)
     {
@@ -1551,19 +1520,15 @@ class ChatAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
 
 class CloseDoorAction : DirectionalAction
 {
-  public CloseDoorAction(GameState gs, Actor actor) : base(gs, actor) => GameState = gs;
-  public CloseDoorAction(GameState gs, Actor actor, Loc loc) : base(gs, actor)
-  {
-    Loc = loc;
-    GameState = gs;
-  }
+  public CloseDoorAction(GameState gs, Actor actor) : base(gs, actor) {}
+  public CloseDoorAction(GameState gs, Actor actor, Loc loc) : base(gs, actor) => Loc = loc;
 
   public override double Execute()
   {
     base.Execute();
     double result = 0.0;
-    UserInterface ui = GameState!.UIRef();
-    Tile tile = GameState!.CurrentMap.TileAt(Loc.Row, Loc.Col);
+    UserInterface ui = GameState.UIRef();
+    Tile tile = GameState.CurrentMap.TileAt(Loc.Row, Loc.Col);
 
     if (tile is Door door)
     {
@@ -1600,18 +1565,14 @@ class CloseDoorAction : DirectionalAction
 
 class OpenDoorAction : DirectionalAction
 {
-  public OpenDoorAction(GameState gs, Actor actor) : base(gs, actor) => GameState = gs;
-  public OpenDoorAction(GameState gs, Actor actor, Loc loc) : base(gs, actor)
-  {
-    Loc = loc;
-    GameState = gs;
-  }
-
+  public OpenDoorAction(GameState gs, Actor actor) : base(gs, actor) {}
+  public OpenDoorAction(GameState gs, Actor actor, Loc loc) : base(gs, actor) => Loc = loc;
+  
   public override double Execute()
   {
     base.Execute();
     double result = 0.0;
-    Tile door = GameState!.CurrentMap.TileAt(Loc.Row, Loc.Col);
+    Tile door = GameState.CurrentMap.TileAt(Loc.Row, Loc.Col);
     UserInterface ui = GameState.UIRef();
 
     if (door is Door d)
@@ -1649,19 +1610,15 @@ class OpenDoorAction : DirectionalAction
 
 class DeviceInteractionAction : DirectionalAction
 {
-  public DeviceInteractionAction(GameState gs, Actor actor) : base(gs, actor) => GameState = gs;
-  public DeviceInteractionAction(GameState gs, Actor actor, Loc loc) : base(gs, actor)
-  {
-    Loc = loc;
-    GameState = gs;
-  }
+  public DeviceInteractionAction(GameState gs, Actor actor) : base(gs, actor) {}
+  public DeviceInteractionAction(GameState gs, Actor actor, Loc loc) : base(gs, actor) => Loc = loc;
 
   public override double Execute()
   {
     base.Execute();
     
     Item? device = null;
-    foreach (Item item in GameState!.ObjDb.ItemsAt(Loc))
+    foreach (Item item in GameState.ObjDb.ItemsAt(Loc))
     {
       if (item.Type == ItemType.Device)
       {
@@ -1869,14 +1826,14 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
   }
 }
 
-class CastCurse(Loc target, int dc) : Action
+class CastCurse(Loc target, int dc, GameState gs) : Action(gs)
 {
   Loc TargetLoc { get; set; } = target;
   int DC { get; set; } = dc;
 
   public override double Execute()
   {
-    if (GameState!.ObjDb.Occupant(TargetLoc) is not Actor target)
+    if (GameState.ObjDb.Occupant(TargetLoc) is not Actor target)
       return 1.0;
 
     Actor caster = Actor!;
@@ -1901,13 +1858,13 @@ class CastCurse(Loc target, int dc) : Action
   }
 }
 
-class CastTeleportAway(Loc target) : Action
+class CastTeleportAway(Loc target, GameState gs, Actor actor) : Action(gs, actor)
 {
   Loc TargetLoc { get; set; } = target;
 
   public override double Execute()
   {
-    if (GameState!.ObjDb.Occupant(TargetLoc) is not Actor target)
+    if (GameState.ObjDb.Occupant(TargetLoc) is not Actor target)
       return 1.0;
 
     Actor caster = Actor!;
@@ -2091,7 +2048,7 @@ class MinorSummonAction(GameState gs, Actor actor) : Action(gs, actor)
   }
 }
 
-class SummonAction(Loc target, string summons, int count) : Action()
+class SummonAction(Loc target, string summons, int count, GameState gs) : Action(gs)
 {
   readonly Loc _target = target;
   readonly string _summons = summons;
@@ -2099,15 +2056,14 @@ class SummonAction(Loc target, string summons, int count) : Action()
 
   Loc SpawnPt()
   {
-    var gs = GameState!;
-    if (gs.TileAt(_target).Passable() && !gs.ObjDb.Occupied(_target))
+    if (GameState.TileAt(_target).Passable() && !GameState.ObjDb.Occupied(_target))
       return _target;
 
-    List<Loc> locs = [.. Util.Adj8Locs(_target).Where(l => gs.TileAt(l).Passable() && !gs.ObjDb.Occupied(l))];
+    List<Loc> locs = [.. Util.Adj8Locs(_target).Where(l => GameState.TileAt(l).Passable() && !GameState.ObjDb.Occupied(l))];
     if (locs.Count == 0)
       return Loc.Nowhere;
     else
-      return locs[gs.Rng.Next(locs.Count)];
+      return locs[GameState.Rng.Next(locs.Count)];
   }
 
   public override double Execute()
@@ -2167,20 +2123,19 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
   {
     base.Execute();
 
-    GameState gs = GameState!;
-    UserInterface ui = gs.UIRef();
+    UserInterface ui = GameState.UIRef();
     Loc playerLoc = Actor!.Loc;
-    List<Loc> sqsToSearch = [..gs.LastPlayerFoV.Keys
+    List<Loc> sqsToSearch = [..GameState.LastPlayerFoV.Keys
                                  .Where(loc => Util.Distance(playerLoc, loc) <= 3)];
 
-    bool rogue = gs.Player.Background == PlayerBackground.Skullduggery;
+    bool rogue = GameState.Player.Background == PlayerBackground.Skullduggery;
     int dc;
     foreach (Loc loc in sqsToSearch)
     {
-      if (gs.ObjDb.Occupant(loc) is Actor actor && actor.IsDisguised())
+      if (GameState.ObjDb.Occupant(loc) is Actor actor && actor.IsDisguised())
       {
         dc = rogue ? 13 : 15;
-        if (gs.Rng.Next(1, 21) >+ dc)
+        if (GameState.Rng.Next(1, 21) >+ dc)
         {
           var disguise = actor.Traits.OfType<DisguiseTrait>().First();
           ui.AlertPlayer($"Wait! That {disguise.DisguiseForm} is actually {actor.Name.IndefArticle()}!");
@@ -2191,7 +2146,7 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
       
       // I'm not going to roll to find secret items. I'm not sure I should
       // even bother for traps/secret doors
-      foreach (Item item in gs.ObjDb.ItemsAt(loc))
+      foreach (Item item in GameState.ObjDb.ItemsAt(loc))
       {
         if (item.HasTrait<HiddenTrait>())
         {
@@ -2200,29 +2155,29 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
         }
       }
 
-      Tile tile = gs.TileAt(loc);
+      Tile tile = GameState.TileAt(loc);
       switch (tile.Type)
       {
         case TileType.SecretDoor:
-          dc = 10 + gs.CurrLevel + 1;
+          dc = 10 + GameState.CurrLevel + 1;
           if (rogue)
             dc -= 2;
           dc = int.Min(dc, 20);
-          if (gs.Rng.Next(1, 21) <= dc) 
+          if (GameState.Rng.Next(1, 21) <= dc) 
           {
             ui.AlertPlayer("You spot a secret door!");
-            gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.ClosedDoor));
+            GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.ClosedDoor));
           }
           break;
         case TileType.HiddenPit:
         case TileType.HiddenTrapDoor:
         case TileType.HiddenTeleportTrap:
         case TileType.HiddenDartTrap:
-          dc = 15 + gs.CurrLevel + 1;
+          dc = 15 + GameState.CurrLevel + 1;
           if (rogue)
             dc -= 2;
           dc = int.Min(dc, 20);
-          if (gs.Rng.Next(1, 21) <= dc)
+          if (GameState.Rng.Next(1, 21) <= dc)
           {
             TileType replacementTile = tile.Type switch 
             {
@@ -2232,29 +2187,29 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
               _ => TileType.TrapDoor
             };
             ui.AlertPlayer("You spot a trap!");
-            gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(replacementTile));
+            GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(replacementTile));
           }          
           break;
         case TileType.HiddenMagicMouth:
-          dc = 10 + gs.CurrLevel + 1;
+          dc = 10 + GameState.CurrLevel + 1;
           if (rogue)
             dc -= 2;
           dc = int.Min(dc, 20);
-          if (gs.Rng.Next(1, 21) <= dc)
+          if (GameState.Rng.Next(1, 21) <= dc)
           {
             ui.AlertPlayer("You spot a magic mouth!");
-            gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.MagicMouth));
+            GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.MagicMouth));
           }
           break;
         case TileType.JetTrigger:
           JetTrigger jt = (JetTrigger)tile;
           if (!jt.Visible)
           {
-            dc = 15 + gs.CurrLevel + 1;
+            dc = 15 + GameState.CurrLevel + 1;
             if (rogue)
               dc -= 2;
             dc = int.Min(dc, 20);
-            if (gs.Rng.Next(1, 21) <= dc)
+            if (GameState.Rng.Next(1, 21) <= dc)
             {
               jt.Visible = true;
               ui.AlertPlayer("You spot a loose flagstone!");
@@ -2265,11 +2220,11 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
           GateTrigger gt = (GateTrigger)tile;
           if (!gt.Found)
           {
-            dc = 12 + gs.CurrLevel + 1;
+            dc = 12 + GameState.CurrLevel + 1;
             if (rogue)
               dc -= 2;
             dc = int.Min(dc, 20);
-            if (gs.Rng.Next(1, 21) <= dc)
+            if (GameState.Rng.Next(1, 21) <= dc)
             {
               ui.AlertPlayer("You spot a pressure plate!");
               gt.Found = true;
@@ -2280,12 +2235,12 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
       }      
     }
 
-    MagicMapAnimation anim = new(gs, gs.CurrentDungeon, sqsToSearch, false)
+    MagicMapAnimation anim = new(GameState, GameState.CurrentDungeon, sqsToSearch, false)
     {
       Colour = Colours.SEARCH_HIGHLIGHT,
       AltColour = Colours.SEARCH_HIGHLIGHT
     };
-    gs.UIRef().RegisterAnimation(anim);
+    GameState.UIRef().RegisterAnimation(anim);
 
     return 1.0;
   }
@@ -2342,9 +2297,9 @@ class DetectTreasureAction(GameState gs, Actor caster) : Action(gs, caster)
   {
     base.Execute();
 
-    if (Actor is Player player)
+    if (Actor is Player)
     {
-      Loc playerLoc = GameState!.Player.Loc;
+      Loc playerLoc = GameState.Player.Loc;
 
       int topScreenRow = playerLoc.Row - UserInterface.ViewHeight / 2;
       int topScreenCol = playerLoc.Col - UserInterface.ViewWidth / 2;
@@ -2457,9 +2412,8 @@ class MirrorImageAction : Action
 {
   readonly Loc _target;
 
-  public MirrorImageAction(GameState gs, Actor caster, Loc target)
+  public MirrorImageAction(GameState gs, Actor caster, Loc target) : base(gs)
   {
-    GameState = gs;
     Actor = caster;
     _target = target;
   }
@@ -2889,15 +2843,9 @@ class FireboltAction(GameState gs, Actor caster, Loc target) : Action(gs, caster
   }
 }
 
-class WebAction : Action
+class WebAction(GameState gs, Loc target) : Action(gs)
 {
-  Loc Target { get; set; }
-
-  public WebAction(GameState gs, Loc target)
-  {
-    GameState = gs;
-    Target = target;
-  }
+  Loc Target { get; set; } = target;
 
   public override double Execute()
   {
@@ -2987,9 +2935,9 @@ class DescentAction(GameState gs, Actor actor) : Action(gs, actor)
   public override double Execute()
   {
     Loc loc = Actor!.Loc;
-    Map map = GameState!.Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
+    Map map = GameState.Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
 
-    if (GameState!.InWilderness || map.HasFeature(MapFeatures.UndiggableFloor))
+    if (GameState.InWilderness || map.HasFeature(MapFeatures.UndiggableFloor))
     {
       GameState.UIRef().AlertPlayer("A tiny, nearly imperceptible divot forms.", GameState, loc);
     }
@@ -3014,7 +2962,7 @@ class BindSpellAction(GameState gs, Actor caster) : Action(gs, caster)
 {
   public override double Execute()
   {
-    Loc loc = GameState!.Player.Loc;
+    Loc loc = GameState.Player.Loc;
     bool bindingAura = GameState.Player.Inventory.Items()
                             .Any(i => i.Traits.OfType<BindingTrait>().FirstOrDefault() is BindingTrait bt && bt.Lit);
 
@@ -3109,7 +3057,7 @@ class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
 
     List<Loc> sqs = [];
     Loc start = Actor!.Loc;
-    Map map = GameState!.Campaign.Dungeons[start.DungeonID].LevelMaps[start.Level];
+    Map map = GameState.Campaign.Dungeons[start.DungeonID].LevelMaps[start.Level];
     bool submered = map.HasFeature(MapFeatures.Submerged);
     for (int r = start.Row - 12; r < start.Row + 12; r++)
     {
@@ -3201,9 +3149,9 @@ class DrinkBoozeAction(GameState gs, Actor target) : Action(gs, target)
   public override double Execute()
   {
     base.Execute();
-    UserInterface ui = GameState!.UIRef();
+    UserInterface ui = GameState.UIRef();
 
-    bool canSeeLoc = GameState!.LastPlayerFoV.ContainsKey(Actor!.Loc);
+    bool canSeeLoc = GameState.LastPlayerFoV.ContainsKey(Actor!.Loc);
 
     if (Actor is Player)
       ui.AlertPlayer("Glug! Glug! Glug!");
@@ -3279,12 +3227,12 @@ class ClarityAction(GameState gs, Actor target) : Action(gs, target)
     {
       if (t is ConfusedTrait confused)
       {
-        confused.Remove(GameState!);
+        confused.Remove(GameState);
         anyRemoved = true;
       }
       else if (t is TipsyTrait tipsy)
       {
-        tipsy.Remove(GameState!);
+        tipsy.Remove(GameState);
         anyRemoved = true;
       }
       else if (t is FrightenedTrait scared)
@@ -3319,7 +3267,7 @@ class ForgetAction(GameState gs, Actor actor) : Action(gs, actor)
     
     if (Actor is Player)
     {
-      foreach (Loc loc in GameState!.CurrentDungeon.RememberedLocs.Keys.Where(l => l.Level == GameState.CurrLevel).ToList())
+      foreach (Loc loc in GameState.CurrentDungeon.RememberedLocs.Keys.Where(l => l.Level == GameState.CurrLevel).ToList())
       {
         GameState.CurrentDungeon.RememberedLocs.Remove(loc);
       }
@@ -3351,7 +3299,7 @@ class SootheAction(GameState gs, Actor target, int amount) : Action(gs, target)
     
     if (Actor!.Stats.TryGetValue(Attribute.Nerve, out Stat? nerve))
     {
-      GameState!.UIRef().AlertPlayer($"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "feel")} more calm.");
+      GameState.UIRef().AlertPlayer($"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "feel")} more calm.");
       SqAnimation anim = new(GameState!, Actor.Loc, Colours.WHITE, Colours.SOPHIE_GREEN, '\u2665');
       GameState!.UIRef().RegisterAnimation(anim);
 
@@ -3456,8 +3404,8 @@ class ThrowBombAction(GameState gs, Actor actor, Loc target) : Action(gs, actor)
 
   public override double Execute()
   {
-    Item bomb = ItemFactory.Get(ItemNames.BOMB, GameState!.ObjDb);
-    Cmd.ThrowItem(Actor!, bomb, Target, GameState!);
+    Item bomb = ItemFactory.Get(ItemNames.BOMB, GameState.ObjDb);
+    Cmd.ThrowItem(Actor!, bomb, Target, GameState);
    
     return 1.0;
   }
@@ -3471,7 +3419,7 @@ class ThrowAction(GameState gs, Actor actor, char slot) : TargetedAction(gs, act
   {
     base.Execute();
 
-    var ammo = Actor!.Inventory.Remove(_slot, 1, GameState!).First();
+    var ammo = Actor!.Inventory.Remove(_slot, 1, GameState).First();
     if (ammo != null)
     {
       Cmd.ThrowItem(Actor, ammo, Target, GameState!);
@@ -3491,7 +3439,7 @@ class FireSelectedBowAction(GameState gs, Player player) : Action(gs, player)
   {
     base.Execute();
 
-    GameState!.ClearMenu();
+    GameState.ClearMenu();
 
     var player = Actor as Player;
 
@@ -3517,7 +3465,7 @@ class ThrowSelectionAction(GameState gs, Player player) : Action(gs, player)
   
   public override double Execute()
   {
-    GameState!.ClearMenu();
+    GameState.ClearMenu();
     var player = Actor as Player;
 
     var (item, _) = player!.Inventory.ItemAt(Choice);
@@ -3556,7 +3504,7 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
   
   public override double Execute()
   {
-    GameState!.ClearMenu();
+    GameState.ClearMenu();
     UserInterface ui = GameState.UIRef();
 
     if (Choice == '$')
@@ -3638,7 +3586,7 @@ class ApplyPoisonAction(GameState gs, Actor actor, Item? item) : Action(gs, acto
   {
     base.Execute();
 
-    GameState!.ClearMenu();
+    GameState.ClearMenu();
 
     var (item, _) = Actor!.Inventory.ItemAt(Choice);
 
@@ -3678,7 +3626,7 @@ class ConsumeAlchemicalCompound(GameState gs, Actor actor, Item item) : Action(g
     List<string> messages = ["You hold your nose and consume the noisome substance."];
     Actor!.Inventory.ConsumeItem(SourceItem, Actor, GameState!);
 
-    Attribute boosted = GameState!.Rng.Next(3) switch
+    Attribute boosted = GameState.Rng.Next(3) switch
     {
       0 => Attribute.Strength,
       1 => Attribute.Dexterity,
@@ -3750,7 +3698,7 @@ class EnchantItemAction(GameState gs, Actor actor, Item item) : Action(gs, actor
   {
     base.Execute();
 
-    GameState!.ClearMenu();
+    GameState.ClearMenu();
 
     var (item, _) = Actor!.Inventory.ItemAt(Choice);
     if (item != null)
@@ -3772,7 +3720,7 @@ class ApplyStainlessnessAction(GameState gs, Actor actor, Item? item) : Action(g
   {
     base.Execute();
 
-    GameState!.ClearMenu();
+    GameState.ClearMenu();
 
     var (item, _) = Actor!.Inventory.ItemAt(Choice);
 
@@ -3819,7 +3767,7 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
   public override double Execute()
   {
     var (item, _) = Actor!.Inventory.ItemAt(Choice);
-    GameState!.ClearMenu();
+    GameState.ClearMenu();
 
     if (item is null)
     {
@@ -3924,12 +3872,12 @@ class FireballAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
         break;      
     }
 
-    var ui = GameState!.UIRef();
+    var ui = GameState.UIRef();
 
-    var anim = new ArrowAnimation(GameState!, pts, Colours.BRIGHT_RED);
+    var anim = new ArrowAnimation(GameState, pts, Colours.BRIGHT_RED);
     ui.PlayAnimation(anim, GameState);
     
-    var affected = GameState!.Flood(actualLoc, 3);
+    var affected = GameState.Flood(actualLoc, 3);
     affected.Add(actualLoc);
 
     ExplosionAnimation explosion = new(GameState!)
@@ -3991,11 +3939,11 @@ class RayOfSlownessAction(GameState gs, Actor actor, Trait src, ulong sourceId) 
       Type = ItemType.Weapon,
       Glyph = new Glyph('*', Colours.FADED_PURPLE, Colours.FADED_PURPLE, Colours.BLACK, false)
     };
-    GameState!.ObjDb.Add(ray);
+    GameState.ObjDb.Add(ray);
 
     List<Loc> pts = [.. Trajectory(Actor!.Loc, true).Skip(1)];
     var anim = new BeamAnimation(GameState!, pts, Colours.FADED_PURPLE, Colours.BLACK);
-    GameState!.UIRef().PlayAnimation(anim, GameState);
+    GameState.UIRef().PlayAnimation(anim, GameState);
 
     // The AlacrityTrait never expires, I don't think. Hmm... Did I create this
     // before I created TemporaryTrait. It's not really a problem right now now
@@ -4055,9 +4003,9 @@ class DigRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, ac
     }
     List<Loc> pts = [.. Trajectory(Actor!.Loc, false).Take(7)];
 
-    BeamAnimation anim = new(GameState!, pts, Colours.LIGHT_BROWN, Colours.WHITE);
+    BeamAnimation anim = new(GameState, pts, Colours.LIGHT_BROWN, Colours.WHITE);
 
-    UserInterface ui = GameState!.UIRef();
+    UserInterface ui = GameState.UIRef();
     ui.PlayAnimation(anim, GameState);
 
     if (Actor is Player)
@@ -4123,16 +4071,16 @@ class FrostRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
       Glyph = new Glyph('*', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, false)
     };
     ray.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 3, DamageType = DamageType.Cold });
-    GameState!.ObjDb.Add(ray);
+    GameState.ObjDb.Add(ray);
 
     // Ray of frost is a beam so unlike things like magic missle, it doesn't stop 
     // when it hits an occupant.
     List<Loc> pts = Trajectory(Actor!.Loc, true);
 
-    BeamAnimation anim = new(GameState!, pts, Colours.LIGHT_BLUE, Colours.WHITE);
-    GameState!.UIRef().PlayAnimation(anim, GameState);
+    BeamAnimation anim = new(GameState, pts, Colours.LIGHT_BLUE, Colours.WHITE);
+    GameState.UIRef().PlayAnimation(anim, GameState);
 
-    foreach (var pt in pts)
+    foreach (Loc pt in pts)
     {
       Effects.ApplyDamageEffectToLoc(pt, DamageType.Cold, GameState);
 
@@ -4175,13 +4123,13 @@ class MagicMissleAction(GameState gs, Actor actor, Trait? src) : TargetedAction(
       Glyph = new Glyph('-', Colours.LIGHT_BLUE, Colours.LIGHT_BLUE, Colours.BLACK, false)
     };
     missile.Traits.Add(new DamageTrait() { DamageDie = DamageDie, NumOfDie = NumOfDie, DamageType = DamageType.Force });
-    GameState!.ObjDb.Add(missile);
+    GameState.ObjDb.Add(missile);
 
     List<Loc> pts = [];
     // I think I can probably clean this crap up
     foreach (var pt in Trajectory(Actor!.Loc, false))
     {
-      var tile = GameState!.TileAt(pt);
+      Tile tile = GameState.TileAt(pt);
       if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
       {
         pts.Add(pt);
@@ -4216,9 +4164,9 @@ class MagicMissleAction(GameState gs, Actor actor, Trait? src) : TargetedAction(
       charged.Used();
     }
 
-    ArrowAnimation anim = new(GameState!, pts, Colours.LIGHT_BLUE);
-    GameState!.UIRef().PlayAnimation(anim, GameState);
-    GameState!.UIRef().AlertPlayer("Pew pew pew!");
+    ArrowAnimation anim = new(GameState, pts, Colours.LIGHT_BLUE);
+    GameState.UIRef().PlayAnimation(anim, GameState);
+    GameState.UIRef().AlertPlayer("Pew pew pew!");
 
     return 1.0;
   }
@@ -4248,7 +4196,7 @@ abstract class TargetedAction(GameState gs, Actor actor) : Action(gs, actor)
   // As in, clear of obstacles, not opacity
   bool ClearTileAt(Loc loc)
   {
-    Tile tile = GameState!.TileAt(loc);
+    Tile tile = GameState.TileAt(loc);
     if (!(tile.Passable() || tile.PassableByFlight()))
       return false;
     if (GameState.ObjDb.AreBlockersAtLoc(loc))
@@ -4284,7 +4232,7 @@ class SwapWithMobAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
   {
     base.Execute();
     
-    if (GameState!.ObjDb.Occupant(_target) is Actor victim)
+    if (GameState.ObjDb.Occupant(_target) is Actor victim)
     {
       if (_source is WandTrait wand)
       {
@@ -4333,7 +4281,7 @@ class SwimAction(GameState gs, Actor actor, bool up) : Action(gs, actor)
     base.Execute();
 
     int nextLevelNum = GameState!.CurrLevel;
-    if (GameState!.CurrentDungeon.Descending && Up)
+    if (GameState.CurrentDungeon.Descending && Up)
       nextLevelNum -= 1;
     else if (GameState.CurrentDungeon.Descending && !Up)
       nextLevelNum += 1;
@@ -4344,13 +4292,13 @@ class SwimAction(GameState gs, Actor actor, bool up) : Action(gs, actor)
 
     if (Up && (nextLevelNum < 0 || nextLevelNum == GameState.CurrentDungeon.LevelMaps.Count))
     {
-      GameState!.UIRef().AlertPlayer("You cannot swim any further upward here.");
+      GameState.UIRef().AlertPlayer("You cannot swim any further upward here.");
 
       return 0.0;
     }
     else if (!Up && (nextLevelNum < 0 || nextLevelNum == GameState.CurrentDungeon.LevelMaps.Count))
     {
-      GameState!.UIRef().AlertPlayer("You cannot swim any deeper here.");
+      GameState.UIRef().AlertPlayer("You cannot swim any deeper here.");
 
       return 0.0;
     }
@@ -4394,7 +4342,7 @@ class CastHealMonster(GameState gs, Actor actor, Trait src) : Action(gs, actor)
     base.Execute();
     double energyCost = 1.0;
 
-    if (GameState!.ObjDb.Occupant(_target) is Actor target)
+    if (GameState.ObjDb.Occupant(_target) is Actor target)
     {
       if (target is Player)
       {
@@ -4437,7 +4385,7 @@ class AimAction(GameState gs, Actor actor, Action replacementAction) : Action(gs
     if (Actor is Player)
     {
       DirectionalInputer aimer = new(GameState!, false, false) { DeferredAction = _replacementAction };
-      GameState!.UIRef().SetInputController(aimer);
+      GameState.UIRef().SetInputController(aimer);
     }
 
     return 0.0;
@@ -4456,8 +4404,8 @@ class InventoryChoiceAction(GameState gs, Actor actor, InventoryOptions opts, Ac
     if (Actor is Player player)
     {
       char[] slots = player.Inventory.UsedSlots();
-      player.Inventory.ShowMenu(GameState!.UIRef(), InvOptions);
-      Inventorier inputer = new(GameState!, [.. slots]) { DeferredAction = ReplacementAction };
+      player.Inventory.ShowMenu(GameState.UIRef(), InvOptions);
+      Inventorier inputer = new(GameState, [.. slots]) { DeferredAction = ReplacementAction };
       GameState.UIRef().SetInputController(inputer);
     }
 
@@ -4474,7 +4422,7 @@ class ScatterAction(GameState gs, Actor actor) : Action(gs, actor)
     // instead.
     if (Actor is Player && Actor.HasTrait<SwallowedTrait>())
     {
-      Actor.QueueAction(new BlinkAction(GameState!, Actor));
+      Actor.QueueAction(new BlinkAction(GameState, Actor));
 
       return 0.0;
     }
@@ -4483,7 +4431,7 @@ class ScatterAction(GameState gs, Actor actor) : Action(gs, actor)
     // I'm passing a new objdb because I am using CalcVisible() as a way to 
     // calculate a circular area of effect and I want to ignore objects like
     // fog and ink that reduce visibility.
-    foreach (var kvp in FieldOfView.CalcVisible(4, Actor!.Loc, GameState!.CurrentMap, new GameObjectDB()))
+    foreach (var kvp in FieldOfView.CalcVisible(4, Actor!.Loc, GameState.CurrentMap, new GameObjectDB()))
     {
       if (kvp.Value != Illumination.Full)
         continue;
@@ -4541,7 +4489,7 @@ class UseSpellItemAction(GameState gs, Actor actor, string spell, Item? item) : 
 
   public override double Execute()
   {
-    Player player = GameState!.Player;
+    Player player = GameState.Player;
     
     switch (Spell)
     {
@@ -4567,58 +4515,57 @@ class UseWandAction(GameState gs, Actor actor, WandTrait wand, ulong wandId) : A
     if (Actor is not Player player)
       throw new Exception("Boy did something sure go wrong!");
 
-    GameState gs = GameState!;
     Inputer inputer;
     switch (_wand.Effect)
     {
       case "magicmissile":
-        inputer = new Aimer(GameState!, player.Loc, 7)
+        inputer = new Aimer(GameState, player.Loc, 7)
         {
-          DeferredAction = new MagicMissleAction(GameState!, player, _wand)
+          DeferredAction = new MagicMissleAction(GameState, player, _wand)
         };
-        gs.UIRef().SetInputController(inputer);
+        GameState.UIRef().SetInputController(inputer);
         break;
       case "fireball":
-        inputer = new Aimer(GameState!, player.Loc, 12)
+        inputer = new Aimer(GameState, player.Loc, 12)
         {
-          DeferredAction = new FireballAction(GameState!, player, _wand)
+          DeferredAction = new FireballAction(GameState, player, _wand)
         };
-        gs.UIRef().SetInputController(inputer);
+        GameState.UIRef().SetInputController(inputer);
         break;
       case "swap":
-        inputer = new Aimer(GameState!, player.Loc, 25)
+        inputer = new Aimer(GameState, player.Loc, 25)
         {
-          DeferredAction = new SwapWithMobAction(GameState!, player, _wand)
+          DeferredAction = new SwapWithMobAction(GameState, player, _wand)
         };
-        gs.UIRef().SetInputController(inputer);
+        GameState.UIRef().SetInputController(inputer);
         break;
       case "healmonster":
-        inputer = new Aimer(GameState!, player.Loc, 7)
+        inputer = new Aimer(GameState, player.Loc, 7)
         {
-          DeferredAction = new CastHealMonster(GameState!, player, _wand)
+          DeferredAction = new CastHealMonster(GameState, player, _wand)
         };
-        gs.UIRef().SetInputController(inputer);
+        GameState.UIRef().SetInputController(inputer);
         break;
       case "frost":
-        inputer = new Aimer(GameState!, player.Loc, 7)
+        inputer = new Aimer(GameState, player.Loc, 7)
         {
-          DeferredAction = new FrostRayAction(GameState!, player, _wand)
+          DeferredAction = new FrostRayAction(GameState, player, _wand)
         };
-        gs.UIRef().SetInputController(inputer);
+        GameState.UIRef().SetInputController(inputer);
         break;
       case "slowmonster":
-        inputer = new Aimer(GameState!, player.Loc, 9)
+        inputer = new Aimer(GameState, player.Loc, 9)
         {
-          DeferredAction = new RayOfSlownessAction(GameState!, player, _wand, wandId)
+          DeferredAction = new RayOfSlownessAction(GameState, player, _wand, wandId)
         };
-        gs.UIRef().SetInputController(inputer);
+        GameState.UIRef().SetInputController(inputer);
         break;
       case "digging":
         inputer = new Aimer(GameState!, player.Loc, 6)
         {
-          DeferredAction = new DigRayAction(GameState!, player, _wand)
+          DeferredAction = new DigRayAction(GameState, player, _wand)
         };
-        gs.UIRef().SetInputController(inputer);
+        GameState.UIRef().SetInputController(inputer);
         break;
       case "summoning":
         SetupSummoning();
@@ -4637,23 +4584,15 @@ class UseWandAction(GameState gs, Actor actor, WandTrait wand, ulong wandId) : A
     
     // We don't need to replace the player's pending action here because 
     // there's no input needed from the player
-    SummonAction summon = new(Actor!.Loc, GameState!.RandomMonster(Actor.Loc.DungeonID), 1)
-    {
-      GameState = GameState,
-      Actor = Actor
-    };
+    SummonAction summon = new(Actor!.Loc, GameState.RandomMonster(Actor.Loc.DungeonID), 1, GameState) { Actor = Actor };
     Actor.QueueAction(summon);
   }
 }
 
 sealed class PassAction : Action
 {
-  public PassAction() { }
-  public PassAction(GameState? gs, Actor? actor)
-  {
-    GameState = gs;
-    Actor = actor;
-  }
+  public PassAction(GameState gs) : base(gs) { }
+  public PassAction(GameState gs, Actor? actor) : base(gs) => Actor = actor;
 
   public sealed override double Execute()
   {
@@ -4699,7 +4638,7 @@ class HighlightLocAction(GameState gs, Actor actor, HighlightLocAnimation anim) 
     bool disguised = false;
     int hpCurr = -1;
     int hpMax = -1;
-    if (GameState!.ObjDb.Occupant(loc) is Actor actor)
+    if (GameState.ObjDb.Occupant(loc) is Actor actor)
     {
       if (actor is Player)
       {
@@ -4821,19 +4760,13 @@ class HighlightLocAction(GameState gs, Actor actor, HighlightLocAnimation anim) 
   }
 }
 
-class CloseMenuAction : Action
+class CloseMenuAction(GameState gs, double energyCost = 0.0) : Action(gs)
 {
-  readonly double _energyCost;
-
-  public CloseMenuAction(GameState gs, double energyCost = 0.0)
-  {
-    GameState = gs;
-    _energyCost = energyCost;
-  }
+  readonly double _energyCost = energyCost;
 
   public override double Execute()
   {
-    GameState!.ClearMenu();
+    GameState.ClearMenu();
     return _energyCost;
   }
 }
@@ -4844,7 +4777,7 @@ class QuitAction(GameState gs) : Action(gs)
 {
   public override double Execute()
   {
-    GameState!.GameSignal = GameSignal.Quit;
+    GameState.GameSignal = GameSignal.Quit;
 
     return 0.0;
   } 
@@ -4854,13 +4787,13 @@ class SaveGameAction(GameState gs) : Action(gs)
 {
   public override double Execute()
   {
-    GameState!.GameSignal = GameSignal.SaveGame;
+    GameState.GameSignal = GameSignal.SaveGame;
 
     return 0.0;
   }
 }
 
-class NullAction : Action
+class NullAction (GameState gs): Action(gs)
 {
   public override double Execute() => throw new Exception("Hmm this should never happen");
 }
