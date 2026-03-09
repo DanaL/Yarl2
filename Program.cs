@@ -44,11 +44,11 @@ if (dialogueErrors.Count > 0)
 try
 {
   RunningState state = RunningState.Pregame;
-
+  string alert = "";
   do
   {
     display.ClosePopup();
-    TitleScreen ts = new(display);
+    TitleScreen ts = new(display) { Alert = alert };
     SetupType gameSetup = ts.Display();
 
     GameState? gameState = null;
@@ -97,7 +97,7 @@ try
     if (gameState is not null)
     {
       display.State = UIState.InGame;
-      GameLoop(display, gameState);
+      alert = GameLoop(display, gameState);
     }
     display.Reset();
     
@@ -142,7 +142,7 @@ catch (QuitGameException)
 //   display.BlockForInput(null);
 // }
 
-static void GameLoop(UserInterface ui, GameState gameState)
+static string GameLoop(UserInterface ui, GameState gameState)
 {
   Options opts = gameState.Options;
   if (opts.DefaultMoveHints)
@@ -179,7 +179,7 @@ static void GameLoop(UserInterface ui, GameState gameState)
       switch (gameState.GameSignal)
       {
         case GameSignal.Quit:
-          return;
+          return "";
         case GameSignal.SaveGame:
           try
           {
@@ -192,14 +192,14 @@ static void GameLoop(UserInterface ui, GameState gameState)
             ui.SetPopup(new Popup(ex.Message, "", -1, -1));
           }
 
-          return;
+          return "...your game has been saved";
       }
     }
     catch (QuitGameException)
     {
       // If the players quits the game while playing, we bump them 
       // back to the main menu.
-      return;
+      return "";
     }
     catch (PlayerKilledException pke)
     {
@@ -214,7 +214,7 @@ static void GameLoop(UserInterface ui, GameState gameState)
       ui.BlockFoResponse(gameState);
       GravestoneScreen(ui, gameState, pke.Messages);
 
-      return;
+      return "";
     }
     catch (VictoryException)
     {
@@ -225,7 +225,7 @@ static void GameLoop(UserInterface ui, GameState gameState)
 
       Victory.VictoryScreen(gameState);
 
-      return;
+      return "";
     }
 
     TimeSpan elapsed = DateTime.UtcNow - refresh;
@@ -237,6 +237,8 @@ static void GameLoop(UserInterface ui, GameState gameState)
       refresh = DateTime.UtcNow;
     }
   }
+
+  return "";
 }
 
 static void DrawGravestone(UserInterface ui, GameState gameState, List<string> messages, List<Colour> flowerColours)

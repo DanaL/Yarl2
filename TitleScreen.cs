@@ -13,6 +13,7 @@ using Yarl2;
 
 class TitleScreen(UserInterface ui)
 {
+  public string Alert { get; set; } = "";
   UserInterface UI { get; set; } = ui;
   Map? Map { get; set; }
   Loc Player { get; set; }
@@ -47,6 +48,12 @@ class TitleScreen(UserInterface ui)
 
     UI.SqsOnScreen = new Sqr[UserInterface.ScreenHeight, UserInterface.ScreenWidth];
     UI.ClearSqsOnScreen();
+
+    if (Alert != "")
+    {
+      text[8] = Alert.PadLeft(UserInterface.ScreenWidth / 2 + Alert.Length / 2 - 2, ' ');
+    }
+
     for (int r = 0; r < text.Length; r++)
     {
       string row = text[r];
