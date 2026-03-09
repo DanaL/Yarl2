@@ -55,7 +55,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   public int MainQuestState => Player.Stats[Attribute.MainQuestState].Curr;
 
   public GameSignal GameSignal { get; set; } = GameSignal.None;
-  
+  public String SignalMessage { get; set; } = "";
+
   public void ActorEntersLevel(Actor actor, int dungeonId, int level)
   {
     if (actor is not Yarl2.Player)
@@ -780,10 +781,10 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       // Play any queued explosions in case it was one of the explosions
       // that killed the player
       UI.PlayQueuedExplosions(this);
+      GameSignal = GameSignal.PlayerKilled;
+      SignalMessage = killedBy;
 
-      PlayerKilledException pke = new();
-      pke.Messages.Add(killedBy);
-      throw pke;
+      return;
     }
     else if (locVisible && victim.Traits.OfType<DeathMessageTrait>().FirstOrDefault() is DeathMessageTrait dmt)
     {

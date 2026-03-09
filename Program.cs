@@ -14,6 +14,7 @@ using System.Text.Json;
 using System.Runtime.InteropServices;
 
 using Yarl2;
+using System.Runtime.CompilerServices;
 
 var options = Options.LoadOptions();
 
@@ -181,39 +182,17 @@ static string GameLoop(UserInterface ui, GameState gameState)
         case GameSignal.Quit:
           return "";
         case GameSignal.SaveGame:
-          try
-          {
-            Serialize.WriteSaveGame(gameState, ui);
-            Serialize.WriteOptions(gameState.Options);
-
-          }
-          catch (Exception ex)
-          {
-            ui.SetPopup(new Popup(ex.Message, "", -1, -1));
-          }
-
+          SaveGame(gameState, ui);
           return "...your game has been saved";
+        case GameSignal.PlayerKilled:
+          PlayerKilled(gameState, ui);
+          return "";
       }
     }
     catch (QuitGameException)
     {
       // If the players quits the game while playing, we bump them 
       // back to the main menu.
-      return "";
-    }
-    catch (PlayerKilledException pke)
-    {
-      string s = $"Oh noes you've been killed by {pke.Messages[0]} :(";
-      if (pke.Messages[0] == "drowning")
-        s = "Oh noes you have drowned :(";
-
-      if (gameState.Player.HasTrait<ParalyzedTrait>())
-        pke.Messages.Add("while paralyzed");
-      ui.SetPopup(new Popup(s, "", -1, -1));
-      ui.WriteAlerts();
-      ui.BlockFoResponse(gameState);
-      GravestoneScreen(ui, gameState, pke.Messages);
-
       return "";
     }
     catch (VictoryException)
@@ -239,6 +218,43 @@ static string GameLoop(UserInterface ui, GameState gameState)
   }
 
   return "";
+}
+
+static void SaveGame(GameState gs, UserInterface ui)
+{
+  try
+  {
+    Serialize.WriteSaveGame(gs, ui);
+    Serialize.WriteOptions(gs.Options);
+
+  }
+  catch (Exception ex)
+  {
+    ui.SetPopup(new Popup(ex.Message, "", -1, -1));
+  }
+}
+
+static void PlayerKilled(GameState gs, UserInterface ui)
+{
+  List<string> msgs = [];
+  string s = "";
+  if (gs.SignalMessage == "drowning")
+  {
+    s = "Oh noes you have drowned :(";
+    msgs.Add("drowning");
+  }
+  else
+  {
+    s = $"Oh noes you've been killed by {gs.SignalMessage} :(";
+    msgs.Add(gs.SignalMessage);
+  }
+  
+  if (gs.Player.HasTrait<ParalyzedTrait>())
+    msgs.Add("while paralyzed");
+  ui.SetPopup(new Popup(s, "", -1, -1));
+  ui.WriteAlerts();
+  ui.BlockFoResponse(gs);
+  GravestoneScreen(ui, gs, msgs);
 }
 
 static void DrawGravestone(UserInterface ui, GameState gameState, List<string> messages, List<Colour> flowerColours)
