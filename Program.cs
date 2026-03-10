@@ -61,10 +61,8 @@ try
       case SetupType.NewGame:
         var (gs, s) = new CampaignCreator(display).Create(options);            
         display.InTutorial = false;
-        if (s != RunningState.Playing)
-          state = s;
-        else
-          gameState = gs;        
+        state = s;
+        gameState = gs;
         break;
       case SetupType.Tutorial:
         display.InTutorial = true;
