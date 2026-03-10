@@ -71,18 +71,13 @@ try
         gameState = new Tutorial(display).Setup(options);
         break;
       default:
-        // try
-        // {
-          display.InTutorial = false;
-          gameState = new GameLoader(display).Load(options);
-          
-          if (gameState is null)
-            state = RunningState.ExitGame;
-        // }
-        // catch (GameNotLoadedException)
-        // {
-        //   state = RunningState.Pregame;
-        // }
+        display.InTutorial = false;
+        var result = new GameLoader(display).Load(options);
+        
+        if (result.Item2 == GameEventType.Quiting)
+          state = RunningState.ExitGame;
+        else
+          gs = result.Item1;
         break;
     }
 

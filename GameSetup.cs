@@ -105,7 +105,7 @@ class GameLoader(UserInterface ui)
   public (GameState?, GameEventType) Load(Options options)
   {
     var (path, evt) = LoadGameScreen();
-    if (evt == GameEventType.Cancel)
+    if (evt == GameEventType.Cancel || evt == GameEventType.Quiting)
       return (null, evt);
 
     GameState? gameState = Serialize.LoadSaveGame(path, options, UI);
@@ -537,21 +537,14 @@ class CampaignCreator(UserInterface ui)
 
       if (c == Constants.ESC || c == 'a')
       {
-        throw new GameNotLoadedException();
+        return;
       }
       else if (c == 'b')
       {
-        try
-        {
-          File.Delete(existingSavePath);
-          UI.ClosePopup();
-          return;
-        }
-        catch (Exception)
-        {
-          throw new GameNotLoadedException();
-        }
-      }      
+        File.Delete(existingSavePath);
+        UI.ClosePopup();
+        return;
+      }
     }
     while (true);
   }
