@@ -909,7 +909,7 @@ abstract class UserInterface
       }
       else if (e.Value == Constants.ESC)
       {
-        return ("", GameEventType.NoEvent);
+        return ("", GameEventType.Cancel);
       }
       else if (e.Type == GameEventType.Quiting)
       {
