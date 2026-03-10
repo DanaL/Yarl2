@@ -95,7 +95,7 @@ class TitleScreen(UserInterface ui)
         return SetupType.NewGame;
       else if (c == 'c')
         AboutPopup();
-      else if (c == 'q')
+      else if (c == 'q' || c == Constants.QUIT_SIGNAL)
         return SetupType.Quit;
       else if (c == 't')
         return SetupType.Tutorial;

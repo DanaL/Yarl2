@@ -1287,7 +1287,6 @@ class MapUtils
   }
 }
 
-class QuitGameException : Exception { }
 class InvalidRoomException : Exception { }
 class WildernessCreationException(string msg) : Exception(msg) { }
 

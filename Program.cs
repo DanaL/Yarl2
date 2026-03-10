@@ -14,7 +14,6 @@ using System.Text.Json;
 using System.Runtime.InteropServices;
 
 using Yarl2;
-using System.Runtime.CompilerServices;
 
 var options = Options.LoadOptions();
 
@@ -42,67 +41,62 @@ if (dialogueErrors.Count > 0)
   Environment.Exit(1);
 }
 
-try
+RunningState state = RunningState.Pregame;
+string alert = "";
+do
 {
-  RunningState state = RunningState.Pregame;
-  string alert = "";
-  do
+  display.ClosePopup();
+  TitleScreen ts = new(display) { Alert = alert };
+  SetupType gameSetup = ts.Display();    
+  GameState? gameState = null;
+  (GameState? GS, SetupResult R) result;
+
+  switch (gameSetup)
   {
-    display.ClosePopup();
-    TitleScreen ts = new(display) { Alert = alert };
-    SetupType gameSetup = ts.Display();    
-    GameState? gameState = null;
-    (GameState? GS, SetupResult R) result;
-
-    switch (gameSetup)
-    {
-      case SetupType.Quit:
-        state = RunningState.ExitGame;
-        break;
-      case SetupType.NewGame:
-        result = new CampaignCreator(display).Create(options);
-        if (result.R == SetupResult.Cancel)
-          state = RunningState.Pregame;
-        else if (result.R == SetupResult.Quit)
-          state = RunningState.ExitGame;
-
-        display.InTutorial = false;
-        gameState = result.GS;
-        break;
-      case SetupType.Tutorial:
-        display.InTutorial = true;
-        gameState = new Tutorial(display).Setup(options);
-        break;
-      default:
-        display.InTutorial = false;
-        result = new GameLoader(display).Load(options);
-        if (result.R == SetupResult.Quit)
-          state = RunningState.ExitGame;
-        else if (result.R == SetupResult.Cancel)
-          state = RunningState.Pregame;
-
-        gameState = result.GS;
-        break;
-    }
-
-    if (gameSetup == SetupType.Quit)
+    case SetupType.Quit:
+      state = RunningState.ExitGame;
       break;
+    case SetupType.NewGame:
+      result = new CampaignCreator(display).Create(options);
+      if (result.R == SetupResult.Cancel)
+        state = RunningState.Pregame;
+      else if (result.R == SetupResult.Quit)
+        state = RunningState.ExitGame;
 
-    if (gameState is not null)
-    {
-      display.State = UIState.InGame;
-      alert = GameLoop(display, gameState);
-    }
-    display.Reset();
-    
-    display.CheatSheetMode = CheatSheetMode.Messages;
-    display.MessageHistory = [];
+      display.InTutorial = false;
+      gameState = result.GS;
+      break;
+    case SetupType.Tutorial:
+      display.InTutorial = true;
+      gameState = new Tutorial(display).Setup(options);
+      break;
+    default:
+      display.InTutorial = false;
+      result = new GameLoader(display).Load(options);
+      if (result.R == SetupResult.Quit)
+        state = RunningState.ExitGame;
+      else if (result.R == SetupResult.Cancel)
+        state = RunningState.Pregame;
+
+      gameState = result.GS;
+      break;
   }
-  while (state != RunningState.ExitGame);
+
+  if (gameSetup == SetupType.Quit)
+    break;
+
+  if (gameState is not null)
+  {
+    display.State = UIState.InGame;
+    alert = GameLoop(display, gameState);
+  }
+  display.Reset();
+  
+  display.CheatSheetMode = CheatSheetMode.Messages;
+  display.MessageHistory = [];
 }
-catch (QuitGameException)
-{
-}
+while (state != RunningState.ExitGame);
+
 // catch (Exception ex)
 // {
 //   List<string> lines = [];
@@ -152,7 +146,7 @@ static string GameLoop(UserInterface ui, GameState gameState)
     ui.RegisterAnimation(new RoofAnimation(gameState));
     ui.RegisterAnimation(new LavaAnimation(ui, gameState));
   }
-  
+
   DateTime refresh = DateTime.UtcNow;
 
   while (true)
@@ -161,38 +155,29 @@ static string GameLoop(UserInterface ui, GameState gameState)
     if (quitting)
       break;
 
-    try
+    if (gameState.NextPerformer() is Actor actor)
     {
-      if (gameState.NextPerformer() is Actor actor)
-      {
-        gameState.ActorPreTurn(actor);
-        actor.TakeTurn(gameState);
-        if (actor.Energy >= 1.0)
-          gameState.PushPerformer(actor);
-      }
-
-      ui.WriteAlerts();
-
-      switch (gameState.GameSignal)
-      {
-        case GameSignal.Quit:
-          return "";
-        case GameSignal.SaveGame:
-          SaveGame(gameState, ui);
-          return "...your game has been saved";
-        case GameSignal.PlayerKilled:
-          PlayerKilled(gameState, ui);
-          return "";
-        case GameSignal.Victory:
-          PlayerVictory(gameState, ui);
-          return "";
-      }
+      gameState.ActorPreTurn(actor);
+      actor.TakeTurn(gameState);
+      if (actor.Energy >= 1.0)
+        gameState.PushPerformer(actor);
     }
-    catch (QuitGameException)
+
+    ui.WriteAlerts();
+
+    switch (gameState.GameSignal)
     {
-      // If the players quits the game while playing, we bump them 
-      // back to the main menu.
-      return "";
+      case GameSignal.Quit:
+        return "";
+      case GameSignal.SaveGame:
+        SaveGame(gameState, ui);
+        return "...your game has been saved";
+      case GameSignal.PlayerKilled:
+        PlayerKilled(gameState, ui);
+        return "";
+      case GameSignal.Victory:
+        PlayerVictory(gameState, ui);
+        return "";
     }
 
     TimeSpan elapsed = DateTime.UtcNow - refresh;

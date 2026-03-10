@@ -751,7 +751,7 @@ abstract class UserInterface
   {
     var e = PollForEvent();
     if (e.Type == GameEventType.Quiting)
-      throw new QuitGameException();
+      return Constants.QUIT_SIGNAL;
 
     if (e.Type == GameEventType.KeyInput)
       return e.Value;
@@ -781,23 +781,13 @@ abstract class UserInterface
       char ch = GetKeyInput();
       if (ch == '\n' || ch == '\r' || ch == ' ' || ch == Constants.ESC)
         break;
+      //else if (ch == Constants.QUIT_SIGNAL)
+
       gs.PrepareFieldOfView();
       SetSqsOnScreen(gs);
       UpdateDisplay(gs);
       Delay();
     }
-  }
-
-  public void BlockingPopup(GameState gs)
-  {
-    GameEvent e;
-    do
-    {
-      UpdateDisplay(gs);
-      e = PollForEvent();
-      Delay();
-    }
-    while (e.Type == GameEventType.NoEvent);
   }
 
   public char FullScreenMenu(List<string> menu, HashSet<char> options, GameState? gs)
@@ -825,69 +815,6 @@ abstract class UserInterface
       }
     }
     while (true);
-  }
-
-  public char BlockingPopupMenu(string menu, string title, HashSet<char> options, GameState gs, int popupWidth)
-  {
-    GameEvent e;
-
-    int col = (ScreenWidth / 2) - (ScreenWidth - popupWidth) / 2 + 2;
-    do
-    {
-      SetPopup(new Popup(menu, title, -1, col, popupWidth));
-      UpdateDisplay(gs);
-
-      e = PollForEvent();
-      if (e.Type == GameEventType.NoEvent)
-      {
-        Delay();
-        continue;
-      }
-      else if (e.Type == GameEventType.Quiting)
-      {
-        throw new QuitGameException();
-      }
-      else if (options.Contains(e.Value))
-      {
-        return e.Value;
-      }
-    }
-    while (true);
-  }
-
-  public bool Confirmation(string txt, GameState gs)
-  {
-    GameEvent e;
-    char ch = '\0';
-
-    do
-    {
-      if (txt != "")
-        _confirm = new Popup(txt, "", ViewHeight / 2 - 2, ScreenWidth / 2);
-      _popup?.SetDefaultTextColour(Colours.DARK_GREY);
-
-      UpdateDisplay(gs);
-
-      e = PollForEvent();
-      if (e.Type == GameEventType.NoEvent)
-      {
-        Delay();
-        continue;
-      }
-      else if (e.Type == GameEventType.Quiting)
-      {
-        throw new QuitGameException();
-      }
-      else
-      {
-        ch = e.Value;
-      }
-    }
-    while (!(ch == 'y' || ch == 'n'));
-
-    _popup?.SetDefaultTextColour(Colours.WHITE);
-
-    return ch == 'y';
   }
 
   public string QueryPlayerName(string prompt, int maxLength, IInputChecker? validator = null)
