@@ -8,6 +8,7 @@
 // You should have received a copy of the CC0 Public Domain Dedication along 
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
+using System.Runtime.InteropServices;
 
 namespace Yarl2;
 
@@ -91,25 +92,17 @@ abstract class UserInterface
     PlayerScreenCol = (ScreenWidth - SideBarWidth - 1) / 2;
     SqsOnScreen = new Sqr[ViewHeight, ViewWidth];
     ZLayer = new Sqr[ViewHeight, ViewWidth];
-    ClearZLayer();
-  }
-
-  public void ClearLongMessage()
-  {
-    _longMessage = null;
-  }
-
-  public void ClearSqsOnScreen()
-  {
-    for (int r = 0; r < SqsOnScreen.GetLength(0); r++)
+    for (int r = 0; r < ViewHeight; r++)
     {
-      for (int c = 0; c < SqsOnScreen.GetLength(1); c++)
+      for (int c = 0; c < ViewWidth; c++)
       {
-        SqsOnScreen[r, c] = Constants.BLANK_SQ;
+        ZLayer[r, c] = Constants.BLANK_SQ;
       }
     }
   }
 
+  public void ClearLongMessage() => _longMessage = null;
+  public void ClearSqsOnScreen() => MemoryMarshal.CreateSpan(ref SqsOnScreen[0, 0], SqsOnScreen.Length).Fill(Constants.BLANK_SQ);
   public void SetPopup(IPopup popup) => _popup = popup;
   public void ClosePopup()
   {
@@ -910,17 +903,6 @@ abstract class UserInterface
     int colOffset = playerCol - PlayerScreenCol;
 
     return (screenRow + rowOffset, screenCol + colOffset);
-  }
-
-  void ClearZLayer()
-  {
-    for (int r = 0; r < ViewHeight; r++)
-    {
-      for (int c = 0; c < ViewWidth; c++)
-      {
-        ZLayer[r, c] = Constants.BLANK_SQ;
-      }
-    }
   }
 
   // Clear out anything that should shouldn't persist between games
