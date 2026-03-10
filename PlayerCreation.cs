@@ -14,14 +14,14 @@ namespace Yarl2;
 
 class PlayerCreator
 {
-  public static Player? NewPlayer(string playerName, GameState gs, int startRow, int startCol, UserInterface ui, Rng rng)
+  public static (Player?, RunningState) NewPlayer(string playerName, GameState gs, int startRow, int startCol, UserInterface ui, Rng rng)
   {
     var (lineage, lineageResult) = PickLineage(ui);
     if (lineageResult == GameEventType.Quiting)
-      return null;
+      return (null, RunningState.ExitGame);
     var (background, backGroundResult) = PickBackground(ui);
     if (backGroundResult == GameEventType.Quiting)
-      return null;
+      return (null, RunningState.ExitGame);
       
     Player player = new(playerName)
     {
@@ -94,7 +94,7 @@ class PlayerCreator
 
     player.Stats[Attribute.HP].Reset();
     
-    return player;
+    return (player, RunningState.Pregame);
   }
 
   static readonly int[] _basicStatArray = [-2, -1, -1, -1, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2];

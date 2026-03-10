@@ -20,7 +20,7 @@ class GameLoader(UserInterface ui)
 {
   UserInterface UI { get; set; } = ui;
 
-  string LoadGameScreen()
+  (string, GameEventType) LoadGameScreen()
   {
     UI.SqsOnScreen = new Sqr[UserInterface.ScreenHeight, UserInterface.ScreenWidth];
     UI.ClearSqsOnScreen();
@@ -76,7 +76,7 @@ class GameLoader(UserInterface ui)
       }
       else if (ch == Constants.ESC || (noGame && (ch == ' ' || ch == '\n' || ch == '\r')))
       {
-        throw new GameNotLoadedException();
+        return ("", GameEventType.Cancel);
       }
       
       if (files.Count > 0)
@@ -99,42 +99,35 @@ class GameLoader(UserInterface ui)
     UI.SqsOnScreen = new Sqr[UserInterface.ViewHeight, UserInterface.ViewWidth];
     UI.ClearSqsOnScreen();
 
-    return savePath;
+    return (savePath, GameEventType.NoEvent);
   }
 
-  public GameState? Load(Options options)
+  public (GameState?, GameEventType) Load(Options options)
   {
-    try
+    var (path, evt) = LoadGameScreen();
+    if (evt == GameEventType.Cancel)
+      return (null, evt);
+
+    GameState? gameState = Serialize.LoadSaveGame(path, options, UI);
+    Player p = gameState.ObjDb.FindPlayer() ?? throw new Exception("No player :O");
+    gameState.SetPlayer(p);
+    gameState.ObjDb.SetActorToLoc(gameState.Player.Loc, gameState.Player.ID);
+    gameState.PrepareFieldOfView();
+    gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
+
+    //File.Delete(path);
+
+    if (gameState.CurrentMap.HasFeature(MapFeatures.Foggy))
     {
-      string path = LoadGameScreen();
-      if (path == "")
-        throw new GameNotLoadedException();
-
-      GameState? gameState = Serialize.LoadSaveGame(path, options, UI);
-      Player p = gameState.ObjDb.FindPlayer() ?? throw new Exception("No player :O");
-      gameState.SetPlayer(p);
-      gameState.ObjDb.SetActorToLoc(gameState.Player.Loc, gameState.Player.ID);
-      gameState.PrepareFieldOfView();
-      gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
-
-      //File.Delete(path);
-
-      if (gameState.CurrentMap.HasFeature(MapFeatures.Foggy))
-      {
-        UI.RegisterAnimation(new FogAnimation(UI, gameState, gameState.CurrentMap.Height, gameState.CurrentMap.Width));
-      }
-      else if (gameState.CurrentMap.HasFeature(MapFeatures.Submerged))
-      {
-        UI.RegisterAnimation(new UnderwaterAnimation(UI, gameState, gameState.CurrentMap.Height, gameState.CurrentMap.Width));
-      }
-      
-      return gameState;
+      UI.RegisterAnimation(new FogAnimation(UI, gameState, gameState.CurrentMap.Height, gameState.CurrentMap.Width));
     }
-    catch (QuitGameException)
+    else if (gameState.CurrentMap.HasFeature(MapFeatures.Submerged))
     {
-      return null;
+      UI.RegisterAnimation(new UnderwaterAnimation(UI, gameState, gameState.CurrentMap.Height, gameState.CurrentMap.Width));
     }
-
+    
+    return (gameState, GameEventType.NoEvent);
+ 
     // Need to gracefully handle missing/corrupt/unparseable save game
   }
 }
@@ -143,16 +136,14 @@ class CampaignCreator(UserInterface ui)
 {
   UserInterface UI { get; set; } = ui;
 
-  string QueryPlayerName()
+  (string, GameEventType) QueryPlayerName()
   {
-    string playerName;
-    do
+    while (true)
     {
-      playerName = UI.BlockingGetResponse("Who are you?", 30, new PlayerNameInputChecker()).Trim();      
+      var (playerName, eventType) = UI.QueryPlayerName("Who are you?", 30, new PlayerNameInputChecker());
+      if (playerName != "" || eventType == GameEventType.Quiting || eventType == GameEventType.Cancel)
+        return (playerName, eventType);
     }
-    while (playerName.Length == 0);
-
-    return playerName;    
   }
 
   static void SetItemIDInfo(Rng rng)
@@ -565,71 +556,71 @@ class CampaignCreator(UserInterface ui)
     while (true);
   }
 
-  public GameState? Create(Options options)
+  public (GameState?, RunningState) Create(Options options)
   {
     int seed = DateTime.UtcNow.GetHashCode();
     //Console.WriteLine($"Seed: {seed}");
 
-    try
-    {
-      string playerName = QueryPlayerName();
-
-      foreach (var existingSave in Serialize.GetSavedGames())
-      {
-        if (existingSave.CharName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase))
-        {
-          SavedGameExists(playerName, existingSave.Path);
-          break;
-        }
-      }
-
-      Rng rng = new(seed);
-      
-      SetItemIDInfo(rng);
-
-      Campaign campaign;
-      GameObjectDB objDb;
-      int startRow, startCol;
-      (campaign, startRow, startCol, objDb) = BeginNewCampaign(rng);
-      GameState gameState = new(campaign, options, UI, rng)
-      {
-        ObjDb = objDb,
-        Turn = 1
-      };
-
-      Player? player = PlayerCreator.NewPlayer(playerName, gameState, startRow, startCol, UI, rng);
-      if (player is null)
-      {
-        return null;
-      }
-
-      gameState.SetPlayer(player);
-
-      UI.ClearLongMessage();
-
-      string welcomeText = "An adventure begins!\n\nHaving recently graduated from one of the top fourteen Adventurer Colleges in ";
-      welcomeText += $"Yendor, you've ventured to the remote town of {gameState.Town.Name}, ";
-      welcomeText += "having heard that a growing darkness imperils its people. What better venue for a new adventurer to earn fame, glory, and gold!";
-      welcomeText += "\n\n";
-      welcomeText += "You might wish to speak with the townsfolk before your first delve into the nearby dungeon (marked with a [LIGHTBLUE Ո] symbol). They may have advice for you, and supplies to help you survive.";
-      welcomeText += "\n\n";
-      welcomeText += "Press [ICEBLUE ? for help], and [ICEBLUE x] will allow you to examine interesting features on screen.";
-      welcomeText += "\n\n";
-      welcomeText += "[ICEBLUE /] will toggle between recent messages and command/movement key cheat sheets.";
-      welcomeText += "\n\n";
-      welcomeText += "[ICEBLUE =] opens the Options menu.";
-      UI.SetPopup(new Popup(welcomeText, "", -2, -1));
-
-      gameState.ObjDb.SetActorToLoc(player.Loc, player.ID);
-      gameState.PrepareFieldOfView();
-      gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
-
-      return gameState;
+    var (playerName, eventType) = QueryPlayerName();
+    if (eventType == GameEventType.Quiting) 
+    {        
+      return (null, RunningState.ExitGame);
     }
-    catch (QuitGameException)
+    else if (eventType == GameEventType.Cancel)
     {
-      return null;
+      return (null, RunningState.Pregame);
     }
+
+    foreach (var existingSave in Serialize.GetSavedGames())
+    {
+      if (existingSave.CharName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase))
+      {
+        SavedGameExists(playerName, existingSave.Path);
+        break;
+      }
+    }
+
+    Rng rng = new(seed);
+    
+    SetItemIDInfo(rng);
+
+    Campaign campaign;
+    GameObjectDB objDb;
+    int startRow, startCol;
+    (campaign, startRow, startCol, objDb) = BeginNewCampaign(rng);
+    GameState gameState = new(campaign, options, UI, rng)
+    {
+      ObjDb = objDb,
+      Turn = 1
+    };
+
+    var (player, result) = PlayerCreator.NewPlayer(playerName, gameState, startRow, startCol, UI, rng);
+    if (result == RunningState.ExitGame || player is null)
+      return (null, RunningState.ExitGame);
+
+    gameState.SetPlayer(player);
+
+    UI.ClearLongMessage();
+
+    string welcomeText = "An adventure begins!\n\nHaving recently graduated from one of the top fourteen Adventurer Colleges in ";
+    welcomeText += $"Yendor, you've ventured to the remote town of {gameState.Town.Name}, ";
+    welcomeText += "having heard that a growing darkness imperils its people. What better venue for a new adventurer to earn fame, glory, and gold!";
+    welcomeText += "\n\n";
+    welcomeText += "You might wish to speak with the townsfolk before your first delve into the nearby dungeon (marked with a [LIGHTBLUE Ո] symbol). They may have advice for you, and supplies to help you survive.";
+    welcomeText += "\n\n";
+    welcomeText += "Press [ICEBLUE ? for help], and [ICEBLUE x] will allow you to examine interesting features on screen.";
+    welcomeText += "\n\n";
+    welcomeText += "[ICEBLUE /] will toggle between recent messages and command/movement key cheat sheets.";
+    welcomeText += "\n\n";
+    welcomeText += "[ICEBLUE =] opens the Options menu.";
+    UI.SetPopup(new Popup(welcomeText, "", -2, -1));
+
+    gameState.ObjDb.SetActorToLoc(player.Loc, player.ID);
+    gameState.PrepareFieldOfView();
+    gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
+
+    return (gameState, RunningState.Playing);
+
     //catch (Exception ex)
     //{
     //  string s = $"Exception creating new game. Initial seed: {seed}";

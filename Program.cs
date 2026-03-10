@@ -59,35 +59,30 @@ try
         state = RunningState.ExitGame;
         break;
       case SetupType.NewGame:
-        try
-        {
-          gameState = new CampaignCreator(display).Create(options);            
-          display.InTutorial = false;
-          if (gameState is null)
-            state = RunningState.ExitGame;
-        }
-        catch (GameNotLoadedException)
-        {
-          state = RunningState.Pregame;
-        }
+        var (gs, s) = new CampaignCreator(display).Create(options);            
+        display.InTutorial = false;
+        if (s != RunningState.Playing)
+          state = s;
+        else
+          gameState = gs;        
         break;
       case SetupType.Tutorial:
         display.InTutorial = true;
         gameState = new Tutorial(display).Setup(options);
         break;
       default:
-        try
-        {
+        // try
+        // {
           display.InTutorial = false;
           gameState = new GameLoader(display).Load(options);
           
           if (gameState is null)
             state = RunningState.ExitGame;
-        }
-        catch (GameNotLoadedException)
-        {
-          state = RunningState.Pregame;
-        }
+        // }
+        // catch (GameNotLoadedException)
+        // {
+        //   state = RunningState.Pregame;
+        // }
         break;
     }
 

@@ -14,7 +14,7 @@ using System.Text.RegularExpressions;
 
 namespace Yarl2;
 
-enum GameEventType { Quiting, KeyInput, EndOfRound, NoEvent, Death, MobSpotted, LocChanged }
+enum GameEventType { Quiting, Cancel, KeyInput, EndOfRound, NoEvent, Death, MobSpotted, LocChanged }
 record struct GameEvent(GameEventType Type, char Value);
 record struct Sqr(Colour Fg, Colour Bg, char Ch);
 
@@ -1288,7 +1288,6 @@ class MapUtils
 }
 
 class QuitGameException : Exception { }
-class GameNotLoadedException : Exception { }
 class InvalidRoomException : Exception { }
 class WildernessCreationException(string msg) : Exception(msg) { }
 
