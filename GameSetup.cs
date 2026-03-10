@@ -597,7 +597,12 @@ class CampaignCreator(UserInterface ui)
         Turn = 1
       };
 
-      Player player = PlayerCreator.NewPlayer(playerName, gameState, startRow, startCol, UI, rng);
+      Player? player = PlayerCreator.NewPlayer(playerName, gameState, startRow, startCol, UI, rng);
+      if (player is null)
+      {
+        return null;
+      }
+
       gameState.SetPlayer(player);
 
       UI.ClearLongMessage();

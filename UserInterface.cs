@@ -817,7 +817,7 @@ abstract class UserInterface
       }
       else if (e.Value == Constants.ESC || e.Type == GameEventType.Quiting)
       {
-        throw new QuitGameException();
+        return Constants.QUIT_SIGNAL;
       }
       else if (options.Contains(e.Value))
       {

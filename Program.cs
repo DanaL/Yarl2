@@ -61,8 +61,7 @@ try
       case SetupType.NewGame:
         try
         {
-          gameState = new CampaignCreator(display).Create(options);
-          
+          gameState = new CampaignCreator(display).Create(options);            
           display.InTutorial = false;
           if (gameState is null)
             state = RunningState.ExitGame;
