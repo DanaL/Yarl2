@@ -1312,7 +1312,7 @@ class InventoryDetails : Inputer
       }
       else
       {
-        ui.CloseMenu();
+        ui.CloseDropDown();
         ui.ClosePopup();
         ui.SetInputController(new PlayerCommandController(GS));
         return;
@@ -1421,7 +1421,7 @@ class InventoryDetails : Inputer
     }
 
     GS.UIRef().ClosePopup();
-    GS.UIRef().CloseMenu();
+    GS.UIRef().CloseDropDown();
   }
 
   void SetInteractionMenu(Item item)
@@ -1582,7 +1582,7 @@ class Inventorier(GameState gs, HashSet<char> options) : Inputer(gs)
   {
     if (ch == Constants.ESC || ch == ' ' || ch == '\n' || ch == '\r')
     {
-      GS.UIRef().CloseMenu();
+      GS.UIRef().CloseDropDown();
       Close();
     }
     else if (_options.Contains(ch))
@@ -1590,7 +1590,7 @@ class Inventorier(GameState gs, HashSet<char> options) : Inputer(gs)
       Msg = "";
       _choice = ch;
 
-      GS.UIRef().CloseMenu();
+      GS.UIRef().CloseDropDown();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
       QueueDeferredAction();
     }
@@ -1598,7 +1598,7 @@ class Inventorier(GameState gs, HashSet<char> options) : Inputer(gs)
     {
       Msg = "You don't have that.";
 
-      GS.UIRef().CloseMenu();
+      GS.UIRef().CloseDropDown();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
     }
   }

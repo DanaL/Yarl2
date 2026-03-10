@@ -734,8 +734,9 @@ abstract class UserInterface
 
   public void SetLongMessage(List<string> message) => _longMessage = message;
   public void ShowDropDown(List<string> lines) => MenuRows = lines;
-  public void CloseMenu() => MenuRows = [];
-
+  public void CloseDropDown() => MenuRows = [];
+  public bool ActiveDropDown() => MenuRows.Count > 0;
+  
   protected static void Delay(int ms = 10) => Thread.Sleep(ms);
 
   // I am using this in input menus outside of the main game. Primarily

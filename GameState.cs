@@ -49,7 +49,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
   UserInterface UI { get; set; } = ui;
 
-  public void ClearMenu() => UI.CloseMenu();
+  public void ClearMenu() => UI.CloseDropDown();
   public UserInterface UIRef() => UI;
 
   public int MainQuestState => Player.Stats[Attribute.MainQuestState].Curr;

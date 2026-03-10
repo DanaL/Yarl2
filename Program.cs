@@ -444,13 +444,13 @@ static void GravestoneScreen(UserInterface ui, GameState gameState, List<string>
       ShowMessageLog(ui, lines);
       DrawGravestone(ui, gameState, messages, flowerColours);
     }
-    else if (ch == ' ')
+    else if (ch == ' ' || (ui.ActiveDropDown() && ch == Constants.ESC))
     {
-      ui.CloseMenu();
+      ui.CloseDropDown();
     }
     else if (ch == 'q' || ch == Constants.ESC)
     {
-      ui.CloseMenu();
+      ui.CloseDropDown();
       break;
     }
     

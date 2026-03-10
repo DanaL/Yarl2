@@ -558,7 +558,7 @@ class CampaignCreator(UserInterface ui)
   public (GameState?, SetupResult) Create(Options options)
   {
     int seed = DateTime.UtcNow.GetHashCode();
-    //Console.WriteLine($"Seed: {seed}");
+    Console.WriteLine($"Seed: {seed}");
 
     var (playerName, setup) = QueryPlayerName();
     if (setup == SetupResult.Cancel || setup == SetupResult.Quit)
