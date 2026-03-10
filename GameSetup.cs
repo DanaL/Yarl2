@@ -523,7 +523,7 @@ class CampaignCreator(UserInterface ui)
     return (campaign, startR, startC, objDb);
   }
 
-  public void SavedGameExists(string playerName, string existingSavePath)
+  public SetupResult SavedGameExists(string playerName, string existingSavePath)
   {
     string s = $"Hmm! A saved game for [LIGHTBLUE {playerName}] already exists!";
     s += "\n\na) go back";
@@ -539,13 +539,17 @@ class CampaignCreator(UserInterface ui)
 
       if (c == Constants.ESC || c == 'a')
       {
-        return;
+        return SetupResult.Cancel;
+      }
+      else if (c == Constants.QUIT_SIGNAL)
+      {
+        return SetupResult.Quit;
       }
       else if (c == 'b')
       {
         File.Delete(existingSavePath);
         UI.ClosePopup();
-        return;
+        return SetupResult.Success;
       }
     }
     while (true);
@@ -564,7 +568,9 @@ class CampaignCreator(UserInterface ui)
     {
       if (existingSave.CharName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase))
       {
-        SavedGameExists(playerName, existingSave.Path);
+        var res = SavedGameExists(playerName, existingSave.Path);
+        if (res != SetupResult.Success)
+          return (null, res);
         break;
       }
     }
@@ -584,8 +590,11 @@ class CampaignCreator(UserInterface ui)
     };
 
     var (player, result) = PlayerCreator.NewPlayer(playerName, gameState, startRow, startCol, UI, rng);
-    if (result == RunningState.ExitGame || player is null)
-      return (null, SetupResult.Quit);
+    if (result == SetupResult.Quit || result == SetupResult.Cancel || player is null) 
+    {
+      UI.ClearLongMessage();
+      return (null, result);
+    }
 
     gameState.SetPlayer(player);
 

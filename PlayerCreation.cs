@@ -14,14 +14,14 @@ namespace Yarl2;
 
 class PlayerCreator
 {
-  public static (Player?, RunningState) NewPlayer(string playerName, GameState gs, int startRow, int startCol, UserInterface ui, Rng rng)
+  public static (Player?, SetupResult) NewPlayer(string playerName, GameState gs, int startRow, int startCol, UserInterface ui, Rng rng)
   {
-    var (lineage, lineageResult) = PickLineage(ui);
-    if (lineageResult == GameEventType.Quiting)
-      return (null, RunningState.ExitGame);
-    var (background, backGroundResult) = PickBackground(ui);
-    if (backGroundResult == GameEventType.Quiting)
-      return (null, RunningState.ExitGame);
+    var (lineage, res) = PickLineage(ui);
+    if (res == SetupResult.Quit || res == SetupResult.Cancel)
+      return (null, res);
+    var (background, bkgrRes) = PickBackground(ui);
+    if (bkgrRes == SetupResult.Quit || bkgrRes == SetupResult.Cancel)
+      return (null, res);
       
     Player player = new(playerName)
     {
@@ -94,7 +94,7 @@ class PlayerCreator
 
     player.Stats[Attribute.HP].Reset();
     
-    return (player, RunningState.Pregame);
+    return (player, SetupResult.Success);
   }
 
   static readonly int[] _basicStatArray = [-2, -1, -1, -1, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2];
@@ -266,7 +266,7 @@ class PlayerCreator
     }
   }
 
-  static (PlayerLineage, GameEventType) PickLineage(UserInterface ui)
+  static (PlayerLineage, SetupResult) PickLineage(UserInterface ui)
   {
     List<string> menu = [
       "To create a new character, first please select your lineage:",
@@ -291,21 +291,21 @@ class PlayerCreator
     char choice = ui.FullScreenMenu(menu, options, null);
 
     if (choice == Constants.QUIT_SIGNAL)
-    {
-      return (PlayerLineage.Human, GameEventType.Quiting);
-    }
+      return (PlayerLineage.Human, SetupResult.Quit);
+    
+    if (choice == Constants.ESC)
+      return (PlayerLineage.Human, SetupResult.Cancel);
 
     return choice switch
     {
-      '1' => (PlayerLineage.Human, GameEventType.NoEvent),
-      '2' => (PlayerLineage.Orc, GameEventType.NoEvent),
-      '3' => (PlayerLineage.Elf, GameEventType.NoEvent),
-      _ => (PlayerLineage.Dwarf, GameEventType.NoEvent)
+      '1' => (PlayerLineage.Human, SetupResult.Success),
+      '2' => (PlayerLineage.Orc, SetupResult.Success),
+      '3' => (PlayerLineage.Elf, SetupResult.Success),
+      _ => (PlayerLineage.Dwarf, SetupResult.Success)
     };
-
   }
 
-  static (PlayerBackground, GameEventType) PickBackground(UserInterface ui)
+  static (PlayerBackground, SetupResult) PickBackground(UserInterface ui)
   {
     List<string> menu = [
      "What was your major in Adventurer College?",
@@ -332,15 +332,16 @@ class PlayerCreator
     char choice = ui.FullScreenMenu(menu, options, null);
 
     if (choice == Constants.QUIT_SIGNAL)
-    {
-      return (PlayerBackground.Warrior, GameEventType.Quiting);
-    }
+      return (PlayerBackground.Warrior, SetupResult.Quit);
+    
+    if (choice == Constants.ESC)
+      return (PlayerBackground.Warrior, SetupResult.Cancel);
 
     return choice switch
     {
-      '1' => (PlayerBackground.Warrior, GameEventType.NoEvent),
-      '2' => (PlayerBackground.Scholar, GameEventType.NoEvent),
-      _ => (PlayerBackground.Skullduggery, GameEventType.NoEvent)
+      '1' => (PlayerBackground.Warrior, SetupResult.Success),
+      '2' => (PlayerBackground.Scholar, SetupResult.Success),
+      _ => (PlayerBackground.Skullduggery, SetupResult.Success)
     };
   }
 }

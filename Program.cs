@@ -473,10 +473,7 @@ static void GravestoneScreen(UserInterface ui, GameState gameState, List<string>
 
 namespace Yarl2
 {
-  enum RunningState
-  {
-    Playing, ExitGame, GameOver, Pregame
-  }
+  enum RunningState { Playing, ExitGame, GameOver, Pregame }
 
   public class Configuration
   {

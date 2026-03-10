@@ -815,11 +815,11 @@ abstract class UserInterface
         Delay();
         continue;
       }
-      else if (e.Value == Constants.ESC || e.Type == GameEventType.Quiting)
+      else if (e.Type == GameEventType.Quiting)
       {
         return Constants.QUIT_SIGNAL;
       }
-      else if (options.Contains(e.Value))
+      else if (options.Contains(e.Value) || e.Value == Constants.ESC)
       {
         return e.Value;
       }
