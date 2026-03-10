@@ -11,16 +11,14 @@
 
 namespace Yarl2;
 
-enum SetupType
-{
-  NewGame, LoadGame, Quit, Tutorial
-}
+enum SetupType { NewGame, LoadGame, Quit, Tutorial }
+enum SetupResult { Cancel, Quit, Success }
 
 class GameLoader(UserInterface ui)
 {
   UserInterface UI { get; set; } = ui;
 
-  (string, GameEventType) LoadGameScreen()
+  (string, SetupResult) LoadGameScreen()
   {
     UI.SqsOnScreen = new Sqr[UserInterface.ScreenHeight, UserInterface.ScreenWidth];
     UI.ClearSqsOnScreen();
@@ -49,7 +47,7 @@ class GameLoader(UserInterface ui)
       }
       else
       {
-        int width = files.Select(f => f.CharName.Length).Max() + 1;        
+        int width = files.Max(f => f.CharName.Length) + 1;        
         for (int i = 0; i < files.Count; i++)
         {
           string charName = files[i].CharName.PadRight(width);
@@ -76,7 +74,7 @@ class GameLoader(UserInterface ui)
       }
       else if (ch == Constants.ESC || (noGame && (ch == ' ' || ch == '\n' || ch == '\r')))
       {
-        return ("", GameEventType.Cancel);
+        return ("", SetupResult.Cancel);
       }
       
       if (files.Count > 0)
@@ -99,14 +97,14 @@ class GameLoader(UserInterface ui)
     UI.SqsOnScreen = new Sqr[UserInterface.ViewHeight, UserInterface.ViewWidth];
     UI.ClearSqsOnScreen();
 
-    return (savePath, GameEventType.NoEvent);
+    return (savePath, SetupResult.Success);
   }
 
-  public (GameState?, GameEventType) Load(Options options)
+  public (GameState?, SetupResult) Load(Options options)
   {
-    var (path, evt) = LoadGameScreen();
-    if (evt == GameEventType.Cancel || evt == GameEventType.Quiting)
-      return (null, evt);
+    var (path, res) = LoadGameScreen();    
+    if (res != SetupResult.Success)
+      return (null, res);
 
     GameState? gameState = Serialize.LoadSaveGame(path, options, UI);
     Player p = gameState.ObjDb.FindPlayer() ?? throw new Exception("No player :O");
@@ -126,7 +124,7 @@ class GameLoader(UserInterface ui)
       UI.RegisterAnimation(new UnderwaterAnimation(UI, gameState, gameState.CurrentMap.Height, gameState.CurrentMap.Width));
     }
     
-    return (gameState, GameEventType.NoEvent);
+    return (gameState, SetupResult.Success);
  
     // Need to gracefully handle missing/corrupt/unparseable save game
   }
@@ -136,13 +134,17 @@ class CampaignCreator(UserInterface ui)
 {
   UserInterface UI { get; set; } = ui;
 
-  (string, GameEventType) QueryPlayerName()
+  (string, SetupResult) QueryPlayerName()
   {
     while (true)
     {
-      var (playerName, eventType) = UI.QueryPlayerName("Who are you?", 30, new PlayerNameInputChecker());
-      if (playerName != "" || eventType == GameEventType.Quiting || eventType == GameEventType.Cancel)
-        return (playerName, eventType);
+      string playerName = UI.QueryPlayerName("Who are you?", 30, new PlayerNameInputChecker());
+      if (playerName == Constants.ESC.ToString())
+        return ("", SetupResult.Cancel);
+      else if (playerName == Constants.QUIT_SIGNAL.ToString())
+        return ("", SetupResult.Quit);
+      
+      return (playerName, SetupResult.Success);
     }
   }
 
@@ -549,20 +551,14 @@ class CampaignCreator(UserInterface ui)
     while (true);
   }
 
-  public (GameState?, RunningState) Create(Options options)
+  public (GameState?, SetupResult) Create(Options options)
   {
     int seed = DateTime.UtcNow.GetHashCode();
     //Console.WriteLine($"Seed: {seed}");
 
-    var (playerName, eventType) = QueryPlayerName();
-    if (eventType == GameEventType.Quiting) 
-    {        
-      return (null, RunningState.ExitGame);
-    }
-    else if (eventType == GameEventType.Cancel)
-    {
-      return (null, RunningState.Pregame);
-    }
+    var (playerName, setup) = QueryPlayerName();
+    if (setup == SetupResult.Cancel || setup == SetupResult.Quit)
+      return (null, setup);
 
     foreach (var existingSave in Serialize.GetSavedGames())
     {
@@ -589,7 +585,7 @@ class CampaignCreator(UserInterface ui)
 
     var (player, result) = PlayerCreator.NewPlayer(playerName, gameState, startRow, startCol, UI, rng);
     if (result == RunningState.ExitGame || player is null)
-      return (null, RunningState.ExitGame);
+      return (null, SetupResult.Quit);
 
     gameState.SetPlayer(player);
 
@@ -612,7 +608,7 @@ class CampaignCreator(UserInterface ui)
     gameState.PrepareFieldOfView();
     gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
 
-    return (gameState, RunningState.Playing);
+    return (gameState, SetupResult.Success);
 
     //catch (Exception ex)
     //{

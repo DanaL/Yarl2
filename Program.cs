@@ -50,19 +50,24 @@ try
   {
     display.ClosePopup();
     TitleScreen ts = new(display) { Alert = alert };
-    SetupType gameSetup = ts.Display();
-
+    SetupType gameSetup = ts.Display();    
     GameState? gameState = null;
+    (GameState? GS, SetupResult R) result;
+
     switch (gameSetup)
     {
       case SetupType.Quit:
         state = RunningState.ExitGame;
         break;
       case SetupType.NewGame:
-        var (gs, s) = new CampaignCreator(display).Create(options);            
+        result = new CampaignCreator(display).Create(options);
+        if (result.R == SetupResult.Cancel)
+          state = RunningState.Pregame;
+        else if (result.R == SetupResult.Quit)
+          state = RunningState.ExitGame;
+
         display.InTutorial = false;
-        state = s;
-        gameState = gs;
+        gameState = result.GS;
         break;
       case SetupType.Tutorial:
         display.InTutorial = true;
@@ -70,12 +75,13 @@ try
         break;
       default:
         display.InTutorial = false;
-        var result = new GameLoader(display).Load(options);
-        
-        if (result.Item2 == GameEventType.Quiting)
+        result = new GameLoader(display).Load(options);
+        if (result.R == SetupResult.Quit)
           state = RunningState.ExitGame;
-        else
-          gs = result.Item1;
+        else if (result.R == SetupResult.Cancel)
+          state = RunningState.Pregame;
+
+        gameState = result.GS;
         break;
     }
 

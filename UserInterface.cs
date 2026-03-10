@@ -890,7 +890,7 @@ abstract class UserInterface
     return ch == 'y';
   }
 
-  public (string, GameEventType) QueryPlayerName(string prompt, int maxLength, IInputChecker? validator = null)
+  public string QueryPlayerName(string prompt, int maxLength, IInputChecker? validator = null)
   {
     string result = "";
     GameEvent e;
@@ -909,11 +909,11 @@ abstract class UserInterface
       }
       else if (e.Value == Constants.ESC)
       {
-        return ("", GameEventType.Cancel);
+        return Constants.ESC.ToString();
       }
       else if (e.Type == GameEventType.Quiting)
       {
-        return ("", GameEventType.Quiting);
+        return Constants.QUIT_SIGNAL.ToString();
       }
 
       if (e.Value == '\n' || e.Value == 13)
@@ -931,7 +931,7 @@ abstract class UserInterface
 
     ClosePopup();
 
-    return (result.Trim(), GameEventType.NoEvent);
+    return result.Trim();
   }
 
   void SetSqsOnScreen(GameState gs)
