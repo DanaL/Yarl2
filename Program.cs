@@ -146,10 +146,13 @@ static string GameLoop(UserInterface ui, GameState gameState)
     ui.AlertPlayer(gameState.KeyMapWarning);
 
   ui.SetInputController(new PlayerCommandController(gameState));
-  ui.RegisterAnimation(new CloudAnimation(ui, gameState));
-  ui.RegisterAnimation(new RoofAnimation(gameState));
-  ui.RegisterAnimation(new LavaAnimation(ui, gameState));
-
+  if (!ui.InTutorial) 
+  {
+    ui.RegisterAnimation(new CloudAnimation(ui, gameState));
+    ui.RegisterAnimation(new RoofAnimation(gameState));
+    ui.RegisterAnimation(new LavaAnimation(ui, gameState));
+  }
+  
   DateTime refresh = DateTime.UtcNow;
 
   while (true)
