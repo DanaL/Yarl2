@@ -2901,8 +2901,7 @@ class PaladinBlessingTrait : ChampionBlessingTrait
     string s = base.Description(owner);
 
     DamageTrait dt = owner.Traits.OfType<DamageTrait>()
-                              .Where(t => t.SourceId == SourceId)
-                              .First();
+                          .First(t => t.SourceId == SourceId);
     s += $" You deal {dt.NumOfDie}d{dt.DamageDie} extra [lightblue holy damage].";
 
     return s;
