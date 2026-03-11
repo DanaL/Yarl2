@@ -469,11 +469,7 @@ class CampaignCreator(UserInterface ui)
         };
 
         wildernessMap.SetTile(entrance, portal);
-        factDb.Add(new LocationFact()
-        {
-          Loc = entranceLoc,
-          Desc = "Dungeon Entrance"
-        });
+        factDb.Add(new LocationFact() { Loc = entranceLoc, Desc = "Dungeon Entrance" });
 
         MessageAtLoc pal = new(entranceLoc, "A portal looms before you! Danger lurks within -- when you feel prepared you can enter via the [LIGHTBLUE >] command!");
         objDb.ConditionalEvents.Add(pal);
