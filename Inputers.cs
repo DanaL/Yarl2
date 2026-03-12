@@ -720,27 +720,27 @@ class MapView : Inputer
       {
         case "north":
           row = 1;
-          col = Math.Clamp(UserInterface.ScreenWidth / 2 - label.Length / 2 - 2 + (loc.Col + startCol), 1, UserInterface.ScreenWidth - label.Length - 1);
+          col = UserInterface.ScreenWidth / 2 - label.Length / 2 - 1;
           pointerRow = 0;
-          pointerCol = Math.Clamp(UserInterface.ScreenWidth / 2 - 1 + (loc.Col + startCol), 0, UserInterface.ScreenWidth - 1);
+          pointerCol = UserInterface.ScreenWidth / 2;
           pointer = '▲';
           break;
         case "south":
           row = UserInterface.ScreenHeight - 2;
-          col = Math.Clamp(UserInterface.ScreenWidth / 2 - label.Length / 2 - 2 + (loc.Col + startCol), 1, UserInterface.ScreenWidth - label.Length - 1);
+          col = UserInterface.ScreenWidth / 2 - label.Length / 2 - 1;
           pointerRow = UserInterface.ScreenHeight - 1;
-          pointerCol = Math.Clamp(UserInterface.ScreenWidth / 2 - 1 + (loc.Col + startCol), 0, UserInterface.ScreenWidth - 1);
+          pointerCol = UserInterface.ScreenWidth / 2;
           pointer = '▼';
           break;
         case "east":
-          row = Math.Clamp(UserInterface.ScreenHeight / 2 + (loc.Row + startRow), 2, UserInterface.ScreenHeight - 2);
+          row = UserInterface.ScreenHeight / 2;
           col = UserInterface.ScreenWidth - label.Length - 2;
           pointerRow = row;
           pointerCol = UserInterface.ScreenWidth - 1;
           pointer = '►';
           break;
         case "west":
-          row = Math.Clamp(UserInterface.ScreenHeight / 2 + (loc.Row + startRow), 2, UserInterface.ScreenHeight - 3);
+          row = UserInterface.ScreenHeight / 2;
           col = 2;
           pointerRow = row;
           pointerCol = 0;
@@ -748,37 +748,30 @@ class MapView : Inputer
           break;
         case "northwest":
           row = 2;
-          col = Math.Clamp(2 + (loc.Col + startCol), 1, UserInterface.ScreenWidth - label.Length - 1);
+          col = Math.Clamp(2, loc.Col - startCol, UserInterface.ScreenWidth / 2);
           pointerRow = 0;
-          pointerCol = 0;
+          pointerCol = col - 1;
           pointer = '◤';
           break;
         case "northeast":
           row = 1;
-          col = Math.Clamp(UserInterface.ScreenWidth - label.Length - 2 + (loc.Col + startCol), 1, UserInterface.ScreenWidth - label.Length - 1);
+          col = int.Min(loc.Col - startCol - label.Length - 2, UserInterface.ScreenWidth - label.Length - 2);
           pointerRow = 0;
-          pointerCol = UserInterface.ScreenWidth - 1;
+          pointerCol = col + label.Length + 1;
           pointer = '◥';
           break;
         case "southwest":
           row = UserInterface.ScreenHeight - 2;
-          col = Math.Clamp(2 + (loc.Col + startCol), 1, UserInterface.ScreenWidth - label.Length - 1);
+          col = Math.Clamp(2, loc.Col - startCol, UserInterface.ScreenWidth / 2);
           pointerRow = UserInterface.ScreenHeight - 1;
-          pointerCol = 0;
-
-          if (startCol + loc.Col > 0 && startCol + loc.Col < UserInterface.ScreenWidth / 2)
-          {
-            col = startCol + loc.Col + 1;
-            pointerCol = startCol + loc.Col;
-          }
-          
+          pointerCol = col - 1;
           pointer = '◣';
           break;
         case "southeast":
           row = UserInterface.ScreenHeight - 2;
-          col = Math.Clamp(UserInterface.ScreenWidth - label.Length - 2 + (loc.Col + startCol), 1, UserInterface.ScreenWidth - label.Length - 1);
+          col = int.Min(loc.Col - startCol - label.Length - 2, UserInterface.ScreenWidth - label.Length - 2);
           pointerRow = UserInterface.ScreenHeight - 1;
-          pointerCol = UserInterface.ScreenWidth - 1;
+          pointerCol = col + label.Length + 1;
           pointer = '◢';
           break;
       }
