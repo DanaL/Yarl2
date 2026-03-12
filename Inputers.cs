@@ -612,9 +612,7 @@ class MapView : Inputer
       startCol -= d;
     }
 
-    int centreScreenR = startRow + UserInterface.ScreenHeight / 2;
-    int centreScreenC = startCol + UserInterface.ScreenWidth / 2;
-    Sqr[,] sqs = new Sqr[UserInterface.ScreenHeight, UserInterface.ScreenWidth];    
+    Sqr[,] sqs = new Sqr[UserInterface.ScreenHeight, UserInterface.ScreenWidth];
     for (int r = 0; r < UserInterface.ScreenHeight; r++)
     {
       for (int c = 0; c < UserInterface.ScreenWidth; c++)
@@ -649,7 +647,7 @@ class MapView : Inputer
 
     if (GS.CurrDungeonID == 0)
     {
-      DecorateWildernessMap(sqs, centreScreenR, centreScreenC);  
+      DecorateWildernessMap(sqs, startRow, startCol);
     }
 
     return sqs;
@@ -662,13 +660,13 @@ class MapView : Inputer
     GS.UIRef().SetPopup(new FullScreenPopup(sqrs));
   }
 
-  void DecorateWildernessMap(Sqr[,] sqs, int centreScreenR, int centreScreenC)
+  void DecorateWildernessMap(Sqr[,] sqs, int startRow, int startCol)
   {    
     int minRow = OnScreen.Min(l => l.Row);
     int maxRow = OnScreen.Max(l => l.Row);
     int minCol = OnScreen.Min(l => l.Col);
     int maxCol = OnScreen.Max(l => l.Col);
-    Loc centerLoc = new(GS.CurrDungeonID, GS.CurrLevel, (minRow + maxRow) / 2, (minCol + maxCol) / 2);
+    Loc centerLoc = new(0, 0, startRow + UserInterface.ScreenHeight / 2 - 1, startCol + UserInterface.ScreenWidth / 2 - 1);
 
     if (GS.FactDb.FactCheck("Dungeon Entrance") is LocationFact lf)
     {
@@ -676,7 +674,7 @@ class MapView : Inputer
       if (GS.Campaign.Dungeons[GS.CurrDungeonID].RememberedLocs.ContainsKey(dungeonLoc))
       {
         string dir = RelativeDir(centerLoc, dungeonLoc);
-        PlaceLabel(sqs, "The Dungeon", dir, dungeonLoc, centreScreenR, centreScreenC, OnScreen.Contains(dungeonLoc));  
+        PlaceLabel(sqs, "The Dungeon", dir, dungeonLoc, startRow, startCol, OnScreen.Contains(dungeonLoc));
       }
     }
   
@@ -686,7 +684,7 @@ class MapView : Inputer
       if (GS.Campaign.Dungeons[GS.CurrDungeonID].RememberedLocs.ContainsKey(towerLoc))
       {
         string dir = RelativeDir(centerLoc, towerLoc);
-        PlaceLabel(sqs, "Spooky Tower", dir, towerLoc, centreScreenR, centreScreenC, OnScreen.Contains(towerLoc));  
+        PlaceLabel(sqs, "Spooky Tower", dir, towerLoc, startRow, startCol, OnScreen.Contains(towerLoc));
       }
     }
 
@@ -694,18 +692,18 @@ class MapView : Inputer
     if (GS.Campaign.Dungeons[GS.CurrDungeonID].RememberedLocs.ContainsKey(witchCottageLoc))
     {
       string dir = RelativeDir(centerLoc, witchCottageLoc);
-        PlaceLabel(sqs, "The Witches", dir, witchCottageLoc, centreScreenR, centreScreenC, OnScreen.Contains(witchCottageLoc));  
+      PlaceLabel(sqs, "The Witches", dir, witchCottageLoc, startRow, startCol, OnScreen.Contains(witchCottageLoc));
     }
 
     Loc tavernLoc = GS.Campaign.Town!.Tavern.First(l => GS.TileAt(l) is Door || GS.TileAt(l).Type == TileType.BrokenDoor);
     if (GS.Campaign.Dungeons[GS.CurrDungeonID].RememberedLocs.ContainsKey(tavernLoc))
     {
       string dir = RelativeDir(centerLoc, tavernLoc);
-        PlaceLabel(sqs, "The Tavern", dir, tavernLoc, centreScreenR, centreScreenC, OnScreen.Contains(tavernLoc));  
+      PlaceLabel(sqs, "The Tavern", dir, tavernLoc, startRow, startCol, OnScreen.Contains(tavernLoc));
     }
   }
 
-  void PlaceLabel(Sqr[,] sqs, string label, string dir, Loc loc, int centreScreenR, int centreScreenC, bool onScreen)
+  void PlaceLabel(Sqr[,] sqs, string label, string dir, Loc loc, int startRow, int startCol, bool onScreen)
   {
     int row, col, pointerRow, pointerCol;
     char pointer;
@@ -722,27 +720,27 @@ class MapView : Inputer
       {
         case "north":
           row = 1;
-          col = Math.Clamp(UserInterface.ScreenWidth / 2 - label.Length / 2 - 2 + (loc.Col - centreScreenC), 1, UserInterface.ScreenWidth - label.Length - 1);
+          col = Math.Clamp(UserInterface.ScreenWidth / 2 - label.Length / 2 - 2 + (loc.Col + startCol), 1, UserInterface.ScreenWidth - label.Length - 1);
           pointerRow = 0;
-          pointerCol = Math.Clamp(UserInterface.ScreenWidth / 2 - 1 + (loc.Col - centreScreenC), 0, UserInterface.ScreenWidth - 1);
+          pointerCol = Math.Clamp(UserInterface.ScreenWidth / 2 - 1 + (loc.Col + startCol), 0, UserInterface.ScreenWidth - 1);
           pointer = '▲';
           break;
         case "south":
           row = UserInterface.ScreenHeight - 2;
-          col = Math.Clamp(UserInterface.ScreenWidth / 2 - label.Length / 2 - 2 + (loc.Col - centreScreenC), 1, UserInterface.ScreenWidth - label.Length - 1);
+          col = Math.Clamp(UserInterface.ScreenWidth / 2 - label.Length / 2 - 2 + (loc.Col + startCol), 1, UserInterface.ScreenWidth - label.Length - 1);
           pointerRow = UserInterface.ScreenHeight - 1;
-          pointerCol = Math.Clamp(UserInterface.ScreenWidth / 2 - 1 + (loc.Col - centreScreenC), 0, UserInterface.ScreenWidth - 1);
+          pointerCol = Math.Clamp(UserInterface.ScreenWidth / 2 - 1 + (loc.Col + startCol), 0, UserInterface.ScreenWidth - 1);
           pointer = '▼';
           break;
         case "east":
-          row = Math.Clamp(UserInterface.ScreenHeight / 2 + (loc.Row - centreScreenR), 2, UserInterface.ScreenHeight - 2);
+          row = Math.Clamp(UserInterface.ScreenHeight / 2 + (loc.Row + startRow), 2, UserInterface.ScreenHeight - 2);
           col = UserInterface.ScreenWidth - label.Length - 2;
           pointerRow = row;
           pointerCol = UserInterface.ScreenWidth - 1;
           pointer = '►';
           break;
         case "west":
-          row = Math.Clamp(UserInterface.ScreenHeight / 2 + (loc.Row - centreScreenR), 2, UserInterface.ScreenHeight - 3);
+          row = Math.Clamp(UserInterface.ScreenHeight / 2 + (loc.Row + startRow), 2, UserInterface.ScreenHeight - 3);
           col = 2;
           pointerRow = row;
           pointerCol = 0;
@@ -750,35 +748,35 @@ class MapView : Inputer
           break;
         case "northwest":
           row = 2;
-          col = Math.Clamp(2 + (loc.Col - centreScreenC), 1, UserInterface.ScreenWidth - label.Length - 1);
+          col = Math.Clamp(2 + (loc.Col + startCol), 1, UserInterface.ScreenWidth - label.Length - 1);
           pointerRow = 0;
           pointerCol = 0;
           pointer = '◤';
           break;
         case "northeast":
           row = 1;
-          col = Math.Clamp(UserInterface.ScreenWidth - label.Length - 2 + (loc.Col - centreScreenC), 1, UserInterface.ScreenWidth - label.Length - 1);
+          col = Math.Clamp(UserInterface.ScreenWidth - label.Length - 2 + (loc.Col + startCol), 1, UserInterface.ScreenWidth - label.Length - 1);
           pointerRow = 0;
           pointerCol = UserInterface.ScreenWidth - 1;
           pointer = '◥';
           break;
         case "southwest":
           row = UserInterface.ScreenHeight - 2;
-          col = Math.Clamp(2 + (loc.Col - centreScreenC), 1, UserInterface.ScreenWidth - label.Length - 1);          
+          col = Math.Clamp(2 + (loc.Col + startCol), 1, UserInterface.ScreenWidth - label.Length - 1);
           pointerRow = UserInterface.ScreenHeight - 1;
           pointerCol = 0;
 
-          if (centreScreenC - loc.Col > 0 && centreScreenC - loc.Col < UserInterface.ScreenWidth / 2)
+          if (startCol + loc.Col > 0 && startCol + loc.Col < UserInterface.ScreenWidth / 2)
           {
-            col = centreScreenC - loc.Col + 1;
-            pointerCol = centreScreenC - loc.Col;
+            col = startCol + loc.Col + 1;
+            pointerCol = startCol + loc.Col;
           }
           
           pointer = '◣';
           break;
         case "southeast":
           row = UserInterface.ScreenHeight - 2;
-          col = Math.Clamp(UserInterface.ScreenWidth - label.Length - 2 + (loc.Col - centreScreenC), 1, UserInterface.ScreenWidth - label.Length - 1);
+          col = Math.Clamp(UserInterface.ScreenWidth - label.Length - 2 + (loc.Col + startCol), 1, UserInterface.ScreenWidth - label.Length - 1);
           pointerRow = UserInterface.ScreenHeight - 1;
           pointerCol = UserInterface.ScreenWidth - 1;
           pointer = '◢';
@@ -787,20 +785,20 @@ class MapView : Inputer
     }
     else
     {
-      int sqsRow = loc.Row - centreScreenR + UserInterface.ScreenHeight / 2;
-      int sqsCol = loc.Col - centreScreenC + UserInterface.ScreenWidth / 2;
+      int sqsRow = loc.Row - startRow;
+      int sqsCol = loc.Col - startCol + 1;
       switch (dir)
       {
         case "north":
           row = sqsRow + 2;
-          col = sqsCol - label.Length / 2 - 2;
+          col = sqsCol - label.Length / 2;
           pointerRow = sqsRow + 1;
           pointerCol = sqsCol;
           pointer = '▲';
           break;
         case "south":
           row = sqsRow - 2;
-          col = sqsCol - label.Length / 2 - 2;
+          col = sqsCol - label.Length / 2;
           pointerRow = sqsRow - 1;
           pointerCol = sqsCol;
           pointer = '▼';
@@ -814,7 +812,7 @@ class MapView : Inputer
           break;
         case "northeast":
           row = sqsRow + 2;
-          col = sqsCol - 2;
+          col = sqsCol - label.Length - 2;
           pointerRow = sqsRow + 1;
           pointerCol = sqsCol - 1;
           pointer = '◥';
@@ -828,9 +826,9 @@ class MapView : Inputer
           break;
         case "west":
           row = sqsRow;
-          col = sqsCol + 2;
+          col = sqsCol + 1;
           pointerRow = sqsRow;
-          pointerCol = sqsCol + 1;
+          pointerCol = sqsCol;
           pointer = '◄';
           break;
         case "southwest":
