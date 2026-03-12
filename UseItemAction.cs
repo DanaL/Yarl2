@@ -715,8 +715,14 @@ class PickLockAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       bool rogue = GameState.Player.Background == PlayerBackground.Skullduggery;
       int dc = 12 + GameState.CurrLevel + 1;
 
-      if (rogue)
+      if (rogue) {
         dc -= 5;
+      }
+
+      if (GameState.Player.HasTrait<TipsyTrait>())
+      {
+        dc += 3;  
+      }
 
       foreach (Trait t in Tool.Traits)
       {
