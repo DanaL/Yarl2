@@ -52,7 +52,7 @@ class Treasure
       ItemNames.SCROLL_TRAP_DETECTION, ItemNames.SCROLL_SCATTERING, ItemNames.POTION_OBSCURITY, ItemNames.POTION_DRAGON_BREATH,
       ItemNames.FEATHERFALL_BOOTS, ItemNames.WIND_FAN, ItemNames.SKELETON_KEY,
       ItemNames.TINCTURE_CELERITY, ItemNames.POTION_HEROISM, ItemNames.POTION_DESCENT, ItemNames.SCROLL_STAINLESS,
-      ItemNames.HOLY_WATER, ItemNames.SNEAKERS, ItemNames.MOON_MANTLE
+      ItemNames.HOLY_WATER, ItemNames.SNEAKERS, ItemNames.MOON_MANTLE, ItemNames.CLAYMORE
   ];
 
   static readonly List<ItemNames> RareItems = [
