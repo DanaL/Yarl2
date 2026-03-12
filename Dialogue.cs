@@ -1716,8 +1716,7 @@ class DialogueInterpreter
   void EvalShopMenu(Actor mob, GameState gs)
   {
     NumberListTrait selections = mob.Traits.OfType<NumberListTrait>()
-                                           .Where(t => t.Name == "ShopSelections")
-                                           .First();
+                                           .First(t => t.Name == "ShopSelections");
 
     Sb.Append("\n\nHere's what I have left:");
 
@@ -1760,8 +1759,7 @@ class DialogueInterpreter
 
     int selectionNum = choice - 'a';
     NumberListTrait selections = mob.Traits.OfType<NumberListTrait>()
-                                           .Where(t => t.Name == "ShopSelections")
-                                           .First();
+                                           .First(t => t.Name == "ShopSelections");
 
     if (selections.Items[selectionNum] == count)
       selections.Items[selectionNum] = 0;
@@ -1773,8 +1771,7 @@ class DialogueInterpreter
   {
     int itemNum = choice - 'a';
     NumberListTrait selections = mob.Traits.OfType<NumberListTrait>()
-                                           .Where(t => t.Name == "ShopSelections")
-                                           .First();
+                                           .First(t => t.Name == "ShopSelections");
     if (!selections.Items.Remove(itemNum))
       selections.Items.Add(itemNum);
   }
@@ -1808,7 +1805,7 @@ class DialogueInterpreter
       Options.Add(new DialogueOption($"Buy [ICEBLUE Holy Water] for a small donation - [YELLOW $]{HolyWaterPrice(gs)}", opt++, new ScriptBuyHolyWater()));
     }
 
-    if (gs.Player.Inventory.Items().Where(i => i.Name == "skull").Any())
+    if (gs.Player.Inventory.Items().Any(i => i.Name == "skull"))
     {
       Options.Add(new DialogueOption("That [ICEBLUE skull]: please allow me to give those remains a proper burial!", opt++, new ScriptTurnInSkull()));
     }

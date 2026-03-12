@@ -50,7 +50,5 @@
 
   (say (pick lines))
 
-  (
-    (blessings-options)
-  )
+  (blessings-options)  
 )
