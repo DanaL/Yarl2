@@ -1778,25 +1778,37 @@ class DialogueInterpreter
 
   void EvalBlessings(Actor mob, GameState gs)
   {
-    bool blessed = gs.Player.HasTrait<BlessingTrait>();
+    bool championBlessing = false, paladinBlessing = false, winterBlessing = false;
+    foreach (Trait t in gs.Player.Traits)
+    {
+      if (t is ChampionBlessingTrait)
+        championBlessing = true;
+      else if (t is PaladinBlessingTrait)
+        paladinBlessing = true;
+      else if (t is WinterBlessingTrait)
+        winterBlessing = true;
+    }
+ 
+    int questState = gs.Player.Stats[Attribute.MainQuestState].Curr;
     char opt = 'a';
 
-    if (!blessed)
+    if (!championBlessing)
     {      
-      Options.Add(new DialogueOption("Accept the [ICEBLUE Blessing of the Champion]: Huntokar's grace shall protect you and lead your blade to strike true!", opt++, new ScriptChampionBlessing()));
-      //else
-      //  Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Paladin]: You will bring Huntokar's wrath to your foes!", opt++, new ScriptPaladinBlessing()));
-      
-      //Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Reaver]: Bring Huntokar's wrath to your foes, turning you into a frightening presence!", opt++, new ScriptReaverBlessing()));
-      //Options.Add(new DialogueOption("The [ICEBLUE Winter's Blessing]: Use the power of arctic storms to aid your quest!", opt++, new ScriptWinterBlessing()));
-
-      //Options.Add(new DialogueOption("The [ICEBLUE Blessing of Embers]: Huntokar will surround you in holy fire and immolate evil you face!", opt++, new ScriptEmberBlessing()));
-      //Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Trickster]: Draw upon Huntokars's mischevious aspects and elude your foes!", opt++, new ScriptTricksterBlessing()));      
+      Options.Add(new DialogueOption("Accept the [ICEBLUE Blessing of the Champion]: Huntokar's grace shall protect you and lead your blade to strike true!", opt++, new ScriptChampionBlessing()));            
+    }
+    else if (championBlessing && questState > 1 && !(paladinBlessing || winterBlessing))
+    {
+      Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Paladin]: You will bring Huntokar's holy wrath to your foes!", opt++, new ScriptPaladinBlessing()));
+      Options.Add(new DialogueOption("The [ICEBLUE Winter's Blessing]: Use the power of arctic storms to aid your quest!", opt++, new ScriptWinterBlessing()));
     }
     else
     {
       Sb.Append("\n\nYou go forth with Huntokar's blessing and aid. Seek out and defeat the evil that is plauging our town!");
     }
+    
+    //Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Reaver]: Bring Huntokar's wrath to your foes, turning you into a frightening presence!", opt++, new ScriptReaverBlessing()));
+    //Options.Add(new DialogueOption("The [ICEBLUE Blessing of Embers]: Huntokar will surround you in holy fire and immolate evil you face!", opt++, new ScriptEmberBlessing()));
+    //Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Trickster]: Draw upon Huntokars's mischevious aspects and elude your foes!", opt++, new ScriptTricksterBlessing()));
     
     int lastHWPurchase = mob.Stats[Attribute.ShopMenu].Curr;
     int currTurn = (int)(gs.Turn % int.MaxValue);

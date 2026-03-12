@@ -337,12 +337,10 @@ class ChampionBlessingTrait : BlessingTrait
     string s = $"You have the [iceblue {Title} Blessing]. It grants";
 
     StatBuffTrait? sbt = owner.Traits.OfType<StatBuffTrait>()
-                              .Where(t => t.SourceId == SourceId)
-                              .FirstOrDefault();
+                              .FirstOrDefault(t => t.SourceId == SourceId);
 
     ACModTrait? acMod = owner.Traits.OfType<ACModTrait>()
-                              .Where(t => t.SourceId == SourceId)
-                              .FirstOrDefault();
+                              .FirstOrDefault(t => t.SourceId == SourceId);
     if (acMod is not null)
     {
       s += $" a [lightblue +{acMod.ArmourMod}] AC bonus";
