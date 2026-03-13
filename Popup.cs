@@ -213,7 +213,7 @@ class Popup : IPopup
     List<(Colour, string)> line = [(DefaultTextColour, "│ ")];
 
     while (w < Words.Count)
-    {
+    {      
       var (colour, word) = Words[w++];
 
       if (word == "\r")
@@ -227,6 +227,11 @@ class Popup : IPopup
       {
         line.Add((Colours.BLACK, "   "));
         currWidth += 3;
+      }
+      else if (word.Length == Width - currWidth - 3 && PunctuationAhead())
+      {
+        --w;
+        BuildPaddedLine();
       }
       else if (word.Length < Width - currWidth - 2)
       {
@@ -300,6 +305,18 @@ class Popup : IPopup
     string bottomBorder = Constants.BOTTOM_LEFT_CORNER.ToString().PadRight(Width - 1, '─') + Constants.BOTTOM_RIGHT_CORNER.ToString();
     ui.WriteText([(DefaultTextColour, bottomBorder)], row++, col);
     
+    bool PunctuationAhead()
+    {
+      if (w >= Words.Count)
+        return false;
+
+      return Words[w].Item2[0] switch
+      {
+        '.' or '!' or '?' => true,
+        _ => false
+      };
+    }
+
     void BuildPaddedLine()
     {
       // Calculate total width of all existing content
