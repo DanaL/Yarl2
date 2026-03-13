@@ -341,8 +341,7 @@ sealed class Player : Actor
     bool quiet = false;
     bool fireDmg = false;
     bool fireRebuke = false;
-    BlessingTrait? blessing = null;
-
+    
     foreach (Trait trait in Traits)
     {
       if (trait is RageTrait)
@@ -362,7 +361,7 @@ sealed class Player : Actor
       else if (trait is FrighteningTrait)
         traitsToShow.Add("You can frighten your foes");
       else if (trait is BlessingTrait bt)
-        blessing = bt;
+        traitsToShow.Add(bt.Description(this));        
       else if (trait is ACModTrait acm)
         acmod += acm.ArmourMod;
       else if (trait is AttackModTrait attm)
@@ -430,12 +429,6 @@ sealed class Player : Actor
       lines.Add("You have yet to venture into the Dungeon.");
     else
       lines.Add($"You have ventured as deep as level {Stats[Attribute.Depth].Max}.");
-
-    if (blessing is not null)
-    {
-      lines.Add("");
-      lines.Add(blessing.Description(this));
-    }
 
     return lines;
   }

@@ -1829,7 +1829,6 @@ class DialogueInterpreter
   {
     ChampionBlessingTrait blessing = new() { SourceId = mob.ID, OwnerID = gs.Player.ID };
     blessing.Apply(mob, gs);
-    gs.Player.Stats[Attribute.LastBlessing].SetMax(1);
     
     throw new ConversationEnded("You are bathed in holy light!");
   }
@@ -1838,7 +1837,6 @@ class DialogueInterpreter
   {
     PaladinBlessingTrait blessing = new() { SourceId = mob.ID, OwnerID = gs.Player.ID };
     blessing.Apply(mob, gs);
-    gs.Player.Stats[Attribute.LastBlessing].SetMax(1);
     
     throw new ConversationEnded("You are bathed in holy light!");
   }
@@ -1847,8 +1845,7 @@ class DialogueInterpreter
   {
     ReaverBlessingTrait reaver = new() { SourceId = mob.ID, OwnerID = gs.Player.ID };
     reaver.Apply(mob, gs);
-    gs.Player.Stats[Attribute.LastBlessing].SetMax(1);
-
+    
     throw new ConversationEnded("You are bathed in holy light!");
   }
 
@@ -1856,8 +1853,7 @@ class DialogueInterpreter
   {
     EmberBlessingTrait ember = new() { SourceId = mob.ID, OwnerID = gs.Player.ID };
     ember.Apply(mob, gs);
-    gs.Player.Stats[Attribute.LastBlessing].SetMax(2);
-
+    
     throw new ConversationEnded("You are bathed in holy light!");
   }
 
@@ -1865,7 +1861,6 @@ class DialogueInterpreter
   {
     TricksterBlessingTrait trickster = new() { SourceId = mob.ID, OwnerID = gs.Player.ID };
     trickster.Apply(mob, gs);
-    gs.Player.Stats[Attribute.LastBlessing].SetMax(4);
 
     throw new ConversationEnded("You are bathed in holy light!");
   }
@@ -1874,7 +1869,6 @@ class DialogueInterpreter
   {
     WinterBlessingTrait winter = new() { SourceId = mob.ID, OwnerID = gs.Player.ID };
     winter.Apply(mob, gs);
-    gs.Player.Stats[Attribute.LastBlessing].SetMax(5);
     
     throw new ConversationEnded("You are bathed in holy light!");
   }

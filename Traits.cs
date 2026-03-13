@@ -312,12 +312,9 @@ class DragonCultBlessingTrait : BlessingTrait
 }
 
 class ChampionBlessingTrait : BlessingTrait
-{
-  protected virtual string Title => "Champion";
-
+{  
   public override void Apply(GameObj granter, GameState gs)
   {
-    
     ACModTrait ac = new() { ArmourMod = 1, SourceId = granter.ID };
     gs.Player.Traits.Add(ac);
 
@@ -334,7 +331,7 @@ class ChampionBlessingTrait : BlessingTrait
 
   public override string Description(Actor owner)
   {
-    string s = $"You have the [iceblue {Title} Blessing]. It grants";
+    string s = $"You have the [iceblue Champion Blessing]. It grants";
 
     StatBuffTrait? sbt = owner.Traits.OfType<StatBuffTrait>()
                               .FirstOrDefault(t => t.SourceId == SourceId);
@@ -347,8 +344,7 @@ class ChampionBlessingTrait : BlessingTrait
     }
 
     AttackModTrait? am = owner.Traits.OfType<AttackModTrait>()
-                              .Where(t => t.SourceId == SourceId)
-                              .FirstOrDefault();
+                              .FirstOrDefault(t => t.SourceId == SourceId);
     if (am is not null)
     {
       s += sbt is null ? " and " : ", ";
@@ -359,8 +355,6 @@ class ChampionBlessingTrait : BlessingTrait
     {
       s += $", and [lightblue +{sbt.Amt}] bonus HP";
     }
-
-    s += ".";
 
     return s;
   }
@@ -2882,27 +2876,20 @@ class OwnedTrait : Trait
   public override string AsText() => $"Owned#{string.Join(',', OwnerIDs)}";
 }
 
-class PaladinBlessingTrait : ChampionBlessingTrait
-{
-  protected override string Title => "Paladin";
-
+class PaladinBlessingTrait : BlessingTrait
+{  
   public override void Apply(GameObj granter, GameState gs)
-  {
-    base.Apply(granter, gs);
-
+  { 
+    gs.Player.Traits.Add(this);
     DamageTrait dt = new() { SourceId = granter.ID, DamageType = DamageType.Holy, DamageDie = 6, NumOfDie = 1 };
     gs.Player.Traits.Add(dt);
   }
 
   public override string Description(Actor owner)
-  {
-    string s = base.Description(owner);
-
+  {    
     DamageTrait dt = owner.Traits.OfType<DamageTrait>()
                           .First(t => t.SourceId == SourceId);
-    s += $" You deal {dt.NumOfDie}d{dt.DamageDie} extra [lightblue holy damage].";
-
-    return s;
+    return $" You deal {dt.NumOfDie}d{dt.DamageDie} extra [lightblue holy damage] from your [iceblue Paladin Blessing]";
   }
 
   public override string AsText() => $"PaladinBlessing#{SourceId}#{OwnerID}";
@@ -4350,7 +4337,7 @@ class WinterBlessingTrait : BlessingTrait
   }
 
   public override string AsText() => $"WinterBlessing#{SourceId}#{OwnerID}";
-  public override string Description(Actor owner) => "Winter blessing";
+  public override string Description(Actor owner) => "You have been granted the [iceblue fury] of [iceblue Winter]";
 }
 
 class WoodChopperTrait : Trait
@@ -4853,7 +4840,7 @@ class TraitFactory
     { "WeaponBonus", (pieces, gameObj) => new WeaponBonusTrait() { Bonus = int.Parse(pieces[1]) } },
     { "WeaponSpeed", (pieces, gameObj) => new WeaponSpeedTrait() { Cost = Util.ToDouble(pieces[1]) } },
     { "WearAndTear", (pieces, gameObj) => new WearAndTearTrait() { Wear = int.Parse(pieces[1])} },
-    { "WinterBlessing", (pieces, gameObj) => new WinterBlessingTrait() { SourceId = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[3]) } },
+    { "WinterBlessing", (pieces, gameObj) => new WinterBlessingTrait() { SourceId = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
     { "WoodChopper", (pieces, gameObj) => new WoodChopperTrait() },
     { "Worshiper", (pieces, gameObj) => new WorshiperTrait() { AltarLoc = Loc.FromStr(pieces[1]), AltarId = ulong.Parse(pieces[2]), Chant = pieces[3] } }
   };
