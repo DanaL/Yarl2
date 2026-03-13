@@ -805,9 +805,9 @@ class MapView : Inputer
           break;
         case "northeast":
           row = sqsRow + 2;
-          col = sqsCol - label.Length - 2;
+          col = sqsCol - label.Length - 3;
           pointerRow = sqsRow + 1;
-          pointerCol = sqsCol - 1;
+          pointerCol = sqsCol - 2;
           pointer = '◥';
           break;
         case "east":
