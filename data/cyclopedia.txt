@@ -742,3 +742,6 @@ Wizards love to say, "Anything a carpenter can do, I can do better!" and so inve
 #
 infected mushroom
 A grotesque, bloated mushroom that seems to shiver and twitch. It does not look delicious at all.
+#
+puddle of booze
+An alcoholic somewhere is very sad about this.
