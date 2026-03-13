@@ -67,11 +67,9 @@ sealed class Player : Actor
         if (item is not null && item.Equipped)
         {
           armour += item.Traits.OfType<ArmourTrait>()
-                               .Select(t => t.ArmourMod + t.Bonus)
-                               .Sum();
+                               .Sum(t => t.ArmourMod + t.Bonus);
           armour += item.Traits.OfType<ACModTrait>()
-                               .Select(t => t.ArmourMod)
-                               .Sum();
+                               .Sum(t => t.ArmourMod);
         }
       }
 
@@ -313,11 +311,9 @@ sealed class Player : Actor
   {
     List<string> lines = [];
 
-    lines.Add($"[GREEN {Name}], {CharDesc()}");
-    lines.Add("");
-    lines.Add($"Str: {PrintStat(Attribute.Strength)}\t\tCon: {PrintStat(Attribute.Constitution)}\t\tDex: {PrintStat(Attribute.Dexterity)}\t\tWill: {PrintStat(Attribute.Will)}");
-    lines.Add("");
-
+    lines.Add($"[GREEN {Name}], {CharDesc()}\n\n");
+    lines.Add($"Str: {PrintStat(Attribute.Strength)}\t\tCon: {PrintStat(Attribute.Constitution)}\t\tDex: {PrintStat(Attribute.Dexterity)}\t\tWill: {PrintStat(Attribute.Will)}\n\n");
+    
     if (Stats.TryGetValue(Attribute.SwordUse, out Stat? stat))
       lines.Add($"Swords bonus: +{stat.Curr / 100} ({stat.Curr})");
     if (Stats.TryGetValue(Attribute.PolearmsUse, out stat))
@@ -331,7 +327,7 @@ sealed class Player : Actor
     if (Stats.TryGetValue(Attribute.BowUse, out stat))
       lines.Add($"Bow bonus: +{stat.Curr / 100} ({stat.Curr})");
 
-    lines.Add("");
+    lines.Add("\n");
 
     HashSet<string> traitsToShow = [];
     double alacrity = 0;
@@ -426,9 +422,9 @@ sealed class Player : Actor
     // }
 
     if (Stats[Attribute.Depth].Max == 0)
-      lines.Add("You have yet to venture into the Dungeon.");
+      lines.Add("\nYou have yet to venture into the Dungeon.");
     else
-      lines.Add($"You have ventured as deep as level {Stats[Attribute.Depth].Max}.");
+      lines.Add($"\nYou have ventured as deep as level {Stats[Attribute.Depth].Max}.");
 
     return lines;
   }

@@ -8,6 +8,7 @@
 // You should have received a copy of the CC0 Public Domain Dedication along 
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
+
 using System.Runtime.InteropServices;
 
 namespace Yarl2;
@@ -53,7 +54,7 @@ abstract class UserInterface
   protected int FontSize;
   public int PlayerScreenRow { get; set; }
   public int PlayerScreenCol { get; set; }
-  protected List<string>? _longMessage;
+  protected List<List<(Colour, string)>> _longMessage = [];
   public UIState State = UIState.InMainMenu;
 
   readonly Queue<string> Messages = [];
@@ -101,7 +102,7 @@ abstract class UserInterface
     }
   }
 
-  public void ClearLongMessage() => _longMessage = null;
+  public void ClearLongMessage() => _longMessage.Clear();
   public void ClearSqsOnScreen() => MemoryMarshal.CreateSpan(ref SqsOnScreen[0, 0], SqsOnScreen.Length).Fill(Constants.BLANK_SQ);
   public void SetPopup(IPopup popup) => _popup = popup;
   public void ClosePopup()
@@ -142,13 +143,11 @@ abstract class UserInterface
   protected void WritePopUp() => _popup?.Draw(this);
   protected void WriteConfirmation() => _confirm?.Draw(this);
 
-  protected void WriteLongMessage(List<string> msg)
+  protected void WriteLongMessage()
   {
-    for (int row = 0; row < msg.Count; row++)
+    for (int row = 0; row < _longMessage.Count; row++)
     {
-      LineScanner ls = new(msg[row]);
-      List<(Colour, string)> words = ls.Scan();
-      WriteText(words.ToArray(), row, 0);
+      WriteText([.. _longMessage[row]], row, 0);
     }
   }
 
@@ -732,7 +731,73 @@ abstract class UserInterface
       MessageHistory.RemoveAt(MaxHistory);
   }
 
-  public void SetLongMessage(List<string> message) => _longMessage = message;
+  public void SetLongMessage(List<string> message)
+  {
+    _longMessage.Clear();
+
+    foreach (string s in message)
+    {
+      List<(Colour, string)> words = new LineScanner(s).Scan();
+      List<(Colour, string)> line = [];
+      int w = 0;
+      int currWidth = 0;
+
+      while (w < words.Count)
+      {
+        var (colour, word) = words[w++];
+
+        if (word == "\r")
+          continue;
+
+        if (word == "\n")
+        {
+          _longMessage.Add(line);
+          line = [];
+        }
+        else if (word == "\t")
+        {
+          line.Add((Colours.BLACK, "   "));
+          currWidth += 3;
+        }
+        else if (word.Length == ScreenWidth - currWidth - 2 && PunctuationAhead(line, w))
+        {
+          _longMessage.Add(line);
+          line = [];
+          currWidth = 0;
+          --w;
+        }
+        else if (word.Length + currWidth < ScreenWidth)
+        {
+          line.Add((colour, word));
+          currWidth += word.Length;
+        }
+        else
+        {
+          _longMessage.Add(line);
+          line = [];
+          currWidth = 0;
+          --w;
+        }
+      }
+
+      if (line.Count > 0)
+        _longMessage.Add(line);
+    }
+
+    static bool PunctuationAhead(List<(Colour, string)> line, int w)
+    {
+      if (w >= line.Count)
+        return false;
+
+      return line[w].Item2[0] switch
+      {
+        '.' or '!' or '?' => true,
+        _ => false
+      };
+    }
+
+  }
+
   public void ShowDropDown(List<string> lines) => MenuRows = lines;
   public void CloseDropDown() => MenuRows = [];
   public bool ActiveDropDown() => MenuRows.Count > 0;
@@ -787,10 +852,10 @@ abstract class UserInterface
   public char FullScreenMenu(List<string> menu, HashSet<char> options, GameState? gs)
   {
     GameEvent e;
+    SetLongMessage(menu);
 
     do
-    {
-      SetLongMessage(menu);
+    {      
       UpdateDisplay(gs);
       e = PollForEvent();
 

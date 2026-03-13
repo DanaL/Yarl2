@@ -1855,61 +1855,26 @@ sealed class PauseForMoreInputer(GameState gs) : Inputer(gs)
   public override void Input(char ch) => Close();
 }
 
-sealed class LongMessagerInputer : Inputer
+sealed class LongMessageInputer : Inputer
 {
   readonly UserInterface _ui;
-  readonly List<string> _wrappedLines;
+  readonly List<string> _lines;
   int _page;
   readonly int _pageCount;
   readonly int _pageSize;
 
   readonly bool _showPageCount = false;
 
-  public LongMessagerInputer(GameState gs, UserInterface ui, IEnumerable<string> lines, bool showPageCount) : base(gs)
+  public LongMessageInputer(GameState gs, UserInterface ui, IEnumerable<string> lines, bool showPageCount) : base(gs)
   {
     _ui = ui;
-    _wrappedLines = WrapLines(lines);    
+    _lines = [.. lines];
     _page = 0;
     _pageSize = showPageCount ? (UserInterface.ScreenHeight - 1) : UserInterface.ScreenHeight;
-    _pageCount = _wrappedLines.Count / _pageSize + 1;
+    _pageCount = _lines.Count / _pageSize + 1;
     _showPageCount = showPageCount;
 
     WriteScreen();
-  }
-
-  static List<string> WrapLines(IEnumerable<string> lines)
-  {
-    List<string> wrapped = [];
-
-    foreach (string line in lines)
-    {
-      if (line.Length <= UserInterface.ScreenWidth)
-      {
-        wrapped.Add(line);
-        continue;
-      }
-
-      string[] words = line.Split(' ');
-      StringBuilder currentLine = new();
-
-      foreach (var word in words)
-      {
-        if (currentLine.Length + word.Length + 1 > UserInterface.ScreenWidth)
-        {
-          wrapped.Add(currentLine.ToString().TrimEnd());
-          currentLine.Clear();
-        }
-
-        if (currentLine.Length > 0)
-          currentLine.Append(' ');
-        currentLine.Append(word);
-      }
-
-      if (currentLine.Length > 0)
-        wrapped.Add(currentLine.ToString());
-    }
-
-    return wrapped;
   }
 
   public override void Input(char ch)
@@ -1946,7 +1911,7 @@ sealed class LongMessagerInputer : Inputer
       lines.Add(header);  
     }
     
-    lines.AddRange(_wrappedLines.Skip(_page * (UserInterface.ScreenHeight - 1)).Take(_pageSize));
+    lines.AddRange(_lines.Skip(_page * (UserInterface.ScreenHeight - 1)).Take(_pageSize));
     
     _ui.SetLongMessage(lines);    
   }

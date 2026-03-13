@@ -167,9 +167,9 @@ internal class BLUserInterface : UserInterface, IDisposable
   {
     Terminal.Clear();
 
-    if (_longMessage != null)
+    if (_longMessage.Count > 0)
     {
-      WriteLongMessage(_longMessage);
+      WriteLongMessage();
     }
     else
     {

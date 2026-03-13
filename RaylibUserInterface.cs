@@ -246,9 +246,9 @@ class RaylibUserInterface : UserInterface
     BeginDrawing();
     ClearBackground(Color.Black);
 
-    if (_longMessage is not null)
+    if (_longMessage.Count > 0)
     {
-      WriteLongMessage(_longMessage);
+      WriteLongMessage();
       WritePopUp();
     }
     else

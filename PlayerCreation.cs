@@ -269,22 +269,22 @@ class PlayerCreator
   {
     List<string> menu = [
       "To create a new character, first please select your lineage:",
-      "",
-      " (1) Human\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t(2) Orc",
-      "",
-      " Your standard homo sapien. Thanks\t\t\t\t\t\tNaturally strong, orcs receive ",
-      " to progressive tax policy in this\t\t\t\t\t\tbonus hit points. Due to participating",
-      " world of fantastical beings,\t\t\t\t\t\t\t\t\t\t\tin orc hockey as a child, you start",
-      " humans begin with more gold.\t\t\t\t\t\t\t\t\t\t\twith the ability to Rage.",
-      "                              ",
-      "",
-      " (3) Elf\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t(4) Dwarf",
-      "",
-      " Magical, ethereal, fond of wine\t\t\t\t\t\t\t\tStout and bearded. Dwarves in Delve",
-      " and grammar. Elves also benefit\t\t\t\t\t\t\t\tabsolutely do not have Scottish",
-      " from mandatory archery classes\t\t\t\t\t\t\t\t\taccents. They are less prone to illness",
-      " in Elf Grade School.\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tand poison, and accrue stress more",
-      "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tslowly when exploring dungeons."
+      "\n",
+      " (1) Human _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _(2) Orc",
+      "\n",
+      " Your standard homo sapien. Thanks _ _ _Naturally strong, orcs receive ",
+      " to progressive tax policy in this _ _ _bonus hit points. Due to participating",
+      " world of fantastical beings, _ _ _ _ _ _ _ _ in orc hockey as a child, you start",
+      " humans begin with more gold. _ _ _ _ _ _ _ _ with the ability to Rage.",
+      "\n",
+      "\n",
+      " (3) Elf _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __ _ _ _ __ (4) Dwarf",
+      "\n",
+      " Magical, ethereal, fond of wine _ _ __ _Stout and bearded. Dwarves in Delve",
+      " and grammar. Elves also benefit _ _ _ _ _absolutely do not have Scottish",
+      " from mandatory archery classes _ _ _ _ _ _accents. They are less prone to illness",
+      " in Elf Grade School. _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _and poison, and accrue stress more",
+      " _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ ________ _ _ _ _ _ _ _ _ _slowly when exploring dungeons."
     ];
     HashSet<char> options = [ '1', '2', '3', '4'  ];
     char choice = ui.FullScreenMenu(menu, options, null);
@@ -306,23 +306,23 @@ class PlayerCreator
 
   static (PlayerBackground, SetupResult) PickBackground(UserInterface ui)
   {
-    List<string> menu = [
+List<string> menu = [
      "What was your major in Adventurer College?",
-      "",
-      " (1) Warrior\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t(2) Scholar",
-      "",
-      " A broad curriculum in beating\t\t\t\t\t\t\t\t\tYou spent your time in college hitting",
-      " people up has left you skilled in\t\t\t\t\tthe books. You passed Magic 101 and",
-      " most weapons, as well as strong\t\t\t\t\t\t\tthanks to your studies and student",
-      " and tough.\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tfrugality, when you read scrolls there's",
-      "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\ta small chance they won't be consumed.",
-      "",
-      "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t(weaker than the others in this version)",
-      "",
-      " (3) Skullduggery                    ",
-      "",
-      " Most of your time in school was     ",
-      " spent sneaking into parties you    ",
+      "\n",
+      " (1) Warrior __________________________ [darkgrey (2) Scholar]",
+      "\n",
+      " A broad curriculum in beating ________ You spent your time in college hitting",
+      " people up has left you skilled in ____ the books. You passed Magic 101 and",
+      " most weapons, as well as strong ______ thanks to your studies and student",
+      " and tough. ___________________________ frugality, when you read scrolls there's",
+      "______________________________________ a small chance they won't be consumed.",
+      "\n",
+      "______________________________________ (weaker than the others in this version)",
+      "\n",
+      " (3) Skullduggery",
+      "\n",
+      " Most of your time in school was",
+      " spent sneaking into parties you",
       " weren't invited to. Skills which",
       " translate directly to adventuring."
     ];
