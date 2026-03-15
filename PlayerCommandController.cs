@@ -220,7 +220,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
   static bool AttackingWithLunge(Player player)
   {
     // Is it too mean to make the player unable to lunge while tipsy?
-    if (player.HasTrait<TipsyTrait>())
+    if (player.HasTrait<TipsyTrait>() || player.HasTrait<ConfusedTrait>())
       return false;
 
     if (player.Inventory.ReadiedWeapon() is Item item && item.HasTrait<LungeTrait>())
