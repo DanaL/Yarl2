@@ -73,13 +73,13 @@ class MoveAction(GameState gameState, Actor actor, Loc loc, bool involuntary) : 
     return false;
   }
 
-  protected bool StuckOnLoc(Actor actor, GameState gs, UserInterface ui)
+  public static bool StuckOnLoc(Actor actor, Loc loc, GameState gs, UserInterface ui)
   {
     // Is something blocking your egress from your loc?
-    if (gs.ObjDb.ItemsAt(Loc).Any(item => item.HasTrait<BlockTrait>()))
+    if (gs.ObjDb.ItemsAt(loc).Any(item => item.HasTrait<BlockTrait>()))
     {
       string msg;
-      Item blockage = gs.ObjDb.ItemsAt(Loc).Where(item => item.HasTrait<BlockTrait>()).First();
+      Item blockage = gs.ObjDb.ItemsAt(loc).First(item => item.HasTrait<BlockTrait>());
       if (blockage.Traits.OfType<DescriptionTrait>().FirstOrDefault() is DescriptionTrait desc)
       {
         msg = $"{Grammar.Possessive(actor).Capitalize()} way is blocked by {desc.Text}.";
@@ -101,7 +101,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc, bool involuntary) : 
     // tunneling into the floor, we move the actor onto their current location
     // in order to correctly resolve as though they had stepped onto the
     // square
-    if (gs.ObjDb.Occupied(Loc) && gs.ObjDb.Occupant(Loc) != Actor)
+    if (gs.ObjDb.Occupied(loc) && gs.ObjDb.Occupant(loc) != actor)
     {
       return true;
     }
@@ -174,7 +174,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc, bool involuntary) : 
           ui.AlertPlayer(s);
         actor.Traits = [.. actor.Traits.Where(t => t is not InPitTrait)];
       }
-      else if (Actor is Player)
+      else if (actor is Player)
       {        
         ui.AlertPlayer("You are still stuck in the pit.");
       }
@@ -213,7 +213,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc, bool involuntary) : 
     base.Execute();
     UserInterface ui = GameState!.UIRef();
 
-    if (StuckOnLoc(Actor!, GameState!, ui))
+    if (StuckOnLoc(Actor!, Loc, GameState!, ui))
       return 1.0;
 
     if (!GameState.CurrentMap.InBounds(Loc.Row, Loc.Col))

@@ -58,7 +58,7 @@ class MeleeAttackAction(GameState gs, Actor actor, Loc target) : Action(gs, acto
     }
 
     double result;
-    if (GameState!.ObjDb.Occupant(Target) is Actor target)
+    if (GameState.ObjDb.Occupant(Target) is Actor target)
     {
       result = Battle.MeleeAttack(Actor!, target, GameState, AttackEffect);
     }
@@ -66,6 +66,42 @@ class MeleeAttackAction(GameState gs, Actor actor, Loc target) : Action(gs, acto
     {
       GameState.UIRef().AlertPlayer($"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "swing")} wildly!", GameState, Actor.Loc, Actor);      
       result = 1.0;
+    }
+
+    return result;
+  }
+}
+
+class LungeAttackAction(GameState gs, Actor actor, Loc adj, Loc target) : Action(gs, actor)
+{
+  Loc _adj = adj;
+  Loc _target = target;
+
+  public override double Execute()
+  {
+    base.Execute();
+
+    string s = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "lunge")} at {Grammar.Possessive(Actor)} foe with a vicious attack!";
+    GameState.UIRef().AlertPlayer(s, GameState, Actor.Loc);
+
+    try
+    {
+      GameState.ResolveActorMove(Actor, Actor.Loc, _adj);
+    }
+    catch (AbnormalMovement abMov)
+    {
+      Actor.Loc = abMov.Dest;
+    }
+
+    double result = 1.0;
+    // If after the movement, the player's location is _adj and the player 
+    // is not in a pit, the actual lunge attack can happen. (If the player
+    // now has the InPitTrait trait, they must have fallen into a pit in
+    // the lunge)
+    if (Actor.Loc == _adj && GameState.ObjDb.Occupant(_target) is Actor occ && !Actor.HasTrait<InPitTrait>())
+    {
+
+      result = Battle.MeleeAttack(Actor!, occ, GameState, new LungeTrait());
     }
 
     return result;

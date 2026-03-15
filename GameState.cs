@@ -1464,7 +1464,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
  
     // At the moment ThingTouchesFLoor (formerly ThingAddedToLoc) only handles
     // floor triggers, but if it starts doing more I'll have to split it into
-    // seperate moethods, or actually pass the object in
+    // separate methods, or actually pass the object in
     if (!flying)
     {
       string s = ThingTouchesFloor(dest);

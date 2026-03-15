@@ -217,6 +217,18 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     return false;
   }
 
+  static bool AttackingWithLunge(Player player)
+  {
+    // Is it too mean to make the player unable to lunge while tipsy?
+    if (player.HasTrait<TipsyTrait>())
+      return false;
+
+    if (player.Inventory.ReadiedWeapon() is Item item && item.HasTrait<LungeTrait>())
+      return true;
+
+    return false;
+  }
+
   void CalcMovementAction(GameState gs, KeyCmd cmd)
   {
     bool involuntary = false;
@@ -255,6 +267,21 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
         gs.UIRef().RegisterAnimation(anim);
 
         gs.Player.QueueAction(new MeleeAttackAction(gs, gs.Player, adj2));
+        return;
+      }      
+    }
+    else if (AttackingWithLunge(gs.Player))
+    {
+      Loc adj = gs.Player.Loc.Move(dr, dc);
+      Tile adjTile = gs.TileAt(adj);
+      Loc adj2 = gs.Player.Loc.Move(dr * 2, dc * 2);
+
+      bool validTarget = !gs.ObjDb.Occupied(adj) && gs.ObjDb.Occupant(adj2) is Actor occ && Util.PlayerAwareOfActor(occ, gs);
+      bool canMove = MoveAction.CanMoveTo(gs.Player, gs.CurrentMap, adj, false);
+      bool stuck = MoveAction.StuckOnLoc(gs.Player, gs.Player.Loc, gs, gs.UIRef());
+      if (validTarget && canMove && !stuck)
+      {
+        gs.Player.QueueAction(new LungeAttackAction(gs, gs.Player, adj, adj2));
         return;
       }
     }

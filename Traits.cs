@@ -807,6 +807,11 @@ class LikeableTrait : Trait
   public override string AsText() => "Likeable";
 }
 
+class LungeTrait: Trait
+{
+  public override string AsText() => "Lunge";
+}
+
 class MageArmourTrait : TemporaryTrait
 {
   protected override string ExpiryMsg => $"You feel less protected.";
@@ -1684,14 +1689,6 @@ class SlimerTrait() : Trait
   public int DC { get; set; }
 
   public override string AsText() => $"Slimer#{DC}";
-}
-
-// One could argue lots of weapons are stabby but I created this one to 
-// differentiate between a Rapier (which can impale) and a Dagger which
-// cannot
-class StabbyTrait() : Trait
-{
-  public override string AsText() => "Stabby";
 }
 
 class StackableTrait() : Trait
@@ -4613,6 +4610,7 @@ class TraitFactory
     },
     { "LightStep", (pieces, gameObj) => new LightStepTrait() },
     { "Likeable", (pieces, gameObj) => new LikeableTrait() },
+    { "Lunge", (pieces, gameObj) => new LungeTrait() },
     { "MageArmour", (pieces, gameObj) =>
       new MageArmourTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) }
     },
@@ -4742,7 +4740,6 @@ class TraitFactory
     { "SilverAllergy", (pieces, gameObj) => new SilverAllergyTrait() },
     { "Sleeping", (pieces, gameObj) => new SleepingTrait() },
     { "Slimer", (pieces, gameObj) => new SlimerTrait() { DC = int.Parse(pieces[1])} },
-    { "Stabby", (pieces, gameObj) => new StabbyTrait() },
     { "Stackable", (pieces, gameObj) => new StackableTrait() },
     { "StatBuff", (pieces, gameObj) =>
       {

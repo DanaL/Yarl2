@@ -329,6 +329,11 @@ class Battle
     if (weapon is not null && weapon.Traits.OfType<ViciousTrait>().FirstOrDefault() is ViciousTrait vt)
       dmgScale = vt.Scale;
 
+    if (attackEffect is LungeTrait)
+    {
+      bonusDamage += gs.Rng.Next(8) + gs.Rng.Next(8) + gs.Rng.Next(8) + 3;
+    }
+
     var (hpLeft, dmgMsg, dmgDone) = target.ReceiveDmg(dmg, bonusDamage, gs, weapon, dmgScale);    
     if (dmgMsg != "")
       gs.UIRef().AlertPlayer(dmgMsg);
@@ -344,10 +349,10 @@ class Battle
       if (target is Player)
         s += " your life essence and looks stronger!";
       else
-        s += $" {target.FullName} and looks stronerg!";
+        s += $" {target.FullName} and looks stronger!";
       gs.UIRef().AlertPlayer(s, gs, target.Loc, target);
     }
-
+    
     if (weapon is not null) 
     { 
       CheckAttackTraits(target, gs, weapon, dmgDone);
@@ -686,7 +691,7 @@ class Battle
 
       if (messages.Count > 0)
       {        
-          gs.UIRef().AlertPlayer(string.Join(' ', messages).Trim(), gs, target.Loc);      
+        gs.UIRef().AlertPlayer(string.Join(' ', messages).Trim(), gs, target.Loc);      
       }
 
       if (thief)
