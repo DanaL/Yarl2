@@ -84,6 +84,8 @@ class LungeAttackAction(GameState gs, Actor actor, Loc adj, Loc target) : Action
     string s = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "lunge")} at {Grammar.Possessive(Actor)} foe with a vicious attack!";
     GameState.UIRef().AlertPlayer(s, GameState, Actor.Loc);
 
+    Loc startLoc = Actor.Loc;
+
     try
     {
       GameState.ResolveActorMove(Actor, Actor.Loc, _adj);
@@ -100,9 +102,14 @@ class LungeAttackAction(GameState gs, Actor actor, Loc adj, Loc target) : Action
     // the lunge)
     if (Actor.Loc == _adj && GameState.ObjDb.Occupant(_target) is Actor occ && !Actor.HasTrait<InPitTrait>())
     {
-
       result = Battle.MeleeAttack(Actor!, occ, GameState, new LungeTrait());
     }
+
+    var anim = new SqAnimation(GameState, startLoc, Colours.GREY, Colours.BLACK, Actor.Glyph.Ch, 175);
+    GameState.UIRef().RegisterAnimation(anim);
+
+    var bark = new BarkAnimation(GameState, 250, GameState.Player, "Have at thee!");
+    GameState.UIRef().RegisterAnimation(bark);
 
     return result;
   }
