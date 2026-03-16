@@ -22,7 +22,11 @@ class RaylibUserInterface : UserInterface
   int _fontHeight;
   Dictionary<Colour, Color> _colours = [];
   Dictionary<char, string> _charCache = [];
-  Queue<GameEvent> EventQ { get; set; } = [];
+  
+  float _heldTime;
+  double _lastEvent;
+  const float INITIAL_DELAY = 0.25f;
+  const float REPEAT_INTERVAL = 0.1f;
 
   public RaylibUserInterface(string windowTitle, Options opt) : base()
   {
@@ -52,7 +56,7 @@ class RaylibUserInterface : UserInterface
     _fontWidth = FontSize / 2;
     _fontHeight = FontSize;
 
-    SetWindowPosition(100, 0);
+    SetWindowPosition(100, 32);
   }
 
   public override void SetFontSize(int newSize)
@@ -75,6 +79,29 @@ class RaylibUserInterface : UserInterface
     SetWindowSize(width, height);
   }
 
+  GameEvent? CheckHeldKey(bool pressed, bool down, float dt, double now, char resultChar)
+  {
+    if (!pressed && !down)
+      return null;
+
+    _heldTime += dt;
+    if (pressed && _heldTime > INITIAL_DELAY)
+    {
+      _heldTime = 0;
+      _lastEvent = now;
+      return new(GameEventType.KeyInput, resultChar);
+    }
+    else if (down && !pressed && now - _lastEvent > REPEAT_INTERVAL)
+    {
+      _lastEvent = now;
+      return new(GameEventType.KeyInput, resultChar);
+    }
+    else
+    {
+      return Constants.NO_EVENT;
+    }
+  }
+
   protected override GameEvent PollForEvent(bool pause = true)
   {
     if (pause)
@@ -90,106 +117,59 @@ class RaylibUserInterface : UserInterface
     }
 
     int ch = GetCharPressed();
-    while (ch > 0)
+    if (ch >= 32 && ch <= 126)
     {
-      if (ch >= 32 && ch <= 126)
-      {
-        EventQ.Enqueue(new(GameEventType.KeyInput, (char)ch));
-      }
-
-      ch = GetCharPressed();
+      return new(GameEventType.KeyInput, (char)ch);
     }
 
-    if (IsKeyPressed(KeyboardKey.Escape))
-    {
-      EventQ.Enqueue(new(GameEventType.KeyInput, (char)Constants.ESC));
-      Delay(50);
-    }
-    else if (IsKeyPressed(KeyboardKey.Enter))
-    {
-      EventQ.Enqueue(new(GameEventType.KeyInput, (char)13));
-      Delay(50);
-    }
-    else if (IsKeyPressed(KeyboardKey.Backspace) || IsKeyPressedRepeat(KeyboardKey.Backspace))
-    {
-      EventQ.Enqueue(new(GameEventType.KeyInput, (char)Constants.BACKSPACE));
-      Delay(50);
-    }
-    else if (IsKeyPressed(KeyboardKey.Tab))
-    {
-      EventQ.Enqueue(new(GameEventType.KeyInput, (char)Constants.TAB));
-      Delay(50);
-    }
-    else if (IsKeyPressed(KeyboardKey.Left) || IsKeyPressedRepeat(KeyboardKey.Left))
-    {
-      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_W));
-      Delay(50);
-    }
-    else if (IsKeyPressed(KeyboardKey.Kp4) || IsKeyPressedRepeat(KeyboardKey.Kp4))
-    {
-      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_W));
-      Delay(50);
-    }
-    else if (IsKeyPressed(KeyboardKey.Right) || IsKeyPressedRepeat(KeyboardKey.Right))
-    {
-      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_E));
-      Delay(50);
-    }
-    else if (IsKeyPressed(KeyboardKey.Kp6) || IsKeyPressedRepeat(KeyboardKey.Kp6))
-    {
-      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_E));
-      Delay(50);
-    }
-    else if (IsKeyPressed(KeyboardKey.Down) || IsKeyPressedRepeat(KeyboardKey.Down))
-    {
-      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_S));
-      Delay(50);
-    }
-    else if (IsKeyPressed(KeyboardKey.Kp2) || IsKeyPressedRepeat(KeyboardKey.Kp2))
-    {
-      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_S));
-      Delay(50);
-    }
-    else if (IsKeyPressed(KeyboardKey.Up) || IsKeyPressedRepeat(KeyboardKey.Up))
-    {
-      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_N));
-      Delay(50);
-    }
-    else if (IsKeyPressed(KeyboardKey.Kp8) || IsKeyPressedRepeat(KeyboardKey.Kp8))
-    {
-      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_N));
-      Delay(50);
-    }
-    else if (IsKeyPressed(KeyboardKey.Kp7) || IsKeyPressedRepeat(KeyboardKey.Kp7))
-    {
-      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_NW));
-      Delay(50);
-    }
-    else if (IsKeyPressed(KeyboardKey.Kp9) || IsKeyPressedRepeat(KeyboardKey.Kp9))
-    {
-      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_NE));
-      Delay(50);
-    }
-    else if (IsKeyPressed(KeyboardKey.Kp1) || IsKeyPressedRepeat(KeyboardKey.Kp1))
-    {
-      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_SW));
-      Delay(50);
-    }
-    else if (IsKeyPressed(KeyboardKey.Kp3) || IsKeyPressedRepeat(KeyboardKey.Kp3))
-    {
-      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.ARROW_SE));
-      Delay(50);
-    }
-    else if (IsKeyPressed(KeyboardKey.Kp5) || IsKeyPressedRepeat(KeyboardKey.Kp5))
-    {
-      EventQ.Enqueue(new(GameEventType.KeyInput, Constants.PASS));
-      Delay(50);
-    }
+    // Handle special keys that might be repeated    
+    float dt = GetFrameTime();
+    double now = GetTime();
 
-    if (EventQ.Count > 0)
+    if (CheckHeldKey(IsKeyPressed(KeyboardKey.Up), IsKeyDown(KeyboardKey.Up), dt, now, Constants.ARROW_N) is GameEvent upEvt)
+      return upEvt;
+    else if (CheckHeldKey(IsKeyPressed(KeyboardKey.Kp8), IsKeyDown(KeyboardKey.Kp8), dt, now, Constants.ARROW_N) is GameEvent upKpEvt)
+      return upKpEvt;
+    else if (CheckHeldKey(IsKeyPressed(KeyboardKey.Left), IsKeyDown(KeyboardKey.Left), dt, now, Constants.ARROW_W) is GameEvent leftEvt)
+      return leftEvt;
+    else if (CheckHeldKey(IsKeyPressed(KeyboardKey.Right), IsKeyDown(KeyboardKey.Right), dt, now, Constants.ARROW_E) is GameEvent rightEvt)
+      return rightEvt;
+    else if (CheckHeldKey(IsKeyPressed(KeyboardKey.Kp4), IsKeyDown(KeyboardKey.Kp4), dt, now, Constants.ARROW_W) is GameEvent leftKpEvt)
+      return leftKpEvt;
+    else if (CheckHeldKey(IsKeyPressed(KeyboardKey.Kp6), IsKeyDown(KeyboardKey.Kp6), dt, now, Constants.ARROW_E) is GameEvent rightKpEvt)
+      return rightKpEvt;
+    else if (CheckHeldKey(IsKeyPressed(KeyboardKey.Down), IsKeyDown(KeyboardKey.Down), dt, now, Constants.ARROW_S) is GameEvent downEvt)
+      return downEvt;
+    else if (CheckHeldKey(IsKeyPressed(KeyboardKey.Kp2), IsKeyDown(KeyboardKey.Kp2), dt, now, Constants.ARROW_S) is GameEvent downKpEvt)
+      return downKpEvt;
+    else if (CheckHeldKey(IsKeyPressed(KeyboardKey.Kp7), IsKeyDown(KeyboardKey.Kp7), dt, now, Constants.ARROW_NW) is GameEvent nwKpEvt)
+      return nwKpEvt;
+    else if (CheckHeldKey(IsKeyPressed(KeyboardKey.Kp9), IsKeyDown(KeyboardKey.Kp9), dt, now, Constants.ARROW_NE) is GameEvent neKpEvt)
+      return neKpEvt;
+    else if (CheckHeldKey(IsKeyPressed(KeyboardKey.Kp1), IsKeyDown(KeyboardKey.Kp1), dt, now, Constants.ARROW_SW) is GameEvent swKpEvt)
+      return swKpEvt;
+    else if (CheckHeldKey(IsKeyPressed(KeyboardKey.Kp3), IsKeyDown(KeyboardKey.Kp3), dt, now, Constants.ARROW_SE) is GameEvent seKpEvt)
+      return seKpEvt;
+    else if (CheckHeldKey(IsKeyPressed(KeyboardKey.Kp5), IsKeyDown(KeyboardKey.Kp5), dt, now, Constants.PASS) is GameEvent passKpEvt)
+      return passKpEvt;
+    else if (CheckHeldKey(IsKeyPressed(KeyboardKey.Backspace), IsKeyDown(KeyboardKey.Backspace), dt, now, (char) Constants.BACKSPACE) is GameEvent bspcEvt)
+      return bspcEvt;
+
+    var key = GetKeyPressed();
+    if (key == (int) KeyboardKey.Escape)
     {
-      return EventQ.Dequeue();
+      return new(GameEventType.KeyInput, (char)Constants.ESC);
     }
+    else if (key == (int) KeyboardKey.Enter || key == (int) KeyboardKey.KpEnter)
+    {
+      return new(GameEventType.KeyInput, (char)13);
+    }
+    else if (key == (int) KeyboardKey.Tab)
+    {
+      return new(GameEventType.KeyInput, (char)Constants.TAB);
+    }
+   
+    _heldTime = 0;
 
     return Constants.NO_EVENT;
   }
