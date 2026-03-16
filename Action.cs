@@ -108,6 +108,15 @@ class LungeAttackAction(GameState gs, Actor actor, Loc adj, Loc target) : Action
     var anim = new SqAnimation(GameState, startLoc, Colours.GREY, Colours.BLACK, Actor.Glyph.Ch, 175);
     GameState.UIRef().RegisterAnimation(anim);
 
+    char bladeCh = Util.RelativeDir(startLoc, _adj) switch
+    {
+      "north" or "south" => '|',
+      "east" or "west" => '-',
+      "northwest" or "southeast" => '\\',
+      _ => '/'
+    };
+    GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, _adj, Colours.GREY, Colours.BLACK, bladeCh, 175));
+
     var bark = new BarkAnimation(GameState, 250, GameState.Player, "Have at thee!");
     GameState.UIRef().RegisterAnimation(bark);
 
