@@ -2438,7 +2438,7 @@ class MagicMapAction(GameState gs, Actor caster) : Action(gs, caster)
     {
       if (GameState!.CurrentMap.HasFeature(MapFeatures.Unmappable))
       {
-        GameState.UIRef().AlertPlayer("This region cannot be encompassed by such puny magicks! The spell faiis.");
+        GameState.UIRef().AlertPlayer("This region cannot be encompassed by such puny magicks! The spell fails.");
       }
       else
       {
