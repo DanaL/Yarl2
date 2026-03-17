@@ -1702,6 +1702,8 @@ class InventoryDetails : Inputer
         items.Add("It may [DARKGREEN frighten] your foes");
       if (trait is CleaveTrait)
         items.Add("it can [BRIGHTRED cleave] enemies");
+      if (trait is LungeTrait)
+        items.Add("you can [BRIGHTRED lunge] with this weapon");
       if (trait is TwoHandedTrait)
         items.Add("it must be wielded with two hands");
       if (trait is RustProofTrait)
