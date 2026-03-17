@@ -217,7 +217,7 @@
   {
     "Name": "ARROW",
     "DescriptiveName": "arrow",
-    "Type": "Weapon",
+    "Type": "Arrow",
     "Value": 2,
     "Glyph": "-,lightbrown,brown,black,false",
     "Traits": [
@@ -1501,7 +1501,7 @@
     "Glyph": "),lightbrown,brown,black,false",
     "Traits": [
       "KnockBack",
-      "Ammo#4#1#Piercing#9",
+      "Ammo#6#1#Piercing#9",
       "Stackable",
       "Equipable"
     ]

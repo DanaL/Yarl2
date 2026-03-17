@@ -312,7 +312,20 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
   {    
     int range;
     Item arrow;
-    if (bow.Traits.OfType<AmmoTrait>().FirstOrDefault() is AmmoTrait ammoTrait)
+
+    // Does player have an equipped special arrows?
+    Item? equippedArrow= gs.Player.Inventory.Items()
+                                            .FirstOrDefault(a => a.Type == ItemType.Arrow && a.Equipped);
+
+    if (equippedArrow is not null)
+    {      
+      arrow = equippedArrow;
+      var ammoTrait = arrow.Traits.OfType<AmmoTrait>().First();
+      gs.Player.Inventory.RemoveByID(arrow.ID, gs);
+      range = ammoTrait.Range;
+      arrow.Traits.Add(new DamageTrait() { DamageType = ammoTrait.DamageType, DamageDie = ammoTrait.DamageDie, NumOfDie = ammoTrait.NumOfDie });
+    }
+    else if (bow.Traits.OfType<AmmoTrait>().FirstOrDefault() is AmmoTrait ammoTrait)
     {
       arrow = ammoTrait.Arrow(gs);
       range = ammoTrait.Range;
