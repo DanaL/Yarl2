@@ -29,7 +29,7 @@
 
       ( (= MAIN_QUEST_STATUS 1)
         (say (
-          pick ("They say the ruins used to be beautiful underground kingdom."
+          pick ("They say the ruins used to be beautiful a underground kingdom."
                 "Level 3? You've made it further than that last guy!"
                 "Don't push yourself too hard. Adventurer burnout is a common problem."
                 "Constant #EARLY_DENIZEN raids are no way to build a tourism industry!"
