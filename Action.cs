@@ -280,10 +280,10 @@ class ArrowShotAction(GameState gs, Actor actor, Item? bow, Item ammo, int attac
       if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
       {
         pts.Add(pt);
-        bool attackSuccessful = Battle.MissileAttack(Actor!, occ, GameState, _ammo, _attackBonus, new ArrowAnimation(GameState, pts, _ammo.Glyph.Lit));
+        targetHit = Battle.MissileAttack(Actor!, occ, GameState, _ammo, _attackBonus, new ArrowAnimation(GameState, pts, _ammo.Glyph.Lit));
         creatureTargeted = true;
-        
-        if (attackSuccessful)
+
+        if (targetHit)
         {
           pts = [];
           break;
