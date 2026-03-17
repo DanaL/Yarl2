@@ -147,6 +147,10 @@ class Battle
         ApplyPoison(poison, target, gs);
         poisoner = true;
       }
+      else if (trait is KnockBackTrait && attacker is Actor shooter)
+      {
+        ResolveKnockBack(shooter, target, gs);
+      }
     }
 
     if (poisoner)
@@ -420,9 +424,27 @@ class Battle
 
     int deltaRow = attacker.Loc.Row - target.Loc.Row;
     int deltaCol = attacker.Loc.Col - target.Loc.Col;
+    int absDeltaRow = Math.Abs(deltaRow);
+    int absDeltaCol = Math.Abs(deltaCol);
+    int stepRow, stepCol;
+    if (absDeltaCol > 2 * absDeltaRow)
+    {
+        stepRow = 0;
+        stepCol = Math.Sign(deltaCol);
+    }
+    else if (absDeltaRow > 2 * absDeltaCol)
+    {
+        stepRow = Math.Sign(deltaRow);
+        stepCol = 0;
+    }
+    else
+    {
+        stepRow = Math.Sign(deltaRow);
+        stepCol = Math.Sign(deltaCol);
+    }
 
-    Loc first = target.Loc with { Row = target.Loc.Row - deltaRow, Col = target.Loc.Col - deltaCol };
-    Loc second = target.Loc with { Row = target.Loc.Row - 2 * deltaRow, Col = target.Loc.Col - 2 * deltaCol };
+    Loc first = target.Loc with { Row = target.Loc.Row - stepRow, Col = target.Loc.Col - stepCol };
+    Loc second = target.Loc with { Row = target.Loc.Row - 2 * stepRow, Col = target.Loc.Col - 2 * stepCol };
 
     if (CanPass(first, gs) && CanPass(second, gs))
     {
