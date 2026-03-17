@@ -3851,7 +3851,12 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
         energyCost = 1.0;
         break;
       case EquipingResult.Unequipped:
-        s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "remove")} {item.FullName.DefArticle()}.";
+        s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "unequip")} {item.FullName.DefArticle()}.";
+        GameState.UIRef().AlertPlayer(s);
+        energyCost = 1.0;
+        break;
+      case EquipingResult.StackUnequipped:
+        s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "unequip")} {item.FullName.DefArticle().Pluralize()}.";        
         GameState.UIRef().AlertPlayer(s);
         energyCost = 1.0;
         break;

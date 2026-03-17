@@ -935,12 +935,13 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
   }
 
   static (EquipingResult, ArmourParts) UnequipItem(Item item)
-  {
+  {    
     item.Equipped = false;
+    
     return (EquipingResult.Unequipped, ArmourParts.None);
   }
 
-  (EquipingResult, ArmourParts) ToggleWand(Item wand, int freeHands)
+  static (EquipingResult, ArmourParts) ToggleWand(Item wand, int freeHands)
   {
     if (wand.Equipped)
     {
@@ -997,9 +998,16 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       if (item.Type == ItemType.Wand)
         return ToggleWand(item, freeHands);
 
-      if (item.Equipped)
+      if (item.Equipped && item.Type == ItemType.Arrow)
+      {
+        int count = EquipStackable(item, false);
+        return (count > 1 ? EquipingResult.StackUnequipped : EquipingResult.Unequipped, ArmourParts.None);
+      }
+      else if (item.Equipped)
+      {
         return UnequipItem(item);
-
+      }
+        
       if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool)
       {
         if (freeHands == 0 && shield && item.HasTrait<TwoHandedTrait>())
@@ -1381,7 +1389,8 @@ enum EquipingResult
   TooManyRings,
   TooManyTalismans,
   NoFreeHand,
-  StackEquipped
+  StackEquipped,
+  StackUnequipped
 }
 
 class EmptyInventory : Inventory
