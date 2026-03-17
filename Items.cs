@@ -15,30 +15,9 @@ namespace Yarl2;
 
 enum ItemType
 {
-  Weapon,
-  Bow,
-  Armour,
-  Zorkmid,
-  Tool,
-  Document,
-  Potion,
-  Scroll,
-  Trinket,
-  Wand,
-  Ring,
-  Bone,
-  Food,
-  Talisman,
-  Reagent,
-  Environment,
-  Fog,
-  Landscape,
-  Statue,
-  Illusion,
-  Device,
-  Altar,
-  Column,
-  Ink
+  Weapon, Bow, Armour, Zorkmid, Tool, Document, Potion, Scroll, Trinket, Wand, 
+  Ring, Bone, Food, Talisman, Reagent, Environment, Fog, Landscape, Statue, 
+  Illusion, Device, Altar, Column, Ink, Arrow
 }
 
 record ItemIDInfo(bool Known, string Desc);
@@ -233,16 +212,17 @@ enum ItemNames
   CUTPURSE_CREST, DAGGER, DART, EMERGENCY_DOOR, FEARFUL_RUNE, FEATHERFALL_BOOTS, FIRE_GIANT_ESSENCE, FIREBOLT, FLASK_OF_BOOZE, 
   FROST_GIANT_ESSENCE, GASTON_BADGE, GAUNTLETS_OF_POWER, GENERIC_WAND, GHOSTCAP_MUSHROOM, GOLDEN_APPLE, GREATSWORD, GUIDE_STABBY, 
   GUIDE_AXES, GUIDE_BOWS, GUIDE_SWORDS, GUISARME, HAND_AXE, HEARTY_SOUP, HEAVY_BOOTS, HELMET, HILL_GIANT_ESSENCE, HOLY_WATER, 
-  LEATHER_ARMOUR, LEATHER_GLOVES, LEMBAS, LESSER_BURLY_CHARM, LESSER_GRACE_CHARM, LESSER_HEALTH_CHARM, LOCK_PICK, LONGBOW, LONGSWORD, 
-  MACE, MEDITATION_CRYSTAL, MITHRIL_ORE, MOON_LYRE, MOON_MANTLE, MUSHROOM_STEW, OGRE_LIVER, PHALANX_PHOLIO_2, PICKAXE, POTION_BLINDNESS, 
-  POTION_CLARITY, POTION_COLD_RES, POTION_DESCENT, POTION_DRAGON_BREATH, POTION_FIRE_RES, POTION_FORGETFULNESS, POTION_HEALING, 
-  POTION_HEROISM, POTION_MIND_READING, POTION_OF_LEVITATION, POTION_OBSCURITY, QUARTERSTAFF, RAPIER, RING_OF_ADORNMENT, RING_OF_PROTECTION, 
-  RING_OF_WATER_BREATHING, RINGMAIL, RUBBLE, SCROLL_BLINK, RUNE_OF_LASHING, RUNE_OF_PARRYING, SCROLL_ENCHANTING, SCROLL_ESCAPE, SCROLL_DISARM, 
-  SCROLL_KNOCK, SCROLL_MAGIC_MAP, SCROLL_PROTECTION, SCROLL_SCATTERING, SCROLL_STAINLESS, SCROLL_TRAP_DETECTION, SCROLL_TREASURE_DETECTION, 
-  SEEWEED, SHIELD, SHORTSHORD, SILVER_DAGGER, SILVER_LONGSWORD, SKELETON_KEY, SKULL, SMOULDERING_CHARM, SNEAKERS, SPEAR, STATUE, STONE_ALTAR, 
-  STUDDED_LEATHER_ARMOUR, TALISMAN_OF_CIRCUMSPECTION, TINCTURE_CELERITY, TORCH, TROLL_BROOCH, VIAL_OF_POISON, WAND_DIGGING, WAND_FIREBALLS, 
-  WAND_FROST, WAND_HEAL_MONSTER, WAND_MAGIC_MISSILES, WAND_SLOW_MONSTER, WAND_SUMMONING, WAND_SWAP, WIND_FAN, ZORKMIDS, ZORKMIDS_GOOD, 
-  ZORKMIDS_MEDIOCRE, ZORKMIDS_PITTANCE,
+  KNOCKBACK_ARROW, LEATHER_ARMOUR, LEATHER_GLOVES, LEMBAS, LESSER_BURLY_CHARM, LESSER_GRACE_CHARM, LESSER_HEALTH_CHARM, LOCK_PICK, 
+  LONGBOW, LONGSWORD, MACE, MEDITATION_CRYSTAL, MITHRIL_ORE, MOON_LYRE, MOON_MANTLE, MUSHROOM_STEW, OGRE_LIVER, PHALANX_PHOLIO_2, 
+  PICKAXE, POTION_BLINDNESS, POTION_CLARITY, POTION_COLD_RES, POTION_DESCENT, POTION_DRAGON_BREATH, POTION_FIRE_RES, 
+  POTION_FORGETFULNESS, POTION_HEALING, POTION_HEROISM, POTION_MIND_READING, POTION_OF_LEVITATION, POTION_OBSCURITY, QUARTERSTAFF, 
+  RAPIER, RING_OF_ADORNMENT, RING_OF_PROTECTION, RING_OF_WATER_BREATHING, RINGMAIL, RUBBLE, SCROLL_BLINK, RUNE_OF_LASHING, 
+  RUNE_OF_PARRYING, SCROLL_ENCHANTING, SCROLL_ESCAPE, SCROLL_DISARM, SCROLL_KNOCK, SCROLL_MAGIC_MAP, SCROLL_PROTECTION, 
+  SCROLL_SCATTERING, SCROLL_STAINLESS, SCROLL_TRAP_DETECTION, SCROLL_TREASURE_DETECTION, SEEWEED, SHIELD, SHORTSHORD, SILVER_DAGGER, 
+  SILVER_LONGSWORD, SKELETON_KEY, SKULL, SMOULDERING_CHARM, SNEAKERS, SPEAR, STATUE, STONE_ALTAR, STUDDED_LEATHER_ARMOUR, 
+  TALISMAN_OF_CIRCUMSPECTION, TINCTURE_CELERITY, TORCH, TROLL_BROOCH, VIAL_OF_POISON, WAND_DIGGING, WAND_FIREBALLS, WAND_FROST, 
+  WAND_HEAL_MONSTER, WAND_MAGIC_MISSILES, WAND_SLOW_MONSTER, WAND_SUMMONING, WAND_SWAP, WIND_FAN, ZORKMIDS, ZORKMIDS_GOOD, 
+  ZORKMIDS_MEDIOCRE, ZORKMIDS_PITTANCE, 
 
   RED_CRYSTAL, BLUE_CRYSTAL
 }
@@ -1087,7 +1067,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         }
         else
         {
-          int ringCount = Items().Where(i => i.Type == ItemType.Ring && i.Equipped).Count();
+          int ringCount = Items().Count(i => i.Type == ItemType.Ring && i.Equipped);
           if (ringCount == 2)
             return (EquipingResult.TooManyRings, ArmourParts.None);
 
@@ -1104,7 +1084,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         }
         else
         {
-          int talismanCount = Items().Where(i => i.Type == ItemType.Talisman && i.Equipped).Count();
+          int talismanCount = Items().Count(i => i.Type == ItemType.Talisman && i.Equipped);
           if (talismanCount == 2)
             return (EquipingResult.TooManyTalismans, ArmourParts.None);
 
@@ -1112,6 +1092,11 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
           return (EquipingResult.Equipped, ArmourParts.None);
         }
+      }
+      else if (item.Type == ItemType.Arrow)
+      {
+        int count = EquipStackable(item, !item.Equipped);
+        return (count > 1 ? EquipingResult.StackEquipped : EquipingResult.Equipped, ArmourParts.None);
       }
       // I think by this point it would be error for an item to not have the 
       // equipable trait, but check for it here because and item that does not
@@ -1124,6 +1109,14 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     }
 
     return (EquipingResult.Conflict, ArmourParts.None);
+
+    int EquipStackable(Item item, bool status)
+    {
+      var items = Items().Where(i => i.Name == item.Name);
+      foreach (Item other in items)      
+        other.Equipped = status;
+      return items.Count();
+    }
   }
 
   public string ApplyEffectToInv(DamageType damageType, GameState gs, Loc loc)
@@ -1162,6 +1155,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
   {
     List<char> weapons = [];
     List<char> armour = [];
+    List<char> arrows = [];
     List<char> scrolls = [];
     List<char> potions = [];
     List<char> wands = [];
@@ -1179,6 +1173,9 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         case ItemType.Weapon:
         case ItemType.Bow:
           weapons.Add(s);
+          break;
+        case ItemType.Arrow:
+          arrows.Add(s);
           break;
         case ItemType.Armour:
           armour.Add(s);
@@ -1209,6 +1206,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
     List<char> slots = [];
     slots.AddRange(SortSlots(weapons));
+    slots.AddRange(SortSlots(arrows));
     slots.AddRange(SortSlots(armour));
     slots.AddRange(SortSlots(scrolls)); // You can't equip scrolls or potions
     slots.AddRange(SortSlots(potions)); // but who knows what the future holds
@@ -1287,6 +1285,8 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
           desc += " [GREY (wearing)]";
         else if (item.Type == ItemType.Wand)
           desc += " [LIGHTBLUE (focus)]";
+        else if (item.Type == ItemType.Arrow)          
+          desc += " [GREY (readied)]";
         else
           desc += " [GREY (equipped)]";
       }
@@ -1330,6 +1330,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       ItemType.Talisman => "LIGHTPURPLE",
       ItemType.Tool => "BROWN",
       ItemType.Ring => "YELLOW",
+      ItemType.Arrow => "LIGHTBROWN",
       _ => "WHITE"
     };
   }
@@ -1379,7 +1380,8 @@ enum EquipingResult
   TwoHandedConflict,
   TooManyRings,
   TooManyTalismans,
-  NoFreeHand
+  NoFreeHand,
+  StackEquipped
 }
 
 class EmptyInventory : Inventory

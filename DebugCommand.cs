@@ -133,7 +133,8 @@ class DebugCommand(GameState gs)
     {"moon lyre", ItemNames.MOON_LYRE },
     {"potion of clarity", ItemNames.POTION_CLARITY },
     {"draught of forgetfulness", ItemNames.POTION_FORGETFULNESS },
-    {"emergency door", ItemNames.EMERGENCY_DOOR }
+    {"emergency door", ItemNames.EMERGENCY_DOOR },
+    {"knockback arrow", ItemNames.KNOCKBACK_ARROW}
   };
 
   public string DoCommand(string txt)

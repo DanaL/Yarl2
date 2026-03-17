@@ -3844,6 +3844,12 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
         GameState.UIRef().AlertPlayer(s);
         energyCost = 1.0;
         break;
+      case EquipingResult.StackEquipped:
+        s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "ready")} {item.FullName.DefArticle().Pluralize()}";
+        s += item.Type == ItemType.Wand ? " as a casting focus." : ".";
+        GameState.UIRef().AlertPlayer(s);
+        energyCost = 1.0;
+        break;
       case EquipingResult.Unequipped:
         s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "remove")} {item.FullName.DefArticle()}.";
         GameState.UIRef().AlertPlayer(s);

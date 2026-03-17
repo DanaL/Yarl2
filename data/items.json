@@ -1492,5 +1492,18 @@
       "EmergencyDoor",
       "Consumable"
     ]
+  },
+  {
+    "Name": "KNOCKBACK_ARROW",
+    "DescriptiveName": "knockback arrow",
+    "Type": "Arrow",
+    "Value": 20,
+    "Glyph": "),lightbrown,brown,black,false",
+    "Traits": [
+      "KnockBack",
+      "Ammo#4#1#Piercing#9",
+      "Stackable",
+      "Equipable"
+    ]
   }
 ]
