@@ -766,6 +766,31 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   public char Choice { get; set; }
   
+  double UseArrow(Item arrow)
+  {
+    if (Actor!.Inventory.ReadiedBow() is not Item bow)
+    {
+      GameState.UIRef().AlertPlayer($"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "have")} no readied bow.");      
+    }
+    else
+    {
+      // For the moment only the Player will be calling UseItemAction/UseArrow
+      var ammoTrait = arrow.Traits.OfType<AmmoTrait>().First();
+      Actor.Inventory.RemoveByID(arrow.ID, GameState);
+      int range = ammoTrait.Range;
+      arrow.Traits.Add(new DamageTrait() { DamageType = ammoTrait.DamageType, DamageDie = ammoTrait.DamageDie, NumOfDie = ammoTrait.NumOfDie });
+
+      int archeryBonus = 0;
+      if (Actor.Stats.TryGetValue(Attribute.ArcheryBonus, out var ab))
+        archeryBonus = ab.Curr;
+      ArrowShotAction missileAction = new(GameState, GameState.Player, bow, arrow, archeryBonus);
+      Aimer aimer = new(GameState, GameState.Player.Loc, range) { DeferredAction = missileAction };
+      GameState.UIRef().SetInputController(aimer);
+    }
+
+    return 0.0;
+  }
+
   double UseVaultKey(Item key)
   {
     VaultKeyTrait? keyTrait = key.Traits.OfType<VaultKeyTrait>()
@@ -852,9 +877,14 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       return 0.0;
     }
 
+    if (item.Type == ItemType.Arrow)
+    {
+      return UseArrow(item);
+    }
+
     bool torch = false, written = false, vaultKey = false;
     bool onCooldown = false;
-    bool needsToBeEquiped = false;
+    bool needsToBeEquipped = false;
     foreach (Trait t in item.Traits)
     {
       if (t is ReadableTrait || t is ScrollTrait || t is BookTrait)
@@ -872,21 +902,21 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
 
       if (t is WandTrait)
       {
-        needsToBeEquiped = false;
+        needsToBeEquipped = false;
         break;
       }
 
       if (t is TorchTrait)
       {
         torch = true;
-        needsToBeEquiped = false;
+        needsToBeEquipped = false;
         break;
       }
-
-      if (t is EquipableTrait && !item.Equipped)
-        needsToBeEquiped = true;
+      
+      if (t is EquipableTrait && !item.Equipped && item.Type != ItemType.Arrow)
+        needsToBeEquipped = true;
     }
-
+    
     GameState!.ClearMenu();
 
     if (vaultKey)
@@ -895,7 +925,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     List<Trait> useableTraits = [.. item.Traits.Where(t => t is IUSeable)];
     if (useableTraits.Count != 0 || item.HasTrait<CanApplyTrait>())
     {
-      if (needsToBeEquiped)
+      if (needsToBeEquipped)
       {
         string name = MsgFactory.CalcName(item, GameState.Player).Capitalize();
         GameState.UIRef().AlertPlayer($"{name} needs to be equipped first.");

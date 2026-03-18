@@ -308,16 +308,16 @@ class ArrowShotAction(GameState gs, Actor actor, Item? bow, Item ammo, int attac
       {
         if (t is SnowBurstTrait)
         {
-          Effects.SnowBurst(pts.Last(), gs);      
+          Effects.SnowBurst(pts.Last(), GameState);      
         }
         else if (t is FireBurstTrait)
         {
-          Effects.FireBurst(pts.Last(), gs);
+          Effects.FireBurst(pts.Last(), GameState);
         }
       }
     }
    
-    if (creatureTargeted && !targetHit && Actor is Player player && bow is Item && bow.HasTrait<BowTrait>())
+    if (creatureTargeted && !targetHit && Actor is Player player && bow is not null && bow.HasTrait<BowTrait>())
     {
       player.ExerciseStat(Attribute.BowUse);
     }
