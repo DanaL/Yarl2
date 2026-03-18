@@ -1691,6 +1691,11 @@ class SlimerTrait() : Trait
   public override string AsText() => $"Slimer#{DC}";
 }
 
+class SnowBurstTrait() : Trait
+{
+  public override string AsText() => "SnowBurst";
+}
+
 class StackableTrait() : Trait
 {
   public override string AsText() => "Stackable";
@@ -4740,6 +4745,7 @@ class TraitFactory
     { "SilverAllergy", (pieces, gameObj) => new SilverAllergyTrait() },
     { "Sleeping", (pieces, gameObj) => new SleepingTrait() },
     { "Slimer", (pieces, gameObj) => new SlimerTrait() { DC = int.Parse(pieces[1])} },
+    { "SnowBurst", (pieces, gameObj) => new SnowBurstTrait() },
     { "Stackable", (pieces, gameObj) => new StackableTrait() },
     { "StatBuff", (pieces, gameObj) =>
       {

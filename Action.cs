@@ -303,6 +303,14 @@ class ArrowShotAction(GameState gs, Actor actor, Item? bow, Item ammo, int attac
     {
       var anim = new ArrowAnimation(GameState, pts, _ammo.Glyph.Lit);
       GameState.UIRef().PlayAnimation(anim, GameState);
+
+      foreach (Trait t in _ammo.Traits)
+      {
+        if (t is SnowBurstTrait)
+        {
+          Effects.SnowBurst(pts.Last(), gs);      
+        }
+      }
     }
    
     if (creatureTargeted && !targetHit && Actor is Player player && bow is Item && bow.HasTrait<BowTrait>())

@@ -150,7 +150,7 @@ class Battle
       else if (trait is KnockBackTrait && attacker is Actor shooter)
       {
         ResolveKnockBack(shooter, target, gs);
-      }
+      }      
     }
 
     if (poisoner)

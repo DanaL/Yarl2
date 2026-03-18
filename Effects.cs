@@ -471,6 +471,32 @@ class Effects
     }
   }
 
+  public static void SnowBurst(Loc centre, GameState gs)
+  {
+    HashSet<Loc> affected = [.. Util.Adj8Locs(centre)];
+    affected.Add(centre);
+    UserInterface ui = gs.UIRef();
+    ui.PlayAnimation(new ExplosionAnimation(gs) { MainColour = Colours.LIGHT_BLUE, AltColour1 = Colours.ICE_BLUE, AltColour2 = Colours.BLUE, Highlight = Colours.WHITE, Centre = centre, Sqs = affected }, gs);
+  
+    int dmg = gs.Rng.Next(1, 9) + gs.Rng.Next(1, 9);
+    foreach (Loc loc in affected)
+    {
+      if (gs.ObjDb.Occupant(loc) is Actor actor)
+      {
+        ui.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} caught in the blast!");
+        var (hpLeft, msg, _) = actor.ReceiveDmg([(dmg, DamageType.Cold)], 0, gs, null, 1.0);
+        ui.AlertPlayer(msg, gs, loc);
+
+        if (hpLeft < 1)
+        {
+          gs.ActorKilled(actor, "a blast of cold", null);
+        }
+      }
+      
+      ApplyDamageEffectToLoc(loc, DamageType.Cold, gs);
+    }  
+  }
+
   public static void HandleTipsy(Actor imbiber, GameState gs)
   {
     TipsyTrait? tipsy = null;

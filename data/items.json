@@ -1498,9 +1498,22 @@
     "DescriptiveName": "knockback arrow",
     "Type": "Arrow",
     "Value": 20,
-    "Glyph": "),lightbrown,brown,black,false",
+    "Glyph": "),lightgrey,grey,black,false",
     "Traits": [
       "KnockBack",
+      "Ammo#6#1#Piercing#9",
+      "Stackable",
+      "Equipable"
+    ]
+  },
+  {
+    "Name": "SNOWBURST_ARROW",
+    "DescriptiveName": "snowburst arrow",
+    "Type": "Arrow",
+    "Value": 20,
+    "Glyph": "),iceblue,lightblue,black,false",
+    "Traits": [      
+      "SnowBurst",
       "Ammo#6#1#Piercing#9",
       "Stackable",
       "Equipable"

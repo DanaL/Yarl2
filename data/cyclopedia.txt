@@ -745,3 +745,9 @@ A grotesque, bloated mushroom that seems to shiver and twitch. It does not look 
 #
 puddle of booze
 An alcoholic somewhere is very sad about this.
+#
+knockback arrow
+An arrow that says to your opponent, "I want to shoot you but also I want you to go away!"
+#
+snowburst arrow
+Novelty arrows used by the sort of ranger who says things like "Cold enough for ya, bud?" or "Some weather we're having, huh?"
