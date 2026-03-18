@@ -259,7 +259,12 @@ class DebugCommand(GameState gs)
         _gs.UIRef().AlertPlayer(s, _gs, _gs.Player.Loc);
       return "";
     }
-    
+    else if (txt == "terraform")
+    {
+      _gs.UIRef().SetInputController(new TerraformTool(_gs, _gs.Player.Loc));
+      return "keepopen";
+    }
+
     var parts = txt.Split(' ', 2);
     if (parts.Length < 2)
       return "Debug commands are formated: add/give/drop <obj name>";

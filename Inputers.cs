@@ -436,7 +436,6 @@ record HelpEntry(string Title, string Entry);
 
 class HelpScreen : Inputer
 {
-  readonly UserInterface _ui;
   Dictionary<char, HelpEntry> Entries { get; set; } = [];
   char _selected;
   TwoPanelPopup Popup { get; set; }
@@ -454,8 +453,6 @@ class HelpScreen : Inputer
 
   public HelpScreen(GameState gs, UserInterface ui) : base(gs)
   {
-    _ui = ui;
-
     string[] lines = [.. File.ReadAllLines(ResourcePath.GetDataFilePath("help.txt"))
                               .Select(line => ReplaceKeyPlaceholders(line.TrimEnd(), gs.KeyMap))];
     int l = 0;
@@ -971,8 +968,11 @@ class WizardCommander : Inputer
 
       if (ErrorMessage == "")
       {
-        GS.UIRef().ClosePopup();
-        GS.UIRef().SetInputController(new PlayerCommandController(GS));
+        Close();
+        return;
+      }
+      else if (ErrorMessage == "keepopen")
+      {
         return;
       }
     }
