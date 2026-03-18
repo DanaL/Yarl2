@@ -310,6 +310,10 @@ class ArrowShotAction(GameState gs, Actor actor, Item? bow, Item ammo, int attac
         {
           Effects.SnowBurst(pts.Last(), gs);      
         }
+        else if (t is FireBurstTrait)
+        {
+          Effects.FireBurst(pts.Last(), gs);
+        }
       }
     }
    

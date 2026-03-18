@@ -711,6 +711,11 @@ class FinesseTrait : Trait
   public override string AsText() => "Finesse";
 }
 
+class FireBurstTrait : Trait
+{
+  public override string AsText() => "FireBurst";
+}
+
 // If I add more rebuke types, I'll either generalize this class or create a
 // a superclass RebukeTrait
 class FireRebukeTrait : Trait
@@ -4532,6 +4537,7 @@ class TraitFactory
     }},
     { "FinalBoss", (pieces, gameObj) => new FinalBossTrait() },
     { "Finesse", (pieces, gameObj) => new FinesseTrait() },
+    { "FireBurst", (pieces, gameObj) => new FireBurstTrait() },
     { "FireRebuke", (pieces, gameObj) => new FireRebukeTrait() { SourceId = ulong.Parse(pieces[1])} },
     { "FlagOnPickUp", (pieces, gameObj) => new FlagOnPickUpTrait() { Flag = pieces[1] }},
     { "Flammable", (pieces, gameObj) => new FlammableTrait() },

@@ -135,7 +135,8 @@ class DebugCommand(GameState gs)
     {"draught of forgetfulness", ItemNames.POTION_FORGETFULNESS },
     {"emergency door", ItemNames.EMERGENCY_DOOR },
     {"knockback arrow", ItemNames.KNOCKBACK_ARROW },
-    {"snowburst arrow", ItemNames.SNOWBURST_ARROW }
+    {"snowburst arrow", ItemNames.SNOWBURST_ARROW },
+    {"fireburst arrow", ItemNames.FIREBURST_ARROW }
   };
 
   public string DoCommand(string txt)

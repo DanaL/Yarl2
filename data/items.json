@@ -1512,8 +1512,21 @@
     "Type": "Arrow",
     "Value": 20,
     "Glyph": "),iceblue,lightblue,black,false",
-    "Traits": [      
+    "Traits": [
       "SnowBurst",
+      "Ammo#6#1#Piercing#9",
+      "Stackable",
+      "Equipable"
+    ]
+  },
+  {
+    "Name": "FIREBURST_ARROW",
+    "DescriptiveName": "fireburst arrow",
+    "Type": "Arrow",
+    "Value": 20,
+    "Glyph": "),brightred,dullred,black,false",
+    "Traits": [
+      "FireBurst",
       "Ammo#6#1#Piercing#9",
       "Stackable",
       "Equipable"
