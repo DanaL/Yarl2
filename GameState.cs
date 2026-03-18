@@ -651,25 +651,27 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         messages.Add(invMsgs);
       }
 
-      int conMod;
-      if (actor.Stats.TryGetValue(Attribute.Constitution, out var stat))
-        conMod = stat.Curr;
-      else
-        conMod = 0;
-      ulong endsOn = Turn + (ulong)(250 - 10 * conMod);
-      ExhaustedTrait exhausted = new()
-      {
-        OwnerID = actor.ID,
-        ExpiresOn = endsOn
-      };
-      List<string> msgs = exhausted.Apply(actor, this);
-      foreach (string msg in msgs)
-      {
-        messages.Add(msg);
-      }
+      bool needsToBreath = !(actor.HasTrait<PlantTrait>() || actor.HasTrait<ConstructTrait>() || actor.HasTrait<UndeadTrait>());
 
+      if (needsToBreath)
+      {
+        int conMod;
+        if (actor.Stats.TryGetValue(Attribute.Constitution, out var stat))
+          conMod = stat.Curr;
+        else
+          conMod = 0;
+        ulong endsOn = Turn + (ulong)(250 - 10 * conMod);
+        ExhaustedTrait exhausted = new() { OwnerID = actor.ID, ExpiresOn = endsOn };
+        List<string> msgs = exhausted.Apply(actor, this);
+        messages.AddRange(msgs);
+      }
+     
       if (LastPlayerFoV.ContainsKey(destination))
-        messages.Add($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "wash")} ashore, gasping for breath!");
+      {
+        string s = needsToBreath ? $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "wash")} ashore, gasping for breath!"
+                                 : $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "wash")} ashore!";
+        messages.Add(s);
+      }
     }
     else
     {
