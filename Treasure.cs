@@ -32,7 +32,7 @@ class Treasure
       ItemNames.SCROLL_DISARM, ItemNames.BEETLE_CARAPACE, ItemNames.LEATHER_GLOVES, ItemNames.MITHRIL_ORE,
       ItemNames.SCROLL_TREASURE_DETECTION, ItemNames.SCROLL_TRAP_DETECTION, ItemNames.SKELETON_KEY, ItemNames.PICKAXE,
       ItemNames.POTION_HEROISM, ItemNames.POTION_DESCENT, ItemNames.SCROLL_STAINLESS,
-      ItemNames.POTION_FORGETFULNESS, ItemNames.EMERGENCY_DOOR
+      ItemNames.POTION_FORGETFULNESS, ItemNames.EMERGENCY_DOOR, ItemNames.KNOCKBACK_ARROW
   ]; 
 
   static readonly List<ItemNames> GoodItems = [ 
@@ -52,7 +52,8 @@ class Treasure
       ItemNames.SCROLL_TRAP_DETECTION, ItemNames.SCROLL_SCATTERING, ItemNames.POTION_OBSCURITY, ItemNames.POTION_DRAGON_BREATH,
       ItemNames.FEATHERFALL_BOOTS, ItemNames.WIND_FAN, ItemNames.SKELETON_KEY,
       ItemNames.TINCTURE_CELERITY, ItemNames.POTION_HEROISM, ItemNames.POTION_DESCENT, ItemNames.SCROLL_STAINLESS,
-      ItemNames.HOLY_WATER, ItemNames.SNEAKERS, ItemNames.MOON_MANTLE, ItemNames.CLAYMORE
+      ItemNames.HOLY_WATER, ItemNames.SNEAKERS, ItemNames.MOON_MANTLE, ItemNames.CLAYMORE, ItemNames.KNOCKBACK_ARROW,
+      ItemNames.SNOWBURST_ARROW, ItemNames.FIREBURST_ARROW
   ];
 
   static readonly List<ItemNames> RareItems = [
