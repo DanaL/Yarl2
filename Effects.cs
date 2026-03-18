@@ -523,6 +523,44 @@ class Effects
     }  
   }
 
+  public static void BreakGrapple(Actor actor, GameState gs)
+  {
+    GrappledTrait? grappled = actor.Traits.OfType<GrappledTrait>().FirstOrDefault();
+    grappled?.Remove(gs);
+    GrapplingTrait? grappling = actor.Traits.OfType<GrapplingTrait>().FirstOrDefault();
+    if (grappling is not null && gs.ObjDb.GetObj(grappling.VictimId) is Actor victim)
+    {
+      grappled = victim.Traits.OfType<GrappledTrait>().FirstOrDefault();
+      grappled?.Remove(gs);
+    }
+  }
+
+  public static void Banishment(Actor victim, GameState gs)
+  {
+    Loc start = victim.Loc;
+    Dungeon dungeon = gs.Campaign.Dungeons[victim.Loc.DungeonID];
+    List<int> levels = [.. dungeon.LevelMaps.Keys.Where(k => k != victim.Loc.Level)];
+    int level = levels.Count > 0 ? levels[gs.Rng.Next(levels.Count)] : victim.Loc.Level;
+    Map map = dungeon.LevelMaps[level];
+    
+    var floors = map.ClearFloors(dungeon.ID, level, gs.ObjDb);
+
+    if (floors.Count == 0)
+    {
+      gs.UIRef().AlertPlayer("A spell fizzles!", gs, start);
+    }
+    else
+    {
+      Loc loc = floors[gs.Rng.Next(floors.Count)];
+      victim.ClearAnchors(gs);
+      BreakGrapple(victim, gs);
+      gs.ActorEntersLevel(victim, loc.DungeonID, loc.Level);
+      gs.ResolveActorMove(victim, victim.Loc, loc);
+      string name = MsgFactory.CalcName(victim, gs.Player, Article.Def).Capitalize();
+      gs.UIRef().AlertPlayer($"{name} {Grammar.Conjugate(victim, "is")} banished!", gs, start);
+    }    
+  }
+
   public static void HandleTipsy(Actor imbiber, GameState gs)
   {
     TipsyTrait? tipsy = null;

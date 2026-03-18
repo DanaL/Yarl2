@@ -136,7 +136,8 @@ class DebugCommand(GameState gs)
     {"emergency door", ItemNames.EMERGENCY_DOOR },
     {"knockback arrow", ItemNames.KNOCKBACK_ARROW },
     {"snowburst arrow", ItemNames.SNOWBURST_ARROW },
-    {"fireburst arrow", ItemNames.FIREBURST_ARROW }
+    {"fireburst arrow", ItemNames.FIREBURST_ARROW },
+    {"arrow of banishment", ItemNames.ARROW_BANISHMENT }
   };
 
   public string DoCommand(string txt)

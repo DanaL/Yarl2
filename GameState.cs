@@ -589,18 +589,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     }
   }
 
-  void BreakGrapple(Actor actor)
-  {
-    GrappledTrait? grappled = actor.Traits.OfType<GrappledTrait>().FirstOrDefault();
-    grappled?.Remove(this);
-    GrapplingTrait? grappling = actor.Traits.OfType<GrapplingTrait>().FirstOrDefault();
-    if (grappling is not null && ObjDb.GetObj(grappling.VictimId) is Actor victim)
-    {
-      grappled = victim.Traits.OfType<GrappledTrait>().FirstOrDefault();
-      grappled?.Remove(this);
-    }
-  }
-
   public void FallIntoWater(Actor actor, Loc loc)
   {
     List<string> messages = [];
@@ -613,7 +601,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     HashSet<Loc> shores = [];
 
     // if the actor falls into water, break any grapple they are under
-    BreakGrapple(actor);
+    Effects.BreakGrapple(actor, this);
 
     // Build set of potential places for the actor to wash ashore
     while (q.Count > 0)
@@ -734,7 +722,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       return;
 
     // if the actor falls into a chasm, break any grapple they are participating in
-    BreakGrapple(actor);
+    Effects.BreakGrapple(actor, this);
     
     landingSpot = CalcFinalLandingSpot(landingSpot);
     int levelsFallen = Math.Abs(landingSpot.Level - actor.Loc.Level);

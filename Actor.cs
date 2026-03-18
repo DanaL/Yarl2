@@ -186,7 +186,7 @@ abstract class Actor : GameObj, IZLevel
         Traits.Remove(t);
       }
       else if (t is GrappledTrait grappled)
-      {
+      {        
         Traits.Remove(t);
       }
     }

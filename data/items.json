@@ -1534,5 +1534,19 @@
       "Equipable",
       "CanApply"
     ]
+  },
+  {
+    "Name": "ARROW_BANISHMENT",
+    "DescriptiveName": "arrow of banishment",
+    "Type": "Arrow",
+    "Value": 20,
+    "Glyph": "),lightpurple,purple,black,false",
+    "Traits": [
+      "Banishment",
+      "Ammo#4#1#Piercing#7",
+      "Stackable",
+      "Equipable",
+      "CanApply"
+    ]
   }
 ]

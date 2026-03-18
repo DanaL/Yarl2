@@ -150,7 +150,11 @@ class Battle
       else if (trait is KnockBackTrait && attacker is Actor shooter)
       {
         ResolveKnockBack(shooter, target, gs);
-      }      
+      }
+      else if (trait is BanishmentTrait && gs.Rng.NextDouble() > 0.15)
+      {
+        Effects.Banishment(target, gs);
+      }
     }
 
     if (poisoner)

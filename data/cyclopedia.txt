@@ -754,3 +754,6 @@ Novelty arrows used by the sort of ranger who says things like "Cold enough for 
 #
 fireburst arrow
 Leave it to dwarves to invent a magical way to deliver a little explosion at a distance.
+#
+arrow of banishment
+A handy way to deal with a Monster Situation later. A target by this enchanted arrow will be banished (most of the time) to a different level in the same dungeon.

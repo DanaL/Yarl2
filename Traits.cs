@@ -619,6 +619,11 @@ sealed class AxeTrait : Trait
   public override string AsText() => "Axe";
 }
 
+sealed class BanishmentTrait : Trait
+{
+  public override string AsText() => "Banishment";
+}
+
 // Temproary (god, I hope!) trait to designate which Mobs use behaviour trees to
 // determine their behaviour instead of my OG hard-coded AI. Once I've converted
 // everyone to use BTs I can ditch this
@@ -706,12 +711,12 @@ class DoorKeyTrait : Trait
   public override string AsText() => $"DoorKey#{DCMod}";
 }
 
-class FinesseTrait : Trait
+sealed class FinesseTrait : Trait
 {
   public override string AsText() => "Finesse";
 }
 
-class FireBurstTrait : Trait
+sealed class FireBurstTrait : Trait
 {
   public override string AsText() => "FireBurst";
 }
@@ -1593,7 +1598,7 @@ class ImpaleTrait : Trait
   public override string AsText() => "Impale";
 }
 
-class KnockBackTrait : Trait
+sealed class KnockBackTrait : Trait
 {
   public override string AsText() => "KnockBack";
 }
@@ -1696,7 +1701,7 @@ class SlimerTrait() : Trait
   public override string AsText() => $"Slimer#{DC}";
 }
 
-class SnowBurstTrait() : Trait
+sealed class SnowBurstTrait() : Trait
 {
   public override string AsText() => "SnowBurst";
 }
@@ -4414,6 +4419,7 @@ class TraitFactory
     { "AuraMessage", (pieces, gameObj) => new AuraMessageTrait() { ObjId = ulong.Parse(pieces[1]), Radius = int.Parse(pieces[2]), Message = pieces[3] } },
     { "AuraOfProtection", (pieces, gameObj) => new AuraOfProtectionTrait() { HP = int.Parse(pieces[1]) }},
     { "Axe", (pieces, gameObj) => new AxeTrait() },
+    { "Banishment", (pieces, gameObj) => new BanishmentTrait() },
     { "BehaviourTree", (pieces, gameObj) => new BehaviourTreeTrait() { Plan = pieces[1] } },
     {
       "Berzerk", (pieces, gameObj) => pieces.Length == 1 ? new BerzerkTrait() : new BerzerkTrait() { SourceId = ulong.Parse(pieces[1])}
