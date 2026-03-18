@@ -206,7 +206,7 @@
     "Name": "LONGBOW",
     "DescriptiveName": "longbow",
     "Type": "Bow",
-    "Value": 30,
+    "Value": 25,
     "Glyph": "),lightbrown,brown,black,false",
     "Traits": [
       "Damage#1#1#Blunt",
