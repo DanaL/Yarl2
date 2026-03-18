@@ -82,10 +82,18 @@ class TerraformTool : Inputer
       {
         var (mapR, mapC) = GS.UIRef().ScrLocToGameLoc(_popup.CursorRow, _popup.CursorCol, GS.Player.Loc.Row, GS.Player.Loc.Col);
         Loc loc = new (GS.CurrDungeonID, GS.CurrLevel, mapR, mapC);
-        GS.CurrentMap.SetTile(mapR, mapC, TerraformPopup.Tiles[_popup.SelectedTile]);
-        if (!GS.LastPlayerFoV.ContainsKey(loc))
-          GS.CurrentDungeon.RememberedLocs[loc] = new(Util.TileToGlyph(TerraformPopup.Tiles[_popup.SelectedTile]), 0);
-        GS.PrepareFieldOfView();
+        Tile tile = GS.TileAt(loc);
+        if (tile.Type == TileType.WorldBorder || tile.Type == TileType.PermWall)
+        {
+          GS.UIRef().AlertPlayer($"You cannot edit that tile {tile.Type}.");
+        }
+        else
+        {
+          GS.CurrentMap.SetTile(mapR, mapC, TerraformPopup.Tiles[_popup.SelectedTile]);
+          if (!GS.LastPlayerFoV.ContainsKey(loc))
+            GS.CurrentDungeon.RememberedLocs[loc] = new(Util.TileToGlyph(TerraformPopup.Tiles[_popup.SelectedTile]), 0);
+          GS.PrepareFieldOfView();  
+        }
       }
     }
   }
