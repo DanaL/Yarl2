@@ -449,14 +449,12 @@ class Battle
     if (CanPass(first, gs) && CanPass(second, gs))
     {
       gs.ResolveActorMove(target, target.Loc, second);
-      target.Loc = second;
       
       return $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} knocked backward!";
     }
     else if (CanPass(first, gs))
     {
       gs.ResolveActorMove(target, target.Loc, first);
-      target.Loc = first;
       
       return $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} knocked backward!";
     }
