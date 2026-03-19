@@ -512,6 +512,12 @@ class SmithBehaviour : NPCBehaviour
       else if (roll == 11)
         npc.Inventory.Add(ItemFactory.Get(ItemNames.QUARTERSTAFF, gs.ObjDb), npc.ID);
     }
+
+    bool bowInStock = npc.Inventory.Items().Any(i => i.Type == ItemType.Bow);
+    if (!bowInStock && gs.Player.Stats[Attribute.Depth].Curr > 0 && gs.Rng.Next(4) == 0)
+    {
+      npc.Inventory.Add(ItemFactory.Get(ItemNames.SHORTBOW, gs.ObjDb), npc.ID);
+    }
   }
 }
 

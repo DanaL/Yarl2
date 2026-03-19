@@ -209,8 +209,18 @@
     "Value": 25,
     "Glyph": "),lightbrown,brown,black,false",
     "Traits": [
-      "Damage#1#1#Blunt",
       "Ammo#4#1#Piercing#9",
+      "Bow"
+    ]
+  },
+  {
+    "Name": "SHORTBOW",
+    "DescriptiveName": "shortbow",
+    "Type": "Bow",
+    "Value": 15,
+    "Glyph": "),lightbrown,brown,black,false",
+    "Traits": [
+      "Ammo#3#1#Piercing#6",
       "Bow"
     ]
   },

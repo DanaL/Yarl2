@@ -357,7 +357,7 @@ sticky ooze
 Malevolent, cursed mounds of semi-sentient honey. Legend has it these monsters were originally created by a mad Bear Wizard.
 #
 longbow
-Classic tool of the archer's trade. Shoot with the fire (f) command (will auto-select an equiped bow).
+Classic tool of the archer's trade. Shoot with the fire (f) command (will auto-select an equipped bow).
 #
 dagger
 Use it to slice your dinner or stab your foe! Truly a multi-functional piece of adventuring kit.
@@ -760,3 +760,6 @@ A handy way to deal with a Monster Situation later. A target by this enchanted a
 #
 gloves of archery
 Humans, long jealous of elves with their fancy archery skills, had their tailor-warlocks create these gloves that simulate being an elf, without the pointy ears.
+#
+shortbow
+A find option for arhcery, albeit with less range than a longbow. Shoot with the fire (f) command (will auto-select an equipped bow).
