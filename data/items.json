@@ -1554,7 +1554,7 @@
     "DescriptiveName": "gloves of archery",
     "Type": "Armour",
     "Value": 30,
-    "Glyph": "[,lightbeige,lightbrown,black,false",
+    "Glyph": "[,beige,lightbrown,black,false",
     "Traits": [
       "Armour#Gloves#0#0",
       "Plural",
