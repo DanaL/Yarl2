@@ -399,16 +399,17 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
 
       for (int j = 0; j < rng.Next(3, 6); j++)
       {
-        Item item = rng.Next(12) switch
+        List<Item> items = rng.Next(12) switch
         {
-          0 or 1 => Treasure.ItemByQuality(TreasureQuality.Common, objDb, rng),
-          2 or 3 or 4 => Treasure.ItemByQuality(TreasureQuality.Uncommon, objDb, rng),
-          5 or 6 or 7 or 8 or 9 => Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng),
-          _ => Treasure.ItemByQuality(TreasureQuality.Rare, objDb, rng)
+          0 or 1 => Treasure.TreasureByQuality(TreasureQuality.Common, objDb, rng),
+          2 or 3 or 4 => Treasure.TreasureByQuality(TreasureQuality.Uncommon, objDb, rng),
+          5 or 6 or 7 or 8 or 9 => Treasure.TreasureByQuality(TreasureQuality.Good, objDb, rng),
+          _ => Treasure.TreasureByQuality(TreasureQuality.Rare, objDb, rng)
         };
 
         Loc loc = floors[rng.Next(floors.Count)];
-        objDb.SetToLoc(loc, item);
+        foreach (var item in items)
+          objDb.SetToLoc(loc, item);
       }
 
       for (int j = 0; j < rng.Next(2, 5); j++)

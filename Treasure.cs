@@ -14,62 +14,63 @@ namespace Yarl2;
 enum TreasureQuality { Common, Uncommon, Good, Rare }
 
 class Treasure
-{  
-  static readonly List<ItemNames> CommonItems = 
-    [ ItemNames.TORCH, ItemNames.TORCH, ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE,
-      ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE, ItemNames.SCROLL_BLINK,
-      ItemNames.POTION_HEALING, ItemNames.ANTIDOTE, ItemNames.DAGGER, ItemNames.FLASK_OF_BOOZE ];
+{
+  static readonly List<(ItemNames, int)> CommonItems =[ 
+      (ItemNames.TORCH, 1), (ItemNames.TORCH, 2), (ItemNames.ZORKMIDS_PITTANCE, 1), (ItemNames.ZORKMIDS_PITTANCE, 1),
+      (ItemNames.ZORKMIDS_PITTANCE, 1), (ItemNames.ZORKMIDS_PITTANCE, 1), (ItemNames.SCROLL_BLINK, 1),
+      (ItemNames.POTION_HEALING, 1), (ItemNames.ANTIDOTE, 1), (ItemNames.DAGGER, 1), (ItemNames.FLASK_OF_BOOZE, 1) 
+    ];
 
-  static readonly List<ItemNames> UncommonItems = [
-      ItemNames.TORCH, ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE,
-      ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE, ItemNames.POTION_HEALING,
-      ItemNames.POTION_HEALING, ItemNames.ANTIDOTE, ItemNames.ANTIDOTE, ItemNames.DAGGER, ItemNames.POTION_CLARITY,
-      ItemNames.SHORTSHORD, ItemNames.SHIELD, ItemNames.SCROLL_BLINK, ItemNames.SCROLL_BLINK, ItemNames.POTION_DRAGON_BREATH,
-      ItemNames.SCROLL_BLINK, ItemNames.SCROLL_MAGIC_MAP, ItemNames.SCROLL_MAGIC_MAP, ItemNames.HAND_AXE,
-      ItemNames.POTION_COLD_RES, ItemNames.POTION_FIRE_RES, ItemNames.POTION_MIND_READING, ItemNames.WAND_MAGIC_MISSILES,
-      ItemNames.WAND_HEAL_MONSTER, ItemNames.HELMET, ItemNames.SHIELD, ItemNames.ZORKMIDS_MEDIOCRE, ItemNames.SCROLL_KNOCK,
-      ItemNames.SCROLL_KNOCK, ItemNames.LOCK_PICK, ItemNames.VIAL_OF_POISON, ItemNames.SCROLL_PROTECTION,
-      ItemNames.SCROLL_DISARM, ItemNames.BEETLE_CARAPACE, ItemNames.LEATHER_GLOVES, ItemNames.MITHRIL_ORE,
-      ItemNames.SCROLL_TREASURE_DETECTION, ItemNames.SCROLL_TRAP_DETECTION, ItemNames.SKELETON_KEY, ItemNames.PICKAXE,
-      ItemNames.POTION_HEROISM, ItemNames.POTION_DESCENT, ItemNames.SCROLL_STAINLESS,
-      ItemNames.POTION_FORGETFULNESS, ItemNames.EMERGENCY_DOOR, ItemNames.KNOCKBACK_ARROW, ItemNames.LONGBOW,
-      ItemNames.ARROW_BANISHMENT, ItemNames.SPIDER_ARROW
-  ]; 
-
-  static readonly List<ItemNames> GoodItems = [ 
-      ItemNames.ZORKMIDS_MEDIOCRE, ItemNames.ZORKMIDS_GOOD, ItemNames.ZORKMIDS_GOOD,
-      ItemNames.POTION_HEALING, ItemNames.POTION_MIND_READING, ItemNames.POTION_COLD_RES,
-      ItemNames.POTION_FIRE_RES, ItemNames.SCROLL_BLINK, ItemNames.SCROLL_BLINK, ItemNames.SCROLL_MAGIC_MAP,
-      ItemNames.SCROLL_MAGIC_MAP, ItemNames.SCROLL_ESCAPE, ItemNames.GUISARME, ItemNames.LONGSWORD, ItemNames.SHORTSHORD,
-      ItemNames.SHIELD, ItemNames.HELMET, ItemNames.STUDDED_LEATHER_ARMOUR, ItemNames.CHAINMAIL, ItemNames.TALISMAN_OF_CIRCUMSPECTION,
-      ItemNames.SPEAR, ItemNames.WAND_MAGIC_MISSILES, ItemNames.WAND_HEAL_MONSTER, ItemNames.LEATHER_GLOVES,
-      ItemNames.WAND_FROST, ItemNames.WAND_SWAP, ItemNames.RING_OF_PROTECTION, ItemNames.WAND_SLOW_MONSTER,
-      ItemNames.POTION_OF_LEVITATION, ItemNames.SCROLL_KNOCK, ItemNames.LOCK_PICK, ItemNames.WAND_FIREBALLS,
-      ItemNames.VIAL_OF_POISON, ItemNames.SCROLL_PROTECTION, ItemNames.LEMBAS, ItemNames.SCROLL_ENCHANTING,
-      ItemNames.GUIDE_AXES, ItemNames.GUIDE_STABBY, ItemNames.GUIDE_SWORDS, ItemNames.BEETLE_CARAPACE,
-      ItemNames.HILL_GIANT_ESSENCE, ItemNames.FROST_GIANT_ESSENCE, ItemNames.FIRE_GIANT_ESSENCE,
-      ItemNames.SCROLL_DISARM, ItemNames.GUIDE_BOWS, ItemNames.TROLL_BROOCH, ItemNames.SMOULDERING_CHARM,
-      ItemNames.CLOAK_OF_PROTECTION, ItemNames.GAUNTLETS_OF_POWER, ItemNames.SCROLL_TREASURE_DETECTION,
-      ItemNames.SCROLL_TRAP_DETECTION, ItemNames.SCROLL_SCATTERING, ItemNames.POTION_OBSCURITY, ItemNames.POTION_DRAGON_BREATH,
-      ItemNames.FEATHERFALL_BOOTS, ItemNames.WIND_FAN, ItemNames.SKELETON_KEY,
-      ItemNames.TINCTURE_CELERITY, ItemNames.POTION_HEROISM, ItemNames.POTION_DESCENT, ItemNames.SCROLL_STAINLESS,
-      ItemNames.HOLY_WATER, ItemNames.SNEAKERS, ItemNames.MOON_MANTLE, ItemNames.CLAYMORE, ItemNames.KNOCKBACK_ARROW,
-      ItemNames.SNOWBURST_ARROW, ItemNames.FIREBURST_ARROW, ItemNames.LONGBOW, ItemNames.ARROW_BANISHMENT,
-      ItemNames.GLOVES_OF_ARCHERY, ItemNames.SPIDER_ARROW
+  static readonly List<(ItemNames, int)> UncommonItems = [
+      (ItemNames.TORCH, 2), (ItemNames.ZORKMIDS_PITTANCE, 1), (ItemNames.ZORKMIDS_PITTANCE, 1),
+      (ItemNames.ZORKMIDS_PITTANCE, 1), (ItemNames.ZORKMIDS_PITTANCE, 1), (ItemNames.POTION_HEALING, 1),
+      (ItemNames.POTION_HEALING, 1), (ItemNames.ANTIDOTE, 1), (ItemNames.ANTIDOTE, 1), (ItemNames.DAGGER, 1), (ItemNames.POTION_CLARITY, 1),
+      (ItemNames.SHORTSHORD, 1), (ItemNames.SHIELD, 1), (ItemNames.SCROLL_BLINK, 1), (ItemNames.SCROLL_BLINK, 2), (ItemNames.POTION_DRAGON_BREATH, 1),
+      (ItemNames.SCROLL_BLINK, 1), (ItemNames.SCROLL_MAGIC_MAP, 1), (ItemNames.SCROLL_MAGIC_MAP, 1), (ItemNames.HAND_AXE, 1),
+      (ItemNames.POTION_COLD_RES, 1), (ItemNames.POTION_FIRE_RES, 1), (ItemNames.POTION_MIND_READING, 1), (ItemNames.WAND_MAGIC_MISSILES, 1),
+      (ItemNames.WAND_HEAL_MONSTER, 1), (ItemNames.HELMET, 1), (ItemNames.SHIELD, 1), (ItemNames.ZORKMIDS_MEDIOCRE, 1), 
+      (ItemNames.SCROLL_KNOCK, 2), (ItemNames.LOCK_PICK, 1), (ItemNames.VIAL_OF_POISON, 1), (ItemNames.SCROLL_PROTECTION, 1),
+      (ItemNames.SCROLL_DISARM, 1), (ItemNames.BEETLE_CARAPACE, 1), (ItemNames.LEATHER_GLOVES, 1), (ItemNames.MITHRIL_ORE, 1),
+      (ItemNames.SCROLL_TREASURE_DETECTION, 1), (ItemNames.SCROLL_TRAP_DETECTION, 1), (ItemNames.SKELETON_KEY, 1), (ItemNames.PICKAXE, 1),
+      (ItemNames.POTION_HEROISM, 1), (ItemNames.POTION_DESCENT, 1), (ItemNames.SCROLL_STAINLESS, 1),
+      (ItemNames.POTION_FORGETFULNESS, 1), (ItemNames.EMERGENCY_DOOR, 1), (ItemNames.KNOCKBACK_ARROW, 3), (ItemNames.LONGBOW, 1),
+      (ItemNames.ARROW_BANISHMENT, 3), (ItemNames.SPIDER_ARROW, 3)
   ];
 
-  static readonly List<ItemNames> RareItems = [
-      ItemNames.GUISARME, ItemNames.LONGSWORD, ItemNames.SHORTSHORD, ItemNames.SPEAR,
-      ItemNames.SHIELD, ItemNames.HELMET, ItemNames.STUDDED_LEATHER_ARMOUR, ItemNames.CHAINMAIL,
-      ItemNames.LEATHER_GLOVES, ItemNames.CLOAK_OF_PROTECTION, ItemNames.GAUNTLETS_OF_POWER,
-      ItemNames.RING_OF_PROTECTION, ItemNames.WAND_FIREBALLS, ItemNames.SCROLL_ENCHANTING, 
-      ItemNames.HILL_GIANT_ESSENCE, ItemNames.FROST_GIANT_ESSENCE, ItemNames.FIRE_GIANT_ESSENCE, 
-      ItemNames.GUIDE_BOWS, ItemNames.GUIDE_AXES, ItemNames.GUIDE_STABBY, ItemNames.GUIDE_SWORDS,
-      ItemNames.CRIMSON_KING_WARD, ItemNames.CROESUS_CHARM, ItemNames.CUTPURSE_CREST,
-      ItemNames.GASTON_BADGE, ItemNames.LESSER_BURLY_CHARM, ItemNames.LESSER_GRACE_CHARM, 
-      ItemNames.LESSER_HEALTH_CHARM, ItemNames.SMOULDERING_CHARM, ItemNames.TALISMAN_OF_CIRCUMSPECTION, 
-      ItemNames.TROLL_BROOCH, ItemNames.RUNE_OF_LASHING, ItemNames.FEARFUL_RUNE, ItemNames.RUNE_OF_PARRYING, 
-      ItemNames.MOON_MANTLE, ItemNames.MOON_LYRE
+  static readonly List<(ItemNames, int)> GoodItems = [
+      (ItemNames.ZORKMIDS_MEDIOCRE, 1), (ItemNames.ZORKMIDS_GOOD, 1), (ItemNames.ZORKMIDS_GOOD, 1),
+      (ItemNames.POTION_HEALING, 1), (ItemNames.POTION_MIND_READING, 1), (ItemNames.POTION_COLD_RES, 1),
+      (ItemNames.POTION_FIRE_RES, 1), (ItemNames.SCROLL_BLINK, 2), (ItemNames.SCROLL_BLINK, 1), (ItemNames.SCROLL_MAGIC_MAP, 1),
+      (ItemNames.SCROLL_MAGIC_MAP, 1), (ItemNames.SCROLL_ESCAPE, 1), (ItemNames.GUISARME, 1), (ItemNames.LONGSWORD, 1), (ItemNames.SHORTSHORD, 1),
+      (ItemNames.SHIELD, 1), (ItemNames.HELMET, 1), (ItemNames.STUDDED_LEATHER_ARMOUR, 1), (ItemNames.CHAINMAIL, 1), (ItemNames.TALISMAN_OF_CIRCUMSPECTION, 1),
+      (ItemNames.SPEAR, 1), (ItemNames.WAND_MAGIC_MISSILES, 1), (ItemNames.WAND_HEAL_MONSTER, 1), (ItemNames.LEATHER_GLOVES, 1),
+      (ItemNames.WAND_FROST, 1), (ItemNames.WAND_SWAP, 1), (ItemNames.RING_OF_PROTECTION, 1), (ItemNames.WAND_SLOW_MONSTER, 1),
+      (ItemNames.POTION_OF_LEVITATION, 1), (ItemNames.SCROLL_KNOCK, 2), (ItemNames.LOCK_PICK, 1), (ItemNames.WAND_FIREBALLS, 1),
+      (ItemNames.VIAL_OF_POISON, 1), (ItemNames.SCROLL_PROTECTION, 1), (ItemNames.LEMBAS, 1), (ItemNames.SCROLL_ENCHANTING, 1),
+      (ItemNames.GUIDE_AXES, 1), (ItemNames.GUIDE_STABBY, 1), (ItemNames.GUIDE_SWORDS, 1), (ItemNames.BEETLE_CARAPACE, 1),
+      (ItemNames.HILL_GIANT_ESSENCE, 1), (ItemNames.FROST_GIANT_ESSENCE, 1), (ItemNames.FIRE_GIANT_ESSENCE, 1),
+      (ItemNames.SCROLL_DISARM, 2), (ItemNames.GUIDE_BOWS, 1), (ItemNames.TROLL_BROOCH, 1), (ItemNames.SMOULDERING_CHARM, 1),
+      (ItemNames.CLOAK_OF_PROTECTION, 1), (ItemNames.GAUNTLETS_OF_POWER, 1), (ItemNames.SCROLL_TREASURE_DETECTION, 1),
+      (ItemNames.SCROLL_TRAP_DETECTION, 1), (ItemNames.SCROLL_SCATTERING, 2), (ItemNames.POTION_OBSCURITY, 1), (ItemNames.POTION_DRAGON_BREATH, 2),
+      (ItemNames.FEATHERFALL_BOOTS, 1), (ItemNames.WIND_FAN, 1), (ItemNames.SKELETON_KEY, 1),
+      (ItemNames.TINCTURE_CELERITY, 1), (ItemNames.POTION_HEROISM, 1), (ItemNames.POTION_DESCENT, 1), (ItemNames.SCROLL_STAINLESS, 1),
+      (ItemNames.HOLY_WATER, 1), (ItemNames.SNEAKERS, 1), (ItemNames.MOON_MANTLE, 1), (ItemNames.CLAYMORE, 1), (ItemNames.KNOCKBACK_ARROW, 3),
+      (ItemNames.SNOWBURST_ARROW, 3), (ItemNames.FIREBURST_ARROW,3), (ItemNames.LONGBOW, 1), (ItemNames.ARROW_BANISHMENT, 3),
+      (ItemNames.GLOVES_OF_ARCHERY, 1), (ItemNames.SPIDER_ARROW, 3)
+  ];
+
+  static readonly List<(ItemNames, int)> RareItems = [
+      (ItemNames.GUISARME, 1), (ItemNames.LONGSWORD, 1), (ItemNames.SHORTSHORD, 1), (ItemNames.SHIELD, 1), (ItemNames.HELMET, 1), 
+      (ItemNames.STUDDED_LEATHER_ARMOUR, 1), (ItemNames.CHAINMAIL, 1),
+      (ItemNames.LEATHER_GLOVES, 1), (ItemNames.CLOAK_OF_PROTECTION, 1), (ItemNames.GAUNTLETS_OF_POWER, 1),
+      (ItemNames.RING_OF_PROTECTION, 1), (ItemNames.WAND_FIREBALLS, 1), (ItemNames.SCROLL_ENCHANTING, 1),
+      (ItemNames.HILL_GIANT_ESSENCE, 1), (ItemNames.FROST_GIANT_ESSENCE, 1), (ItemNames.FIRE_GIANT_ESSENCE, 1),
+      (ItemNames.GUIDE_BOWS, 1), (ItemNames.GUIDE_AXES, 1), (ItemNames.GUIDE_STABBY, 1), (ItemNames.GUIDE_SWORDS, 1),
+      (ItemNames.CRIMSON_KING_WARD, 1), (ItemNames.CROESUS_CHARM, 1), (ItemNames.CUTPURSE_CREST, 1),
+      (ItemNames.GASTON_BADGE, 1), (ItemNames.LESSER_BURLY_CHARM, 1), (ItemNames.LESSER_GRACE_CHARM, 1),
+      (ItemNames.LESSER_HEALTH_CHARM, 1), (ItemNames.SMOULDERING_CHARM, 1), (ItemNames.TALISMAN_OF_CIRCUMSPECTION, 1),
+      (ItemNames.TROLL_BROOCH, 1), (ItemNames.RUNE_OF_LASHING, 1), (ItemNames.FEARFUL_RUNE, 1), (ItemNames.RUNE_OF_PARRYING, 1),
+      (ItemNames.MOON_MANTLE, 1), (ItemNames.MOON_LYRE, 1)
   ];
 
   public static readonly List<ItemNames> Consumables = [
@@ -153,7 +154,7 @@ class Treasure
 
     for (int j = 0; j < numOfItems; j++)
     {
-      var name = CommonItems[rng.Next(CommonItems.Count)];
+      var (name, _) = CommonItems[rng.Next(CommonItems.Count)];
       loot.Add(GenerateItem(name, objDb, rng));
     }
     
@@ -188,37 +189,42 @@ class Treasure
     objDb.SetToLoc(loc, item);
   }
 
-  public static Item ItemByQuality(TreasureQuality quality, GameObjectDB objDb, Rng rng)
+  public static List<Item> TreasureByQuality(TreasureQuality quality, GameObjectDB objDb, Rng rng)
   {
-    var name = quality switch
+    var (name, maxCount) = quality switch
     {
       TreasureQuality.Uncommon => UncommonItems[rng.Next(UncommonItems.Count)],
       TreasureQuality.Good => GoodItems[rng.Next(GoodItems.Count)],
       TreasureQuality.Rare => RareItems[rng.Next(RareItems.Count)],
       _ => CommonItems[rng.Next(CommonItems.Count)],
     };
-    
-    Item item = GenerateItem(name, objDb, rng);
 
-    if (quality == TreasureQuality.Rare)
+    int count = maxCount > 1 ? rng.Next(maxCount ) + 1 : 1;
+    List<Item> items = [];
+    for (int i = 0; i < count; i++)
     {
-      switch (item.Type)
+      Item item = GenerateItem(name, objDb, rng);
+      if (quality == TreasureQuality.Rare)
       {
-        case ItemType.Weapon:
-        case ItemType.Bow:
-          int bonus = rng.Next(5) == 0 ? 2 : 1;
-          item.Traits.Add(new WeaponBonusTrait() { Bonus = bonus, SourceId = item.ID });
-          break;
-        case ItemType.Armour:
-          if (item.Traits.OfType<ArmourTrait>().FirstOrDefault() is ArmourTrait at)
-          {
-            at.Bonus += rng.Next(5) == 0 ? 2 : 1;
-          }
-          break;
+        switch (item.Type)
+        {
+          case ItemType.Weapon:
+          case ItemType.Bow:
+            int bonus = rng.Next(5) == 0 ? 2 : 1;
+            item.Traits.Add(new WeaponBonusTrait() { Bonus = bonus, SourceId = item.ID });
+            break;
+          case ItemType.Armour:
+            if (item.Traits.OfType<ArmourTrait>().FirstOrDefault() is ArmourTrait at)
+            {
+              at.Bonus += rng.Next(5) == 0 ? 2 : 1;
+            }
+            break;
+        }
       }
+      items.Add(item);
     }
 
-    return GenerateItem(name, objDb, rng);
+    return items;
   }
 
   public static Item MinorGift(GameObjectDB objDb, Rng rng) => rng.Next(10) switch

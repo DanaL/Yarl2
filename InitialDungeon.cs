@@ -369,10 +369,10 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     objDb.SetToLoc(statueLoc, statue);
 
     room.Remove((statueR, statueC));
-    Item item = Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng);
     var (itemR, itemC) = room[rng.Next(room.Count)];
     Loc itemLoc = new(dungeonId, level, itemR, itemC);
-    objDb.SetToLoc(itemLoc, item);
+    foreach (var item in Treasure.TreasureByQuality(TreasureQuality.Good, objDb, rng))
+      objDb.SetToLoc(itemLoc, item);
 
     Actor sword = MonsterFactory.Get("dancing sword", objDb, rng);
     sword.Traits.Add(new RegenerationTrait() { Rate = 1, ExpiresOn = ulong.MaxValue, OwnerID = sword.ID, SourceId = sword.ID });
@@ -548,8 +548,9 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       int numItems = rng.Next(1, 4);
       for (int j = 0; j < numItems; j++)
       {
-        PlaceItem(Treasure.ItemByQuality(TreasureQuality.Common, objDb, rng));        
-      }      
+        foreach (var item in Treasure.TreasureByQuality(TreasureQuality.Common, objDb, rng))
+          PlaceItem(item);
+      }
     }
     else if (levelNum == 1)
     {
@@ -558,10 +559,12 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       {
         double roll = rng.NextDouble();
         TreasureQuality quality = roll <= 0.9 ? TreasureQuality.Common : TreasureQuality.Uncommon;
-        PlaceItem(Treasure.ItemByQuality(quality, objDb, rng));
+        foreach (var item in Treasure.TreasureByQuality(quality, objDb, rng))
+          PlaceItem(item);
       }
 
-      PlaceItem(Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng));
+      foreach (var item in Treasure.TreasureByQuality(TreasureQuality.Good, objDb, rng))
+        PlaceItem(item);
 
       zorkmidPiles = 2;
     }
@@ -578,7 +581,8 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
           quality = TreasureQuality.Uncommon;
         else
           quality = TreasureQuality.Good;
-        PlaceItem(Treasure.ItemByQuality(quality, objDb, rng));
+        foreach (var item in Treasure.TreasureByQuality(quality, objDb, rng))
+          PlaceItem(item);
       }
     }
     else
@@ -594,7 +598,8 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
           quality = TreasureQuality.Uncommon;
         else
           quality = TreasureQuality.Good;
-        PlaceItem(Treasure.ItemByQuality(quality, objDb, rng));
+        foreach (var item in Treasure.TreasureByQuality(quality, objDb, rng))
+          PlaceItem(item);
       }
     }
     
@@ -896,12 +901,13 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     int numItems = rng.Next(3, 6);
     while (numItems > 0)
     {
-      Item item = Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng);
-      if (item.Type == ItemType.Zorkmid)
-        continue;
-      flinFlon.Inventory.Add(item, flinFlon.ID);
-
-      --numItems;
+      foreach (var item in Treasure.TreasureByQuality(TreasureQuality.Good, objDb, rng))
+      {
+        if (numItems <= 0) break;
+        if (item.Type == ItemType.Zorkmid) continue;
+        flinFlon.Inventory.Add(item, flinFlon.ID);
+        --numItems;
+      }
     }
 
     List<Loc> floors = levels[level].ClearFloors(dungeonId, level, objDb);

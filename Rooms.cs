@@ -272,8 +272,8 @@ class Vaults
       int i = rng.Next(locs.Count);
       Loc loc = locs[i];
       locs.RemoveAt(i);
-      Item item = Treasure.ItemByQuality(quality, objDb, rng);
-      objDb.SetToLoc(loc, item);
+      foreach (var item in Treasure.TreasureByQuality(quality, objDb, rng))
+        objDb.SetToLoc(loc, item);
     }
 
     NameGenerator ng = new(rng, Util.NamesFile);
@@ -611,7 +611,7 @@ class Rooms
     map.SetTile(trapSq.Item1, trapSq.Item2, trap);
     objDb.LocListeners.Add(triggerLoc);
 
-    Item bait = Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng);
+    Item bait = Treasure.TreasureByQuality(TreasureQuality.Good, objDb, rng).First();
     objDb.SetToLoc(triggerLoc, bait);
     if (bait.Type != ItemType.Zorkmid)
     {
@@ -674,9 +674,9 @@ class Rooms
     for (int j = 0; j < int.Min(candidates.Count, rng.Next(1, 4)); j++)
     {
       map.SetTile(candidates[j], TileFactory.Get(TileType.DungeonFloor));
-      Item item = Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng);
       Loc loc = new(dungeonId, level, candidates[j].Item1, candidates[j].Item2);
-      objDb.SetToLoc(loc, item);
+      foreach (var item in Treasure.TreasureByQuality(TreasureQuality.Good, objDb, rng))
+        objDb.SetToLoc(loc, item);
     }
   }
   
@@ -735,8 +735,8 @@ class Rooms
     (int, int) treasureSq = info.IslandSqs[rng.Next(info.IslandSqs.Count)];
     Loc treasureLoc = new(dungeonID, level, treasureSq.Item1, treasureSq.Item2);
     TreasureQuality quality = level < 2 ? TreasureQuality.Uncommon : TreasureQuality.Good;
-    Item treasure = Treasure.ItemByQuality(quality, objDb, rng);
-    objDb.SetToLoc(treasureLoc, treasure);
+    foreach (var treasure in Treasure.TreasureByQuality(quality, objDb, rng))
+      objDb.SetToLoc(treasureLoc, treasure);
 
     if (rng.Next(5) == 0)
     {
@@ -766,8 +766,8 @@ class Rooms
       (int, int) treasureSq = info.IslandSqs[rng.Next(info.IslandSqs.Count)];
       Loc treasureLoc = new(dungeonID, level, treasureSq.Item1, treasureSq.Item2);
       TreasureQuality quality = rng.NextDouble() < 05 ? TreasureQuality.Uncommon : TreasureQuality.Good;
-      Item treasure = Treasure.ItemByQuality(quality, objDb, rng);
-      objDb.SetToLoc(treasureLoc, treasure);
+      foreach (var treasure in Treasure.TreasureByQuality(quality, objDb, rng))
+        objDb.SetToLoc(treasureLoc, treasure);
     }
   }
 
@@ -914,9 +914,9 @@ class Rooms
         _ => TreasureQuality.Good
       };
 
-      Item item = Treasure.ItemByQuality(quality, objDb, rng);
       Loc itemSq = spotsNearFire[rng.Next(spotsNearFire.Count)];
-      objDb.SetToLoc(itemSq, item);
+      foreach (var item in Treasure.TreasureByQuality(quality, objDb, rng))
+        objDb.SetToLoc(itemSq, item);
     }
 
     Actor boss;
@@ -1063,7 +1063,8 @@ class Rooms
         if (rng.NextDouble() < 0.6)
           objDb.AddNewActor(MonsterFactory.Mimic(true, rng), new(dungeonId, level, nearby[1].Item1, nearby[1].Item2));
         else
-          objDb.SetToLoc(new(dungeonId, level, nearby[1].Item1, nearby[1].Item2), Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng));
+          foreach (var item in Treasure.TreasureByQuality(TreasureQuality.Good, objDb, rng))
+            objDb.SetToLoc(new(dungeonId, level, nearby[1].Item1, nearby[1].Item2), item);
       }
     }
     

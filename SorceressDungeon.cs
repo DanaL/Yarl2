@@ -300,11 +300,13 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
     for (int j = 0; j < 4; j++)
     {
       var quality = rng.Next(4) > 0 ? TreasureQuality.Good : TreasureQuality.Uncommon;
-      Item item = Treasure.ItemByQuality(quality, objDb, rng);
       var sq = floorsInChambers[rng.Next(floorsInChambers.Count)];
       Loc loc = new(dungeonId, 0, sq.Item1, sq.Item2);
-      objDb.Add(item);
-      objDb.SetToLoc(loc, item);
+      foreach (var item in Treasure.TreasureByQuality(quality, objDb, rng))
+      {
+        objDb.Add(item);
+        objDb.SetToLoc(loc, item);
+      }
     }
 
     for (int j = 0; j < 3; j++)
@@ -449,7 +451,8 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
         quality = TreasureQuality.Uncommon;
       else
         quality = TreasureQuality.Good;
-      PlaceItem(Treasure.ItemByQuality(quality, objDb, rng));
+      foreach (var item in Treasure.TreasureByQuality(quality, objDb, rng))
+        PlaceItem(item);
     }
 
     for (int j = 0; j < rng.Next(1, 4); j++)
@@ -467,7 +470,8 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
     
     if (levelNum == 4 && rng.Next(3) == 0)
     {
-      PlaceItem(Treasure.ItemByQuality(TreasureQuality.Rare, objDb, rng));
+      foreach (var item in Treasure.TreasureByQuality(TreasureQuality.Rare, objDb, rng))
+        PlaceItem(item);
     }
 
     void PlaceItem(Item item)

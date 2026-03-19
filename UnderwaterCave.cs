@@ -283,9 +283,9 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
       for (int j = 0; j < numOfItems; j++)
       {
         TreasureQuality quality = rng.Next(5) == 0 ? TreasureQuality.Rare : TreasureQuality.Good;
-        Item item = Treasure.ItemByQuality(quality, objDb, rng);
         Loc loc = floors[j];
-        objDb.SetToLoc(loc, item);
+        foreach (var item in Treasure.TreasureByQuality(quality, objDb, rng))
+          objDb.SetToLoc(loc, item);
       }
     }
   }
@@ -357,11 +357,13 @@ class LostTempleBuilder(int dungeonId) : DungeonBuilder
     for (int j = 0; j < numOfTreasures; j++)
     {
       var quality = rng.Next(5) > 0 ? TreasureQuality.Good : TreasureQuality.Uncommon;
-      Item item = Treasure.ItemByQuality(quality, objDb, rng);
       var sq = templeFloors[rng.Next(templeFloors.Count)];
       Loc loc = new(DungeonId, 0, sq.Item1, sq.Item2);
-      objDb.Add(item);
-      objDb.SetToLoc(loc, item);
+      foreach (var item in Treasure.TreasureByQuality(quality, objDb, rng))
+      {
+        objDb.Add(item);
+        objDb.SetToLoc(loc, item);
+      }
     }
 
     AddStatue();

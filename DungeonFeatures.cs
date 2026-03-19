@@ -766,13 +766,14 @@ class TunnelCarver
     int numTreasure = rng.Next(2, 6);
     for (int j = 0; j < numTreasure; j++)
     {
-      Item treasure = rng.Next(3) switch
+      List<Item> treasures = rng.Next(3) switch
       {
-        0 => Treasure.ItemByQuality(TreasureQuality.Common, objDb, rng),  
-        1 => Treasure.ItemByQuality(TreasureQuality.Uncommon, objDb, rng),
-        _ => Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng)
-      };      
-      objDb.SetToLoc(loc, treasure);
+        0 => Treasure.TreasureByQuality(TreasureQuality.Common, objDb, rng),
+        1 => Treasure.TreasureByQuality(TreasureQuality.Uncommon, objDb, rng),
+        _ => Treasure.TreasureByQuality(TreasureQuality.Good, objDb, rng)
+      };
+      foreach (var treasure in treasures)
+        objDb.SetToLoc(loc, treasure);
     }
 
     // Maybe a skull (or eventually other remains?)

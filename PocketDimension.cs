@@ -168,14 +168,15 @@ class PocketDimension
     List<Loc> floors = [.. map.SqsOfType(TileType.BellyFloor).Select(sq => new Loc(dungeonId, 0, sq.Item1, sq.Item2))];
     for (int i = 0; i < gs.Rng.Next(1, 4); i++)
     {
-      Item item = gs.Rng.Next(3) switch
+      List<Item> items = gs.Rng.Next(3) switch
       {
-        0 => Treasure.GoodMagicItem(gs.Rng, gs.ObjDb),
-        1 => Treasure.ItemByQuality(TreasureQuality.Good, gs.ObjDb, gs.Rng),
-        _ => Treasure.ItemByQuality(TreasureQuality.Uncommon, gs.ObjDb, gs.Rng)
+        0 => [Treasure.GoodMagicItem(gs.Rng, gs.ObjDb)],
+        1 => Treasure.TreasureByQuality(TreasureQuality.Good, gs.ObjDb, gs.Rng),
+        _ => Treasure.TreasureByQuality(TreasureQuality.Uncommon, gs.ObjDb, gs.Rng)
       };
       Loc loc = floors[gs.Rng.Next(floors.Count)];
-      gs.ItemDropped(item, loc);
+      foreach (var item in items)
+        gs.ItemDropped(item, loc);
     }
 
     return (new Loc(dungeonId, 0, 2, 1), belly);
