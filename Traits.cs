@@ -824,7 +824,7 @@ class LungeTrait: Trait
 
 class MageArmourTrait : TemporaryTrait
 {
-  protected override string ExpiryMsg => $"You feel less protected.";
+  protected override string ExpiryMsg => "You feel less protected.";
   public override string AsText() => $"MageArmour#{ExpiresOn}#{OwnerID}";
 
   public override List<string> Apply(GameObj target, GameState gs)
@@ -3193,15 +3193,13 @@ class StatBuffTrait : TemporaryTrait
         return $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "look")} {adj}!";
     }
     else if (Attr == Attribute.HP && player)
-    {
       return Amt >= 0 ? "You feel more robust!" : "You feel frail!";
-    }
     else if (Attr == Attribute.Dexterity && player)
-    {
       return Amt >= 0 ? "You feel more agile!" : "You feel klutzy!";
-    }
     else if (Attr == Attribute.Constitution && player)
       return Amt >= 0 ? "You feel healthier!" : "You feel frail!";
+    else if (Attr == Attribute.ArcheryBonus)
+      return "You feel like a steadier shot.";
 
     return player ? "You feel different!" : "";
   }
@@ -3296,6 +3294,8 @@ class StatBuffTrait : TemporaryTrait
         return "Some of your vitality returns.";
       else if (Attr == Attribute.HP && Amt >= 0)
         return "You feel less sturdy.";
+      else if (Attr == Attribute.ArcheryBonus)
+        return "You no longer feel like the archest of archers.";
       else
         return $"Your {Attr} returns to normal.";
     }

@@ -757,3 +757,6 @@ Leave it to dwarves to invent a magical way to deliver a little explosion at a d
 #
 arrow of banishment
 A handy way to deal with a Monster Situation later. A target by this enchanted arrow will be banished (most of the time) to a different level in the same dungeon.
+#
+gloves of archery
+Humans, long jealous of elves with their fancy archery skills, had their tailor-warlocks create these gloves that simulate being an elf, without the pointy ears.

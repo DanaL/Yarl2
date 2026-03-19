@@ -84,7 +84,7 @@
     "DescriptiveName": "pickaxe",
     "Type": "Tool",
     "Value": 15,
-    "Glyph": "),grey,darkgrey,black,false",
+    "Glyph": "(,grey,darkgrey,black,false",
     "Traits": [
       "Damage#6#1#Piercing",
       "Axe",
@@ -1265,7 +1265,7 @@
     "DescriptiveName": "wind fan",
     "Type": "Tool",
     "Value": 25,
-    "Glyph": "),lightblue,blue,black,false",
+    "Glyph": "(,lightblue,blue,black,false",
     "Traits": [
       "Consumable",
       "Cast#GustOfWind"
@@ -1341,7 +1341,7 @@
     "DescriptiveName": "bomb",
     "Type": "Tool",
     "Value": 10,
-    "Glyph": "),darkgrey,darkgrey,black,false",
+    "Glyph": "(,darkgrey,darkgrey,black,false",
     "Traits": [
       "Explosive#1#6#3",
       "Stackable"
@@ -1547,6 +1547,18 @@
       "Stackable",
       "Equipable",
       "CanApply"
+    ]
+  },
+  {
+    "Name": "GLOVES_OF_ARCHERY",
+    "DescriptiveName": "gloves of archery",
+    "Type": "Armour",
+    "Value": 30,
+    "Glyph": "[,lightbeige,lightbrown,black,false",
+    "Traits": [
+      "Armour#Gloves#0#0",
+      "Plural",
+      "Grants#StatBuff&0&max&ArcheryBonus&2&item"
     ]
   }
 ]

@@ -54,7 +54,8 @@ class Treasure
       ItemNames.FEATHERFALL_BOOTS, ItemNames.WIND_FAN, ItemNames.SKELETON_KEY,
       ItemNames.TINCTURE_CELERITY, ItemNames.POTION_HEROISM, ItemNames.POTION_DESCENT, ItemNames.SCROLL_STAINLESS,
       ItemNames.HOLY_WATER, ItemNames.SNEAKERS, ItemNames.MOON_MANTLE, ItemNames.CLAYMORE, ItemNames.KNOCKBACK_ARROW,
-      ItemNames.SNOWBURST_ARROW, ItemNames.FIREBURST_ARROW, ItemNames.LONGBOW, ItemNames.ARROW_BANISHMENT
+      ItemNames.SNOWBURST_ARROW, ItemNames.FIREBURST_ARROW, ItemNames.LONGBOW, ItemNames.ARROW_BANISHMENT,
+      ItemNames.GLOVES_OF_ARCHERY
   ];
 
   static readonly List<ItemNames> RareItems = [
@@ -111,7 +112,7 @@ class Treasure
 
   public static Item GoodMagicItem(Rng rng, GameObjectDB objDb)
   {
-    int roll = rng.Next(28);
+    int roll = rng.Next(29);
     return roll switch
     {
       0 => ItemFactory.Get(ItemNames.WAND_FIREBALLS, objDb),
@@ -141,6 +142,7 @@ class Treasure
       25 => ItemFactory.Get(ItemNames.CRIMSON_KING_WARD, objDb),
       26 => ItemFactory.Get(ItemNames.SNEAKERS, objDb),
       27 => ItemFactory.Get(ItemNames.MOON_MANTLE, objDb),
+      28 => ItemFactory.Get(ItemNames.GLOVES_OF_ARCHERY, objDb),
       _ => ItemFactory.Get(ItemNames.SILVER_LONGSWORD, objDb),
     };
   }
