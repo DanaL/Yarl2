@@ -273,10 +273,9 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     else if (AttackingWithLunge(gs.Player))
     {
       Loc adj = gs.Player.Loc.Move(dr, dc);
-      Tile adjTile = gs.TileAt(adj);
       Loc adj2 = gs.Player.Loc.Move(dr * 2, dc * 2);
 
-      bool validTarget = !gs.ObjDb.Occupied(adj) && gs.ObjDb.Occupant(adj2) is Actor occ && Util.PlayerAwareOfActor(occ, gs);
+      bool validTarget = !gs.ObjDb.Occupied(adj) && gs.ObjDb.Occupant(adj2) is Actor occ && Util.PlayerAwareOfActor(occ, gs) && Battle.PlayerWillAttack(occ);
       bool canMove = MoveAction.CanMoveTo(gs.Player, gs.CurrentMap, adj, false);
       bool stuck = MoveAction.StuckOnLoc(gs.Player, gs.Player.Loc, gs, gs.UIRef());
       if (validTarget && canMove && !stuck)
