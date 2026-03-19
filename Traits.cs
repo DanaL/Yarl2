@@ -3172,6 +3172,11 @@ class WearAndTearTrait : Trait
   public override string AsText() => $"WearAndTear#{Wear}";
 }
 
+sealed class WebBurstTrait : Trait
+{
+  public override string AsText() => "WebBurst";
+}
+
 class StatBuffTrait : TemporaryTrait
 {
   public Attribute Attr { get; set; }
@@ -4854,6 +4859,7 @@ class TraitFactory
     { "Weaken", (pieces, gameObj) =>  new WeakenTrait() { DC = int.Parse(pieces[1]), Amt = int.Parse(pieces[2]) } },
     { "WeaponBonus", (pieces, gameObj) => new WeaponBonusTrait() { Bonus = int.Parse(pieces[1]) } },
     { "WeaponSpeed", (pieces, gameObj) => new WeaponSpeedTrait() { Cost = Util.ToDouble(pieces[1]) } },
+    { "WebBurst", (pieces, gameObj) => new WebBurstTrait() },
     { "WearAndTear", (pieces, gameObj) => new WearAndTearTrait() { Wear = int.Parse(pieces[1])} },
     { "WinterBlessing", (pieces, gameObj) => new WinterBlessingTrait() { SourceId = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
     { "WoodChopper", (pieces, gameObj) => new WoodChopperTrait() },

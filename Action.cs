@@ -314,6 +314,12 @@ class ArrowShotAction(GameState gs, Actor actor, Item? bow, Item ammo, int attac
         {
           Effects.FireBurst(pts.Last(), GameState);
         }
+        else if (t is WebBurstTrait)
+        {
+          Loc target = pts.Last();
+          GameState.UIRef().AlertPlayer("The arrow bursts in a clump of sticky webs!", GameState, target);
+          Effects.WebBurst(target, GameState);
+        }
       }
     }
    
@@ -2913,25 +2919,7 @@ class WebAction(GameState gs, Loc target) : Action(gs)
 
   public override double Execute()
   {
-    Item w = ItemFactory.Web();
-    GameState!.ObjDb.Add(w);
-    GameState.ItemDropped(w, Target);
-
-    foreach (Loc adj in Util.Adj8Locs(Target))
-    {
-      if (GameState.TileAt(adj).Passable() && GameState.Rng.NextDouble() < 0.666)
-      {
-        w = ItemFactory.Web();
-        GameState.ObjDb.Add(w);
-        GameState.ItemDropped(w, Target with { Row = adj.Row, Col = adj.Col });
-      }
-    }
-
-    if (GameState.ObjDb.Occupant(Target) is Actor victim)
-    {
-      string txt = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught up in webs!";
-      GameState!.UIRef().AlertPlayer(txt, GameState, Target);
-    }
+    Effects.WebBurst(Target, GameState);
 
     return 1.0;
   }

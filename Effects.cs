@@ -523,6 +523,29 @@ class Effects
     }  
   }
 
+  public static void WebBurst(Loc centre, GameState gs)
+  {
+    Item w = ItemFactory.Web();
+    gs.ObjDb.Add(w);
+    gs.ItemDropped(w, centre);
+
+    foreach (Loc adj in Util.Adj8Locs(centre))
+    {
+      if (gs.TileAt(adj).Passable() && gs.Rng.NextDouble() < 0.666)
+      {
+        w = ItemFactory.Web();
+        gs.ObjDb.Add(w);
+        gs.ItemDropped(w, centre with { Row = adj.Row, Col = adj.Col });
+      }
+    }
+
+    if (gs.ObjDb.Occupant(centre) is Actor victim)
+    {
+      string txt = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught up in webs!";
+      gs.UIRef().AlertPlayer(txt, gs, centre);
+    }
+  }
+
   public static void BreakGrapple(Actor actor, GameState gs)
   {
     GrappledTrait? grappled = actor.Traits.OfType<GrappledTrait>().FirstOrDefault();

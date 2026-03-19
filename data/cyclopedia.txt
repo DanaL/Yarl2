@@ -763,3 +763,6 @@ Humans, long jealous of elves with their fancy archery skills, had their tailor-
 #
 shortbow
 A find option for arhcery, albeit with less range than a longbow. Shoot with the fire (f) command (will auto-select an equipped bow).
+#
+spider arrow
+Invented by spider archers. A spider can hold a lot of bows at once... 

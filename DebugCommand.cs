@@ -139,7 +139,8 @@ class DebugCommand(GameState gs)
     {"fireburst arrow", ItemNames.FIREBURST_ARROW },
     {"arrow of banishment", ItemNames.ARROW_BANISHMENT },
     {"gloves of archery", ItemNames.GLOVES_OF_ARCHERY },
-    {"shortbow", ItemNames.SHORTBOW }
+    {"shortbow", ItemNames.SHORTBOW },
+    {"spider arrow", ItemNames.SPIDER_ARROW },
   };
 
   public string DoCommand(string txt)
