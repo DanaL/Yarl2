@@ -212,14 +212,6 @@ class AuraOfProtectionTrait : TemporaryTrait
   public override string AsText() => $"AuraOfProtection#{HP}";
 }
 
-abstract class BlessingTrait : Trait
-{
-  public ulong OwnerID {  get; set; }
-
-  public abstract string Description(Actor owner);
-  public abstract void Apply(GameObj granter, GameState gs);
-}
-
 // For items that can be used by the Apply command but don't need to
 // implement IUseable
 class CanApplyTrait : Trait
@@ -272,91 +264,6 @@ class CelerityTrait : TemporaryTrait
       Remove(gs);
       victim.Recovery -= 0.5;
     }
-  }
-}
-
-class DragonCultBlessingTrait : BlessingTrait
-{
-  const int MP_COST = 3;
-
-  public override string Description(Actor owner) => "Dragon cult blessing";
-
-  public override void Apply(GameObj _, GameState gs)
-  {
-    OwnerID = gs.Player.ID;
-
-    ACModTrait ac = new() { ArmourMod = 3, SourceId = Constants.DRAGON_GOD_ID };
-    gs.Player.Traits.Add(ac);
-
-    if (!gs.Player.SpellsKnown.Contains("breathe fire"))
-      gs.Player.SpellsKnown.Add("breathe fire");
-
-    if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var mp))
-    {
-      mp.ChangeMax(MP_COST);
-      mp.Change(MP_COST);
-    }
-    else
-    {
-      gs.Player.Stats[Attribute.MagicPoints] = new Stat(MP_COST);
-    }
-
-    GoldSnifferTrait sniffer = new() { SourceId = Constants.DRAGON_GOD_ID };
-    sniffer.Apply(gs.Player, gs);
-    gs.Player.Traits.Add(sniffer);
-
-    gs.Player.Traits.Add(this);
-  }
-
-  public override string AsText() => $"DragonCultBlessing#{OwnerID}";
-}
-
-class ChampionBlessingTrait : BlessingTrait
-{  
-  public override void Apply(GameObj granter, GameState gs)
-  {
-    ACModTrait ac = new() { ArmourMod = 1, SourceId = granter.ID };
-    gs.Player.Traits.Add(ac);
-
-    StatBuffTrait sbt = new() { Attr = Attribute.HP, Amt = 5, ExpiresOn = ulong.MaxValue, SourceId = granter.ID, MaxHP = true };
-    sbt.Apply(gs.Player, gs);
-
-    AttackModTrait amt = new() { Amt = 1, SourceId = granter.ID };
-    gs.Player.Traits.Add(amt);
-    
-    gs.Player.Traits.Add(this);
-  }
-
-  public override string AsText() => $"ChampionBlessing#{SourceId}#{OwnerID}";
-
-  public override string Description(Actor owner)
-  {
-    string s = $"You have the [iceblue Champion Blessing]. It grants";
-
-    StatBuffTrait? sbt = owner.Traits.OfType<StatBuffTrait>()
-                              .FirstOrDefault(t => t.SourceId == SourceId);
-
-    ACModTrait? acMod = owner.Traits.OfType<ACModTrait>()
-                              .FirstOrDefault(t => t.SourceId == SourceId);
-    if (acMod is not null)
-    {
-      s += $" a [lightblue +{acMod.ArmourMod}] AC bonus";
-    }
-
-    AttackModTrait? am = owner.Traits.OfType<AttackModTrait>()
-                              .FirstOrDefault(t => t.SourceId == SourceId);
-    if (am is not null)
-    {
-      s += sbt is null ? " and " : ", ";
-      s += $"a [lightblue +{am.Amt}] attack bonus";
-    }
-
-    if (sbt is not null)
-    {
-      s += $", and [lightblue +{sbt.Amt}] bonus HP";
-    }
-
-    return s;
   }
 }
 
@@ -923,41 +830,6 @@ sealed class EndGameTriggerTrait : TemporaryTrait
 class EquipableTrait : Trait
 {
   public override string AsText() => "Equipable";
-}
-
-class EmberBlessingTrait : BlessingTrait
-{
-  public override void Apply(GameObj granter, GameState gs)
-  {
-    ResistanceTrait resist = new()
-    {
-      SourceId = granter.ID,
-      OwnerID = gs.Player.ID,
-      ExpiresOn = ulong.MaxValue,
-      Type = DamageType.Fire
-    };
-    // I'm not calling the Apply() method here because I don't want a separate listener
-    // registered for the ResistanceTrait. This trait will be removed when 
-    // EmberBlessingTrait is removed.
-    gs.Player.Traits.Add(resist);
-
-    DamageTrait dt = new()
-    {
-      SourceId = granter.ID,
-      DamageType = DamageType.Fire,
-      DamageDie = 6,
-      NumOfDie = 1
-    };
-    gs.Player.Traits.Add(dt);
-
-    FireRebukeTrait rebuke = new() { SourceId = granter.ID };
-    gs.Player.Traits.Add(rebuke);
-
-    gs.Player.Traits.Add(this);
-  }
-
-  public override string AsText() => $"EmberBlessing#{SourceId}#{OwnerID}";
-  public override string Description(Actor owner) => "Ember blessing";
 }
 
 class PrisonerTrait : TemporaryTrait
@@ -2888,25 +2760,6 @@ class OwnedTrait : Trait
   public override string AsText() => $"Owned#{string.Join(',', OwnerIDs)}";
 }
 
-class PaladinBlessingTrait : BlessingTrait
-{  
-  public override void Apply(GameObj granter, GameState gs)
-  { 
-    gs.Player.Traits.Add(this);
-    DamageTrait dt = new() { SourceId = granter.ID, DamageType = DamageType.Holy, DamageDie = 6, NumOfDie = 1 };
-    gs.Player.Traits.Add(dt);
-  }
-
-  public override string Description(Actor owner)
-  {    
-    DamageTrait dt = owner.Traits.OfType<DamageTrait>()
-                          .First(t => t.SourceId == SourceId);
-    return $" You deal {dt.NumOfDie}d{dt.DamageDie} extra [lightblue holy damage] from your [iceblue Paladin Blessing]";
-  }
-
-  public override string AsText() => $"PaladinBlessing#{SourceId}#{OwnerID}";
-}
-
 class ParalyzedTrait : TemporaryTrait
 {
   public int DC { get; set; }
@@ -3465,44 +3318,6 @@ class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
     Action action = new CloseMenuAction(gs, 1.0);
     
     return new UseResult(action);
-  }
-}
-
-class ReaverBlessingTrait : BlessingTrait
-{
-  public override void Apply(GameObj granter, GameState gs)
-  {
-    MeleeDamageModTrait dmg = new() { Amt = 2, SourceId = granter.ID };
-    gs.Player.Traits.Add(dmg);
-
-    FrighteningTrait fright = new() { DC = 13, SourceId = granter.ID };
-    gs.Player.Traits.Add(fright);
-
-    gs.Player.Traits.Add(this);
-  }
-
-  public override string AsText() => $"ReaverBlessing#{SourceId}#{OwnerID}";
-
-  public override string Description(Actor owner)
-  {
-    string s = "You have the [iceblue Reaver Blessing]. It grants";
-
-    MeleeDamageModTrait? dmg = owner.Traits.OfType<MeleeDamageModTrait>()
-                                           .Where(t => t.SourceId == SourceId)
-                                           .FirstOrDefault();
-    if (dmg is not null)
-    {
-      s += $" a [lightblue +{dmg.Amt}] bonus to melee damage";
-    }
-
-    if (owner.Traits.OfType<FrighteningTrait>().Where(t => t.SourceId == SourceId).Any())
-    {
-      s += " and your attacks may [brightred frighten] your foes";
-    }
-
-    s += ".";
-
-    return s;
   }
 }
 
@@ -4240,33 +4055,6 @@ class TransformedTrait : TemporaryTrait
   }
 }
 
-class TricksterBlessingTrait : BlessingTrait
-{
-  public override void Apply(GameObj granter, GameState gs)
-  {
-    QuietTrait quiet = new() { SourceId = granter.ID };
-    gs.Player.Traits.Add(quiet);
-
-    if (!gs.Player.SpellsKnown.Contains("phase door"))
-      gs.Player.SpellsKnown.Add("phase door");
-
-    if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var mp))
-    {
-      mp.ChangeMax(2);
-      mp.Change(2);
-    }
-    else
-    {
-      gs.Player.Stats[Attribute.MagicPoints] = new Stat(2);
-    }
-
-    gs.Player.Traits.Add(this);
-  }
-
-  public override string AsText() => $"TricksterBlessing#{SourceId}#{OwnerID}";
-  public override string Description(Actor owner) => "Trickster blessing";
-}
-
 sealed class UndeadTrait : Trait
 {
   public override string AsText() => $"Undead";
@@ -4321,40 +4109,6 @@ class WeaponBonusTrait : Trait
 {
   public int Bonus {  get; set; }
   public override string AsText() => $"WeaponBonus#{Bonus}";
-}
-
-class WinterBlessingTrait : BlessingTrait
-{
-  public override void Apply(GameObj granter, GameState gs)
-  {
-    ResistanceTrait resist = new()
-    {
-      SourceId = granter.ID,
-      OwnerID = gs.Player.ID,
-      Type = DamageType.Cold
-    };
-    gs.Player.Traits.Add(resist);
-
-    if (!gs.Player.SpellsKnown.Contains("cone of cold"))
-      gs.Player.SpellsKnown.Add("cone of cold");
-    if (!gs.Player.SpellsKnown.Contains("gust of wind"))
-      gs.Player.SpellsKnown.Add("gust of wind");
-
-    if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var mp))
-    {
-      mp.ChangeMax(2);
-      mp.Change(2);
-    }
-    else
-    {
-      gs.Player.Stats[Attribute.MagicPoints] = new Stat(2);
-    }
-
-    gs.Player.Traits.Add(this);
-  }
-
-  public override string AsText() => $"WinterBlessing#{SourceId}#{OwnerID}";
-  public override string Description(Actor owner) => "You have been granted the [iceblue fury] of [iceblue Winter]";
 }
 
 class WoodChopperTrait : Trait
