@@ -769,3 +769,6 @@ Imagine how many bows a spider-archer could wield at once...
 #
 lamp
 A giant beacon on a bronze pedestal that shines a beam of light. It appears the lamp can be rotated.
+#
+dart
+Another dungeon trap classic!
