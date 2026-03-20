@@ -125,7 +125,8 @@ abstract class Tile(TileType type) : IZLevel
     TileType.WaterTrap => true,
     TileType.RevealedSummonsTrap => true,
     TileType.RevealedBridgeCollapseTrap => true,
-    TileType.MagicMouth => true,    
+    TileType.MagicMouth => true,
+    TileType.JetTrigger => true,
     _ => false
   };
 
