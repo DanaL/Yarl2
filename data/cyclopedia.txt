@@ -765,4 +765,7 @@ shortbow
 A find option for arhcery, albeit with less range than a longbow. Shoot with the fire (f) command (will auto-select an equipped bow).
 #
 spider arrow
-Imagine how many bows a spider-archer could wield at once... 
+Imagine how many bows a spider-archer could wield at once...
+#
+lamp
+A giant beacon on a bronze pedestal that shines a beam of light. It appears the lamp can be rotated.

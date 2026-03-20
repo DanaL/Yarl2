@@ -4729,7 +4729,18 @@ class HighlightLocAction(GameState gs, Actor actor, HighlightLocAnimation anim) 
         if (actor.Traits.OfType<DescriptionTrait>().FirstOrDefault() is DescriptionTrait dt)
           desc = dt.Text;
 
-        Stat hp = actor.Stats[Attribute.HP];
+        // if it's an illusory duplicate, we want to display the HP of its 
+        // source so as to not give away the game
+        Stat hp;
+        if (actor.Traits.OfType<IllusionTrait>().FirstOrDefault() is IllusionTrait illusion)
+        {
+          hp = ((Actor) GameState.ObjDb.GetObj(illusion.SourceId)!).Stats[Attribute.HP];
+        }
+        else
+        {
+          hp = actor.Stats[Attribute.HP];
+        }
+        
         hpCurr = hp.Curr;
         hpMax = hp.Max;
       }
