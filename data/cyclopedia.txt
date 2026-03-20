@@ -772,3 +772,6 @@ A giant beacon on a bronze pedestal that shines a beam of light. It appears the 
 #
 dart
 Another dungeon trap classic!
+#
+mirror
+A large, polished reflective surface made of silver. It looks as though you can tilt it to control the angle of its face.
