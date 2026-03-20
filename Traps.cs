@@ -176,7 +176,7 @@ class Traps
         RevealTrap(tile, gs, loc);
       }
 
-      s = actor.Inventory.ApplyEffectToInv(DamageType.Wet, gs, loc);      
+      s = actor.Inventory.ApplyEffectToInv(DamageType.Wet, gs, loc);
       if (gs.LastPlayerFoV.ContainsKey(actor.Loc))
         gs.UIRef().AlertPlayer(s);
     }
@@ -405,11 +405,12 @@ class Traps
         if (gs.LastPlayerFoV.ContainsKey(loc))
           gs.UIRef().AlertPlayer($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!");
 
-        var (hpLeft, _, _) = victim.ReceiveDmg(dmg, 0, gs, null, 1.0);
-        if (hpLeft < 1)
-        {
+        var (hpLeft, msg, _) = victim.ReceiveDmg(dmg, 0, gs, null, 1.0);
+        if (msg != "")
+        
+          gs.UIRef().AlertPlayer(msg, gs, victim.Loc);        
+        if (hpLeft < 1)        
           gs.ActorKilled(victim, "flames", null);
-        }
       }
     }
   }
