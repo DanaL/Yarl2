@@ -989,13 +989,10 @@ class DialogueInterpreter
         return 0;
       case "MAIN_QUEST_STATUS":
         return gs.MainQuestState;
-      case "BLESSED":
-        foreach (Trait t in gs.Player.Traits)
-        {
-          if (t is BlessingTrait)
-            return true;
-        }
-        return false;
+      case "RELIGION":
+        return gs.Player.Religion;
+      case "FAITH":
+        return gs.Player.Faith;
       default:
         throw new Exception($"Unknown variable {name}");
     }    

@@ -54,6 +54,38 @@ sealed class Player : Actor
 
   public bool Running { get; set; } = false;
 
+  public string Religion
+  {
+    get
+    {
+      foreach (Trait t in Traits)
+      {
+        if (t is ChampionBlessingTrait || t is PaladinBlessingTrait || t is WinterBlessingTrait)
+          return "Huntokar";
+      }
+
+      return "Agnostic";
+    }
+  }
+
+  public int Faith
+  {
+    get
+    {
+      int faith = 0;
+      foreach (Trait t in Traits)
+      {
+        if (t is ChampionBlessingTrait && faith < 1)
+          faith = 1;
+        else if (t is PaladinBlessingTrait && faith < 2)
+          faith = 2;
+        else if (t is WinterBlessingTrait && faith < 2)
+          faith = 2;
+      }
+
+      return faith;
+    }
+  }
   public override int AC
   {
     get
