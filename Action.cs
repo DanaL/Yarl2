@@ -3863,6 +3863,9 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
       case EquipingResult.TwoHandedConflict:
         GameState.UIRef().AlertPlayer("You cannot wear a shield with a two-handed weapon!");
         break;
+      case EquipingResult.BowConflict:
+        GameState.UIRef().AlertPlayer("You cannot wear a shield while you have a bow equipped!");
+        break;
       case EquipingResult.ShieldConflict:
         GameState.UIRef().AlertPlayer("You cannot use a two-handed weapon with a shield!");
         break;

@@ -963,7 +963,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
   public (EquipingResult, ArmourParts) ToggleEquipStatus(char slot)
   {
     bool twoHandedWeapon = ReadiedWeapon() is Item w && w.HasTrait<TwoHandedTrait>();
-    bool bowEquiped = ReadiedBow() is not null;
+    bool bowEquipped = ReadiedBow() is not null;
 
     // I suppose at some point I'll have items that can't be equipped
     // (or like it doesn't make sense for them to be) and I'll have
@@ -1060,9 +1060,11 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         if (part is ArmourParts.Shield && freeHands == 0)
           return (EquipingResult.NoFreeHand, part);
 
-        if (part is ArmourParts.Shield && (twoHandedWeapon || bowEquiped))
+        if (part is ArmourParts.Shield && twoHandedWeapon)
           return (EquipingResult.TwoHandedConflict, part);
-
+        else if (part is ArmourParts.Shield && bowEquipped)
+          return (EquipingResult.BowConflict, part);
+          
         item.Equipped = !item.Equipped;
 
         return (EquipingResult.Equipped, ArmourParts.Shirt);
@@ -1386,6 +1388,7 @@ enum EquipingResult
   Conflict,
   ShieldConflict,
   TwoHandedConflict,
+  BowConflict,
   TooManyRings,
   TooManyTalismans,
   NoFreeHand,
