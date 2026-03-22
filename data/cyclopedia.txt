@@ -775,3 +775,6 @@ Another dungeon trap classic!
 #
 mirror
 A large, polished reflective surface made of silver. It looks as though you can tilt it to control the angle of its face.
+#
+fog
+Thick mist that obscures your vision.
