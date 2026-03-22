@@ -342,7 +342,7 @@ class Battle
       bonusDamage += gs.Rng.Next(8) + gs.Rng.Next(8) + gs.Rng.Next(8) + 3;
     }
 
-    var (hpLeft, dmgMsg, dmgDone) = target.ReceiveDmg(dmg, bonusDamage, gs, weapon, dmgScale);    
+    var (hpLeft, dmgMsg, dmgDone) = target.ReceiveDmg(dmg, bonusDamage, gs, attacker, dmgScale);    
     if (dmgMsg != "")
       gs.UIRef().AlertPlayer(dmgMsg);
     

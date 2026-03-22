@@ -335,12 +335,21 @@ abstract class Actor : GameObj, IZLevel
       dt.Disguised = false;
     }
 
-    if (HasTrait<SilverAllergyTrait>() && src is Item weapon && weapon.MetalType() == Metals.Silver)
+    if (HasTrait<SilverAllergyTrait>())
     {
-      total += gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7);
-      msg += $" {weapon.FullName.DefArticle().Capitalize()} sears {FullName}!";
-    }
+      bool silver = false;
+      if (src is Item item && item.MetalType() == Metals.Silver)
+        silver = true;
+      else if (src is Actor att && att.Inventory.ReadiedWeapon() is Item weapon && weapon.MetalType() == Metals.Silver)
+        silver = true;
 
+      if (silver)
+      {
+        total += gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7);
+        msg += $" {src!.FullName.DefArticle().Capitalize()} sears {FullName}!";
+      }
+    }
+    
     if (total > 0 && fireDamage)
     {
       string s = Inventory.ApplyEffectToInv(DamageType.Fire, gs, Loc);
@@ -383,7 +392,7 @@ abstract class Actor : GameObj, IZLevel
       }
     }
 
-    if (Traits.OfType<CrimsonWard>().FirstOrDefault() is CrimsonWard cw && currHP.Curr < currHP.Max)
+    if (src is Actor attacker && Traits.OfType<CrimsonWard>().FirstOrDefault() is CrimsonWard cw && currHP.Curr < currHP.Max)
     {
       bool s = false;
       foreach (Loc adj in Util.Adj8Locs(Loc))
