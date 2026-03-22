@@ -182,6 +182,9 @@ class Examiner : Inputer
     while (otherPq.Count > 0)
       _targets.Add(otherPq.Dequeue());
     _targets.Add(GS.Player.Loc);
+
+    if (_targets.Count > 0)
+      _currTarget = _targets.Count - 1;
   }
 
   public override void Input(char ch)
