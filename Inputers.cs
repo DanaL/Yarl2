@@ -264,12 +264,9 @@ class Aimer : Inputer
           if (occ.Traits.OfType<DisguiseTrait>().FirstOrDefault() is DisguiseTrait disguise && disguise.Disguised)
             continue;
 
-          // Bit of a hackey way to determine if something is visible, but this will cover monsters
-          // seen via mind reading and such
-          if (occ.Glyph.Ch == ui.SqsOnScreen[r, c].Ch)
+          if (occ.VisibleTo(GS.Player) && GS.LastPlayerFoV.ContainsKey(loc))
           {
             _monsters.Add(loc);
-
             if (occ.ID == GS.LastTarget)
             {
               _targeted = _monsters.Count - 1;
