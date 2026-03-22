@@ -83,17 +83,19 @@ class Examiner : Inputer
     var ui = GS.UIRef();
     int startRow = GS.Player.Loc.Row - ui.PlayerScreenRow;
     int startCol = GS.Player.Loc.Col - ui.PlayerScreenCol;
-    var pq = new PriorityQueue<Loc, int>();
+    var actorPq = new PriorityQueue<Loc, int>();
+    var itemPq = new PriorityQueue<Loc, int>();
+    var otherPq = new PriorityQueue<Loc, int>();
 
     for (int r = 0; r < UserInterface.ViewHeight; r++)
     {
       for (int c = 0; c < UserInterface.ViewWidth; c++)
       {
-        Loc loc = new(start.DungeonID, start.Level, startRow + r, startCol + c);        
+        Loc loc = new(start.DungeonID, start.Level, startRow + r, startCol + c);
         int distance = Distance(GS.Player.Loc, loc);
-        Actor? occupant = GS.ObjDb.Occupant(loc);
-          
-        if (occupant is not null && PlayerAwareOfActor(occupant, GS))
+        Actor? occ = GS.ObjDb.Occupant(loc);
+
+        if (occ is not null && occ is not Player && PlayerAwareOfActor(occ, GS))
         {
           if (loc == GS.Player.Loc)
           {
@@ -103,30 +105,30 @@ class Examiner : Inputer
             distance = int.MaxValue;
           }
 
-          pq.Enqueue(loc, distance);
+          actorPq.Enqueue(loc, distance);
         }
-        else if (occupant is not null && occupant.IsDisguised())
+        else if (occ is not null && occ.IsDisguised())
         {
-          string form = occupant.Traits.OfType<DisguiseTrait>()
+          string form = occ.Traits.OfType<DisguiseTrait>()
                                        .First().DisguiseForm;
           if (CyclopediaEntryExists(form))
-            pq.Enqueue(loc, distance);
+            itemPq.Enqueue(loc, distance);
         }
-        if (!GS.CurrentDungeon.RememberedLocs.TryGetValue(loc, out var mem)) 
+        if (!GS.CurrentDungeon.RememberedLocs.TryGetValue(loc, out var mem))
         {
           continue;
         }
         else if (mem.ObjId != 0 && GS.ObjDb.ItemsAt(loc).Any(p => p.Type == ItemType.Landscape))
         {
-          pq.Enqueue(loc, distance);
+          itemPq.Enqueue(loc, distance);
         }
         else if (mem.ObjId != 0 && GS.ObjDb.VisibleItemsAt(loc).Count > 0)
         {
-          pq.Enqueue(loc, distance);
+          itemPq.Enqueue(loc, distance);
         }
         else if (mem.ObjId != 0 && GS.ObjDb.EnvironmentsAt(loc).Count > 0)
         {
-          pq.Enqueue(loc, distance);
+          otherPq.Enqueue(loc, distance);
         }
         else
         {
@@ -136,15 +138,15 @@ class Examiner : Inputer
           {
             case TileType.FireJetTrap:
               if (((FireJetTrap)tile).Seen)
-                pq.Enqueue(loc, distance);
+                otherPq.Enqueue(loc, distance);
               break;
             case TileType.JetTrigger:
               if (((JetTrigger) tile).Visible)
-                  pq.Enqueue(loc, distance);
+                  otherPq.Enqueue(loc, distance);
               break;
             case TileType.GateTrigger:
               if (((GateTrigger)tile).Found)
-                pq.Enqueue(loc, distance);
+                otherPq.Enqueue(loc, distance);
               break;
             case TileType.Upstairs:
             case TileType.Downstairs:
@@ -163,20 +165,23 @@ class Examiner : Inputer
             case TileType.BridgeTrigger:
             case TileType.Lever:
             case TileType.BridgeLever:
-            case TileType.RevealedSummonsTrap:            
+            case TileType.RevealedSummonsTrap:
             case TileType.MistyPortal:
             case TileType.MysteriousMirror:
-              pq.Enqueue(loc, distance);
+              otherPq.Enqueue(loc, distance);
               break;
           }
         }
       }
     }
 
-    while (pq.Count > 0)
-    {
-      _targets.Add(pq.Dequeue());
-    }
+    while (actorPq.Count > 0)
+      _targets.Add(actorPq.Dequeue());
+    while (itemPq.Count > 0)
+      _targets.Add(itemPq.Dequeue());
+    while (otherPq.Count > 0)
+      _targets.Add(otherPq.Dequeue());
+    _targets.Add(GS.Player.Loc);
   }
 
   public override void Input(char ch)
