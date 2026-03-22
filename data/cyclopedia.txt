@@ -778,3 +778,6 @@ A large, polished reflective surface made of silver. It looks as though you can 
 #
 fog
 Thick mist that obscures your vision.
+#
+silver arrow
+When adventurers accumulate a few zorkmids, they often look around for ways to spend their loot and fletchers try to accommodate them with fancier, heavily marked up arrows.

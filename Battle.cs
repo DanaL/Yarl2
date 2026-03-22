@@ -935,7 +935,7 @@ class Battle
   }
 
   // attackBonus is because at this point I don't know what weapon shot the ammunition so pass
-  // bonsuses related to that here
+  // bonuses related to that here
   public static bool MissileAttack(Actor attacker, Actor target, GameState gs, Item ammo, int attackBonus, Animation? anim)
   {
     bool success = false;

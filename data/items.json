@@ -1584,5 +1584,19 @@
       "Equipable",
       "CanApply"
     ]
+  },
+  {
+    "Name": "SILVER_ARROW",
+    "DescriptiveName": "silver arrow",
+    "Type": "Arrow",
+    "Value": 10,
+    "Glyph": "),white,lightgrey,black,false",
+    "Traits": [
+      "Ammo#6#1#Piercing#8",
+      "Stackable",
+      "Equipable",
+      "CanApply",
+      "Metal#5"
+    ]
   }
 ]
