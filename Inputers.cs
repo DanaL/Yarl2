@@ -1096,6 +1096,7 @@ class Dialoguer : Inputer
   void EndConversation(string text)
   {
     Close();
+    GS.UIRef().SetPopup(new Popup(text, "", -1, -1));
     GS.UIRef().AlertPlayer(text);
     QueueDeferredAction();    
   }
