@@ -6,7 +6,7 @@
     )
 
     (
-      (and (<= FAITH 1) (> PLAYER_DEPTH 0))
+      (and (<= FAITH 1) (> PLAYER_DEPTH 0) (= DIALOGUE_STATE 0))
 
       (
         (def lines '("You've been into the darkness. Embracing the shadows might be your best way forward."
@@ -16,6 +16,17 @@
 
         (option "Tell me more." ( (set DIALOGUE_STATE 1) (end "Seek the Standing Stones at night.")))
         (option "No thanks." (end "Fare thee well."))
+      )
+    )
+
+    (
+      (and (<= FAITH 1) (= DIALOGUE_STATE 1))
+
+      (
+        (def lines '("Seek the priestess for guidance."
+                    "If you truly wish to embrace the moonlit path, seek out our teacher."
+                    "The dark needn't be your enemy."
+        ))
       )
     )
 
