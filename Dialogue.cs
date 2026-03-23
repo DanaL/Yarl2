@@ -1089,7 +1089,7 @@ class DialogueInterpreter
 
     if (Expr is ScriptBooleanExpr bExpr)
     {
-      return EvallBooleanExpr(bExpr, mob, gs);
+      return EvalBooleanExpr(bExpr, mob, gs);
     }
     else if (Expr is ScriptCond condExpr)
     {
@@ -1280,7 +1280,7 @@ class DialogueInterpreter
     throw new ConversationEnded(msg);
   }
 
-  static ScriptBool EvallBooleanExpr(ScriptBooleanExpr expr, Actor mob, GameState gs)
+  static ScriptBool EvalBooleanExpr(ScriptBooleanExpr expr, Actor mob, GameState gs)
   {
     object val = CheckVal(expr.Identifier, mob, gs);
 
