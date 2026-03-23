@@ -368,10 +368,10 @@ class Village
     return peddler;
   }
 
-  static Mob GenerateVillager1(Map map, Town town, NameGenerator ng, Rng rng)
+  static Mob GenerateVillager1(Map map, Town town, string dialogueScript, NameGenerator ng, Rng rng)
   {
     Mob villager = BaseVillager(ng, rng);
-    villager.Traits.Add(new DialogueScriptTrait() { ScriptFile = "villager1.txt" });
+    villager.Traits.Add(new DialogueScriptTrait() { ScriptFile = dialogueScript });
     villager.Traits.Add(new BehaviourTreeTrait() { Plan = "BasicVillagerPlan" });
 
     int homeID = PickUnoccuppiedCottage(town, rng);
@@ -601,8 +601,11 @@ class Village
     Mob mayor = GenerateMayor(map, town, ng, rng);
     objDb.AddNewActor(mayor, mayor.Loc);
 
-    Mob v1 = GenerateVillager1(map, town, ng, rng);
+    Mob v1 = GenerateVillager1(map, town, "villager1.txt", ng, rng);
     objDb.AddNewActor(v1, v1.Loc);
+
+    Mob v2 = GenerateVillager1(map, town, "moonie.txt", ng, rng);
+    objDb.AddNewActor(v2, v2.Loc);
 
     Mob vet = GenerateVeteran(map, town, ng, objDb, rng, barflyColours);
     objDb.AddNewActor(vet, vet.Loc);

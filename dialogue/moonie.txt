@@ -1,0 +1,30 @@
+(
+  (cond
+    (
+      (= RELIGION "Moon Daughter")
+      (def lines '("MD is rad, huh?"))
+    )
+
+    (
+      (and (<= FAITH 1) (> PLAYER_DEPTH 0))
+
+      (
+        (def lines '("You've been into the darkness. Embracing the shadows might be your best way forward."
+                    "Wasn't the moon lovely last night?"
+                    "There is a path you could take, guided by moonlight."
+        ))
+
+        (option "Tell me more." ( (set DIALOGUE_STATE 1) (end "Seek the Standing Stones at night.")))
+        (option "No thanks." (end "Fare thee well."))
+      )
+    )
+
+    (
+      else (
+        (def lines '("#TOWN_NAME is a lovely hamlet, no?"))
+      )
+    )
+  )
+  
+  (say (pick lines))
+)
