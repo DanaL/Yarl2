@@ -1833,53 +1833,6 @@ class Planner
     return plan;
   }
 
-  static BehaviourNode CreateWorshipperPlan(Mob mob, GameState gs)
-  {
-    WorshiperTrait worshipTrait = mob.Traits.OfType<WorshiperTrait>().First();
-
-    Loc altarLoc = worshipTrait.AltarLoc;
-    HashSet<Loc> nearbyTiles = [];
-    for (int r = altarLoc.Row - 3; r <= altarLoc.Row + 3; r++)
-    {
-      for (int c = altarLoc.Col - 3; c <= altarLoc.Col + 3; c++)
-      {
-        Loc loc = altarLoc with { Row = r, Col = c };
-        if (gs.TileAt(loc).Passable())
-          nearbyTiles.Add(loc);
-      }
-    }
-
-    string name = MsgFactory.CalcName(mob, gs.Player).Capitalize();
-    string s = $"{name} gets angry!";
-
-    Sequence worshipCondition = new([
-      new Not(new CheckMonsterAttitude(Mob.AGGRESSIVE)),
-      new ThingExists(worshipTrait.AltarId)
-    ]);
-
-    Selector worshipBehaviour = new([
-      new RepeatWhile(
-        worshipCondition,
-        new WanderInArea(nearbyTiles)
-      ),
-      new SetMonsterAttitude(Mob.AGGRESSIVE, s)
-    ]);
-
-    Selector plan = CreateMonsterPlan(mob);
-
-    int i = 0;
-    for (; i < plan.Children.Count; i++)
-    {
-      if (plan.Children[i].Label == "indifferent")
-        break;
-    }
-
-    plan.Children.RemoveAt(i);
-    plan.Children.Insert(i, worshipBehaviour);
-
-    return plan;
-  }
-
   static Selector CreateMimicPlan(Mob mimic)
   {    
     List<BehaviourNode> actions = [];
@@ -2219,8 +2172,7 @@ class Planner
       new Sequence([new CheckDialogueState(1), new DiceRoll(250), new MoveLevel()]),
       new RandomMove(), new PassTurn()]),
     "BasicIllusionPlan" => new Selector([new ChaseTarget(), new RandomMove()]),
-    "Greedy" => CreateGreedyMonster(mob, gs),
-    "Worshipper" => CreateWorshipperPlan(mob, gs),
+    "Greedy" => CreateGreedyMonster(mob, gs),    
     "BasicWander" => BasicWander(mob, gs),
     _ => throw new Exception($"Unknown Behaviour Tree plan: {plan}")
   };

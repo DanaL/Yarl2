@@ -4116,15 +4116,6 @@ class WoodChopperTrait : Trait
   public override string AsText() => "WoodChopper";
 }
 
-class WorshiperTrait : Trait
-{
-  public Loc AltarLoc { get; set; }
-  public ulong AltarId { get; set; }
-  public string Chant { get; set; } = "";
-
-  public override string AsText() => $"Worshiper#{AltarLoc}#{AltarId}#{Chant}";
-}
-
 class TraitFactory
 {
   static readonly Dictionary<string, Func<string[], GameObj?, Trait>> traitFactories = new()
@@ -4616,8 +4607,7 @@ class TraitFactory
     { "WebBurst", (pieces, gameObj) => new WebBurstTrait() },
     { "WearAndTear", (pieces, gameObj) => new WearAndTearTrait() { Wear = int.Parse(pieces[1])} },
     { "WinterBlessing", (pieces, gameObj) => new WinterBlessingTrait() { SourceId = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
-    { "WoodChopper", (pieces, gameObj) => new WoodChopperTrait() },
-    { "Worshiper", (pieces, gameObj) => new WorshiperTrait() { AltarLoc = Loc.FromStr(pieces[1]), AltarId = ulong.Parse(pieces[2]), Chant = pieces[3] } }
+    { "WoodChopper", (pieces, gameObj) => new WoodChopperTrait() }
   };
 
   public static Trait FromText(string text, GameObj? container)

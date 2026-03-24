@@ -771,120 +771,120 @@ class Rooms
     }
   }
 
-  public static void KoboldWorshipRoom(Map map, List<(int, int)> room, int dungeonID, int level, FactDb factDb, GameObjectDB objDb, Rng rng)
-  {
-    Loc loc;
-    List<Loc> floors = [];
-    foreach (var (r, c) in room)
-    {
-      loc = new(dungeonID, level, r, c);
-      if (!objDb.Occupied(loc) && !objDb.HazardsAtLoc(loc) && !objDb.AreBlockersAtLoc(loc))
-      {
-        floors.Add(loc);
-      }
-    }
+  // public static void KoboldWorshipRoom(Map map, List<(int, int)> room, int dungeonID, int level, FactDb factDb, GameObjectDB objDb, Rng rng)
+  // {
+  //   Loc loc;
+  //   List<Loc> floors = [];
+  //   foreach (var (r, c) in room)
+  //   {
+  //     loc = new(dungeonID, level, r, c);
+  //     if (!objDb.Occupied(loc) && !objDb.HazardsAtLoc(loc) && !objDb.AreBlockersAtLoc(loc))
+  //     {
+  //       floors.Add(loc);
+  //     }
+  //   }
 
-    int i = rng.Next(floors.Count);
-    Loc effigyLoc = floors[i];
-    floors.RemoveAt(i);
+  //   int i = rng.Next(floors.Count);
+  //   Loc effigyLoc = floors[i];
+  //   floors.RemoveAt(i);
 
-    Item effigy = ItemFactory.Get(ItemNames.STATUE, objDb);
-    effigy.Name = "dragon effigy";
-    effigy.Glyph = new('D', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false);
-    effigy.Traits.Add(new FlammableTrait());
-    effigy.Traits.Add(new DescriptionTrait("A rustic wood effigy of a roaring dragon."));
-    objDb.SetToLoc(effigyLoc, effigy);
+  //   Item effigy = ItemFactory.Get(ItemNames.STATUE, objDb);
+  //   effigy.Name = "dragon effigy";
+  //   effigy.Glyph = new('D', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false);
+  //   effigy.Traits.Add(new FlammableTrait());
+  //   effigy.Traits.Add(new DescriptionTrait("A rustic wood effigy of a roaring dragon."));
+  //   objDb.SetToLoc(effigyLoc, effigy);
 
-    List<Loc> adjToEffigy = [];
-    foreach (Loc adj in Util.Adj4Locs(effigyLoc))
-    {
-      if (map.TileAt(adj.Row, adj.Col).Type == TileType.DungeonFloor)
-        adjToEffigy.Add(adj);
-    }
-    if (adjToEffigy.Count > 0)
-    {
-      Loc altarLoc = adjToEffigy[rng.Next(adjToEffigy.Count)];
-      Item altar = ItemFactory.Get(ItemNames.STONE_ALTAR, objDb);
-      altar.Traits.Add(new KoboldAltarTrait());
+  //   List<Loc> adjToEffigy = [];
+  //   foreach (Loc adj in Util.Adj4Locs(effigyLoc))
+  //   {
+  //     if (map.TileAt(adj.Row, adj.Col).Type == TileType.DungeonFloor)
+  //       adjToEffigy.Add(adj);
+  //   }
+  //   if (adjToEffigy.Count > 0)
+  //   {
+  //     Loc altarLoc = adjToEffigy[rng.Next(adjToEffigy.Count)];
+  //     Item altar = ItemFactory.Get(ItemNames.STONE_ALTAR, objDb);
+  //     altar.Traits.Add(new KoboldAltarTrait());
 
-      objDb.SetToLoc(altarLoc, altar);
-    }
+  //     objDb.SetToLoc(altarLoc, altar);
+  //   }
 
-    floors = [.. floors.Where(loc => Util.Distance(loc, effigyLoc) < 4)];
-    NameGenerator ng = new(rng, Util.NamesFile);
-    string dragonName = ng.GenerateName(rng.Next(8, 13)).Capitalize();
-    factDb.Add(new SimpleFact() { Name = "DragonFact", Value = dragonName });
+  //   floors = [.. floors.Where(loc => Util.Distance(loc, effigyLoc) < 4)];
+  //   NameGenerator ng = new(rng, Util.NamesFile);
+  //   string dragonName = ng.GenerateName(rng.Next(8, 13)).Capitalize();
+  //   factDb.Add(new SimpleFact() { Name = "DragonFact", Value = dragonName });
 
-    WorshiperTrait worship;
-    List<ulong> koboldIds = [];
-    List<Actor> kobolds = [];
-    for (int j = 0; j < rng.Next(3, 6); j++)
-    {
-      Actor kobold = MonsterFactory.Get("kobold", objDb, rng);
-      kobold.Stats[Attribute.MobAttitude] = new Stat(Mob.INDIFFERENT);
+  //   WorshiperTrait worship;
+  //   List<ulong> koboldIds = [];
+  //   List<Actor> kobolds = [];
+  //   for (int j = 0; j < rng.Next(3, 6); j++)
+  //   {
+  //     Actor kobold = MonsterFactory.Get("kobold", objDb, rng);
+  //     kobold.Stats[Attribute.MobAttitude] = new Stat(Mob.INDIFFERENT);
 
-      foreach (Trait t in kobold.Traits)
-      {
-        if (t is BehaviourTreeTrait btt)
-          btt.Plan = "Worshipper";
-      }
-      worship = new()
-      {
-        AltarLoc = effigyLoc,
-        AltarId = effigy.ID,
-        Chant = Chant()
-      };
-      kobold.Traits.Add(worship);
+  //     foreach (Trait t in kobold.Traits)
+  //     {
+  //       if (t is BehaviourTreeTrait btt)
+  //         btt.Plan = "Worshipper";
+  //     }
+  //     worship = new()
+  //     {
+  //       AltarLoc = effigyLoc,
+  //       AltarId = effigy.ID,
+  //       Chant = Chant()
+  //     };
+  //     kobold.Traits.Add(worship);
 
-      i = rng.Next(floors.Count);
-      loc = floors[i];
-      floors.RemoveAt(i);
+  //     i = rng.Next(floors.Count);
+  //     loc = floors[i];
+  //     floors.RemoveAt(i);
 
-      objDb.AddNewActor(kobold, loc);
+  //     objDb.AddNewActor(kobold, loc);
 
-      koboldIds.Add(kobold.ID);
-      kobolds.Add(kobold);
-    }
+  //     koboldIds.Add(kobold.ID);
+  //     kobolds.Add(kobold);
+  //   }
 
-    Actor priest = MonsterFactory.Get("kobold soothsayer", objDb, rng);
-    priest.Stats[Attribute.MobAttitude] = new Stat(Mob.INDIFFERENT);
-    foreach (Trait t in priest.Traits)
-    {
-      if (t is BehaviourTreeTrait btt)
-        btt.Plan = "Worshipper";
-    }
-    worship = new()
-    {
-      AltarLoc = effigyLoc,
-      AltarId = effigy.ID,
-      Chant = Chant()
-    };
-    priest.Traits.Add(worship);
+  //   Actor priest = MonsterFactory.Get("kobold soothsayer", objDb, rng);
+  //   priest.Stats[Attribute.MobAttitude] = new Stat(Mob.INDIFFERENT);
+  //   foreach (Trait t in priest.Traits)
+  //   {
+  //     if (t is BehaviourTreeTrait btt)
+  //       btt.Plan = "Worshipper";
+  //   }
+  //   worship = new()
+  //   {
+  //     AltarLoc = effigyLoc,
+  //     AltarId = effigy.ID,
+  //     Chant = Chant()
+  //   };
+  //   priest.Traits.Add(worship);
 
-    i = rng.Next(floors.Count);
-    loc = floors[i];
-    objDb.AddNewActor(priest, loc);
-    koboldIds.Add(priest.ID);
-    kobolds.Add(priest);
+  //   i = rng.Next(floors.Count);
+  //   loc = floors[i];
+  //   objDb.AddNewActor(priest, loc);
+  //   koboldIds.Add(priest.ID);
+  //   kobolds.Add(priest);
 
-    foreach (Actor kobold in kobolds)
-    {
-      AlliesTrait allies = new()
-      {
-        IDs = [.. koboldIds.Where(id => id != kobold.ID)]
-      };
-      kobold.Traits.Add(allies);
-    }
+  //   foreach (Actor kobold in kobolds)
+  //   {
+  //     AlliesTrait allies = new()
+  //     {
+  //       IDs = [.. koboldIds.Where(id => id != kobold.ID)]
+  //     };
+  //     kobold.Traits.Add(allies);
+  //   }
 
-    string Chant() => rng.Next(4) switch
-    {
-      0 => "Gold! Gold for our dragon god!",
-      1 => $"{dragonName} bless and protect us!",
-      2 => "May your hoard grow ever larger!",
-      _ => $"Glory to {dragonName}!"
-    };
+  //   string Chant() => rng.Next(4) switch
+  //   {
+  //     0 => "Gold! Gold for our dragon god!",
+  //     1 => $"{dragonName} bless and protect us!",
+  //     2 => "May your hoard grow ever larger!",
+  //     _ => $"Glory to {dragonName}!"
+  //   };
 
-  }
+  // }
 
   public static void CampRoom(List<(int, int)> room, int dungeonID, int level, FactDb factDb, GameObjectDB objDb, Rng rng)
   {

@@ -748,7 +748,7 @@ sealed class Mob : Actor
     if (!heard)
       return;
 
-    if (Stats.TryGetValue(Attribute.MobAttitude, out var attitude) && !HasTrait<WorshiperTrait>() && !HasTrait<VillagerTrait>())
+    if (Stats.TryGetValue(Attribute.MobAttitude, out var attitude) && !HasTrait<VillagerTrait>())
     {
       Stats[Attribute.MobAttitude].SetMax(AGGRESSIVE);
     }

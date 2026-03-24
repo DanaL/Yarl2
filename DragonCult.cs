@@ -90,7 +90,7 @@ class Kobold
     Loc effigyLoc = Loc.Nowhere;
     foreach (Loc adj in Util.Adj4Locs(loc))
     {
-      if (gs.ObjDb.ItemsAt(adj).Where(i => i.Name == "dragon effigy").Any())
+      if (gs.ObjDb.ItemsAt(adj).Any(i => i.Name == "dragon effigy"))
       {
         effigyLoc = adj;
         break;
@@ -125,20 +125,20 @@ class Kobold
       gs.UIRef().AlertPlayer("We appreciate the pledging of your soul and service!");
       gs.Player.Stats[Attribute.KoboldCultLevel] = new Stat(1);
 
-      foreach (Mob cultist in gs.ObjDb.AllActors().Where(a => a is Mob).Cast<Mob>())
-      {
-        if (cultist.Traits.OfType<WorshiperTrait>().FirstOrDefault() is WorshiperTrait wt && wt.AltarLoc == effigyLoc)
-        {          
-          if (cultist.Name == "kobold")
-          {
-            MakeCultist(cultist, gs.Rng);
-          }
-          else if (cultist.Name == "kobold soothsayer")
-          {
-            MakeCultLeader(cultist, gs.Rng);
-          }
-        }
-      }
+      // foreach (Mob cultist in gs.ObjDb.AllActors().Where(a => a is Mob).Cast<Mob>())
+      // {
+      //   if (cultist.Traits.OfType<WorshiperTrait>().FirstOrDefault() is WorshiperTrait wt && wt.AltarLoc == effigyLoc)
+      //   {          
+      //     if (cultist.Name == "kobold")
+      //     {
+      //       MakeCultist(cultist, gs.Rng);
+      //     }
+      //     else if (cultist.Name == "kobold soothsayer")
+      //     {
+      //       MakeCultLeader(cultist, gs.Rng);
+      //     }
+      //   }
+      // }
 
       return true;
     }

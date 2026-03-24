@@ -41,16 +41,7 @@ class MonsterBehaviour : IBehaviour, IDialoguer
   readonly Dictionary<string, ulong> _lastUse = [];
   List<DialogueOption> Options { get; set; } = [];
 
-  public string GetBark(Mob actor, GameState gs)
-  {
-    foreach (Trait t in actor.Traits)
-    {
-      if (t is WorshiperTrait worshipper && gs.Rng.Next(8) == 0)
-        return worshipper.Chant;
-    }
-
-    return "";
-  }
+  public string GetBark(Mob actor, GameState gs) => "";
 
   public (Action, Inputer?) Chat(Mob actor, GameState gameState)
   {
