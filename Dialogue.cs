@@ -1365,6 +1365,9 @@ class DialogueInterpreter
       case "LAST_GIFT_TIME":
         mob.Stats[Attribute.LastGiftTime] = new Stat((int)gs.Turn % int.MaxValue);
         break;
+      case "MD_CURIOUS":
+        gs.FactDb.Add(new FlagFact() { Name = "MD_CURIOUS"});
+        break;
       default:
         throw new Exception($"Unknown variable: {set.Name}");
     }

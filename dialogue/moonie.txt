@@ -14,7 +14,7 @@
                     "There is a path you could take, guided by moonlight."
         ))
 
-        (option "Tell me more." ( (set DIALOGUE_STATE 1) (end "Seek the Standing Stones at night.")))
+        (option "Tell me more." ( (set DIALOGUE_STATE 1) (set MD_CURIOUS true) (end "Seek the Standing Stones at night.")))
         (option "No thanks." (end "Fare thee well."))
       )
     )
@@ -26,6 +26,7 @@
         (def lines '("Seek the priestess for guidance."
                     "If you truly wish to embrace the moonlit path, seek out our teacher."
                     "The dark needn't be your enemy."
+                    "Seek the Standing Stones at night."
         ))
       )
     )
