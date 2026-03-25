@@ -1,6 +1,6 @@
 ﻿(
   (cond
-    ((AND (= Religion "Huntokar") (> FAITH 0)) (
+    ((AND (= RELIGION "Huntokar") (> FAITH 0)) (
         (say "Greetings, [GREEN Seeker]. ")
         
         (def lines '("If you wish to help out #TOWN_NAME, Huntokar can guide and protect you.\n\nFollowing Huntokar's teachings lead you on a path of bravery and justice."
