@@ -1183,6 +1183,12 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       }
     }
 
+    var (hour, minute) = CurrTime();
+    if (hour == 20 && minute == 0)
+    {
+      PlaceMoonDaughterCleric();
+    }
+
     if (!UI.InTutorial)
       CheckForStress();
 
@@ -1198,6 +1204,37 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       UI.BlockFoResponse(this);
       UI.PauseForResponse = false;
       UI.ClosePopup();
+    }
+  }
+
+  void PlaceMoonDaughterCleric()
+  {
+    if (!(Player.Religion == "Moon Daughter" || FactDb.FactCheck("MD_CURIOUS") is not null))
+      return;
+
+    ulong clericId = ulong.Parse(FactDb.FactCheck("MDClericID") is SimpleFact sf ? sf.Value :"0");
+    // I guess the cleric could be null if they get killed somehow
+    if (ObjDb.GetObj(clericId) is Actor cleric && FactDb.FactCheck("Stone ring centre") is LocationFact ring)
+    {
+      if (cleric.Loc != Loc.Nowhere)
+      {
+        // If they are already placed, we don't need to place them again.
+        return;
+      }
+
+      List<Loc> nearby = [];
+      for (int r = -2; r < 3; r++)
+      {
+        for (int c = -2; c < 3; c++)
+        {
+          Loc loc = ring.Loc with { Row = ring.Loc.Row + r, Col = ring.Loc.Col + c };
+          if (TileAt(loc).Passable() && !ObjDb.Occupied(loc))
+            nearby.Add(loc);
+        }
+      }
+      Loc clericLoc = nearby[Rng.Next(nearby.Count)];
+      ObjDb.SetActorToLoc(clericLoc, clericId);
+      cleric.Loc = clericLoc;
     }
   }
 

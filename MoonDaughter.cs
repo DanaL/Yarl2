@@ -19,7 +19,7 @@ class MoonDaughter
     Mob cleric = new()
     {
       Name = ng.GenerateName(8),
-      Appearance = "A cleric whose face is concealed by a deep hood. They are suffused with a faint silver glow.",
+      Appearance = "cleric whose face is concealed by a deep hood. They are suffused with a faint silver glow.",
       Glyph = new Glyph('@', Colours.GREY, Colours.DARK_GREEN, Colours.BLACK, false)
     };
     cleric.Stats[Attribute.HP] = new Stat(50);
