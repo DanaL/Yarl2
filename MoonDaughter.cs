@@ -13,7 +13,7 @@ namespace Yarl2;
 
 class MoonDaughter
 {
-  static void Cleric(Rng rng, GameObjectDB objDb)
+  public static Mob Cleric(Rng rng, GameObjectDB objDb)
   {
     NameGenerator ng = new(rng, Util.NamesFile);
     Mob cleric = new()
@@ -33,5 +33,7 @@ class MoonDaughter
     cleric.Loc = Loc.Nowhere;
 
     objDb.Add(cleric);
+
+    return cleric;
   }
 }

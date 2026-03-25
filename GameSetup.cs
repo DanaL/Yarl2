@@ -498,6 +498,9 @@ class CampaignCreator(UserInterface ui)
 
         UnderwaterCave.SetupUnderwaterCave(campaign, ringCentre.Row, ringCentre.Col, objDb, factDb, rng);
 
+        var moonDaughterCleric = MoonDaughter.Cleric(rng, objDb);
+        factDb.Add(new SimpleFact() { Name = "MDClericID", Value = moonDaughterCleric.ID.ToString() });
+        
         (startR, startC) = PickStartLoc(wildernessMap, town, objDb, rng);
         if (startR == -1 || startC == -1)
         {
