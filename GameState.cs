@@ -55,7 +55,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   public int MainQuestState => Player.Stats[Attribute.MainQuestState].Curr;
 
   public GameSignal GameSignal { get; set; } = GameSignal.None;
-  public String SignalMessage { get; set; } = "";
+  public string SignalMessage { get; set; } = "";
 
   public void ActorEntersLevel(Actor actor, int dungeonId, int level)
   {

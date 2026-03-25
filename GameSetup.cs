@@ -579,11 +579,7 @@ class CampaignCreator(UserInterface ui)
     GameObjectDB objDb;
     int startRow, startCol;
     (campaign, startRow, startCol, objDb) = BeginNewCampaign(rng);
-    GameState gameState = new(campaign, options, UI, rng)
-    {
-      ObjDb = objDb,
-      Turn = 1
-    };
+    GameState gameState = new(campaign, options, UI, rng) { ObjDb = objDb, Turn = 1 };
 
     var (player, result) = PlayerCreator.NewPlayer(playerName, gameState, startRow, startCol, UI, rng);
     if (result == SetupResult.Quit || result == SetupResult.Cancel || player is null) 

@@ -129,7 +129,7 @@ class InnkeeperBehaviour : NPCBehaviour
   }
 }
 
-class MoonDaughtersClericBehaviour : NPCBehaviour
+class MoonDaughterClericBehaviour : NPCBehaviour
 {
   DateTime _lastBark = new(1900, 1, 1);
 
