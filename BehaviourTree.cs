@@ -2036,6 +2036,28 @@ class Planner
     return new Selector(plan);
   }
   
+  static BehaviourNode MoonDaughter(GameState gs)
+  {
+    HashSet<Loc> sqs = [];
+
+    if (gs.FactDb.FactCheck("Stone ring centre") is LocationFact ring)
+    {
+      for (int r = -3; r <= 3; r++)
+      {
+        for (int c = -3; c <= 3; c++)
+        {
+          Loc loc = ring.Loc with { Row = ring.Loc.Row + r, Col = ring.Loc.Col + c };
+          if (gs.TileAt(loc).Passable())
+            sqs.Add(loc);
+        }
+      }
+    }
+
+    var wander = new WanderInArea(sqs);
+
+    return new Selector([wander]);
+  }
+
   static BehaviourNode WanderInHome(HashSet<Loc> home, GameState gs)
   {
     HashSet<Loc> sqs = [];
@@ -2168,9 +2190,7 @@ class Planner
     "BarHoundPlan" => WanderInHome(gs.Town.Tavern, gs),
     "PupPlan" => Pup(mob, gs),
     "SimpleRandomPlan" => new Selector([new RandomMove(), new PassTurn()]),
-    "MoonClericPlan" => new Selector([
-      new Sequence([new CheckDialogueState(1), new DiceRoll(250), new MoveLevel()]),
-      new RandomMove(), new PassTurn()]),
+    "MoonClericPlan" => MoonDaughter(gs),
     "BasicIllusionPlan" => new Selector([new ChaseTarget(), new RandomMove()]),
     "Greedy" => CreateGreedyMonster(mob, gs),    
     "BasicWander" => BasicWander(mob, gs),

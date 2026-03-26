@@ -1232,6 +1232,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
             nearby.Add(loc);
         }
       }
+      
       Loc clericLoc = nearby[Rng.Next(nearby.Count)];
       ObjDb.SetActorToLoc(clericLoc, clericId);
       cleric.Loc = clericLoc;
