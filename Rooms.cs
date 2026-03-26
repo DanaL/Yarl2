@@ -301,8 +301,7 @@ class Vaults
     foreach (Loc loc in locs)
     {
       var adjWall = Util.Adj4Sqs(loc.Row, loc.Col)
-                        .Where(sq => map.TileAt(sq).Type == TileType.DungeonWall)
-                        .Any();
+                        .Any(sq => map.TileAt(sq).Type == TileType.DungeonWall);
       if (adjWall)
         decorationLocs.Add(loc);
     }
