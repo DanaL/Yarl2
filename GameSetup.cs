@@ -500,7 +500,7 @@ class CampaignCreator(UserInterface ui)
 
         var moonDaughterCleric = MoonDaughter.Cleric(rng, objDb);
         factDb.Add(new SimpleFact() { Name = "MDClericID", Value = moonDaughterCleric.ID.ToString() });
-        
+
         (startR, startC) = PickStartLoc(wildernessMap, town, objDb, rng);
         if (startR == -1 || startC == -1)
         {
@@ -557,7 +557,6 @@ class CampaignCreator(UserInterface ui)
   public (GameState?, SetupResult) Create(Options options)
   {
     int seed = DateTime.UtcNow.GetHashCode();
-    seed = 1956036268;
     Console.WriteLine($"Seed: {seed}");
 
     var (playerName, setup) = QueryPlayerName();

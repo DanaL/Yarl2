@@ -60,7 +60,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
           riverConfig = new(TileType.DeepWater, false, false);
         }
 
-        AddRiverToLevel(riverConfig, levels[levelNum], nextLevel, levelNum, HEIGHT, WIDTH, DungeonId, objDb, rng);
+        AddRiverToLevel(riverConfig, levels[levelNum], nextLevel, HEIGHT, WIDTH, rng);
         riverLevels.Add((levelNum, riverType));
       }
     }

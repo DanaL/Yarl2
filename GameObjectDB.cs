@@ -447,9 +447,6 @@ class GameObjectDB
   
   public void SetToLoc(Loc loc, Item item)
   {
-    if (loc.Row == 7 && loc.Col == 63)
-        Console.WriteLine("flag");
-
     item.Loc = loc;
     if (!_itemLocs.TryGetValue(loc, out var stack))
     {

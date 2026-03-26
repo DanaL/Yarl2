@@ -651,7 +651,7 @@ class DungeonMap(Rng rng)
 
   // Draw a river on the map. River being a flow of some sort: water, lava,
   // or a chasm
-  public static void CreateRiver(Map map, int width, int height, RiverConfig riverConfig, int dungeonId, int level, GameObjectDB objDb, Rng rng)
+  public static void CreateRiver(Map map, int width, int height, RiverConfig riverConfig, Rng rng)
   {
     // pick starting wall
     int roll = rng.Next(4);
@@ -726,7 +726,7 @@ class DungeonMap(Rng rng)
       dir = ChangeRiverDir(dir, origDir, rng);
     }
 
-    DrawRiver(map, pts, riverConfig.RiverTile, dungeonId, level, objDb, rng);
+    DrawRiver(map, pts, riverConfig.RiverTile, rng);
 
     if (!riverConfig.SkipBridges)
       AddBridges(map, height, width, riverConfig.RiverTile, rng);
@@ -809,7 +809,7 @@ class DungeonMap(Rng rng)
     return [.. distances.Select(d => (d.Item1, d.Item2))];
   }
 
-  static void WidenRiver(Map map, int row, int col, TileType riverTile, int dungeonId, int level, GameObjectDB objDb, Rng rng)
+  static void WidenRiver(Map map, int row, int col, TileType riverTile, Rng rng)
   {
     (int Row, int Col) above = (row - 1, col);
     (int Row, int Col) below = (row + 1, col);
@@ -822,14 +822,14 @@ class DungeonMap(Rng rng)
       {
         map.SetTile(above, TileFactory.Get(riverTile));
         above = (above.Row - 1, above.Col);
-        if (NotEdge(above) && rng.Next(3) == 0 && NoItems(above.Row, above.Col))
+        if (NotEdge(above) && rng.Next(3) == 0)
           map.SetTile(above, TileFactory.Get(riverTile));
       }
       if (NotEdge(below))
       {
         map.SetTile(below, TileFactory.Get(riverTile));
         below = (below.Row + 1, below.Col);
-        if (NotEdge(below) && rng.Next(3) == 0 && NoItems(below.Row, below.Col))
+        if (NotEdge(below) && rng.Next(3) == 0)
           map.SetTile(below, TileFactory.Get(riverTile));
       }
     }
@@ -839,35 +839,33 @@ class DungeonMap(Rng rng)
       {
         map.SetTile(left, TileFactory.Get(riverTile));
         left = (left.Row, left.Col - 1);
-        if (NotEdge(left) && rng.Next(3) == 0 && NoItems(left.Row, left.Col))
+        if (NotEdge(left) && rng.Next(3) == 0)
           map.SetTile(left, TileFactory.Get(riverTile));
       }
       if (NotEdge(right))
       {
         map.SetTile(right, TileFactory.Get(riverTile));
         right = (right.Row, right.Col + 1);
-        if (NotEdge(right) && rng.Next(3) == 0 && NoItems(right.Row, right.Col))
+        if (NotEdge(right) && rng.Next(3) == 0)
           map.SetTile(right, TileFactory.Get(riverTile));
       }
     }
 
     bool NotEdge((int R, int C) sq) => sq.R > 0 && sq.C > 0 && sq.R < map.Height - 1 && sq.C < map.Width - 1;
-    bool NoItems(int r, int c) => !objDb.AnyItemsAt(new Loc(dungeonId, level, r, c));
   }
 
   // Skip any points that have items on them so that we don't remove the 
   // the floor from beneath items that are places on the level in earler 
   // steps of dungeon creation
-  static void  DrawRiver(Map map, List<(int, int, Dir)> pts, TileType riverTile, int dungeonId, int level, GameObjectDB objDb, Rng rng)
+  static void  DrawRiver(Map map, List<(int, int, Dir)> pts, TileType riverTile, Rng rng)
   {
     for (int j = 0; j < pts.Count - 1; j++)
     {
       var river = Util.LerpLine(pts[j].Item1, pts[j].Item2, pts[j + 1].Item1, pts[j + 1].Item2);
       foreach ((int r, int c) in river)
       {
-        if (!objDb.AnyItemsAt(new Loc(dungeonId, level, r, c)))
-          map.SetTile(r, c, TileFactory.Get(riverTile));
-        WidenRiver(map, r, c, riverTile, dungeonId, level, objDb, rng);
+        map.SetTile(r, c, TileFactory.Get(riverTile));
+        WidenRiver(map, r, c, riverTile, rng);
       }
     }
   }

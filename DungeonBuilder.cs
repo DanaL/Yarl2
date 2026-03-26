@@ -98,19 +98,31 @@ abstract class DungeonBuilder
 
   // If a river/chasm cuts the up stairs off from the down stairs, drop
   // a potion of levitation on the level so the player isn't trapped.
+
+  // We also want to check for tiles that were 'flooded' by a river being 
+  // drawn and now have items floating on it. TODO: maybe someday track buoyant
+  // items and leave them on deep water tiles
   protected static void RiverQoLCheck(Map map, int dungeonId, int level, GameObjectDB objDb, Rng rng)
   {
     List<(int, int)> upStairs = [];
     List<(int, int)> downStairs = [];
+    List<Loc> riverTiles = [];
+    List<Loc> floors = [];
 
     for (int r = 1; r < map.Height - 1; r++)
     {
       for (int c = 1; c < map.Width - 1; c++)
       {
-        if (map.TileAt(r, c).Type == TileType.Upstairs)
+        Loc loc = new (dungeonId, level, r, c);
+        TileType type = map.TileAt(r, c).Type;
+        if (type == TileType.Upstairs)
           upStairs.Add((r, c));
-        if (map.TileAt(r, c).Type == TileType.Downstairs)
+        else if (type == TileType.Downstairs)
           downStairs.Add((r, c));
+        else if (type == TileType.Chasm || type == TileType.DeepWater)
+          riverTiles.Add(loc);
+        else if (type == TileType.DungeonFloor && !objDb.HazardsAtLoc(loc))
+          floors.Add(loc);
       }
     }
 
@@ -126,6 +138,16 @@ abstract class DungeonBuilder
           AddRiverCrossing(map, ur, uc, dungeonId, level, objDb, rng);
           return;
         }
+      }
+    }
+
+    foreach (Loc loc in riverTiles)
+    {
+      foreach (Item item in objDb.ItemsAt(loc))
+      {
+        objDb.RemoveItemFromLoc(loc, item);
+        Loc newLoc = floors[rng.Next(floors.Count)];
+        objDb.SetToLoc(newLoc, item);
       }
     }
 
@@ -842,9 +864,9 @@ abstract class DungeonBuilder
     objDb.SetToLoc(loc, bait);
   }
 
-  protected static void AddRiverToLevel(RiverConfig riverConfig, Map map, Map? mapBelow, int levelNum, int height, int width, int dungeonId, GameObjectDB objDb, Rng rng)
+  protected static void AddRiverToLevel(RiverConfig riverConfig, Map map, Map? mapBelow, int height, int width, Rng rng)
   {    
-    DungeonMap.CreateRiver(map, width + 1, height + 1, riverConfig, dungeonId, levelNum, objDb, rng);
+    DungeonMap.CreateRiver(map, width + 1, height + 1, riverConfig, rng);
 
     // When making a chasm, we want to turn any walls below chasms on the 
     // floor below into floors. 
