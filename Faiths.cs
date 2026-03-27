@@ -12,6 +12,14 @@ namespace Yarl2;
 
 class Faiths
 {
+  public static void TricksterBlessing(Actor cleric, GameState gs)
+  {
+    Player p = gs.Player;
+
+    var blessing = new TricksterBlessingTrait() { OwnerID = gs.Player.ID };
+    blessing.Apply(cleric, gs);
+  }
+
   public static void VisitMoonDaughterLocation(GameState gs)
   {    
     if (gs.FactDb.FactCheck("MDSpotLastVisit") is SimpleFact mdlv)

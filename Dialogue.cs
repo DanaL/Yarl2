@@ -992,7 +992,7 @@ class DialogueInterpreter
       case "RELIGION":
         return gs.Player.Religion;
       case "FAITH":
-        return gs.Player.Faith;
+        return gs.Player.Faith;      
       default:
         throw new Exception($"Unknown variable {name}");
     }    
@@ -1076,6 +1076,17 @@ class DialogueInterpreter
     {
       string firstBoss = gs.FactDb.FactCheck("First Boss") is SimpleFact fact ? fact.Value : "";
       s = s.Replace("#FIRST_BOSS", firstBoss);
+    }
+
+    if (s.Contains("#TOWN_PRIEST_NAME"))
+    {
+      string name = "the town cleric";
+      if (gs.FactDb.FactCheck("PriestId") is SimpleFact priestIdFact)
+      {
+        if (gs.ObjDb.GetObj(ulong.Parse(priestIdFact.Value)) is Actor actor)          
+          name = actor.Name.Capitalize();          
+      }
+      s = s.Replace("#TOWN_PRIEST_NAME", name);
     }
 
     s = s.Replace(@"\n", Environment.NewLine);
@@ -1514,7 +1525,11 @@ class DialogueInterpreter
       gs.UIRef().AlertPlayer("You feel healthier!");
       return;      
     }
-
+    else if (gift.Gift == "TRICKSTER_BLESSING")
+    {
+      Faiths.TricksterBlessing(mob, gs);
+      return;      
+    }
     Item item = gift.Gift switch
     {
       "MINOR_GIFT" => Treasure.MinorGift(gs.ObjDb, gs.Rng),

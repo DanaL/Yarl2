@@ -166,7 +166,7 @@ class Village
     return innkeeper;
   }
 
-  static Mob GeneratePriest(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Rng rng)
+  static Mob GeneratePriest(Map map, Town town, NameGenerator ng, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     Mob cleric = BaseVillager(ng, rng);
     cleric.Traits.Add(new DialogueScriptTrait() { ScriptFile = "priest.txt" });
@@ -195,6 +195,8 @@ class Village
     statue.Traits.Add(new DescriptionTrait($"a statue of a mysterious figure gazing warmly out at {town.Name}"));
     objDb.SetToLoc(statueLoc, statue);
     
+    factDb.Add(new SimpleFact() { Name = "PriestId", Value = cleric.ID.ToString() });
+
     return cleric;
   }
 
@@ -575,7 +577,7 @@ class Village
   {
     NameGenerator ng = new(rng, Util.NamesFile);
 
-    Mob cleric = GeneratePriest(map, town, ng, objDb, rng);
+    Mob cleric = GeneratePriest(map, town, ng, objDb, factDb, rng);
     objDb.AddNewActor(cleric, cleric.Loc);
 
     Mob smith = GenerateSmith(map, town, ng, objDb, rng);

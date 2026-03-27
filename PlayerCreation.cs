@@ -515,14 +515,13 @@ class ReaverBlessingTrait : BlessingTrait
     string s = "You have the [iceblue Reaver Blessing]. It grants";
 
     MeleeDamageModTrait? dmg = owner.Traits.OfType<MeleeDamageModTrait>()
-                                           .Where(t => t.SourceId == SourceId)
-                                           .FirstOrDefault();
+                                           .FirstOrDefault(t => t.SourceId == SourceId);
     if (dmg is not null)
     {
       s += $" a [lightblue +{dmg.Amt}] bonus to melee damage";
     }
 
-    if (owner.Traits.OfType<FrighteningTrait>().Where(t => t.SourceId == SourceId).Any())
+    if (owner.Traits.OfType<FrighteningTrait>().Any(t => t.SourceId == SourceId))
     {
       s += " and your attacks may [brightred frighten] your foes";
     }

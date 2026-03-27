@@ -1,25 +1,29 @@
 (cond	
-	((= DIALOGUE_STATE 0)
-		(
-      (say (pick ("We are tasked by the Moon Daughters to aid those who delve the darkness. We can unveil secrets long hidden away."
-              "The moon is, like, cool man!")
+  ((= RELIGION "Agnostic")
+      (
+        (say (pick ("We are tasked by the Moon Daughters to aid those who delve the darkness. We can unveil secrets long hidden away. Do you wish to take up their path?"
+                   "The Moon Daughters wish to see evil defeated as well, but prefer a light touch. Do you wish to take up their path?"
+                   "The Moon Daughters approve of subtlety and craft, and eschew direct confrontation. Do you wish to take up their path?")
       ))
 
-      ;;(option "Reveal the twists and turns of this level."  
-      ;;  ((give BOON_MAP "All will be revealed!") (set DIALOGUE_STATE 1) (set LAST_GIFT_TIME 0) (end "The level is revealed to you!"))
-      ;;)
-      ;;(option "Reveal any hidden traps."  
-      ;;  ((give BOON_TRAPS "Dangers are now laid bare!") (set DIALOGUE_STATE 1) (set LAST_GIFT_TIME 0) (end "Dangers are now laid bare!"))
-      ;;)
-      ;;(option "Identify unknown items in your inventory."  
-      ;;  ((give BOON_ID "The cleric chants.") (set DIALOGUE_STATE 1) (set LAST_GIFT_TIME 0) (end "Secrets revealed."))
-      ;;)
-      ;;(option "Are you lost? We can guide you back to the surface."  
-      ;;  ((give BOON_RECALL "The cleric lays on hands.") (set DIALOGUE_STATE 1) (set LAST_GIFT_TIME 0) (end "A beam of moonlight draws you upward!"))
-      ;;)			
-    )
-	)
-  (else
-    (say (pick ("Return to us later, should you need further help." "The moon is, like, cool man!")))
-  )
+      (option "Accept the Blessing of the Trickster."
+	      ((give TRICKSTER_BLESSING "Receive the Trickster's Blessing") (end "A faint shimmering surrounds you as you are gifted with some eldritch power!")))
+  ))
+
+  ((AND (= RELIGION "Huntokar") (< FAITH 2))
+      (
+        (say (pick ("Huntokar is a fine deity and all and #TOWN_PRIEST_NAME means well but the Moon Daughters offer another way. You might choose to follow their path."
+                    "The Moon Daughters and Huntokar are not foes. They simply differ on means and methods. You might choose to follow their path."
+                      )
+      ))
+
+      (option "Accept the Blessing of the Trickster."
+	      ((give TRICKSTER_BLESSING "Receive the Trickster's Blessing") (end "A faint shimmering surrounds you as you are gifted with some eldritch power!")))
+  ))
+
+  ((AND (= RELIGION "Huntokar") (> FAITH 1))
+      (
+        (say (pick ("Best of luck on your quest. We will watch from the shadows and pray for your success.")
+      ))
+  ))
 )
