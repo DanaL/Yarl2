@@ -217,6 +217,21 @@ class Sequence(List<BehaviourNode> nodes) : BehaviourNode
   }
 }
 
+// Used for mobs like the moon daughter cleric who disappears for a while.
+// I'm not using this for the travelling peddlar yet, but perhaps I should
+class GoAway : BehaviourNode
+{
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    gs.RemovePerformerFromGame(mob);
+    mob.Loc = Loc.Nowhere;
+    mob.Energy = 0.0;
+    gs.ObjDb.Add(mob);
+
+    return PlanStatus.Success;
+  }
+}
+
 class MoveLevel : BehaviourNode
 {
   public override PlanStatus Execute(Mob mob, GameState gs)
@@ -835,18 +850,18 @@ class IsNight : BehaviourNode
   }
 }
 
-class CheckTime(int start, int end) : BehaviourNode
+class TimeBetween(int startHour, int startMin, int endHour, int endMin) : BehaviourNode
 {
-  int Start { get; set; } = start;
-  int End { get; set; } = end;
+  int Start { get; set; } = startHour * 60 + startMin;
+  int End { get; set; } = endHour * 60 + endMin;
 
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
-    var (hour, _) = gs.CurrTime();
-    if (hour >= Start && hour <= End)
-      return PlanStatus.Success;
-
-    return PlanStatus.Failure;
+    var (hour, min) = gs.CurrTime();
+    int curr = hour * 60 + min;
+    bool between = Start <= End ? curr >= Start && curr <= End
+                                : curr >= Start || curr <= End;
+    return between ? PlanStatus.Success : PlanStatus.Failure;
   }
 }
 
@@ -2036,10 +2051,9 @@ class Planner
     return new Selector(plan);
   }
   
-  static BehaviourNode MoonDaughter(GameState gs)
+  static BehaviourNode MoonDaughterCleric(GameState gs)
   {
     HashSet<Loc> sqs = [];
-
     if (gs.FactDb.FactCheck("Stone ring centre") is LocationFact ring)
     {
       for (int r = -3; r <= 3; r++)
@@ -2053,9 +2067,15 @@ class Planner
       }
     }
 
-    var wander = new WanderInArea(sqs);
+    WanderInArea wander = new(sqs);
 
-    return new Selector([wander]);
+    // If the time is between 4:00am and 8:00pm, the moon daughter
+    // cleric will disappear
+    Selector selector = new([
+      new RepeatWhile(new TimeBetween(20, 0, 4, 0), wander),
+      new GoAway()]);
+
+    return selector;
   }
 
   static BehaviourNode WanderInHome(HashSet<Loc> home, GameState gs)
@@ -2159,7 +2179,7 @@ class Planner
   static BehaviourNode AlchemistPlan(Mob alchemist, GameState gs)
   {
     Sequence gardening = new([
-      new CheckTime(8, 12),
+      new TimeBetween(8, 0, 12, 59),
       new FindWayToArea(gs.Town.WitchesGarden),
       new PickRandom([new PassTurn(), new PassTurn(), new WanderInArea(gs.Town.WitchesGarden)])
     ]);
@@ -2190,7 +2210,7 @@ class Planner
     "BarHoundPlan" => WanderInHome(gs.Town.Tavern, gs),
     "PupPlan" => Pup(mob, gs),
     "SimpleRandomPlan" => new Selector([new RandomMove(), new PassTurn()]),
-    "MoonClericPlan" => MoonDaughter(gs),
+    "MoonClericPlan" => MoonDaughterCleric(gs),
     "BasicIllusionPlan" => new Selector([new ChaseTarget(), new RandomMove()]),
     "Greedy" => CreateGreedyMonster(mob, gs),    
     "BasicWander" => BasicWander(mob, gs),
