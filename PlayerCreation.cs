@@ -356,7 +356,10 @@ abstract class BlessingTrait : Trait
 }
 
 
-class ChampionBlessingTrait : BlessingTrait
+abstract class HuntokarBlessingTrait : BlessingTrait {}
+abstract class MoonDaughtersBlessingTrait : BlessingTrait {}
+
+class ChampionBlessingTrait : HuntokarBlessingTrait
 {  
   public override void Apply(GameObj granter, GameState gs)
   {
@@ -476,7 +479,7 @@ class EmberBlessingTrait : BlessingTrait
   public override string Description(Actor owner) => "Ember blessing";
 }
 
-class PaladinBlessingTrait : BlessingTrait
+class PaladinBlessingTrait : HuntokarBlessingTrait
 {  
   public override void Apply(GameObj granter, GameState gs)
   { 
@@ -532,7 +535,7 @@ class ReaverBlessingTrait : BlessingTrait
   }
 }
 
-class TricksterBlessingTrait : BlessingTrait
+class TricksterBlessingTrait : MoonDaughtersBlessingTrait
 {
   public override void Apply(GameObj granter, GameState gs)
   {
@@ -559,7 +562,7 @@ class TricksterBlessingTrait : BlessingTrait
   public override string Description(Actor owner) => "Trickster blessing";
 }
 
-class WinterBlessingTrait : BlessingTrait
+class WinterBlessingTrait : HuntokarBlessingTrait
 {
   public override void Apply(GameObj granter, GameState gs)
   {
