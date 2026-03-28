@@ -78,56 +78,56 @@ static class Colours
   public static readonly Colour BEIGE = new(212, 163, 115, 255);
   public static readonly Colour LIGHT_BEIGE = new (229, 206, 180, 255); 
 
-  public static string ColourToText(Colour colour)
+  public static string ColourToText(Colour colour) => colour switch
   {
-    if (colour == WHITE) return "white";
-    else if (colour == BLACK) return "black";
-    else if (colour == GREY) return "grey";
-    else if (colour == LIGHT_GREY) return "lightgrey";
-    else if (colour == DARK_GREY) return "darkgrey";
-    else if (colour == YELLOW) return "yellow";
-    else if (colour == YELLOW_ORANGE) return "yelloworange";
-    else if (colour == LIGHT_BROWN) return "lightbrown";
-    else if (colour == BROWN) return "brown";
-    else if (colour == GREEN) return "green";
-    else if (colour == DARK_GREEN) return "darkgreen";
-    else if (colour == LIME_GREEN) return "limegreen";
-    else if (colour == BLUE) return "blue";
-    else if (colour == LIGHT_BLUE) return "lightblue";
-    else if (colour == DARK_BLUE) return "darkblue";
-    else if (colour == BRIGHT_RED) return "brightred";
-    else if (colour == SOFT_RED) return "softred";
-    else if (colour == DULL_RED) return "dullred";
-    else if (colour == TORCH_ORANGE) return "torchorange";
-    else if (colour == TORCH_RED) return "torchred";
-    else if (colour == TORCH_YELLOW) return "torchyellow";
-    else if (colour == PLAYER_LIGHT) return "playerlight";
-    else if (colour == FAR_BELOW) return "farbelow";
-    else if (colour == LIGHT_PURPLE) return "lightpurple";
-    else if (colour == FADED_PURPLE) return "fadedpurple";
-    else if (colour == PURPLE) return "purple";
-    else if (colour == PINK) return "pink";
-    else if (colour == FAINT_PINK) return "faintpink";
-    else if (colour == ICE_BLUE) return "iceblue";
-    else if (colour == HILITE) return "hilite";
-    else if (colour == SOPHIE_GREEN) return "sophiegreen";
-    else if (colour == ROOF_TILE) return "rooftile";
-    else if (colour == GHOSTLY_AURA) return "ghostlyaura";
-    else if (colour == MYSTIC_AURA) return "mysticaura";
-    else if (colour == BLUE_AURA) return "blueaura";
-    else if (colour == RED_AURA) return "redaura";
-    else if (colour == UNDERWATER) return "underwater";
-    else if (colour == HOLY_AURA) return "holyaura";
-    else if (colour == NULL) return "null";
-    else if (colour == CREAM) return "cream";
-    else if (colour == SHAMROCK) return "shamrock";
-    else if (colour == BRIGHT_ORANGE) return "brightorange";
-    else if (colour == BURNT_ORANGE) return "burntorange";
-    else if (colour == AMBER) return "amber";
-    else if (colour == BEIGE) return "beige";
-    else if (colour == LIGHT_BEIGE) return "lightbeige";
-    else throw new Exception($"Hmm I don't know that colour {colour}");
-  }
+    _ when colour == WHITE        => "white",
+    _ when colour == BLACK        => "black",
+    _ when colour == GREY         => "grey",
+    _ when colour == LIGHT_GREY   => "lightgrey",
+    _ when colour == DARK_GREY    => "darkgrey",
+    _ when colour == YELLOW       => "yellow",
+    _ when colour == YELLOW_ORANGE => "yelloworange",
+    _ when colour == LIGHT_BROWN  => "lightbrown",
+    _ when colour == BROWN        => "brown",
+    _ when colour == GREEN        => "green",
+    _ when colour == DARK_GREEN   => "darkgreen",
+    _ when colour == LIME_GREEN   => "limegreen",
+    _ when colour == BLUE         => "blue",
+    _ when colour == LIGHT_BLUE   => "lightblue",
+    _ when colour == DARK_BLUE    => "darkblue",
+    _ when colour == BRIGHT_RED   => "brightred",
+    _ when colour == SOFT_RED     => "softred",
+    _ when colour == DULL_RED     => "dullred",
+    _ when colour == TORCH_ORANGE => "torchorange",
+    _ when colour == TORCH_RED    => "torchred",
+    _ when colour == TORCH_YELLOW => "torchyellow",
+    _ when colour == PLAYER_LIGHT => "playerlight",
+    _ when colour == FAR_BELOW    => "farbelow",
+    _ when colour == LIGHT_PURPLE => "lightpurple",
+    _ when colour == FADED_PURPLE => "fadedpurple",
+    _ when colour == PURPLE       => "purple",
+    _ when colour == PINK         => "pink",
+    _ when colour == FAINT_PINK   => "faintpink",
+    _ when colour == ICE_BLUE     => "iceblue",
+    _ when colour == HILITE       => "hilite",
+    _ when colour == SOPHIE_GREEN => "sophiegreen",
+    _ when colour == ROOF_TILE    => "rooftile",
+    _ when colour == GHOSTLY_AURA => "ghostlyaura",
+    _ when colour == MYSTIC_AURA  => "mysticaura",
+    _ when colour == BLUE_AURA    => "blueaura",
+    _ when colour == RED_AURA     => "redaura",
+    _ when colour == UNDERWATER   => "underwater",
+    _ when colour == HOLY_AURA    => "holyaura",
+    _ when colour == NULL         => "null",
+    _ when colour == CREAM        => "cream",
+    _ when colour == SHAMROCK     => "shamrock",
+    _ when colour == BRIGHT_ORANGE => "brightorange",
+    _ when colour == BURNT_ORANGE => "burntorange",
+    _ when colour == AMBER        => "amber",
+    _ when colour == BEIGE        => "beige",
+    _ when colour == LIGHT_BEIGE  => "lightbeige",
+    _ => throw new Exception($"Hmm I don't know that colour {colour}")
+  };
 
   public static Colour TextToColour(string colour) => colour switch
   {
