@@ -579,10 +579,15 @@ abstract class UserInterface
       WriteSideBarLine(Colours.GREEN, "FAST", statusLineNum--);
       _statuses.Add("FAST");
     }
-    if (!_statuses.Contains("BLESSED") && gs.Player.HasTrait<BlessingTrait>())
+    if (!_statuses.Contains("BLESSED") && gs.Player.HasTrait<HuntokarBlessingTrait>())
     {
       WriteSideBarLine(Colours.ICE_BLUE, "BLESSED", statusLineNum--);
-      _statuses.Add("YELLOW");
+      _statuses.Add("BLESSED");
+    }
+    if (!_statuses.Contains("BLESSED") && gs.Player.HasTrait<MoonDaughtersBlessingTrait>())
+    {
+      WriteSideBarLine(Colours.GREY, "BLESSED", statusLineNum--);
+      _statuses.Add("BLESSED");
     }
     if (!_statuses.Contains("DISEASED") && gs.Player.HasTrait<DiseasedTrait>())
     {
