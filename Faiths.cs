@@ -16,6 +16,15 @@ class Faiths
   {
     Player p = gs.Player;
 
+    List<Trait> currBlessings = [.. p.Traits.Where(t => t is BlessingTrait)];
+    foreach (var t in currBlessings)
+    {
+      if (t is BlessingTrait bt && t is not MoonDaughtersBlessingTrait)
+      {
+        bt.Remove(gs);
+      }
+    }
+    
     var blessing = new TricksterBlessingTrait() { OwnerID = gs.Player.ID };
     blessing.Apply(cleric, gs);
   }
