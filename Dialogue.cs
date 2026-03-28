@@ -28,11 +28,8 @@ enum TokenType
   EOF
 }
 
-class ScriptToken(TokenType type, string lexeme)
+record ScriptToken(TokenType Type, string Lexeme)
 {
-  public TokenType Type { get; set; } = type;
-  public string Lexeme { get; set; } = lexeme;
-
   public override string ToString() => $"{Type} {Lexeme}";
 }
 
@@ -682,151 +679,58 @@ class ScriptParser(List<ScriptToken> tokens)
   ScriptToken Previous() => Tokens[Current - 1];
 }
 
-abstract class ScriptExpr { }
-abstract class ScriptAtomic : ScriptExpr { }
+abstract record ScriptExpr;
+abstract record ScriptAtomic : ScriptExpr;
 
-class ScriptList : ScriptExpr
+record class ScriptList : ScriptExpr
 {
-  public List<ScriptExpr> Items = [];
+  public List<ScriptExpr> Items { get; } = [];
 }
 
-class ScriptBooleanExpr(ScriptToken op, string identifier, ScriptAtomic val) : ScriptExpr
-{
-  public ScriptToken Op { get; set; } = op;
-  public string Identifier { get; set; } = identifier;
-  public ScriptAtomic Value { get; set; } = val;
-}
+record class ScriptBooleanExpr(ScriptToken Op, string Identifier, ScriptAtomic Value) : ScriptExpr;
 
-class ScriptPick : ScriptExpr
+record class ScriptPick : ScriptExpr
 {
-  public string Identifier { get; set; } = "";
-  public ScriptList? List { get; set; } = null;
+  public string Identifier { get; init; } = "";
+  public ScriptList? List { get; init; } = null;
 
   public ScriptPick(string identifier) => Identifier = identifier;
   public ScriptPick(ScriptList list) => List = list;
 }
 
-class ScriptDef(string identifier, ScriptList list) : ScriptExpr
-{
-  public string Identifier { get; set; } = identifier;
-  public ScriptList List { get; set; } = list;  
-}
-
-class ScriptAppend(string identifier, ScriptAtomic val) : ScriptExpr
-{
-  public string Identifier { get; set; } = identifier;
-  public ScriptAtomic Value { get; set; } = val;
-}
-
-class ScriptSay(ScriptExpr dialogue) : ScriptExpr
-{
-  public ScriptExpr Dialogue { get; set; } = dialogue;
-}
-
-class ScriptEnd(string text) : ScriptExpr
-{
-  public string Text { get; set; } = text;
-}
-
-class ScriptBranch(ScriptExpr test, ScriptExpr action) : ScriptExpr
-{
-  public ScriptExpr Test { get; set; } = test;
-  public ScriptExpr Action { get; set; } = action;
-}
-
-class ScriptAnd(List<ScriptExpr> conditions) : ScriptExpr
-{
-  public List<ScriptExpr> Conditions { get; set; } = conditions;
-}
-
-class ScriptOr(List<ScriptExpr> conditions) : ScriptExpr
-{
-  public List<ScriptExpr> Conditions { get; set; } = conditions;
-}
-
-class ScriptCond(List<ScriptBranch> branches) : ScriptExpr
-{
-  public List<ScriptBranch> Branches { get; set; } = branches;
-}
-
-class ScriptGive(string gift, string blurb) : ScriptExpr
-{
-  public string Gift { get; set; } = gift;
-  public string Blurb { get; set; } = blurb;
-}
-
-class ScriptSet(string name, ScriptExpr val) : ScriptExpr
-{
-  public string Name { get; set; } = name;
-  public ScriptExpr Value { get; set; } = val;
-}
-
-class ScriptLiteral(string name) : ScriptAtomic
-{
-  public string Name { get; set; } = name;
-}
-
-class ScriptString(string val) : ScriptAtomic
-{
-  public string Value { get; set; } = val;
-}
-
-class ScriptBool(bool val) : ScriptAtomic
-{
-  public bool Value { get; set; } = val;
-}
-
-class ScriptNumber(int val) : ScriptAtomic
-{
-  public int Value { get; set; } = val;
-}
-
-class ScriptVoid : ScriptAtomic { }
-
-class ScriptOption(string text, ScriptExpr expr) : ScriptExpr
-{
-  public string Text { get; set; } = text;
-  public ScriptExpr Expr { get; set; } = expr;  
-}
-
-class ScriptBlessings : ScriptExpr { }
-class ScriptShopMenu : ScriptExpr { }
-class ScriptSellMenu : ScriptExpr { }
-class ScriptShopSelection(char opt) : ScriptExpr 
-{
-  public char Choice { get; set; } = opt;
-}
-
-class ScriptSellSelection(char opt) : ScriptExpr 
-{
-  public char Choice { get; set; } = opt;
-}
-
-class ScriptSpend(int amount) : ScriptExpr
-{
-  public int Amount { get; set; } = amount;
-}
-
-class ScriptChampionBlessing : ScriptExpr {}
-class ScriptPaladinBlessing : ScriptExpr { }
-class ScriptReaverBlessing : ScriptExpr {}
-class ScriptEmberBlessing : ScriptExpr {}
-class ScriptTricksterBlessing : ScriptExpr {}
-class ScriptWinterBlessing : ScriptExpr {}
-class ScriptBuyHolyWater : ScriptExpr {}
-class ScriptStartDragonCultQuest : ScriptExpr {}
-class ScriptTurnInSkull : ScriptExpr {}
-
-class ScriptBump(string stat, ScriptExpr val) : ScriptExpr
-{
-  public string Stat { get; set; } = stat;
-  public ScriptExpr Value { get; set; } = val;
-}
-
-class ScriptOffer(ScriptLiteral identifier) : ScriptExpr
-{
-  public ScriptLiteral Identifier { get; set; } = identifier;
-}
+record class ScriptDef(string Identifier, ScriptList List) : ScriptExpr;
+record class ScriptAppend(string Identifier, ScriptAtomic Value) : ScriptExpr;
+record class ScriptSay(ScriptExpr Dialogue) : ScriptExpr;
+record class ScriptEnd(string Text) : ScriptExpr;
+record class ScriptBranch(ScriptExpr Test, ScriptExpr Action) : ScriptExpr;
+record class ScriptAnd(List<ScriptExpr> Conditions) : ScriptExpr;
+record class ScriptOr(List<ScriptExpr> Conditions) : ScriptExpr;
+record class ScriptCond(List<ScriptBranch> Branches) : ScriptExpr;
+record class ScriptGive(string Gift, string Blurb) : ScriptExpr;
+record class ScriptSet(string Name, ScriptExpr Value) : ScriptExpr;
+record class ScriptLiteral(string Name) : ScriptAtomic;
+record class ScriptString(string Value) : ScriptAtomic;
+record class ScriptBool(bool Value) : ScriptAtomic;
+record class ScriptNumber(int Value) : ScriptAtomic;
+record class ScriptVoid : ScriptAtomic;
+record class ScriptOption(string Text, ScriptExpr Expr) : ScriptExpr;
+record class ScriptBlessings : ScriptExpr;
+record class ScriptShopMenu : ScriptExpr;
+record class ScriptSellMenu : ScriptExpr;
+record class ScriptShopSelection(char Choice) : ScriptExpr;
+record class ScriptSellSelection(char Choice) : ScriptExpr;
+record class ScriptSpend(int Amount) : ScriptExpr;
+record class ScriptChampionBlessing : ScriptExpr;
+record class ScriptPaladinBlessing : ScriptExpr;
+record class ScriptReaverBlessing : ScriptExpr;
+record class ScriptEmberBlessing : ScriptExpr;
+record class ScriptTricksterBlessing : ScriptExpr;
+record class ScriptWinterBlessing : ScriptExpr;
+record class ScriptBuyHolyWater : ScriptExpr;
+record class ScriptStartDragonCultQuest : ScriptExpr;
+record class ScriptTurnInSkull : ScriptExpr;
+record class ScriptBump(string Stat, ScriptExpr Value) : ScriptExpr;
+record class ScriptOffer(ScriptLiteral Identifier) : ScriptExpr;
 
 record DialogueOption(string Text, char Ch, ScriptExpr Expr);
 
