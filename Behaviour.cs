@@ -422,7 +422,7 @@ class SmithBehaviour : NPCBehaviour
     List<string> blurbs = [
       "If you're looking for arms or armour, I'm the only game in town!",
       "Weapons or armour showing signs of wear and tear? I can help with that!",
-      "If you find weird gems or monster parts, I may be able to use them to spruce up your gear!"
+      "If you find weird gems or monster parts, I may be able to use them to spruce up your gear!"      
     ];
 
     if (gs.FactDb.FactCheck("DwarfMine") is not null && gs.Rng.NextDouble() < 0.25)

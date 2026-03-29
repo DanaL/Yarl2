@@ -5,7 +5,9 @@
             ("Swords aren't so great against skeletons." "Owlbears definitely inherited the bear hug genes." "Someone once told me cloakers make their own flocks."
               "Mind your torch around wooden structures!" "They say swinelings spread plague." "Never drink water. Fish pee in there."
               "You don't want to make a habit of it, but a little sip of booze helps steady your nerves in the depths." "Trolls are said to fear fire."
-              "Sometimes dead ends aren't the end of the road." "They say they used to hunt wumpuses with a bow.")))
+              "Sometimes dead ends aren't the end of the road." "They say they used to hunt wumpuses with a bow."
+              "Ogres eat a lot of wizards so a surprising amount of magical energy builds up in their livers."              
+            )))
       (set DIALOGUE_STATE 0)
     )
   )
