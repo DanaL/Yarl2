@@ -781,3 +781,6 @@ Thick mist that obscures your vision.
 #
 silver arrow
 When adventurers accumulate a few zorkmids, they often look around for ways to spend their loot and fletchers try to accommodate them with fancier, heavily marked up arrows.
+#
+halfling cupcake
+A cupcake made by halflings, or OF halflings? Gastromancers debate. What's important for you is that these delicious confections grant some of halfling folks' deft agility.

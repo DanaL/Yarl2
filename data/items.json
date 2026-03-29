@@ -1598,5 +1598,20 @@
       "CanApply",
       "Metal#5"
     ]
+  },
+  {
+    "Name": "HALFLING_CUPCAKE",
+    "DescriptiveName": "halfling cupcake",
+    "Type": "Food",
+    "Value": 1,
+    "Glyph": ",,pink,purple,black,false",
+    "Traits": [
+      "Edible",
+      "CanApply",
+      "Consumable",
+      "Stackable",
+      "SideEffect#100#BoostMaxStat#Dexterity#1",
+      "Delicious"
+    ]
   }
 ]
