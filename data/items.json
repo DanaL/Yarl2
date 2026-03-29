@@ -1613,5 +1613,17 @@
       "SideEffect#100#BoostMaxStat#Dexterity#1",
       "Delicious"
     ]
+  },
+  {
+    "Name": "YENDORIAN_SODA",
+    "DescriptiveName": "yendorian soda",
+    "Type": "Potion",
+    "Value": 20,
+    "Glyph": "!,lightpurple,purple,black,false",
+    "Traits": [
+      "UseSimple#restoremana",
+      "Consumable",
+      "Stackable"
+    ]
   }
 ]

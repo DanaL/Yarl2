@@ -605,7 +605,7 @@ class TricksterBlessingTrait : MoonDaughtersBlessingTrait
   }
 
   public override string AsText() => $"TricksterBlessing#{SourceId}#{OwnerID}";
-  public override string Description(Actor owner) => "Trickster blessing";
+  public override string Description(Actor owner) => "The Trickster blessing grants abilities that help you evade your foes";
 }
 
 class WinterBlessingTrait : HuntokarBlessingTrait

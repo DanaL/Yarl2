@@ -3216,6 +3216,28 @@ class DrinkBoozeAction(GameState gs, Actor target) : Action(gs, target)
   }
 }
 
+class RestoreMana(GameState gs, Actor target) : Action(gs, target)
+{
+  public override double Execute()
+  {
+    base.Execute();
+
+    if (Actor is Player)
+    {
+      GameState.UIRef().AlertPlayer("A tingle runs through you.");  
+    }
+
+    if (Actor!.Stats.TryGetValue(Attribute.MagicPoints, out var mp))
+    {
+      mp.Change(GameState.Rng.Next(1, 6));
+      SqAnimation anim = new(GameState!, Actor!.Loc, Colours.WHITE, Colours.PURPLE, '★');
+      GameState.UIRef().RegisterAnimation(anim);  
+    }
+    
+    return 1.0;
+  }
+}
+
 class HealAction(GameState gs, Actor target, int healDie, int healDice) : Action(gs, target)
 {
   readonly int _healDie = healDie;

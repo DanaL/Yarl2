@@ -34,7 +34,7 @@ class Treasure
       (ItemNames.SCROLL_TREASURE_DETECTION, 1), (ItemNames.SCROLL_TRAP_DETECTION, 1), (ItemNames.SKELETON_KEY, 1), (ItemNames.PICKAXE, 1),
       (ItemNames.POTION_HEROISM, 1), (ItemNames.POTION_DESCENT, 1), (ItemNames.SCROLL_STAINLESS, 1),
       (ItemNames.POTION_FORGETFULNESS, 1), (ItemNames.EMERGENCY_DOOR, 1), (ItemNames.KNOCKBACK_ARROW, 3), (ItemNames.LONGBOW, 1),
-      (ItemNames.ARROW_BANISHMENT, 3), (ItemNames.SPIDER_ARROW, 3), (ItemNames.SILVER_ARROW, 3)
+      (ItemNames.ARROW_BANISHMENT, 3), (ItemNames.SPIDER_ARROW, 3), (ItemNames.SILVER_ARROW, 3), (ItemNames.YENDORIAN_SODA, 1)
   ];
 
   static readonly List<(ItemNames, int)> GoodItems = [
@@ -57,7 +57,7 @@ class Treasure
       (ItemNames.HOLY_WATER, 1), (ItemNames.SNEAKERS, 1), (ItemNames.MOON_MANTLE, 1), (ItemNames.CLAYMORE, 1), (ItemNames.KNOCKBACK_ARROW, 3),
       (ItemNames.SNOWBURST_ARROW, 3), (ItemNames.FIREBURST_ARROW,3), (ItemNames.LONGBOW, 1), (ItemNames.ARROW_BANISHMENT, 3),
       (ItemNames.GLOVES_OF_ARCHERY, 1), (ItemNames.SPIDER_ARROW, 3), (ItemNames.SILVER_ARROW, 3), (ItemNames.PHALANX_PHOLIO_2, 1),
-      (ItemNames.HALFLING_CUPCAKE, 1)
+      (ItemNames.HALFLING_CUPCAKE, 1), (ItemNames.YENDORIAN_SODA, 1)
   ];
 
   static readonly List<(ItemNames, int)> RareItems = [
@@ -99,7 +99,8 @@ class Treasure
     ItemNames.SCROLL_ENCHANTING,
     ItemNames.POTION_CLARITY,
     ItemNames.POTION_FORGETFULNESS,
-    ItemNames.EMERGENCY_DOOR
+    ItemNames.EMERGENCY_DOOR,
+    ItemNames.YENDORIAN_SODA
   ];
 
   public static Item GetTalisman(Rng rng, GameObjectDB objDb)

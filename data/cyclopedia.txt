@@ -784,3 +784,6 @@ When adventurers accumulate a few zorkmids, they often look around for ways to s
 #
 halfling cupcake
 A cupcake made by halflings, or OF halflings? Gastromancers debate. What's important for you is that these delicious confections grant some of halfling folks' deft agility.
+#
+yendorian soda
+A popular beverage from that land of magic and wizards. A perk me up when you've been casting too many spells.
