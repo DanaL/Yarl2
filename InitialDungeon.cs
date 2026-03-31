@@ -436,7 +436,6 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
     // Place a hint scroll
     int hintLevel = rng.Next(levelMaps.Length);
-    hintLevel = 0;
     Map hintMap = levelMaps[hintLevel];
     List<Loc> hintFloors = Floors(hintMap, hintLevel);
     string[] hints = Util.LoadHints();
