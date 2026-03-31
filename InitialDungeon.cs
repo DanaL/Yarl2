@@ -497,8 +497,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
   {    
     string adjective;
     string desc;
-    var roll = rng.NextDouble();
-    if (roll < 0.5)
+    if (rng.NextDouble() < 0.5)
     {
       desc = "scroll";
       adjective = "tattered";
@@ -522,19 +521,6 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     Loc loc = floors[rng.Next(floors.Count)];
     objDb.Add(doc);
     objDb.SetToLoc(loc, doc);
-  }
-
-  static int AdjWalls(Map map, int r, int c)
-  {
-    int walls = 0;
-    foreach (var sq in Util.Adj8Sqs(r, c))
-    {
-      Tile tile = map.TileAt(sq);
-      if (tile.Type == TileType.DungeonWall || tile.Type == TileType.PermWall || tile.Type == TileType.WorldBorder)
-        ++walls;
-    }
-
-    return walls;
   }
 
   // This is probably overly complicated...
