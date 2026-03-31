@@ -797,6 +797,11 @@ static class Util
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
   };
 
+  public static string[] LoadHints()
+  {
+    return [.. File.ReadAllText(ResourcePath.GetDataFilePath("hints.txt")).Split('#').Select(s => s.Trim())];
+  } 
+
   // At some point it will probably become to slow to reload the entire 
   // dictionary from disk everytime I access it...
   public record CyclopediaEntry(string Title, string Text);

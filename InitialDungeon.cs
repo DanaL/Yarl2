@@ -395,30 +395,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
       int level = rng.Next(levelMaps.Length);
       Map map = levelMaps[level];
-
-      List<Loc> floors = [];
-      for (int r = 0; r < map.Height; r++)
-      {
-        for (int c = 0; c < map.Width; c++)
-        {
-          switch (map.TileAt(r, c).Type)
-          {
-            case TileType.DungeonFloor:
-            case TileType.HiddenTrapDoor:
-            case TileType.TrapDoor:
-            case TileType.TeleportTrap:
-            case TileType.HiddenTeleportTrap:
-            case TileType.WoodBridge:
-            case TileType.Grass:
-            case TileType.Dirt:
-            case TileType.GreenTree:
-              Loc floor = new(DungeonId, level, r, c);
-              if (Util.GoodFloorSpace(objDb, floor))
-                floors.Add(floor);
-              break;
-          }
-        }
-      }
+      List<Loc> floors = Floors(map, level);
 
       if (floors.Count == 0)
         continue; // unlikely...
@@ -451,10 +428,34 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       }
       else if (decoration.Type == DecorationType.ScholarJournal && !lvlsWithDocs.Contains(level))
       {
-        PlaceDocument(floors, decoration.Desc, objDb, rng);        
+        var (desc, adjective) = rng.NextDouble() < 0.5 ? ("scroll", "tattered") : ("page", "torn");
+        PlaceDocument(floors, decoration.Desc, desc, adjective, objDb, rng);        
         lvlsWithDocs.Add(level);
       }
     }
+
+    // Place a hint scroll
+    int hintLevel = rng.Next(levelMaps.Length);
+    hintLevel = 0;
+    Map hintMap = levelMaps[hintLevel];
+    List<Loc> hintFloors = Floors(hintMap, hintLevel);
+    string[] hints = Util.LoadHints();
+    var (hintDesc, hintAdj) = rng.Next(5) switch
+    {
+      0 => ("journal", "tattered"),
+      1 => ("scroll", "ornate"),
+      2 => ("book", "burnt"),
+      3 => ("tome", "weathered"),
+      _ => ("tome", "burnt")
+    };
+    string hint = hints[rng.Next(hints.Length)];
+    for (int j = 0; j < rng.Next(0, 10); j++)
+    {
+      int x = rng.Next(hint.Length);
+      if (hint[x] != ' ')
+        hint = hint.Remove(x, 1).Insert(x, "?");
+    }
+    PlaceDocument(hintFloors, hint, hintDesc, hintAdj, objDb, rng);
 
     static bool ValidStatueSq(Map map, int r, int c)
     {
@@ -466,6 +467,35 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       }
 
       return adjFloorCount > 4;
+    }
+
+    List<Loc> Floors(Map map, int level)
+    {
+      List<Loc> floors = [];
+      for (int r = 0; r < map.Height; r++)
+      {
+        for (int c = 0; c < map.Width; c++)
+        {
+          switch (map.TileAt(r, c).Type)
+          {
+            case TileType.DungeonFloor:
+            case TileType.HiddenTrapDoor:
+            case TileType.TrapDoor:
+            case TileType.TeleportTrap:
+            case TileType.HiddenTeleportTrap:
+            case TileType.WoodBridge:
+            case TileType.Grass:
+            case TileType.Dirt:
+            case TileType.GreenTree:
+              Loc floor = new(DungeonId, level, r, c);
+              if (Util.GoodFloorSpace(objDb, floor))
+                floors.Add(floor);
+              break;
+          }
+        }
+      }
+
+      return floors;
     }
   }
 
@@ -493,21 +523,8 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     }
   }
 
-  static void PlaceDocument(List<Loc> floors, string documentText, GameObjectDB objDb, Rng rng)
+  static void PlaceDocument(List<Loc> floors, string documentText, string desc, string adjective, GameObjectDB objDb, Rng rng)
   {    
-    string adjective;
-    string desc;
-    if (rng.NextDouble() < 0.5)
-    {
-      desc = "scroll";
-      adjective = "tattered";
-    }
-    else
-    {
-      desc = "page";
-      adjective = "torn";
-    }
-
     Item doc = new()
     {
       Name = desc, Type = ItemType.Document,
