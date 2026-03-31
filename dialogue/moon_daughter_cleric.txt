@@ -26,4 +26,10 @@
         (say (pick ("Best of luck on your quest. We will watch from the shadows and pray for your success.")
       ))
   ))
+
+  ( (AND (= RELIGION "Moon Daughter") (< MAIN_QUEST_STATUS 2))
+    (
+        (say (pick ("The Moon Daughters value those who act with a subtle touch.")))
+    )
+  )
 )

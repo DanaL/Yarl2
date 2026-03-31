@@ -62,6 +62,8 @@ sealed class Player : Actor
       {
         if (t is ChampionBlessingTrait || t is PaladinBlessingTrait || t is WinterBlessingTrait)
           return "Huntokar";
+        else if (t is MoonDaughtersBlessingTrait)
+          return "Moon Daughter";
       }
 
       return "Agnostic";
