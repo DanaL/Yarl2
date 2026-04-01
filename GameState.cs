@@ -1847,51 +1847,15 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   }
 
   public void RegisterForEvent(GameEventType eventType, IGameEventListener listener, ulong targetID = 0)
-  {
-    if (eventType == GameEventType.EndOfRound)
-      ObjDb.EndOfRoundListeners.Add(listener);
-    else if (eventType == GameEventType.Death)
-      ObjDb.DeathWatchListeners.Add((targetID, listener));
-    else
-      throw new NotImplementedException("I haven't created any other event listeners yet :o");
-  }
+    => ObjDb.RegisterListener(eventType, listener, targetID);
 
   public void StopListening(GameEventType eventType, IGameEventListener listener, ulong targetID = 0)
-  {
-    if (eventType == GameEventType.EndOfRound)
-    {
-      ObjDb.EndOfRoundListeners.Remove(listener);
-    }
-    else if (eventType == GameEventType.Death)
-    {
-      ObjDb.DeathWatchListeners.Remove((targetID, listener));
-    }
-    else
-    {
-      throw new NotImplementedException("I haven't created any other event listeners yet :o");
-    }
-  }
+    => ObjDb.StopListening(eventType, listener, targetID);
 
-  public void RemoveListenersBySourceId(ulong srcId)
-  {
-    ObjDb.EndOfRoundListeners = [.. ObjDb.EndOfRoundListeners.Where(l => l.SourceId != srcId)];
-  }
+  public void RemoveListenersBySourceId(ulong srcId) => ObjDb.RemoveListenersBySourceId(srcId);
 
-  // Remove listener from all events it might be listening for,
-  public void RemoveListener(IGameEventListener listener)
-  {
-    ObjDb.EndOfRoundListeners.Remove(listener);
-
-    Stack<int> indexes = [];
-    for (int j = 0; j < ObjDb.DeathWatchListeners.Count; j++)
-    {
-      if (ObjDb.DeathWatchListeners[j].Item2 == listener)
-        indexes.Push(j);
-    }
-
-    while (indexes.Count > 0)
-      ObjDb.DeathWatchListeners.RemoveAt(indexes.Pop());
-  }
+  // Remove listener from all events it might be listening for
+  public void RemoveListener(IGameEventListener listener) => ObjDb.RemoveListener(listener);
 
   public List<string> OwnedItemPickedUp(List<ulong> ownerIDs, Actor picker, ulong itemID)
   {

@@ -173,12 +173,43 @@ class GameObjectDB
   public Dictionary<Loc, ulong> _actorLocs = [];
   public Dictionary<ulong, GameObj> Objs = [];
 
-  // This might (probably will) expand into a hashtable of 
+  // This might (probably will) expand into a hashtable of
   // UIEventType mapped to a list of listeners
   public List<IGameEventListener> EndOfRoundListeners { get; set; } = [];
   public List<(ulong, IGameEventListener)> DeathWatchListeners { get; set; } = [];
   public HashSet<Loc> LocListeners { get; set; } = [];
   public List<ConditionalEvent> ConditionalEvents { get; set; } = [];
+
+  public void RegisterListener(GameEventType eventType, IGameEventListener listener, ulong targetID = 0)
+  {
+    if (eventType == GameEventType.EndOfRound)
+      EndOfRoundListeners.Add(listener);
+    else if (eventType == GameEventType.Death)
+      DeathWatchListeners.Add((targetID, listener));
+    else
+      throw new NotImplementedException("I haven't created any other event listeners yet :o");
+  }
+
+  public void StopListening(GameEventType eventType, IGameEventListener listener, ulong targetID = 0)
+  {
+    if (eventType == GameEventType.EndOfRound)
+      EndOfRoundListeners.Remove(listener);
+    else if (eventType == GameEventType.Death)
+      DeathWatchListeners.Remove((targetID, listener));
+    else
+      throw new NotImplementedException("I haven't created any other event listeners yet :o");
+  }
+
+  public void RemoveListener(IGameEventListener listener)
+  {
+    EndOfRoundListeners.Remove(listener);
+    DeathWatchListeners.RemoveAll(t => t.Item2 == listener);
+  }
+
+  public void RemoveListenersBySourceId(ulong srcId)
+  {
+    EndOfRoundListeners = [.. EndOfRoundListeners.Where(l => l.SourceId != srcId)];
+  }
 
   public Player? FindPlayer()
   {
