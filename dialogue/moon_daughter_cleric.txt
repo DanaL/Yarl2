@@ -29,7 +29,10 @@
 
   ( (AND (= RELIGION "Moon Daughter") (< MAIN_QUEST_STATUS 2))
     (
-        (say (pick ("The Moon Daughters value those who act with a subtle touch.")))
+        (say (pick ("The Moon Daughters value those who act with a subtle touch."
+                    "Delve into the ancient ruins, slip pass the monsters lurking therein. Learn what you can about the evil that is stirring."
+                    "Long ago we build a monument to the moon's light deep underground."
+              )))
     )
   )
 )
