@@ -240,7 +240,7 @@ class Traps
         int i = gs.Rng.Next(opts.Count);
         Loc spawnLoc = opts[i];
         opts.RemoveAt(i);
-        Actor? monster = gs.LevelAppropriateMonster(spawnLoc.DungeonID, spawnLoc.Level);
+        Actor? monster = MonsterSpawner.LevelAppropriate(gs.CurrentDungeon, gs.ObjDb, gs.Rng, spawnLoc.DungeonID, spawnLoc.Level);
         if (monster is not null)
         {          
           gs.ObjDb.AddNewActor(monster, spawnLoc);

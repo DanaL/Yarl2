@@ -4672,7 +4672,7 @@ class UseWandAction(GameState gs, Actor actor, WandTrait wand, ulong wandId) : A
     
     // We don't need to replace the player's pending action here because 
     // there's no input needed from the player
-    SummonAction summon = new(Actor!.Loc, GameState.RandomMonster(Actor.Loc.DungeonID), 1, GameState) { Actor = Actor };
+    SummonAction summon = new(Actor!.Loc, MonsterSpawner.Random(GameState.Campaign, GameState.Rng, Actor.Loc.DungeonID), 1, GameState) { Actor = Actor };
     Actor.QueueAction(summon);
   }
 }

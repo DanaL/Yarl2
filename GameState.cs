@@ -1153,10 +1153,10 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     // conditions should affect it
     if (CurrentMap.HasFeature(MapFeatures.NoRandomEncounters) && Rng.Next(60) == 0)
     {
-      SpawnMonster();
+      MonsterSpawner.Spawn(CurrentDungeon, ObjDb, Rng, CurrDungeonID, CurrLevel, CurrentMap, LastPlayerFoV);
     }
 
-    // Note to self: you build the list like this because as part of their
+  // Note to self: you build the list like this because as part of their
     // EventAlert() call, a listener might remove itself from the list of
     // listeners
     List<IGameEventListener> listeners = [];
@@ -1293,88 +1293,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     }
 
     Player.CalcStress();
-  }
-
-  void SpawnMonster()
-  {
-    if (LevelAppropriateMonster(CurrDungeonID, CurrLevel) is not Actor monster)
-      return;
-
-    List<Loc> openLoc = [];
-    Map map = CurrentMap;
-    for (int r = 0; r < map.Height; r++)
-    {
-      for (int c = 0; c < map.Width; c++)
-      {
-        Loc loc = new(CurrDungeonID, CurrLevel, r, c);
-
-        if (map.TileAt(r, c).Type != TileType.DungeonFloor)
-          continue;
-        if (ObjDb.Occupied(loc) || ObjDb.AreBlockersAtLoc(loc))
-          continue;
-
-        // This prevents a monster from being spawned on top of a campfire, lol
-        var items = ObjDb.ItemsAt(loc);
-        if (items.Count > 0 && items.Any(i => i.HasTrait<AffixedTrait>()))
-          continue;
-
-        openLoc.Add(loc);
-      }
-    }
-
-    if (openLoc.Count == 0)
-      return;
-
-    // prefer spawning the monster where the player can't see it
-    List<Loc> outOfSight = [.. openLoc.Where(l => !LastPlayerFoV.ContainsKey(l))];
-    if (outOfSight.Count > 0)
-      openLoc = outOfSight;
-
-    Loc spawnPoint = openLoc[Rng.Next(openLoc.Count)];
-    monster.Loc = spawnPoint;
-    ObjDb.AddNewActor(monster, spawnPoint);
-  }
-
-  public Actor? LevelAppropriateMonster(int dungeonId, int level)
-  {
-    Dungeon dungeon = Campaign.Dungeons[dungeonId];
-
-    int monsterLevel = level;
-    if (monsterLevel > 0)
-    {
-      double roll = Rng.NextDouble();
-      if (roll > 0.95)
-        monsterLevel += 2;
-      else if (roll > 0.8)
-        monsterLevel += 1;
-      if (monsterLevel > dungeon.LevelMaps.Count)
-        monsterLevel = dungeon.LevelMaps.Count;
-    }
-
-    monsterLevel = int.Min(monsterLevel, dungeon.MonsterDecks.Count - 1);
-    if (monsterLevel == -1 || monsterLevel >= dungeon.MonsterDecks.Count)
-      return null;
-
-    MonsterDeck deck = dungeon.MonsterDecks[monsterLevel];
-    if (deck.Indexes.Count == 0)
-      deck.Reshuffle(Rng);
-    string m = deck.Monsters[deck.Indexes.Dequeue()];
-
-    return MonsterFactory.Get(m, ObjDb, Rng);
-  }
-
-  public string RandomMonster(int dungeonId)
-  {
-    if (dungeonId == 0)
-    {
-      // I don't yet have a monster deck for the wildneress
-      return Rng.NextDouble() < 0.5 ? "wolf" : "dire bat";
-    }
-
-    Dungeon dungeon = Campaign.Dungeons[dungeonId];
-    MonsterDeck deck = dungeon.MonsterDecks[Rng.Next(dungeon.MonsterDecks.Count)];
-
-    return deck.Monsters[Rng.Next(deck.Monsters.Count)];
   }
 
   // At the moment I can't use ResolveActorMove because it calls
