@@ -34,7 +34,8 @@ class Treasure
       (ItemNames.SCROLL_TREASURE_DETECTION, 1), (ItemNames.SCROLL_TRAP_DETECTION, 1), (ItemNames.SKELETON_KEY, 1), (ItemNames.PICKAXE, 1),
       (ItemNames.POTION_HEROISM, 1), (ItemNames.POTION_DESCENT, 1), (ItemNames.SCROLL_STAINLESS, 1),
       (ItemNames.POTION_FORGETFULNESS, 1), (ItemNames.EMERGENCY_DOOR, 1), (ItemNames.KNOCKBACK_ARROW, 3), (ItemNames.LONGBOW, 1),
-      (ItemNames.ARROW_BANISHMENT, 3), (ItemNames.SPIDER_ARROW, 3), (ItemNames.SILVER_ARROW, 3), (ItemNames.YENDORIAN_SODA, 1)
+      (ItemNames.ARROW_BANISHMENT, 3), (ItemNames.SPIDER_ARROW, 3), (ItemNames.SILVER_ARROW, 3), (ItemNames.YENDORIAN_SODA, 1),
+      (ItemNames.WAND_SUMMONING, 1)
   ];
 
   static readonly List<(ItemNames, int)> GoodItems = [
