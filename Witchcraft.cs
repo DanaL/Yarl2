@@ -898,6 +898,7 @@ class SpellcastMenu : Inputer
   string PopupText { get; set; } = "";
   int PopupRow { get; set; } = -1;
   List<string> SpellList { get; set; } = [];
+  List<string> SpellsNoFocus { get; set; } = [];
 
   public SpellcastMenu(GameState gs) : base(gs)
   {       
@@ -929,7 +930,11 @@ class SpellcastMenu : Inputer
     else
     {
       SpellList = [..GS.Player.SpellsKnown
-                        .Where(s => Spells.NoFocus(s))
+                        .Where(Spells.NoFocus)
+                        .Select(s => s.CapitalizeWords())];
+
+      SpellsNoFocus = [..GS.Player.SpellsKnown
+                        .Where(s => !Spells.NoFocus(s))
                         .Select(s => s.CapitalizeWords())];
     }
   }
