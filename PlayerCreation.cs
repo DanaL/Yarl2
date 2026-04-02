@@ -607,6 +607,7 @@ class TricksterBlessingTrait : MoonDaughtersBlessingTrait
 {
   public override void Apply(GameObj granter, GameState gs)
   {
+    SourceId = granter.ID;
     QuietTrait quiet = new() { SourceId = granter.ID };
     gs.Player.Traits.Add(quiet);
 

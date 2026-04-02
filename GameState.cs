@@ -1156,7 +1156,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       MonsterSpawner.Spawn(CurrentDungeon, ObjDb, Rng, CurrDungeonID, CurrLevel, CurrentMap, LastPlayerFoV);
     }
 
-  // Note to self: you build the list like this because as part of their
+    // Note to self: you build the list like this because as part of their
     // EventAlert() call, a listener might remove itself from the list of
     // listeners
     List<IGameEventListener> listeners = [];

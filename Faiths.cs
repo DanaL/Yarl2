@@ -13,10 +13,8 @@ namespace Yarl2;
 class Faiths
 {
   public static void RemoveOtherFaithBlessings<T>(GameState gs) where T : BlessingTrait
-  {
-    Player p = gs.Player;
-
-    List<Trait> currBlessings = [.. p.Traits.Where(t => t is BlessingTrait)];
+  {    
+    List<Trait> currBlessings = [.. gs.Player.Traits.Where(t => t is BlessingTrait)];
     foreach (var t in currBlessings)
     {
       if (t is BlessingTrait bt && t is not T)
