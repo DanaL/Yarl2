@@ -12,18 +12,23 @@ namespace Yarl2;
 
 class Faiths
 {
-  public static void TricksterBlessing(Actor cleric, GameState gs)
+  public static void RemoveOtherFaithBlessings<T>(GameState gs) where T : BlessingTrait
   {
     Player p = gs.Player;
 
     List<Trait> currBlessings = [.. p.Traits.Where(t => t is BlessingTrait)];
     foreach (var t in currBlessings)
     {
-      if (t is BlessingTrait bt && t is not MoonDaughtersBlessingTrait)
+      if (t is BlessingTrait bt && t is not T)
       {
         bt.Remove(gs);
       }
     }
+  }
+
+  public static void TricksterBlessing(Actor cleric, GameState gs)
+  {
+    RemoveOtherFaithBlessings<MoonDaughtersBlessingTrait>(gs);
     
     var blessing = new TricksterBlessingTrait() { OwnerID = gs.Player.ID };
     blessing.Apply(cleric, gs);

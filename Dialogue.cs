@@ -1727,7 +1727,6 @@ class DialogueInterpreter
     
     //Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Reaver]: Bring Huntokar's wrath to your foes, turning you into a frightening presence!", opt++, new ScriptReaverBlessing()));
     //Options.Add(new DialogueOption("The [ICEBLUE Blessing of Embers]: Huntokar will surround you in holy fire and immolate evil you face!", opt++, new ScriptEmberBlessing()));
-    //Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Trickster]: Draw upon Huntokars's mischevious aspects and elude your foes!", opt++, new ScriptTricksterBlessing()));
     
     int lastHWPurchase = mob.Stats[Attribute.ShopMenu].Curr;
     int currTurn = (int)(gs.Turn % int.MaxValue);
@@ -1746,6 +1745,8 @@ class DialogueInterpreter
 
   static void EvalChampionBlessing(Actor mob, GameState gs)
   {
+    Faiths.RemoveOtherFaithBlessings<HuntokarBlessingTrait>(gs);
+
     ChampionBlessingTrait blessing = new() { SourceId = mob.ID, OwnerID = gs.Player.ID };
     blessing.Apply(mob, gs);
     
@@ -1754,6 +1755,8 @@ class DialogueInterpreter
 
   static void EvalPaladinBlessing(Actor mob, GameState gs)
   {
+    Faiths.RemoveOtherFaithBlessings<HuntokarBlessingTrait>(gs);
+
     PaladinBlessingTrait blessing = new() { SourceId = mob.ID, OwnerID = gs.Player.ID };
     blessing.Apply(mob, gs);
     
@@ -1786,6 +1789,8 @@ class DialogueInterpreter
 
   static void EvalWinterBlessing(Actor mob, GameState gs)
   {
+    Faiths.RemoveOtherFaithBlessings<HuntokarBlessingTrait>(gs);
+    
     WinterBlessingTrait winter = new() { SourceId = mob.ID, OwnerID = gs.Player.ID };
     winter.Apply(mob, gs);
     
