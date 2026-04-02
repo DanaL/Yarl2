@@ -10,6 +10,14 @@
           )
         )
       ))
+
+    ((= RELIGION "Moon Daughter") (        
+        (def lines '("Do you really wish to go down that path?" 
+                     "You know Huntokar has much to offer to you."
+                     "I try to keep an open mind but the Moon Daughters faith has never seemed entirely wholesome to me."))
+      )
+    )
+
     (else (
         (say "Greetings, [GREEN Child]. ")
     

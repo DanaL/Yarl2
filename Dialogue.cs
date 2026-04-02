@@ -100,7 +100,7 @@ class ScriptScanner(string src)
         else if (IsDigit(c))
           Number();
         else
-          throw new Exception($"Unexpected character: {c}.");
+          throw new Exception($"Unexpected character: {c}");
         break;
     }
   }
