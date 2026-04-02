@@ -365,7 +365,7 @@ class Wilderness(Rng rng, int length)
   static void SetBorderingWater(Map map, int length)
   {
     int center = length / 2;
-    int radius = center - 1;
+    int radius = (int) Math.Sqrt(center * center + center * center) - 7;
 
     for (int r = 0; r < length; r++)
     {
@@ -397,9 +397,8 @@ class Wilderness(Rng rng, int length)
     MidpointDisplacement(grid, 0, 0, Length);
     SmoothGrid(grid);
 
-    var map = ToMap(grid);
-    map = TweakTreesAndGrass(map, Rng);
-
+    Map map = TweakTreesAndGrass(ToMap(grid), Rng);
+    
     DrawRivers(map);
 
     // I want the outer perimeter to be deep water/ocean
