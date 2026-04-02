@@ -335,23 +335,27 @@ class Popup : IPopup
   public void SetDefaultTextColour(Colour colour) => DefaultTextColour = colour;
 }
 
-class PopupMenu(string title, List<string> menuItems) : IPopup
+class PopupMenu(string title, List<string> menuItems, string footer = "") : IPopup
 {
   public int SelectedRow { get; set; } = 0;
-  public bool FullWidth { get; set; }
+  public int Width { get; set; } = 0;
+
   Colour DefaultTextColour { get; set; } = Colours.WHITE;
   string Title { get; set; } = title;
   List<string> MenuItems { get; set; } = menuItems;
-  
+  string Footer { get; set; } = footer;
+
   void IPopup.Draw(UserInterface ui)
   {
-    int width = MenuItems.Select(i => i.Length).Max() + 4;
+    int width = MenuItems.Max(i => i.Length) + 4;
     if (Title.Length + 4 > width)
       width = Title.Length + 5;
+    if (Width > width)
+      width = Width + 4;
 
     int col = (UserInterface.ViewWidth - width) / 2;
     int row = 2;
-    
+
     if (Title.Length > 0)
     {
       int left = int.Max(2, (width - Title.Length) / 2 - 2);
@@ -379,6 +383,53 @@ class PopupMenu(string title, List<string> menuItems) : IPopup
       else
       {
         ui.WriteLine($"│ {item.PadRight(width - 4)} │", row++, col, width, DefaultTextColour);
+      }
+    }
+
+    if (Footer != "")
+    {
+      string blankLine = "│ " + new string(' ', width - 4) + " │";
+      ui.WriteLine(blankLine, row++, col, width, DefaultTextColour);
+
+      LineScanner scanner = new(Footer);
+      var words = scanner.Scan();
+
+      int currWidth = 0;
+      List<(Colour, string)> line = [(DefaultTextColour, "│ ")];
+      int w = 0;
+      while (w < words.Count)
+      {
+        var (colour, word) = words[w++];
+
+        if (word == "\r")
+          continue;
+
+        if (word == "\n")
+        {
+          FlushLine();
+        }
+        else if (word.Length < width - currWidth - 2)
+        {
+          line.Add((colour, word));
+          currWidth += word.Length;
+        }
+        else
+        {
+          --w;
+          FlushLine();
+        }
+      }
+      FlushLine();
+
+      void FlushLine()
+      {
+        int actualWidth = line.Sum(t => t.Item2.Length);
+        int padding = width - actualWidth;
+        if (padding > 0)
+          line.Add((DefaultTextColour, "│".PadLeft(padding, ' ')));
+        ui.WriteText(line.ToArray(), row++, col);
+        line = [(DefaultTextColour, "│ ")];
+        currWidth = 0;
       }
     }
 

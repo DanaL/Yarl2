@@ -914,15 +914,15 @@ class SpellcastMenu : Inputer
 
   void SetSpellMenu()
   {
-    bool focusEquiped;
+    bool focusEquipped;
     if (GS.Player.Inventory.FocusEquipped())
-      focusEquiped = true;
+      focusEquipped = true;
     else if (GS.Player.Inventory.ReadiedWeapon() is Item rw && rw.Name == "quarterstaff")
-      focusEquiped = true;
+      focusEquipped = true;
     else
-      focusEquiped = false;
+      focusEquipped = false;
 
-    if (focusEquiped)
+    if (focusEquipped)
     {
       SpellList = [..GS.Player.SpellsKnown
                         .Select(s => s.CapitalizeWords())];
@@ -1072,7 +1072,19 @@ class SpellcastMenu : Inputer
   {    
     if (SpellSelection)
     {
-      GS.UIRef().SetPopup(new PopupMenu("Cast which spell?", SpellList) { SelectedRow = row });
+      int width = 0;
+      string footer = "";
+      foreach (string nf in SpellsNoFocus)
+      {
+        footer += $"[grey {nf}*]\n";
+      }
+      if (footer != "")
+      {
+        footer += "\n[grey *needs a spell focus]";  
+        width = 25;
+      }
+
+      GS.UIRef().SetPopup(new PopupMenu("Cast which spell?", SpellList, footer) { SelectedRow = row, Width = width });
     }
     else
     {
