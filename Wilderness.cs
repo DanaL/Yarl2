@@ -131,42 +131,25 @@ class Wilderness(Rng rng, int length)
     return candidates;
   }
 
-  // Try to draw up to three rivers on the map
   void DrawRivers(Map map)
   {
     List<int> opts = [0, 1, 2];
     opts.Shuffle(Rng);
-
     int third = Length / 3;
 
     foreach (int o in opts)
     {
-      if (o == 0)
+      List<(int, int)> startCandidates = o switch
       {
-        var startCandidates = FindRiverStarts(map, 2, third);
-        if (startCandidates.Count > 0)
-        {
-          var startLoc = startCandidates[Rng.Next(startCandidates.Count)];
-          DrawARiver(map, startLoc);
-        }
-      }
-      else if (o == 1)
+        0 => FindRiverStarts(map, 2, third),
+        1 => FindRiverStarts(map, third, third * 2),
+        _ => FindRiverStarts(map, third * 2, Length - 2)
+      };
+
+      if (startCandidates.Count > 0)
       {
-        var startCandidates = FindRiverStarts(map, third, third * 2);
-        if (startCandidates.Count > 0)
-        {
-          var startLoc = startCandidates[Rng.Next(startCandidates.Count)];
-          DrawARiver(map, startLoc);
-        }
-      }
-      else
-      {
-        var startCandidates = FindRiverStarts(map, third * 2, Length - 2);
-        if (startCandidates.Count > 0)
-        {
-          var startLoc = startCandidates[Rng.Next(startCandidates.Count)];
-          DrawARiver(map, startLoc);
-        }
+        var startLoc = startCandidates[Rng.Next(startCandidates.Count)];
+        DrawARiver(map, startLoc);
       }
     }
   }
@@ -231,27 +214,27 @@ class Wilderness(Rng rng, int length)
         {
           if (c >= 1)
           {
-            avg += grid[(r - 1), +c - 1];
+            avg += grid[r - 1, +c - 1];
             count += 1;
           }
-          avg += grid[(r - 1), +c];
+          avg += grid[r - 1, +c];
           count += 1;
           if (c + 1 < Length)
           {
-            avg += grid[(r - 1), +c + 1];
+            avg += grid[r - 1, +c + 1];
             count += 1;
           }
         }
 
         if (r > 1 && c >= 1)
         {
-          avg += grid[(r - 1), c - 1];
+          avg += grid[r - 1, c - 1];
           count += 1;
         }
 
         if (r > 1 && c + 1 < Length)
         {
-          avg += grid[(r - 1), c + 1];
+          avg += grid[r - 1, c + 1];
           count += 1;
         }
 
@@ -259,14 +242,14 @@ class Wilderness(Rng rng, int length)
         {
           if (c >= 1)
           {
-            avg += grid[(r - 1), c - 1];
+            avg += grid[r - 1, c - 1];
             count += 1;
           }
-          avg += grid[(r - 1), c];
+          avg += grid[r - 1, c];
           count += 1;
           if (c + 1 < Length)
           {
-            avg += grid[(r - 1), c + 1];
+            avg += grid[r - 1, c + 1];
             count += 1;
           }
         }
@@ -281,7 +264,7 @@ class Wilderness(Rng rng, int length)
     int avg = (grid[r, c]
                     + grid[r, c + width - 1]
                     + grid[r + width - 1, c]
-                    + grid[(r + width - 1), c + width - 1]) / 4;
+                    + grid[r + width - 1, c + width - 1]) / 4;
 
 
     int f = Fuzz();
@@ -305,7 +288,7 @@ class Wilderness(Rng rng, int length)
     }
     if (width <= r)
     {
-      avg += grid[(r - width), +c];
+      avg += grid[r - width, +c];
       count += 1;
     }
     if (r + width < Length)
@@ -362,7 +345,7 @@ class Wilderness(Rng rng, int length)
         }
         else if (v < 165)
         {
-          tt = v % 2 == 0 ? tt = TileType.Grass : PickTree(Rng, ConiferousAmount);
+          tt = v % 2 == 0 ? TileType.Grass : PickTree(Rng, ConiferousAmount);
         }
         else if (Rng.NextDouble() < 0.9)
         {
