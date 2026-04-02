@@ -299,7 +299,7 @@ class ArrowShotAction(GameState gs, Actor actor, Item? bow, Item ammo, int attac
       }
     }
 
-    if (pts.Count > 0)
+    if (pts.Count > 0 || targetHit)
     {
       var anim = new ArrowAnimation(GameState, pts, _ammo.Glyph.Lit);
       GameState.UIRef().PlayAnimation(anim, GameState);
