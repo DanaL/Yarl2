@@ -4823,6 +4823,11 @@ class HighlightLocAction(GameState gs, Actor actor, HighlightLocAnimation anim) 
       else if (_cyclopedia.TryGetValue(item.Name, out var v))
         details = v.Text;
 
+      if (details == "" && item.Type == ItemType.Document)
+      {
+        details = "A document, perhaps containing valuable information. Or perhaps lies.";
+      }
+
       return new LocDetails(title, details, item.Glyph.Ch);
     }
 

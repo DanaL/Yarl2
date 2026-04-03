@@ -1555,6 +1555,10 @@ class InventoryDetails : Inputer
       {
         desc = entry.Text;
       }
+      else if (item.Type == ItemType.Document)
+      {
+        desc = "A document, perhaps containing valuable information. Or perhaps lies.";
+      }
 
       int width = Math.Max(desc.Length, title.Length + 1);
 
