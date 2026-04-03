@@ -13,7 +13,7 @@
   ((AND (= RELIGION "Huntokar") (< FAITH 2))
       (
         (say (pick ("Huntokar is a fine deity and all and #TOWN_PRIEST_NAME means well but the Moon Daughters offer another way. You might choose to follow their path."
-                    "The Moon Daughters and Huntokar are not foes. They simply differ on means and methods. You might choose to follow their path."
+                    "The Moon Daughters and Huntokar are not foes. They simply differ on means and methods. And the daughters would welcome you."
                       )
       ))
 
