@@ -337,16 +337,20 @@ abstract class Actor : GameObj, IZLevel
 
     if (HasTrait<SilverAllergyTrait>())
     {
-      bool silver = false;
+      Item? silverWeapon = null;
       if (src is Item item && item.MetalType() == Metals.Silver)
-        silver = true;
-      else if (src is Actor att && att.Inventory.ReadiedWeapon() is Item weapon && weapon.MetalType() == Metals.Silver)
-        silver = true;
+      {
+        silverWeapon = item;
+      }        
+      else if (src is Actor att && att.Inventory.ReadiedWeapon() is Item equipped && equipped.MetalType() == Metals.Silver) 
+      {
+        silverWeapon = equipped;
+      }
 
-      if (silver)
+      if (silverWeapon is not null)
       {
         total += gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7);
-        msg += $" {src!.FullName.DefArticle().Capitalize()} sears {FullName}!";
+        msg += $" {silverWeapon.FullName.DefArticle().Capitalize()} sears {FullName}!";
       }
     }
     
