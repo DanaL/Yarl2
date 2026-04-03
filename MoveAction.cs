@@ -73,8 +73,10 @@ class MoveAction(GameState gameState, Actor actor, Loc loc, bool involuntary) : 
     return false;
   }
 
-  public static bool StuckOnLoc(Actor actor, Loc loc, GameState gs, UserInterface ui)
+  public static bool StuckOnLoc(Actor actor, Loc loc, GameState gs)
   {
+    UserInterface ui = gs.UIRef();
+
     // Is something blocking your egress from your loc?
     if (gs.ObjDb.ItemsAt(loc).Any(item => item.HasTrait<BlockTrait>()))
     {
@@ -91,7 +93,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc, bool involuntary) : 
       }
 
       if (actor is Player)
-        gs.UIRef().SetPopup(new Popup(msg, "", -1, -1));
+        ui.SetPopup(new Popup(msg, "", -1, -1));
       ui.AlertPlayer(msg);
 
       return true;
@@ -211,16 +213,15 @@ class MoveAction(GameState gameState, Actor actor, Loc loc, bool involuntary) : 
   public override double Execute()
   {
     base.Execute();
-    UserInterface ui = GameState!.UIRef();
-
-    if (StuckOnLoc(Actor!, Loc, GameState!, ui))
+    
+    if (StuckOnLoc(Actor!, Loc, GameState))
       return 1.0;
 
     if (!GameState.CurrentMap.InBounds(Loc.Row, Loc.Col))
     {
       // in theory this shouldn't ever happen...
       if (Actor is Player)
-        ui.AlertPlayer("You cannot go that way!");
+        GameState.UIRef().AlertPlayer("You cannot go that way!");
 
       return 0.0;
     }
@@ -240,7 +241,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc, bool involuntary) : 
 
     if (Actor is Player)
     {
-      ui.AlertPlayer(GameState.LocDesc(Actor.Loc));
+      GameState.UIRef().AlertPlayer(GameState.LocDesc(Actor.Loc));
       GameState.Noise(Actor.Loc.Row, Actor.Loc.Col, Actor.GetMovementNoise());
     }
 
@@ -257,8 +258,8 @@ class BumpAction(GameState gameState, Actor actor, Loc loc, bool involuntary) : 
   
   public override double Execute()
   {
-    UserInterface ui = GameState!.UIRef();
-    Player player = GameState!.Player;
+    UserInterface ui = GameState.UIRef();
+    Player player = GameState.Player;
 
     // If the destination tile is a MonsterWall, the player attacks the monster
     if (GameState.TileAt(Loc) is MonsterWall mw)
@@ -287,14 +288,14 @@ class BumpAction(GameState gameState, Actor actor, Loc loc, bool involuntary) : 
           msg = $"You pat {occ.FullName}.";
         else
           msg = $"You give {occ.FullName} some scritches.";
-        GameState.UIRef().SetPopup(new Popup(msg, "", -1, -1));
+        ui.SetPopup(new Popup(msg, "", -1, -1));
       }
       else if (Actor.Traits.OfType<GrappledTrait>().FirstOrDefault() is GrappledTrait grappled && occ!.ID != grappled.GrapplerID)
       {
         if (GameState.ObjDb.GetObj(grappled.GrapplerID) is Actor grappler)
         {
           string s = $"You cannot attack {occ.FullName} while grappled by {grappler.FullName}!";
-          GameState.UIRef().AlertPlayer(s);
+          ui.AlertPlayer(s);
         }
       }
       else if (occ is not null && !Battle.PlayerWillAttack(occ))
@@ -340,7 +341,7 @@ class BumpAction(GameState gameState, Actor actor, Loc loc, bool involuntary) : 
       else if (_lockedDoorMenu && tile.Type == TileType.LockedDoor)
       {
         ui.AlertPlayer(BlockedMessage(tile));
-        GameState.UIRef().SetInputController(new LockedDoorMenu(ui, GameState, Loc));
+        ui.SetInputController(new LockedDoorMenu(ui, GameState, Loc));
         return 0.0;
       }
       else if (!GameState.InWilderness && tile.Type == TileType.DeepWater)
@@ -396,10 +397,10 @@ class BumpAction(GameState gameState, Actor actor, Loc loc, bool involuntary) : 
         // create a separate class from Lever.
         Lever lever = (Lever)tile;
         if (lever.On)
-          GameState.UIRef().AlertPlayer("This lever has already been triggered.");
+          ui.AlertPlayer("This lever has already been triggered.");
         else
         {
-          GameState.UIRef().AlertPlayer("You hear a rumble and the grinding of machinery.");
+          ui.AlertPlayer("You hear a rumble and the grinding of machinery.");
           lever.On = true;
           Loc bridge = lever.Gate;
           do 

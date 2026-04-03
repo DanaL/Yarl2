@@ -1028,7 +1028,7 @@ abstract class PortalAction(GameState gs) : Action(gs)
     Loc start = player.Loc;        
     var (dungeon, level, _, _) = portal.Destination;
     
-    if (MoveAction.StuckOnLoc(player, portal.Destination, GameState, GameState.UIRef()))
+    if (MoveAction.StuckOnLoc(player, portal.Destination, GameState))
     {
       return;  
     }
@@ -4400,7 +4400,7 @@ class SwimAction(GameState gs, Actor actor, bool up) : Action(gs, actor)
     Map nextLevel = GameState.CurrentDungeon.LevelMaps[nextLevelNum];
     Loc nextLoc = GameState.Player.Loc with { Level = nextLevelNum };
 
-    if (MoveAction.StuckOnLoc(GameState.Player, nextLoc, GameState, GameState.UIRef()))
+    if (MoveAction.StuckOnLoc(GameState.Player, nextLoc, GameState))
     {
       return 1.0;  
     }
