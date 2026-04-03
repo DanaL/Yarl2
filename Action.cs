@@ -1028,6 +1028,11 @@ abstract class PortalAction(GameState gs) : Action(gs)
     Loc start = player.Loc;        
     var (dungeon, level, _, _) = portal.Destination;
     
+    if (MoveAction.StuckOnLoc(player, portal.Destination, GameState, GameState.UIRef()))
+    {
+      return;  
+    }
+
     bool trip = level > start.Level && GameState.Player.HasTrait<TipsyTrait>() && GameState.Rng.NextDouble() < 0.33;
 
     GameState.ActorEntersLevel(GameState.Player!, dungeon, level);
@@ -1084,6 +1089,7 @@ class DownstairsAction(GameState gameState) : PortalAction(gameState)
     // Bit of a kludge: because we change current level in the UsePortal() 
     // call, the list of performers is rebuilt and the actors all get their
     // energy recharged, but this happens 
+
     return 1.0;
   }
 }
@@ -4393,6 +4399,12 @@ class SwimAction(GameState gs, Actor actor, bool up) : Action(gs, actor)
 
     Map nextLevel = GameState.CurrentDungeon.LevelMaps[nextLevelNum];
     Loc nextLoc = GameState.Player.Loc with { Level = nextLevelNum };
+
+    if (MoveAction.StuckOnLoc(GameState.Player, nextLoc, GameState, GameState.UIRef()))
+    {
+      return 1.0;  
+    }
+
     Tile nextTile = nextLevel.TileAt(nextLoc.Row, nextLoc.Col);
     if (Up && !(nextTile.Type == TileType.Underwater || nextTile.Type == TileType.Lake))
     {
