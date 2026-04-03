@@ -418,19 +418,20 @@ class ChopWoodAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
 
   public override double Execute()
   {
-    if (!Tool.Equipped)
-    {
-      var (equipResult, _) = ((Player)Actor!).Inventory.ToggleEquipStatus(Tool.Slot);
-      if (equipResult != EquipingResult.Equipped)
-      {
-        GameState!.UIRef().SetPopup(new Popup($"You are unable to ready {Tool.Name.DefArticle()}!", "", -1, -1));
-        return 0.0;
-      }
-      else
-      {
-        GameState!.UIRef().AlertPlayer($"You equip {Tool.Name.DefArticle()}.");
-      }
-    }
+    // Experimenting with not required an axe to be equipped when chopping
+    // if (!Tool.Equipped)
+    // {
+    //   var (equipResult, _) = ((Player)Actor!).Inventory.ToggleEquipStatus(Tool.Slot);
+    //   if (equipResult != EquipingResult.Equipped)
+    //   {
+    //     GameState!.UIRef().SetPopup(new Popup($"You are unable to ready {Tool.Name.DefArticle()}!", "", -1, -1));
+    //     return 0.0;
+    //   }
+    //   else
+    //   {
+    //     GameState!.UIRef().AlertPlayer($"You equip {Tool.Name.DefArticle()}.");
+    //   }
+    // }
 
     if (Actor!.Traits.OfType<SwallowedTrait>().FirstOrDefault() is SwallowedTrait swallowed)
     {
