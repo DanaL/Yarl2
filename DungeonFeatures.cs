@@ -459,8 +459,7 @@ class CaptiveFeature
   }
 
   static void MakePrisoner(int cellRow, int cellCol, int dungeonId, int level, Map map, GameObjectDB objDb, FactDb factDb, Rng rng)
-  {
-    
+  {    
     Loc cell = new(dungeonId, level, cellRow, cellCol);
     NameGenerator ng = new(rng, Util.NamesFile);
 
@@ -470,7 +469,7 @@ class CaptiveFeature
     {
       Name = ng.GenerateName(rng.Next(5, 9)),
       Glyph = new Glyph('@', Colours.FAINT_PINK, Colours.PINK, Colours.BLACK, false),
-      Appearance = $"A disheveled, exhausted-looking {s}."
+      Appearance = $"disheveled, exhausted-looking {s}."
     };
     prisoner.Traits.Add(new VillagerTrait());
     prisoner.Traits.Add(new NamedTrait());
