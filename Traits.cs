@@ -2154,6 +2154,7 @@ class BoostMaxStatTrait : TemporaryTrait
     {
       Attribute.BaseHP => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more robust!",
       Attribute.HP => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more healthier!",
+      Attribute.MagicPoints => $"{"innate power".Possessive(target).Capitalize()} grows!",
       Attribute.Constitution => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more robust!",
       Attribute.Strength => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} stronger!",
       Attribute.Dexterity => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more agile!",

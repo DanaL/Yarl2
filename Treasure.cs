@@ -72,7 +72,8 @@ class Treasure
       (ItemNames.GASTON_BADGE, 1), (ItemNames.LESSER_BURLY_CHARM, 1), (ItemNames.LESSER_GRACE_CHARM, 1),
       (ItemNames.LESSER_HEALTH_CHARM, 1), (ItemNames.SMOULDERING_CHARM, 1), (ItemNames.TALISMAN_OF_CIRCUMSPECTION, 1),
       (ItemNames.TROLL_BROOCH, 1), (ItemNames.RUNE_OF_LASHING, 1), (ItemNames.FEARFUL_RUNE, 1), (ItemNames.RUNE_OF_PARRYING, 1),
-      (ItemNames.MOON_MANTLE, 1), (ItemNames.MOON_LYRE, 1), (ItemNames.PHALANX_PHOLIO_2, 1), (ItemNames.HALFLING_CUPCAKE, 1)
+      (ItemNames.MOON_MANTLE, 1), (ItemNames.MOON_LYRE, 1), (ItemNames.PHALANX_PHOLIO_2, 1), (ItemNames.HALFLING_CUPCAKE, 1),
+      (ItemNames.VIAL_SPRITE_BLOOD, 1)
   ];
 
   public static readonly List<ItemNames> Consumables = [

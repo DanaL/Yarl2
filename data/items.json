@@ -1625,5 +1625,18 @@
       "Consumable",
       "Stackable"
     ]
+  },
+  {
+    "Name": "VIAL_SPRITE_BLOOD",
+    "DescriptiveName": "vial of sprite blood",
+    "Type": "Potion",
+    "Value": 100,
+    "Glyph": "!,fadedpurple,purple,black,false",
+    "Traits": [
+      "SideEffect#100#BoostMaxStat#MagicPoints#1",
+      "Consumable",
+      "Stackable",
+      "CanApply"
+    ]
   }
 ]

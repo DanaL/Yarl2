@@ -787,3 +787,6 @@ A cupcake made by halflings, or OF halflings? Gastromancers debate. What's impor
 #
 yendorian soda
 A popular beverage from that land of magic and wizards. A perk me up when you've been casting too many spells.
+#
+vial of sprite blood
+Best not to think about this one too much, but it is said consuming the blood of a magical creature may increase your own magical power.
