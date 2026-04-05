@@ -178,7 +178,7 @@ abstract class Actor : GameObj, IZLevel
   // (Usually due to various versions of teleportation)
   public void ClearAnchors(GameState gs)
   {
-    List<Trait> toRemove = [.. Traits.Where(t => t is InPitTrait || t is GrappledTrait || t is SwallowedTrait)];
+    List<Trait> toRemove = [.. Traits.Where(t => t is InPitTrait || t is GrappledTrait)];
     foreach (Trait t in toRemove)
     {
       if (t is InPitTrait)

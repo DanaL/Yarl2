@@ -2098,6 +2098,18 @@ class GrapplingTrait : Trait
   public ulong VictimId { get; set; }
 
   public override string AsText() => $"Grappling#{VictimId}";
+
+  public void BreakGrapple(Actor actor, GameState gs)
+  {
+    if (gs.ObjDb.GetObj(VictimId) is GameObj obj)
+    {
+      List<GrappledTrait> grapples = [.. obj.Traits.OfType<GrappledTrait>().Where(gt => gt.GrapplerID == actor.ID)];
+      foreach (GrappledTrait g in grapples)
+        g.Remove(gs);
+    }
+
+    actor.Traits.Remove(this);
+  }
 }
 
 class HeavyTrait : Trait

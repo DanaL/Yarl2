@@ -4575,6 +4575,13 @@ class ScatterAction(GameState gs, Actor actor) : Action(gs, actor)
       GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, landingSpot, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
       
       victim.ClearAnchors(GameState);
+
+      List<GrapplingTrait> grapples = [.. victim.Traits.OfType<GrapplingTrait>()];
+      foreach (var gt in grapples)
+      {
+        gt.BreakGrapple(victim, GameState);
+      }
+
       GameState.ResolveActorMove(victim, loc, landingSpot);
     }
 
