@@ -982,7 +982,7 @@
     "Name": "SCROLL_DISARM",
     "DescriptiveName": "scroll of disarming",
     "Type": "Scroll",
-    "Value": 25,
+    "Value": 15,
     "Glyph": "?,white,grey,black,false",
     "Traits": [
       "Consumable",
