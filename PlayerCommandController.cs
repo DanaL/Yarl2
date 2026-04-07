@@ -275,9 +275,14 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
       Loc adj = gs.Player.Loc.Move(dr, dc);
       Loc adj2 = gs.Player.Loc.Move(dr * 2, dc * 2);
 
+      bool canMove = false, stuck = false;
       bool validTarget = !gs.ObjDb.Occupied(adj) && gs.ObjDb.Occupant(adj2) is Actor occ && Util.PlayerAwareOfActor(occ, gs) && Battle.PlayerWillAttack(occ);
-      bool canMove = MoveAction.CanMoveTo(gs.Player, gs.CurrentMap, adj, false);
-      bool stuck = MoveAction.StuckOnLoc(gs.Player, gs.Player.Loc, gs);
+      if (validTarget)
+      {
+        canMove = MoveAction.CanMoveTo(gs.Player, gs.CurrentMap, adj, false);
+        stuck = MoveAction.StuckOnLoc(gs.Player, gs.Player.Loc, gs);
+      }
+      
       if (validTarget && canMove && !stuck)
       {
         gs.Player.QueueAction(new LungeAttackAction(gs, gs.Player, adj, adj2));
