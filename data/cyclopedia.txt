@@ -790,3 +790,6 @@ A popular beverage from that land of magic and wizards. A perk me up when you've
 #
 vial of sprite blood
 Best not to think about this one too much, but it is said consuming the blood of a magical creature may increase your own magical power.
+#
+troubled spirit
+The ghost of an adventurer who died while terrified. These undead can now infect mortals with their dying fear. Plus also ghosts are just scary, you know?

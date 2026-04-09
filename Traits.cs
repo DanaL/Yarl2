@@ -4285,7 +4285,12 @@ class TraitFactory
     { "Frightened", (pieces, gameObj) => new FrightenedTrait()
       { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) }
     },
-    { "Frightening", (pieces, gameObj) => new FrighteningTrait() { SourceId = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2])} },
+    { "Frightening", (pieces, gameObj) => new FrighteningTrait() 
+      { 
+        SourceId = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]), 
+        DC = int.Parse(pieces[2])
+      } 
+    },
     { "FullBelly", (pieces, gameObj) => new FullBellyTrait()
       {
         VictimID = ulong.Parse(pieces[1]),
