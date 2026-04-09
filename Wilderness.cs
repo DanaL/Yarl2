@@ -749,7 +749,7 @@ class Wilderness(Rng rng, int length)
     Loc centreLoc = new(0, 0, row + 3, col + 3);
     factDb.Add(new LocationFact() { Desc = "Stone ring centre", Loc = centreLoc });
 
-    ItemFactory.CreateTimedLight(5, 20, 5, Colours.WHITE, Colours.WHITE, objDb, centreLoc);
+    ItemFactory.CreateTimedLight(2, 20, 5, Colours.BLACK, Colours.MOONLIGHT, objDb, centreLoc);
     
     return centreLoc;
     

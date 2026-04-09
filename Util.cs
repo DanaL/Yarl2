@@ -77,8 +77,9 @@ static class Colours
   public static readonly Colour AMBER = new(255, 191, 0, 255);
   public static readonly Colour BEIGE = new(212, 163, 115, 255);
   public static readonly Colour LIGHT_BEIGE = new (229, 206, 180, 255); 
+  public static readonly Colour MOONLIGHT = new(100, 110, 130, 255);
 
-  public static string ColourToText(Colour colour) => colour switch
+  public static string ColourToText(Colour colour) => colour switch 
   {
     _ when colour == WHITE        => "white",
     _ when colour == BLACK        => "black",
@@ -126,6 +127,7 @@ static class Colours
     _ when colour == AMBER        => "amber",
     _ when colour == BEIGE        => "beige",
     _ when colour == LIGHT_BEIGE  => "lightbeige",
+    _ when colour == MOONLIGHT    => "moonlight",
     _ => throw new Exception($"Hmm I don't know that colour {colour}")
   };
 
@@ -177,6 +179,7 @@ static class Colours
     "amber" => AMBER,
     "beige" => LIGHT_BEIGE,
     "lightbeige" => LIGHT_BEIGE,
+    "moonlight" => MOONLIGHT,
     _ => throw new Exception($"Hmm I don't know that colour {colour}")
   };
 

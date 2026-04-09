@@ -1796,6 +1796,9 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     _litPool.Clear();
     LitSqs.Clear();
 
+    var (hour, _) = CurrTime();
+    bool overworldDaytime = InWilderness && hour >= 5 && hour < 20;
+
     foreach (GameObj obj in ObjDb.ObjectsOnLevel(dungeonID, level))
     {
       (int lightRadius, Colour fgLightColour, Colour bgLightColour) = FindLight(obj);
@@ -1817,7 +1820,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
           _litPool[sq.Key] |= sq.Value;
 
         double scale;
-        if (InWilderness)
+        if (overworldDaytime)
         {
           scale = 1.0;
           fgLightColour = Colours.BLACK;
