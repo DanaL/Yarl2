@@ -138,17 +138,8 @@ abstract class GameObj : IZLevel
 
   public virtual List<(Colour, Colour, int)> Lights()
   {
-    List<(Colour, Colour, int)> lights = [];
-
-    foreach (Trait t in Traits)
-    {
-      if (t is LightSourceTrait ls)
-      {
-        lights.Add((ls.FgColour, ls.BgColour, ls.Radius));
-      }
-    }
-
-    return lights;
+    return [.. Traits.OfType<LightSourceTrait>()
+                 .Select(ls => (ls.FgColour, ls.BgColour, ls.Radius))];               
   }
 
   public virtual int TotalLightRadius()

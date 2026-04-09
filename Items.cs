@@ -476,6 +476,27 @@ class ItemFactory
     return light;
   }
 
+  public static void CreateTimedLight(int radius, int start, int end, Colour fg, Colour bg, GameObjectDB objDb, Loc loc)
+  {
+    Item light = new()
+    {
+      Name = "light", Type = ItemType.Environment, Value = 0,
+      Glyph = new(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
+    };
+    light.SetZ(-100);
+    
+    TimedLightTrait  tl = new() 
+    { 
+      OwnerID = light.ID, Radius = radius, Start = start, End = end,
+      FgColour = fg, BgColour = bg 
+    };
+    objDb.RegisterListener(GameEventType.EndOfRound, tl);    
+    light.Traits.Add(tl);
+
+    objDb.Add(light);
+    objDb.SetToLoc(loc, light);
+  }
+
   public static Item Lamp(GameObjectDB objDb, Dir dir)
   {
     char ch = dir switch

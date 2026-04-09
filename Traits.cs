@@ -456,7 +456,7 @@ class AbjurationBellTrait : Trait, IUSeable
     foreach (Loc adj in Util.Adj8Locs(caster.Loc))
     {
       List<Item> items = gs.ObjDb.ItemsAt(adj);
-      if (items.Where(i => i.HasTrait<DemonVisageTrait>()).FirstOrDefault() is Item demonVisage)
+      if (items.FirstOrDefault(i => i.HasTrait<DemonVisageTrait>()) is Item demonVisage)
       {
         sb.Append("\nThe demonic statue flares with red light, then explodes!");
 
@@ -1325,6 +1325,48 @@ class TemporaryChasmTrait : TemporaryTrait
 class ThiefTrait : Trait
 {
   public override string AsText() => "Thief";
+}
+
+sealed class TimedLightTrait : BasicTrait, IGameEventListener, IOwner
+{
+  public int Start { get; set; }
+  public int End { get; set; }
+  public int Radius { get; set; }
+  public Colour FgColour { get; set; }
+  public Colour BgColour { get; set; }
+  public ulong OwnerID { get; set; }
+  public ulong ObjId => OwnerID;
+  public bool Expired { get; set; } = false;
+  public bool Listening => true;
+  public GameEventType EventType => GameEventType.EndOfRound;
+  LightSourceTrait? _light = null;
+
+  public override string AsText() => $"TimedLight#{OwnerID}#{Start}#{End}#{Radius}#{Colours.ColourToText(FgColour)}#{Colours.ColourToText(BgColour)}";
+
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (gs.ObjDb.GetObj(OwnerID) is not Item item)
+    {
+      gs.ObjDb.RemoveListener(this);
+      return;
+    }
+    
+    var (hour, min) = gs.CurrTime();
+    int curr = hour * 60 + min;
+    bool active = Start <= End ? curr >= Start * 60 && curr <= End * 60
+                                : curr >= Start * 60 || curr <= End * 60;
+    
+    if (active && _light is null)
+    {
+      _light = new LightSourceTrait() { Radius = Radius, OwnerID = OwnerID, FgColour = FgColour, BgColour = BgColour };
+      item.Traits.Add(_light);
+    }
+    else if (!active && _light is not null)
+    {
+      item.Traits.Remove(_light);
+      _light = null;
+    }
+  }
 }
 
 class TipsyTrait : TemporaryTrait
@@ -3857,10 +3899,7 @@ sealed class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDes
   public bool Expired { get; set; } = false;
   public bool Listening => Lit;
 
-  public override string AsText()
-  {
-    return $"Torch#{OwnerID}#{Lit}#{Fuel}#{Expired}";
-  }
+  public override string AsText() => $"Torch#{OwnerID}#{Lit}#{Fuel}#{Expired}";
 
   public string ReceiveEffect(DamageType damageType, GameState gs, Item item, Loc loc)
   {
@@ -4543,6 +4582,12 @@ class TraitFactory
     { "Telepathy", (pieces, gameObj) => new TelepathyTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
     { "TemporaryChasm", (pieces, gameObj) => new TemporaryChasmTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "Thief", (pieces, gameObj) => new ThiefTrait() },
+    { "TimedLight", (pieces, gameObj) => new TimedLightTrait()
+      {
+        OwnerID = ulong.Parse(pieces[1]), Start = int.Parse(pieces[2]), End = int.Parse(pieces[3]), Radius = int.Parse(pieces[4]),
+        FgColour = Colours.TextToColour(pieces[5]), BgColour = Colours.TextToColour(pieces[6])
+      }
+    },
     { "Tipsy", (pieces, gameObj) => new TipsyTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "Torch", (pieces, gameObj) => new TorchTrait()
       {
