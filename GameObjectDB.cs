@@ -153,6 +153,28 @@ abstract class GameObj : IZLevel
 
     return lightRadius;
   }
+
+  public virtual (int, Colour, Colour) CalcLight(GameState gs)
+  {
+    int lightRadius = -1;
+    Colour bgLightColour = Colours.BLACK;
+    Colour fgLightColour = Colours.BLACK;
+
+    // If an object (most likely the player) has more than one light source
+    // I'm just going to use the one with the largest radius
+    foreach (var (fgcolour, bgcolour, radius) in Lights())
+    {
+      if (radius > lightRadius)
+      {
+        lightRadius = radius;
+        gs.Lights.Add((Loc, fgcolour, bgcolour, radius));
+        bgLightColour = bgcolour;
+        fgLightColour = fgcolour;
+      }
+    }
+    
+    return (lightRadius, fgLightColour, bgLightColour);
+  }
 }
 
 // Structure to store where items are in the world

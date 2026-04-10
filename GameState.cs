@@ -10,6 +10,7 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
+using Raylib_cs;
 
 namespace Yarl2;
 
@@ -1800,8 +1801,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     bool overworldDaytime = InWilderness && hour >= 5 && hour < 20;
 
     foreach (GameObj obj in ObjDb.ObjectsOnLevel(dungeonID, level))
-    {
-      (int lightRadius, Colour fgLightColour, Colour bgLightColour) = FindLight(obj);
+    {            
+      (int lightRadius, Colour fgLightColour, Colour bgLightColour) = obj.CalcLight(this);
 
       if (obj.HasTrait<InPitTrait>())
         lightRadius = int.Min(lightRadius, 1);
@@ -1833,11 +1834,15 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         }
 
         LitSqs.TryGetValue(sq.Key, out (Colour Fg, Colour Bg, int FgAlpha, int BgAlpha) existing);
-        if (existing.Fg == Constants.NO_COLOUR || existing.Bg == Colours.PLAYER_LIGHT)
+        if (existing.Fg == Constants.NO_COLOUR)
         {
           int fga = int.Min(255, (int)(fgLightColour.Alpha * scale));
           int bga = int.Min(100, (int)(bgLightColour.Alpha * scale));
           LitSqs[sq.Key] = (fgLightColour, bgLightColour, fga, bga);
+        }
+        else if (bgLightColour == Constants.VIRTUAL_LIGHT)
+        {
+          LitSqs[sq.Key] = (Constants.VIRTUAL_LIGHT, Constants.VIRTUAL_LIGHT, 0, 0);
         }
         else if (bgLightColour == Colours.PLAYER_LIGHT)
         {
@@ -1857,62 +1862,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     }
 
     return _litPool;
-  }
-
-  (int, Colour, Colour) FindLight(GameObj obj)
-  {
-    int lightRadius = -1;
-    Colour bgLightColour = Colours.BLACK;
-    Colour fgLightColour = Colours.BLACK;
-
-    // If an object (most likely the player) has more than one light source
-    // I'm just going to use the one with the largest radius
-    foreach (var (fgcolour, bgcolour, radius) in obj.Lights())
-    {
-      if (radius > lightRadius)
-      {
-        lightRadius = radius;
-        Lights.Add((obj.Loc, fgcolour, bgcolour, radius));
-        bgLightColour = bgcolour;
-        fgLightColour = fgcolour;
-      }
-    }
-
-    if (obj.ID == Player.ID)
-    {
-      if (InWilderness)
-      {
-        var (hour, _) = CurrTime();
-        int daylight;
-        if (hour >= 6 && hour <= 19)
-          daylight = Player.MAX_VISION_RADIUS;
-        else if (hour >= 20 && hour <= 21)
-          daylight = 7;
-        else if (hour >= 21 && hour <= 23)
-          daylight = 3;
-        else if (hour < 4)
-          daylight = 2;
-        else if (hour == 4)
-          daylight = 3;
-        else
-          daylight = 7;
-
-        lightRadius = int.Max(lightRadius, daylight);
-      }
-      else if (CurrentMap.HasFeature(MapFeatures.Submerged))
-      {
-        lightRadius = 3;
-      }
-
-      if (lightRadius == -1)
-      {
-        lightRadius = 1;
-        fgLightColour = Colours.YELLOW;
-        bgLightColour = Colours.PLAYER_LIGHT;
-      }
-    }
-
-    return (lightRadius, fgLightColour, bgLightColour);
   }
 
   Glyph Hallucination()
@@ -2077,6 +2026,11 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   {
     if (LitSqs.TryGetValue(loc, out (Colour FgColour, Colour BgColour, int FgAlpha, int BgAlpha) lightInfo))
     {
+      if (lightInfo.BgColour == Constants.VIRTUAL_LIGHT)
+      {
+        return glyph;
+      }
+      
       Colour bgColour, fgColour = glyph.Illuminate ? lightInfo.FgColour : glyph.Lit;
       fgColour = fgColour with { Alpha = lightInfo.FgAlpha };
 

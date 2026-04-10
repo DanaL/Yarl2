@@ -52,6 +52,48 @@ sealed class Player : Actor
   public override int Z() => 12;
   public override string FullName => "you";
 
+  public override (int, Colour, Colour) CalcLight(GameState gs)
+  {
+    (int radius, Colour fg, Colour bg) = base.CalcLight(gs);
+    
+    if (gs.InWilderness)
+    {
+      var (hour, _) = gs.CurrTime();
+      int defaultRadius;
+      if (hour >= 6 && hour <= 19) 
+        defaultRadius = MAX_VISION_RADIUS;
+      else if (hour >= 20 && hour <= 21) 
+        defaultRadius = 7;
+      else if (hour >= 21 && hour <= 23)
+        defaultRadius = 3;
+      else if (hour < 4) 
+        defaultRadius = 2;
+      else if (hour == 4)
+        defaultRadius = 3;
+      else 
+        defaultRadius = 7;
+      
+      if (radius < defaultRadius)
+      {
+        radius = defaultRadius;
+        fg = Colours.BLACK;
+        bg = Constants.VIRTUAL_LIGHT;
+      }
+    }    
+    else if (gs.CurrentMap.HasFeature(MapFeatures.Submerged))
+    {
+      radius = 3;
+    }
+    else if (radius == -1)
+    {
+      fg = Colours.YELLOW;
+      bg = Colours.PLAYER_LIGHT;
+      radius = 1;
+    }
+   
+    return (radius, fg, bg);
+  }
+
   public bool Running { get; set; } = false;
 
   public string Religion

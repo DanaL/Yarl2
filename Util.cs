@@ -27,7 +27,7 @@ record struct Colour(int R, int G, int B, int Alpha);
 record struct ExplosionColours(Colour Main, Colour Alt1, Colour Alt2, Colour Highlight, char Ch);
 
 static class Colours
-{
+{  
   public static readonly Colour NULL = new(0, 0, 0, 0);
   public static readonly Colour BLACK = new(0, 0, 0, 255);
   public static readonly Colour WHITE = new(255, 255, 255, 255);
@@ -245,7 +245,8 @@ static class Constants
   public const char QUIT_SIGNAL = char.MaxValue;
   public static Sqr ROOF = new(Colours.ROOF_TILE, Colours.BLACK, '░');
   public static Sqr INK = new(Colours.BLACK, Colours.BLACK, '░');
-  public static Colour NO_COLOUR = new(0, 0, 0, 0);
+  public static readonly Colour NO_COLOUR = new(0, 0, 0, 0);
+  public static readonly Colour VIRTUAL_LIGHT = new(-1, -1, -1, 0);
   public static readonly GameEvent NO_EVENT = new(GameEventType.NoEvent, '\0');
   
   public const int WILDERNESS_WIDTH = 129;
