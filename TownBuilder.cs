@@ -60,6 +60,7 @@ class TownBuilder
 
   public (int, int) TownCentre { get; set; }
   public Town Town { get; set; }
+  public (int, int)? TavernSignLoc { get; private set; }
   Dictionary<string, Template> Templates { get; set; } = [];
 
   public TownBuilder() => Town = new Town();
@@ -176,7 +177,7 @@ class TownBuilder
         break;
       case BuildingType.Tavern:
         Town.Tavern = [.. sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2))];
-        InstallSign(map, building, sqs, rng);
+        TavernSignLoc = InstallSign(map, building, sqs, rng);
         break;
       case BuildingType.Market:
         Town.Market = [.. sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2))];
@@ -195,7 +196,7 @@ class TownBuilder
     }
   }
 
-  static void InstallSign(Map map, BuildingType building, HashSet<(int, int)> sqs, Rng rng)
+  static (int, int)? InstallSign(Map map, BuildingType building, HashSet<(int, int)> sqs, Rng rng)
   {
     foreach (var (r, c) in sqs)
     {
@@ -224,10 +225,12 @@ class TownBuilder
       {
         var (signR, signC) = options[rng.Next(options.Count)];
         map.SetTile(signR, signC, new BusinessSign(sign));
-        break;
+        return (signR, signC);
       }
     }
-    
+
+    return null;
+
     bool SpotForSign(int r, int c)
     {
       TileType type = map.TileAt(r, c).Type;

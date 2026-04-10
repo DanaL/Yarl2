@@ -49,6 +49,7 @@ static class Colours
   public static readonly Colour SOFT_RED = new(190, 65, 65, 255);
   public static readonly Colour DULL_RED = new(129, 12, 12, 255);
   public static readonly Colour TORCH_ORANGE = new(255, 159, 0, 50);
+  public static readonly Colour DIM_ORANGE = new(32, 20, 0, 50);
   public static readonly Colour TORCH_RED = new(208, 28, 31, 25);
   public static readonly Colour TORCH_YELLOW = new(255, 255, 53, 50);
   public static readonly Colour PLAYER_LIGHT = new(255, 255, 52, 45);
@@ -99,7 +100,8 @@ static class Colours
     _ when colour == BRIGHT_RED   => "brightred",
     _ when colour == SOFT_RED     => "softred",
     _ when colour == DULL_RED     => "dullred",
-    _ when colour == TORCH_ORANGE => "torchorange",
+    _ when colour == TORCH_ORANGE     => "torchorange",
+    _ when colour == DIM_ORANGE => "dimtorchorange",
     _ when colour == TORCH_RED    => "torchred",
     _ when colour == TORCH_YELLOW => "torchyellow",
     _ when colour == PLAYER_LIGHT => "playerlight",
@@ -152,6 +154,7 @@ static class Colours
     "softred" => SOFT_RED,
     "dullred" => DULL_RED,
     "torchorange" => TORCH_ORANGE,
+    "dimtorchorange" => DIM_ORANGE,
     "torchred" => TORCH_RED,
     "torchyellow" => TORCH_YELLOW,
     "playerlight" => PLAYER_LIGHT,

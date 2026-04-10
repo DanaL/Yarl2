@@ -391,8 +391,9 @@ class CampaignCreator(UserInterface ui)
         wildernessMap = tb.DrawnTown(wildernessMap, rng);
         town = tb.Town;
         town.Name = NameGenerator.TownName(rng);
-        //Console.WriteLine(town.Name);
-
+        if (tb.TavernSignLoc is (int signRow, int signCol))
+          ItemFactory.CreateTimedLight(2, 20, 0, Colours.BLACK, Colours.DIM_ORANGE, objDb, new Loc(0, 0, signRow, signCol));
+        
         wilderness.AddMap(wildernessMap);
         campaign.AddDungeon(wilderness);
 
