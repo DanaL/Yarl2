@@ -2124,6 +2124,40 @@ class MinorSummonAction(GameState gs, Actor actor) : Action(gs, actor)
   }
 }
 
+class SummonDecoy(GameState gs, Actor actor) : Action(gs, actor)
+{
+  public override double Execute()
+  {
+    base.Execute();
+
+    Loc loc = Util.NearestUnoccupiedLoc(GameState, Actor!.Loc);
+
+    if (loc == Loc.Nowhere)
+    {
+      GameState.UIRef().AlertPlayer("A spell fizzles.", GameState, loc);
+      return 1.0;
+    }
+
+    Glyph glyph = new(Actor.Glyph.Ch, Colours.LIGHT_PURPLE, Colours.LIGHT_PURPLE, Colours.MYSTIC_AURA, false);    
+    Mob decoy = new() { Name = "decoy", Glyph = glyph, Recovery = 1.0 };
+    decoy.Traits.Add(new FlyingTrait());
+    decoy.Traits.Add(new BrainlessTrait());
+    decoy.Traits.Add(new InvincibleTrait());
+    decoy.Traits.Add(new IllusionTrait() { ObjId = decoy.ID, SourceId = decoy.ID });
+    decoy.Traits.Add(new BehaviourTreeTrait() { Plan = "Decoy" });
+    decoy.Traits.Add(new TargetTrait() { TargetId = Actor.ID });
+    decoy.Stats.Add(Attribute.HP, new Stat(1));
+    decoy.Stats.Add(Attribute.AC, new Stat(10));
+
+    if (Actor is Player)
+      decoy.Traits.Add(new FriendlyMonsterTrait());
+
+    GameState.ObjDb.AddNewActor(decoy, loc);
+
+    return 1.0;
+  }
+}
+
 class SummonAction(Loc target, string summons, int count, GameState gs) : Action(gs)
 {
   readonly Loc _target = target;

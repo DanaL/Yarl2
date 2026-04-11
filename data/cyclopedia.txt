@@ -793,3 +793,6 @@ Best not to think about this one too much, but it is said consuming the blood of
 #
 troubled spirit
 The ghost of an adventurer who died while terrified. These undead can now infect mortals with their dying fear. Plus also ghosts are just scary, you know?
+#
+gingerbread man
+A magical cookie made by Yendorian brownies. Eating it will summon a decoy version of yourself, which may prove distracting to foes.

@@ -1638,5 +1638,19 @@
       "Stackable",
       "CanApply"
     ]
+  },
+  {
+    "Name": "GINGERBREAD_MAN",
+    "DescriptiveName": "gingerbread man",
+    "Type": "Food",
+    "Value": 1,
+    "Glyph": ",,lightbrown,brown,black,false",
+    "Traits": [
+      "Edible",
+      "CanApply",
+      "Consumable",
+      "UseSimple#decoy",
+      "Delicious"
+    ]
   }
 ]

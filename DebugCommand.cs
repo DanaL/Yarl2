@@ -144,7 +144,8 @@ class DebugCommand(GameState gs)
     {"silver arrow", ItemNames.SILVER_ARROW },
     {"halfling cupcake", ItemNames.HALFLING_CUPCAKE },
     {"yendorian soda", ItemNames.YENDORIAN_SODA },
-    {"vial of sprite blood", ItemNames.VIAL_SPRITE_BLOOD }
+    {"vial of sprite blood", ItemNames.VIAL_SPRITE_BLOOD },
+    {"gingerbread man", ItemNames.GINGERBREAD_MAN }
   };
 
   public string DoCommand(string txt)

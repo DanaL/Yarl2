@@ -862,27 +862,47 @@ sealed class Mob : Actor
   // changing that
   public override Actor PickTarget(GameState gs)
   {
-    if (gs.Player.HasTrait<NondescriptTrait>())
+    Actor? target;
+    if (Traits.FirstOrDefault(t => t is TargetTrait) is TargetTrait tt && gs.ObjDb.GetObj(tt.TargetId) is Actor actor)
+    {
+      target = actor;
+    }
+    else
+    {
+      target = gs.Player;  
+    }
+
+    if (target.HasTrait<NondescriptTrait>())
       return NoOne.Instance();
 
-    if (gs.Player.VisibleTo(this))
-      return gs.Player;
+    if (target.VisibleTo(this))
+      return target;
 
     return NoOne.Instance();
   }
 
   public override Loc PickTargetLoc(GameState gs, int range)
   {
-    if (gs.Player.HasTrait<NondescriptTrait>())
+    Actor? target;
+    if (Traits.FirstOrDefault(t => t is TargetTrait) is TargetTrait tt && gs.ObjDb.GetObj(tt.TargetId) is Actor actor)
+    {
+      target = actor;
+    }
+    else
+    {
+      target = gs.Player;  
+    }
+
+    if (target.HasTrait<NondescriptTrait>())
       return Loc.Nowhere;
 
     if (HasTrait<ConfusedTrait>())
       Util.RandomAdjLoc(Loc, gs);
 
-    if (!gs.Player.VisibleTo(this))
-      return PickInvisibleTarget(gs.Player.Loc, gs, range);
+    if (!target.VisibleTo(this))
+      return PickInvisibleTarget(target.Loc, gs, range);
 
-    return gs.Player.Loc;
+    return target.Loc;
   }
 
   // I suspect eventually these will diverge

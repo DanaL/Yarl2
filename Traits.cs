@@ -1238,6 +1238,13 @@ class SwordTrait : Trait
   public override string AsText() => "Sword";
 }
 
+sealed class TargetTrait : Trait
+{
+  public ulong TargetId { get; set; }
+
+  public override string AsText() => $"Target#{TargetId}";  
+}
+
 class TeflonTrait : Trait
 {
   public override string AsText() => "Teflon";
@@ -1827,6 +1834,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "blink" => new UseResult(new BlinkAction(gs, user)),
     "booze" => new UseResult(new DrinkBoozeAction(gs, user)),
     "celerity" => new UseResult(new ApplyTraitAction(gs, user, new CelerityTrait())),
+    "decoy" => new UseResult(new SummonDecoy(gs, user)),
     "curedisease" => new UseResult(new CureDisease(gs, user)),
     "disarm" => new UseResult(new DisarmAction(gs, user, user.Loc)),
     "minorheal" => new UseResult(new HealAction(gs, user, 4, 4)),
@@ -4578,6 +4586,7 @@ class TraitFactory
     },
     { "Swimmer", (pieces, gameObj) => new SwimmerTrait() },
     { "Sword", (pieces, gameObj) => new SwordTrait() },
+    { "Target", (pieces, gameOjb) => new TargetTrait() { TargetId = ulong.Parse(pieces[1]) }},
     { "Teflon", (pieces, gameObj) => new TeflonTrait() },
     { "Telepathy", (pieces, gameObj) => new TelepathyTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
     { "TemporaryChasm", (pieces, gameObj) => new TemporaryChasmTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},

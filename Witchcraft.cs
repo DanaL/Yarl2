@@ -471,6 +471,21 @@ class CastFrogify(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   }
 }
 
+class CastSummonDecoy(GameState gs, Actor actor) : CastSpellAction(gs, actor)
+{
+  public override double Execute()
+  {
+    base.Execute();
+
+    if (CheckCost(3, 10))
+    {
+      GameState.Player.QueueAction(new PassAction(GameState, Actor!));
+    }
+
+    return 0.0;
+  }
+}
+
 class CastPhaseDoor(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 {
   public override double Execute()
@@ -479,7 +494,7 @@ class CastPhaseDoor(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     
     if (CheckCost(1, 20))
     {
-      GameState!.Player.QueueAction(new BlinkAction(GameState, Actor!));
+      GameState.Player.QueueAction(new BlinkAction(GameState, Actor!));
     }
 
     return 0.0;

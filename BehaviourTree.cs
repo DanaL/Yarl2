@@ -559,6 +559,21 @@ class PassTurn : BehaviourNode
   }
 }
 
+class WithinRange(int range) : BehaviourNode
+{
+  readonly int _range = range;
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    Actor target = mob.PickTarget(gs);
+
+    if (target is NoOne)
+      return PlanStatus.Failure;
+
+    return Util.Distance(mob.Loc, target.Loc) <= _range ? PlanStatus.Success : PlanStatus.Failure;
+  }
+}
+
 class TryToEscape : BehaviourNode
 {
   Loc GoalLoc { get; set; } = Loc.Nowhere;
@@ -2214,6 +2229,7 @@ class Planner
     "BasicIllusionPlan" => new Selector([new ChaseTarget(), new RandomMove()]),
     "Greedy" => CreateGreedyMonster(mob, gs),    
     "BasicWander" => BasicWander(mob, gs),
+    "Decoy" => new Selector([new Sequence([new WithinRange(5), new RandomMove()]), new ChaseTarget() ]),
     _ => throw new Exception($"Unknown Behaviour Tree plan: {plan}")
   };
 
