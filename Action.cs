@@ -2140,10 +2140,11 @@ class SummonDecoy(GameState gs, Actor actor) : Action(gs, actor)
 
     Glyph glyph = new(Actor.Glyph.Ch, Colours.LIGHT_PURPLE, Colours.LIGHT_PURPLE, Colours.MYSTIC_AURA, false);    
     Mob decoy = new() { Name = "decoy", Glyph = glyph, Recovery = 1.0 };
+    decoy.Traits.Add(new DecoyTrait());
     decoy.Traits.Add(new FlyingTrait());
     decoy.Traits.Add(new BrainlessTrait());
     decoy.Traits.Add(new InvincibleTrait());
-    decoy.Traits.Add(new IllusionTrait() { ObjId = decoy.ID, SourceId = decoy.ID });
+    decoy.Traits.Add(new IllusionTrait() { ObjId = decoy.ID, SourceId = Actor.ID });
     decoy.Traits.Add(new BehaviourTreeTrait() { Plan = "Decoy" });
     decoy.Traits.Add(new TargetTrait() { TargetId = Actor.ID });
     decoy.Stats.Add(Attribute.HP, new Stat(1));

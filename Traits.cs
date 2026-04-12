@@ -2004,6 +2004,11 @@ class DeathMessageTrait : BasicTrait
   public override string AsText() => $"DeathMessage#{Message}";
 }
 
+sealed class DecoyTrait() : Trait
+{
+  public override string AsText() => "Decoy";
+}
+
 sealed class DeliciousTrait : Trait
 {
   public override string AsText() => "Delicious";
@@ -4265,6 +4270,7 @@ class TraitFactory
     },
     { "Dead", (pieces, gameObj) => new DeadTrait() },
     { "DeathMessage", (pieces, gameObj) => new DeathMessageTrait() { Message = pieces[1] } },
+    { "Decoy", (pieces, gameObj) => new DecoyTrait() },
     { "Delicious", (pieces, gameObj) => new DeliciousTrait() },
     { "DemonVisage", (pieces, gameObj) => new DemonVisageTrait() },
     { "Description", (pieces, gameObj) => new DescriptionTrait(pieces[1]) },

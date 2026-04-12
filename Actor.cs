@@ -858,6 +858,27 @@ sealed class Mob : Actor
     return randomLoc.Count > 0 ? randomLoc[gs.Rng.Next(randomLoc.Count)] : Loc.Nowhere;
   }
 
+  Actor TargetOrDecoy(Actor target, GameState gs)
+  {
+    Actor actualTarget = target;
+    int nearest = Util.Distance(Loc, target.Loc);
+
+    foreach (Actor actor in gs.ObjDb.GetPerformers(Loc.DungeonID, Loc.Level))
+    {
+      if (actor.HasTrait<DecoyTrait>() && actor.Traits.Any(t => t is IllusionTrait it && it.SourceId == target.ID))
+      {
+        int d = Util.Distance(Loc, actor.Loc);
+        if (d < nearest)
+        {
+          actualTarget = actor;
+          nearest = d;
+        }
+      }
+    }
+
+    return actualTarget;
+  }
+
   // At the moment, monsters will pick the player, but I'm working toward
   // changing that
   public override Actor PickTarget(GameState gs)
@@ -869,7 +890,7 @@ sealed class Mob : Actor
     }
     else
     {
-      target = gs.Player;  
+      target = TargetOrDecoy(gs.Player, gs);  
     }
 
     if (target.HasTrait<NondescriptTrait>())
@@ -890,7 +911,7 @@ sealed class Mob : Actor
     }
     else
     {
-      target = gs.Player;  
+      target = TargetOrDecoy(gs.Player, gs);  
     }
 
     if (target.HasTrait<NondescriptTrait>())
