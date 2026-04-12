@@ -2147,6 +2147,11 @@ sealed class SummonDecoy(GameState gs, Actor actor) : Action(gs, actor)
     decoy.Traits.Add(new IllusionTrait() { ObjId = decoy.ID, SourceId = Actor.ID });
     decoy.Traits.Add(new BehaviourTreeTrait() { Plan = "Decoy" });
     decoy.Traits.Add(new TargetTrait() { TargetId = Actor.ID });
+
+    ulong expiresOn = GameState.Turn + (ulong) GameState.Rng.Next(31, 36);
+    CountdownTrait countDown = new() { OwnerID = decoy.ID, ExpiresOn = expiresOn};
+    GameState.ObjDb.RegisterListener(GameEventType.EndOfRound, countDown);
+
     decoy.Stats.Add(Attribute.HP, new Stat(1));
     decoy.Stats.Add(Attribute.AC, new Stat(10));
 

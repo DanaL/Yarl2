@@ -3554,7 +3554,7 @@ class InvisibleTrait : TemporaryTrait
 }
 
 // Technically I suppose this is a Count Up not a Count Down...
-class CountdownTrait : BasicTrait, IGameEventListener, IOwner
+sealed class CountdownTrait : BasicTrait, IGameEventListener, IOwner
 {
   public ulong OwnerID { get; set; }
   public ulong ObjId => OwnerID;
@@ -3571,7 +3571,8 @@ class CountdownTrait : BasicTrait, IGameEventListener, IOwner
 
     Expired = true;
 
-    if (gs.ObjDb.GetObj(OwnerID) is Item item)
+    GameObj? obj = gs.ObjDb.GetObj(OwnerID);
+    if (obj is Item item)
     {      
       // Alert! Alert! This is cut-and-pasted from ExtinguishAction()
       if (item.ContainedBy > 0)
@@ -3592,7 +3593,13 @@ class CountdownTrait : BasicTrait, IGameEventListener, IOwner
       string msg = $"{item.Name.DefArticle().Capitalize()} dissipates!";
       gs.UIRef().AlertPlayer(msg, gs, item.Loc);
     }
-  }
+    else if (obj is Actor actor)
+    {
+      gs.RemovePerformerFromGame(actor);
+      string s = $"{actor.FullName.Capitalize()} fades away!";
+      gs.UIRef().AlertPlayer(s, gs, actor.Loc);
+    }
+  }  
 }
 
 class CrimsonWard : Trait

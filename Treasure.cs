@@ -102,7 +102,8 @@ class Treasure
     ItemNames.POTION_CLARITY,
     ItemNames.POTION_FORGETFULNESS,
     ItemNames.EMERGENCY_DOOR,
-    ItemNames.YENDORIAN_SODA
+    ItemNames.YENDORIAN_SODA,
+    ItemNames.GINGERBREAD_MAN
   ];
 
   public static Item GetTalisman(Rng rng, GameObjectDB objDb)
