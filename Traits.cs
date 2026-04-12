@@ -2079,18 +2079,18 @@ class DiseasedTrait : TemporaryTrait
   public override string AsText() => $"Diseased#{SourceId}#{ExpiresOn}#{OwnerID}";
 }
 
-class DisplacementTrait : Trait
+sealed class DisplacementTrait : Trait
 {
   public override string AsText() => $"Displacement";
 }
 
 // For monsters who don't move (plants, etc)
-class ImmobileTrait : Trait
+sealed class ImmobileTrait : Trait
 {
   public override string AsText() => $"Immobile";
 }
 
-class IllusionTrait : BasicTrait, IGameEventListener
+sealed class IllusionTrait : BasicTrait, IGameEventListener
 {
   public ulong ObjId { get; set; } // the GameObj the illusion trait is attached to
   public bool Expired { get => false; set { } }

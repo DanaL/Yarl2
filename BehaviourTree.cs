@@ -542,7 +542,7 @@ class UseTurnIntoBatsPower(Power power) : UsePower(power)
   }
 }
 
-class PassTurn : BehaviourNode
+sealed class PassTurn : BehaviourNode
 {
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
@@ -559,7 +559,7 @@ class PassTurn : BehaviourNode
   }
 }
 
-class WithinRange(int range) : BehaviourNode
+sealed class WithinRange(int range) : BehaviourNode
 {
   readonly int _range = range;
 
@@ -767,7 +767,7 @@ class TryToEscape : BehaviourNode
   }
 }
 
-class WanderInTavern : BehaviourNode
+sealed class WanderInTavern : BehaviourNode
 {
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
@@ -811,7 +811,7 @@ class WanderInArea(HashSet<Loc> area) : BehaviourNode
   }
 }
 
-class InArea(HashSet<Loc> sqs) : BehaviourNode
+sealed class InArea(HashSet<Loc> sqs) : BehaviourNode
 {
   readonly HashSet<Loc> Locations = sqs;
 
@@ -819,7 +819,7 @@ class InArea(HashSet<Loc> sqs) : BehaviourNode
     Locations.Contains(mob.Loc) ? PlanStatus.Success : PlanStatus.Failure;
 }
 
-class HasItem(string name) : BehaviourNode
+sealed class HasItem(string name) : BehaviourNode
 {
   string ItemName { get; set; } = name;
 
@@ -835,7 +835,7 @@ class HasItem(string name) : BehaviourNode
   }
 }
 
-class IsDaytime : BehaviourNode
+sealed class IsDaytime : BehaviourNode
 {
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
@@ -845,7 +845,7 @@ class IsDaytime : BehaviourNode
   }
 }
 
-class IsEvening : BehaviourNode
+sealed class IsEvening : BehaviourNode
 {
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
@@ -855,7 +855,7 @@ class IsEvening : BehaviourNode
   }
 }
 
-class IsNight : BehaviourNode
+sealed class IsNight : BehaviourNode
 {
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
@@ -865,7 +865,7 @@ class IsNight : BehaviourNode
   }
 }
 
-class TimeBetween(int startHour, int startMin, int endHour, int endMin) : BehaviourNode
+sealed class TimeBetween(int startHour, int startMin, int endHour, int endMin) : BehaviourNode
 {
   int Start { get; set; } = startHour * 60 + startMin;
   int End { get; set; } = endHour * 60 + endMin;
@@ -880,7 +880,7 @@ class TimeBetween(int startHour, int startMin, int endHour, int endMin) : Behavi
   }
 }
 
-class DiceRoll(int odds) : BehaviourNode
+sealed class DiceRoll(int odds) : BehaviourNode
 {
   int Odds { get; set; } = odds;
 
@@ -892,7 +892,7 @@ class DiceRoll(int odds) : BehaviourNode
   }
 }
 
-class CheckDialogueState(int state) : BehaviourNode
+sealed class CheckDialogueState(int state) : BehaviourNode
 {
   int DialogueState { get; set; } = state;
 

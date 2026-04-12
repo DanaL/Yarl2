@@ -2124,7 +2124,7 @@ class MinorSummonAction(GameState gs, Actor actor) : Action(gs, actor)
   }
 }
 
-class SummonDecoy(GameState gs, Actor actor) : Action(gs, actor)
+sealed class SummonDecoy(GameState gs, Actor actor) : Action(gs, actor)
 {
   public override double Execute()
   {
