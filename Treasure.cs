@@ -58,7 +58,7 @@ class Treasure
       (ItemNames.HOLY_WATER, 1), (ItemNames.SNEAKERS, 1), (ItemNames.MOON_MANTLE, 1), (ItemNames.CLAYMORE, 1), (ItemNames.KNOCKBACK_ARROW, 3),
       (ItemNames.SNOWBURST_ARROW, 3), (ItemNames.FIREBURST_ARROW,3), (ItemNames.LONGBOW, 1), (ItemNames.ARROW_BANISHMENT, 3),
       (ItemNames.GLOVES_OF_ARCHERY, 1), (ItemNames.SPIDER_ARROW, 3), (ItemNames.SILVER_ARROW, 3), (ItemNames.PHALANX_PHOLIO_2, 1),
-      (ItemNames.HALFLING_CUPCAKE, 1), (ItemNames.YENDORIAN_SODA, 1)
+      (ItemNames.HALFLING_CUPCAKE, 1), (ItemNames.YENDORIAN_SODA, 1), (ItemNames.GINGERBREAD_MAN, 1)
   ];
 
   static readonly List<(ItemNames, int)> RareItems = [
