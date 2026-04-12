@@ -2229,7 +2229,7 @@ class Planner
     "BasicIllusionPlan" => new Selector([new ChaseTarget(), new RandomMove()]),
     "Greedy" => CreateGreedyMonster(mob, gs),    
     "BasicWander" => BasicWander(mob, gs),
-    "Decoy" => new Selector([new Sequence([new WithinRange(5), new RandomMove()]), new ChaseTarget() ]),
+    "Decoy" => new Selector([new Sequence([new WithinRange(5), new PickRandom([new RandomMove(), new PassTurn(), new PassTurn()])]), new ChaseTarget() ]),
     _ => throw new Exception($"Unknown Behaviour Tree plan: {plan}")
   };
 
