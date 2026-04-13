@@ -1652,5 +1652,15 @@
       "UseSimple#decoy",
       "Delicious"
     ]
+  },
+  {
+    "Name": "WOOL_CLOAK",
+    "DescriptiveName": "wool cloak",
+    "Type": "Armour",
+    "Value": 10,
+    "Glyph": "[,lightgrey,grey,black,false",
+    "Traits": [
+      "Armour#Cloak#0#0"
+    ]
   }
 ]

@@ -796,3 +796,6 @@ The ghost of an adventurer who died while terrified. These undead can now infect
 #
 gingerbread man
 A magical cookie made by Yendorian brownies. Eating it will summon a decoy version of yourself, which may prove distracting to foes.
+#
+wool cloak
+While it may not protect you in battle, it may help fend off the elements.
