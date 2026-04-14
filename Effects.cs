@@ -73,7 +73,9 @@ class Effects
     return sb.ToString();
   }
 
-  static string ApplyWet(GameState gs, GameObj receiver, Actor? owner)
+  // shielded/protected. Ie., mostly if Actor is wearing a cloak their items are a
+  // little less likely to get wet
+  static string ApplyWet(GameState gs, GameObj receiver, Actor? owner, bool shielded)
   {
     StringBuilder sb = new();
 
@@ -81,17 +83,18 @@ class Effects
     if (s != "")
       sb.Append(s);
 
+    int odds = shielded ? 7 : 3;
     // Let's say 1 in 3 chance that an item becomes Wet that it might Rust
-    if (receiver is Item item && item.CanCorrode() && gs.Rng.Next(3) != 0)
+    if (receiver is Item item && item.CanCorrode() && gs.Rng.Next(odds) != 0)
     {
-      s = ApplyRust(gs, item, owner);
+      s = ApplyRust(item, owner);
       sb.Append(s);
     }
 
     return sb.ToString();
   }
 
-  static string ApplyRust(GameState gs, GameObj receiver, Actor? owner)
+  static string ApplyRust(GameObj receiver, Actor? owner)
   {
     // At the moment in game, only items can be rusted. Maybe 
     // eventually iron golems or such will exist??
@@ -127,10 +130,7 @@ class Effects
 
     // Some items have their bonuses lowered by being rusted/corroded
     var armourTrait = item.Traits.OfType<ArmourTrait>().FirstOrDefault();
-    if (armourTrait is not null)
-    {
-      armourTrait.Bonus -= 1;
-    }
+    armourTrait?.Bonus -= 1;
 
     if (item.Type == ItemType.Weapon || (item.Type == ItemType.Tool && item.Name == "pickaxe"))
     {
@@ -202,12 +202,12 @@ class Effects
     return ("", false);
   }
 
-  public static (string, bool) Apply(DamageType damageType, GameState gs, GameObj receiver, Actor? owner)
+  public static (string, bool) Apply(DamageType damageType, GameState gs, GameObj receiver, Actor? owner, bool shielded)
   {
     return damageType switch
     {
-      DamageType.Wet => (ApplyWet(gs, receiver, owner), false),
-      DamageType.Rust => (ApplyRust(gs, receiver, owner), false),
+      DamageType.Wet => (ApplyWet(gs, receiver, owner, shielded), false),
+      DamageType.Rust => (ApplyRust(receiver, owner), false),
       DamageType.Fire => ApplyFire(gs, receiver, owner),
       _ => ("", false),
     };

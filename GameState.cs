@@ -429,7 +429,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     foreach (DamageType effect in tile.TerrainEffects())
     {
-      var (s, _) = Effects.Apply(effect, this, item, null);
+      var (s, _) = Effects.Apply(effect, this, item, null, false);
       UI.AlertPlayer(s);
     }
 

@@ -1156,9 +1156,12 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     Actor? owner = (Actor?)gs.ObjDb.GetObj(OwnerID);
     List<string> msgs = [];
 
-    foreach (var item in Items())
+    var items = Items();
+    bool cloaked = items.Any(i => i.Equipped && i.Type == ItemType.Armour && i.Traits.Any(t => t is ArmourTrait at && at.Part == ArmourParts.Cloak));
+    foreach (var item in items)
     {
-      var (s, destroyed) = Effects.Apply(damageType, gs, item, owner);
+      bool shielded = cloaked && ProtectedByCloak(item);
+      var (s, destroyed) = Effects.Apply(damageType, gs, item, owner, shielded);
       if (s != "")
         msgs.Add(s);
       if (destroyed)      
@@ -1166,6 +1169,19 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     }
 
     return string.Join(' ', msgs).Trim();
+
+    static bool ProtectedByCloak(Item item)
+    {
+      if (item.Type == ItemType.Weapon && item.Equipped)
+        return false;
+      else if (item.Type == ItemType.Tool && item.Equipped)
+        return false;
+      else if (item.Type == ItemType.Armour && item.Equipped
+            && item.Traits.Any(t => t is ArmourTrait at && (at.Part == ArmourParts.Shield || at.Part == ArmourParts.Hat)))
+        return false;
+
+      return true;
+    }
   }
 
   public void ConsumeItem(Item item, Actor actor, GameState gs)

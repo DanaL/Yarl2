@@ -250,7 +250,7 @@ class Battle
         if (metalItems.Count > 0)
         {
           var damagedItem = metalItems[gs.Rng.Next(metalItems.Count)];
-          var (s, _) = Effects.Apply(DamageType.Rust, gs, damagedItem, target);
+          var (s, _) = Effects.Apply(DamageType.Rust, gs, damagedItem, target, false);
           gs.UIRef().AlertPlayer(s);
         }
       }
@@ -394,7 +394,7 @@ class Battle
 
     if (target.HasTrait<CorrosiveTrait>() && weapon is not null)
     {
-      var (s, _) = Effects.Apply(DamageType.Rust, gs, weapon, actor);
+      var (s, _) = Effects.Apply(DamageType.Rust, gs, weapon, actor, false);
       if (attacker is Player)
       {
         gs.UIRef().AlertPlayer(s);          
