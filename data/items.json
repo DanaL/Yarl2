@@ -1662,5 +1662,16 @@
     "Traits": [
       "Armour#Cloak#0#0"
     ]
+  },
+  {
+    "Name": "LEATHER_BOOTS",
+    "DescriptiveName": "leather boots",
+    "Type": "Armour",
+    "Value": 15,
+    "Glyph": "[,rooftile,brown,black,false",
+    "Traits": [
+      "Armour#Boots#1#0",
+      "Plural"
+    ]
   }
 ]

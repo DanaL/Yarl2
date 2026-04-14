@@ -799,3 +799,6 @@ A magical cookie made by Yendorian brownies. Eating it will summon a decoy versi
 #
 wool cloak
 While it may not protect you in battle, it may help fend off the elements.
+#
+leather boots
+Because tip-topeing through a field of wildflowers is lovely, dungeons not so much.

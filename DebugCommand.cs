@@ -146,7 +146,8 @@ class DebugCommand(GameState gs)
     {"yendorian soda", ItemNames.YENDORIAN_SODA },
     {"vial of sprite blood", ItemNames.VIAL_SPRITE_BLOOD },
     {"gingerbread man", ItemNames.GINGERBREAD_MAN },
-    {"wool cloak", ItemNames.WOOL_CLOAK }
+    {"wool cloak", ItemNames.WOOL_CLOAK },
+    {"leather boots", ItemNames.LEATHER_BOOTS }
   };
 
   public string DoCommand(string txt)
