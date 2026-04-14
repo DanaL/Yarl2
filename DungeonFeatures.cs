@@ -780,6 +780,11 @@ class TunnelCarver
       objDb.SetToLoc(loc, ItemFactory.Get(ItemNames.WOOL_CLOAK, objDb));
     }
     
+    if (rng.Next(5) == 0)
+    {
+      objDb.SetToLoc(loc, ItemFactory.Get(ItemNames.LEATHER_BOOTS, objDb));
+    }
+
     // Maybe a skull (or eventually other remains?)
     if (rng.Next(3) == 0)
     {
