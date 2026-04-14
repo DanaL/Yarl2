@@ -2218,7 +2218,7 @@ class Planner
     "Rando" => CreateRandoMonsterPlan(mob),
     "PrisonerPlan" => CreatePrisonerPlan(mob),
     "PriestPlan" => WanderInHome(gs.Town.Shrine, gs),
-    "GrocerPlan" => WanderInHome(gs.Town.Market, gs),
+    "GrocerPlan" or "TailorPlan" => WanderInHome(gs.Town.Market, gs),
     "BasicVillagerPlan" => BasicVillager(mob, gs),
     "WitchPlan" => WitchPlan(mob, gs),
     "AlchemistPlan" => AlchemistPlan(mob, gs),

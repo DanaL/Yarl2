@@ -594,6 +594,100 @@ class AlchemistBehaviour : NPCBehaviour
   }
 }
 
+class TailorBehaviour : NPCBehaviour
+{
+  DateTime _lastBark = new(1900, 1, 1);
+
+  public override string GetBark(Mob actor, GameState gs)
+  {
+    if ((DateTime.UtcNow - _lastBark).TotalSeconds < 10)
+      return "";
+
+    _lastBark = DateTime.UtcNow;
+
+    return gs.Rng.Next(3) switch
+    {
+      0 => "I wish the Mayor would dress a little better.",
+      1 => "Fashion is the true magic.",
+      _ => "We don't do consignment sales."
+    };
+  }
+
+  public override (Action, Inputer) Chat(Mob actor, GameState gs)
+  {
+    if (gs.Player.HasTrait<ShunnedTrait>())
+    {
+      return (new NullAction(gs), new PauseForMoreInputer(gs));
+    }
+    
+    string blurb = gs.Rng.Next(3) switch
+    {
+      0 => "Oh no, you got here just in time!",
+      1 => "Dwarven clogs are in this year.",
+      _ => "Does that weapon really go with your complexion?"
+    };
+
+    if (gs.Player.HasTrait<RepugnantTrait>()) 
+    {
+      blurb = "Ew.";
+    }
+
+    ShopMenuInputer acc = new(actor, blurb, gs);
+    ShoppingCompletedAction action = new(gs, actor);
+
+    return (action, acc);
+  }
+
+  public override void RefreshShop(Actor npc, GameState gs) 
+  {
+    int lastRefresh = npc.Stats[Attribute.InventoryRefresh].Curr;
+    int turn = (int)(gs.Turn % int.MaxValue);
+
+    if (Math.Abs(turn - lastRefresh) < 750)
+      return;
+    npc.Stats[Attribute.InventoryRefresh].SetMax(turn);
+
+    List<Item> currStock = npc.Inventory.Items();
+
+    foreach (Item item in currStock)
+    {
+      if (gs.Rng.NextDouble() < 0.2)
+      {
+        npc.Inventory.RemoveByID(item.ID, gs);
+        gs.ObjDb.RemoveItemFromGame(Loc.Nowhere, item);
+      }
+    }
+
+    // int newStock = gs.Rng.Next(1, 4);
+    // for (int j = 0; j < newStock; j++)
+    // {
+    //   int roll = gs.Rng.Next(15);
+    //   if (roll < 3)
+    //     npc.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, gs.ObjDb), npc.ID);
+    //   else if (roll < 5)
+    //     npc.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEALING, gs.ObjDb), npc.ID);
+    //   else if (roll == 6)
+    //     npc.Inventory.Add(ItemFactory.Get(ItemNames.ANTIDOTE, gs.ObjDb), npc.ID);
+    //   else if (roll == 7)
+    //     npc.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_DISARM, gs.ObjDb), npc.ID);
+    //   else if (roll == 8)
+    //     npc.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_BLINK, gs.ObjDb), npc.ID);
+    //   else if (roll == 9)
+    //     npc.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_KNOCK, gs.ObjDb), npc.ID);
+    //   else if (roll == 10)
+    //     npc.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_PROTECTION, gs.ObjDb), npc.ID);
+    //   else if (roll == 11)
+    //     npc.Inventory.Add(ItemFactory.Get(ItemNames.POTION_MIND_READING, gs.ObjDb), npc.ID);
+    //   else if (roll == 12)
+    //     npc.Inventory.Add(ItemFactory.Get(ItemNames.POTION_OF_LEVITATION, gs.ObjDb), npc.ID);
+    //   else if (roll == 13)
+    //     npc.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_TREASURE_DETECTION, gs.ObjDb), npc.ID);
+    //   else if (roll == 14)
+    //     npc.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_TREASURE_DETECTION, gs.ObjDb), npc.ID);
+    // }    
+  }
+}
+
 class GrocerBehaviour : NPCBehaviour
 {
   DateTime _lastBark = new(1900, 1, 1);

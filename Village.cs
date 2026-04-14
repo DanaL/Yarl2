@@ -200,6 +200,18 @@ class Village
     return cleric;
   }
 
+  static Mob GenerateTailor(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Rng rng)
+  {
+    Mob tailor = BaseVillager(ng, rng);
+    tailor.Loc = LocForVillager(map, town.Tailor, rng);
+    tailor.Stats[Attribute.Markup] = new Stat(125 + rng.Next(76));
+    tailor.Stats[Attribute.InventoryRefresh] = new Stat(1);
+    tailor.SetBehaviour(new TailorBehaviour());
+    tailor.Traits.Add(new BehaviourTreeTrait() { Plan = "TailorPlan" });
+
+    return tailor;
+  }
+
   static Mob GenerateGrocer(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Rng rng)
   {
     Mob grocer = BaseVillager(ng, rng);
@@ -587,6 +599,10 @@ class Village
     Mob grocer = GenerateGrocer(map, town, ng, objDb, rng);
     objDb.AddNewActor(grocer, grocer.Loc);
     factDb.Add(new SimpleFact() { Name = "GrocerId", Value = grocer.ID.ToString() });
+
+    Mob tailor = GenerateTailor(map, town, ng, objDb, rng);
+    objDb.AddNewActor(tailor, tailor.Loc);
+    factDb.Add(new SimpleFact() { Name = "TailorId", Value = tailor.ID.ToString() });
 
     // For QoL, I wanted to make sure the NPCs in the bar are generated with
     // different colours 

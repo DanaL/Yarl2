@@ -21,7 +21,8 @@ enum BuildingType
   Tavern,
   Market,
   Smithy,
-  WitchesCottage
+  WitchesCottage,
+  Tailor
 }
 
 class Town
@@ -31,6 +32,7 @@ class Town
   public HashSet<Loc> Tavern { get; set; } = [];
   public HashSet<Loc> Market { get; set; } = [];
   public HashSet<Loc> Smithy { get; set; } = [];
+  public HashSet<Loc> Tailor { get; set; } = [];
   public List<HashSet<Loc>> Homes { get; set; } = [];
   public HashSet<int> TakenHomes { get; set; } = [];
   public HashSet<Loc> TownSquare { get; set; } = [];
@@ -187,6 +189,10 @@ class TownBuilder
         Town.Smithy = [.. sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2))];
         InstallSign(map, building, sqs, rng);
         break;
+      case BuildingType.Tailor:
+        Town.Tailor = [.. sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2))];
+        InstallSign(map, building, sqs, rng);
+        break;
       case BuildingType.WitchesCottage:
         // Witches' cottage is set up outside the main town building functions
         break;
@@ -208,6 +214,7 @@ class TownBuilder
         BuildingType.Smithy => "Ye Olde Smithy",
         BuildingType.Market => "Dry Goods, Salves, & More",
         BuildingType.Tavern => "Tavern & Common House",
+        BuildingType.Tailor => "Fashion & Accessories",
         _ => ""
       };
 
@@ -578,6 +585,9 @@ class TownBuilder
     var j = cottages[rng.Next(cottages.Count)];
     PlaceBuilding(map, townRow, townCol, Templates[j], BuildingType.Market, rng);
 
+    j = cottages[rng.Next(cottages.Count)];
+    PlaceBuilding(map, townRow, townCol, Templates[j], BuildingType.Tailor, rng);
+    
     // next, the smithy
     j = cottages[rng.Next(cottages.Count)];
     PlaceBuilding(map, townRow, townCol, Templates[j], BuildingType.Smithy, rng);
@@ -1005,6 +1015,7 @@ class TownBuilder
     CalcBuilding(Town.Tavern);
     CalcBuilding(Town.Market);
     CalcBuilding(Town.Smithy);
+    CalcBuilding(Town.Tailor);
     CalcBuilding(Town.WitchesCottage);
     foreach (HashSet<Loc> home in Town.Homes)
       CalcBuilding(home);

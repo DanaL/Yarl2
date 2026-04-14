@@ -221,6 +221,8 @@ class TownSave
   [JsonInclude]
   public HashSet<Loc> Smithy { get; set; } = [];
   [JsonInclude]
+   public HashSet<Loc> Tailor { get; set; } = [];
+  [JsonInclude]
   public List<HashSet<Loc>> Homes { get; set; } = [];
   [JsonInclude]
   public HashSet<int> TakenHomes { get; set; } = [];
@@ -261,6 +263,7 @@ class CampaignSaver
       Tavern = c.Town.Tavern,
       Market = c.Town.Market,
       Smithy = c.Town.Smithy,
+      Tailor = c.Town.Tailor,
       Homes = c.Town.Homes,
       WitchesCottage = c.Town.WitchesCottage,
       WitchesGarden = c.Town.WitchesGarden,
@@ -309,7 +312,8 @@ class CampaignSaver
       Tavern = sc.Town.Tavern,
       Market = sc.Town.Market,
       Smithy = sc.Town.Smithy,
-      Homes = sc.Town.Homes,
+      Tailor = sc.Town.Tailor,
+      Homes = sc.Town.Homes,      
       TakenHomes = sc.Town.TakenHomes,
       TownSquare = sc.Town.TownSquare,
       WitchesCottage = sc.Town.WitchesCottage,
