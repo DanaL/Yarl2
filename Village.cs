@@ -209,6 +209,25 @@ class Village
     tailor.SetBehaviour(new TailorBehaviour());
     tailor.Traits.Add(new BehaviourTreeTrait() { Plan = "TailorPlan" });
 
+    tailor.Inventory = new Inventory(tailor.ID, objDb);
+    tailor.Inventory.Add(ItemFactory.Get(ItemNames.LEATHER_BOOTS, objDb), tailor.ID);
+    tailor.Inventory.Add(ItemFactory.Get(ItemNames.WOOL_CLOAK, objDb), tailor.ID);
+    if (rng.NextDouble() < 0.5)
+      tailor.Inventory.Add(ItemFactory.Get(ItemNames.LEATHER_GLOVES, objDb), tailor.ID);
+    if (rng.NextDouble() < 0.5)
+      tailor.Inventory.Add(ItemFactory.Get(ItemNames.BLINDFOLD, objDb), tailor.ID);
+
+    if (rng.Next(5) == 0)
+    {
+      Item magicItem = rng.Next(3) switch
+      {
+        0 => ItemFactory.Get(ItemNames.SNEAKERS, objDb),
+        1 => ItemFactory.Get(ItemNames.CLOAK_OF_PROTECTION, objDb),        
+        _ => ItemFactory.Get(ItemNames.GLOVES_OF_ARCHERY, objDb)
+      };
+      tailor.Inventory.Add(magicItem, tailor.ID);
+    }
+
     return tailor;
   }
 

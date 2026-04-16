@@ -649,15 +649,44 @@ class TailorBehaviour : NPCBehaviour
 
     List<Item> currStock = npc.Inventory.Items();
 
+    bool magicItem = false, leatherGloves = false, blindfold = false;
     foreach (Item item in currStock)
     {
       if (gs.Rng.NextDouble() < 0.2)
       {
         npc.Inventory.RemoveByID(item.ID, gs);
         gs.ObjDb.RemoveItemFromGame(Loc.Nowhere, item);
+        continue;
       }
+
+      if (item.Traits.Any(t => t is MagicItemTrait))
+        magicItem = true;
+
+      if (item.Name == "leather gloves")
+        leatherGloves = true;
+      else if (item.Name == "blindfold")
+        blindfold = true;
     }
 
+    if (!leatherGloves && gs.Rng.NextDouble() < 0.5)
+      npc.Inventory.Add(ItemFactory.Get(ItemNames.LEATHER_GLOVES, gs.ObjDb), npc.ID);
+    if (!blindfold && gs.Rng.NextDouble() < 0.5)
+      npc.Inventory.Add(ItemFactory.Get(ItemNames.BLINDFOLD, gs.ObjDb), npc.ID);
+    if (!magicItem && gs.Rng.Next(4) == 0)
+    {
+      Item mi = gs.Rng.Next(8) switch
+      {
+        0 => ItemFactory.Get(ItemNames.SNEAKERS, gs.ObjDb),
+        1 => ItemFactory.Get(ItemNames.CLOAK_OF_PROTECTION, gs.ObjDb),
+        2 => ItemFactory.Get(ItemNames.RING_OF_PROTECTION, gs.ObjDb),
+        3 => ItemFactory.Get(ItemNames.TALISMAN_OF_CIRCUMSPECTION, gs.ObjDb),
+        4 => ItemFactory.Get(ItemNames.ANTISNAIL_SANDALS, gs.ObjDb),
+        5 => ItemFactory.Get(ItemNames.FEATHERFALL_BOOTS, gs.ObjDb),
+        6 => ItemFactory.Get(ItemNames.BOOTS_OF_WATER_WALKING, gs.ObjDb),
+        _ => ItemFactory.Get(ItemNames.GLOVES_OF_ARCHERY, gs.ObjDb)
+      };
+      npc.Inventory.Add(mi, npc.ID);
+    }
     // int newStock = gs.Rng.Next(1, 4);
     // for (int j = 0; j < newStock; j++)
     // {
