@@ -802,3 +802,6 @@ While it may not protect you in battle, it may help fend off the elements.
 #
 leather boots
 Because tip-topeing through a field of wildflowers is lovely, dungeons not so much.
+#
+blindfold
+Put it on to block your vision. Which may be useful for self-care or protecting your eyes.
