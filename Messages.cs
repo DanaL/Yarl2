@@ -182,17 +182,11 @@ class MsgFactory
     bool canSeeTarget = Util.PlayerAwareOfActor(target, gs);
     
     if (attacker is Player)
-    {
       return canSeeTarget ? $"You {Grammar.Conjugate(attacker, verb)} {CalcName(target, gs.Player)}!" : "You hit!";
-    }
     else if (target is Player)
-    {
       return $"{CalcName(attacker, gs.Player).Capitalize()} {Grammar.Conjugate(attacker, verb)} you!";
-    }
     else
-    {
-      return "You hear the sounds of battle.";
-    }
+      return "You hear the sounds of battle.";    
   }
 
   public static string MissMessage(Actor attacker, Actor target, GameState gs)

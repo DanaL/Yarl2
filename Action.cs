@@ -61,6 +61,11 @@ class MeleeAttackAction(GameState gs, Actor actor, Loc target) : Action(gs, acto
     if (GameState.ObjDb.Occupant(Target) is Actor target)
     {
       result = Battle.MeleeAttack(Actor!, target, GameState, AttackEffect);
+
+      if (Actor is Player && !Util.PlayerAwareOfActor(target, GameState))
+      {
+        GameState.CurrentDungeon.RememberedLocs[target.Loc] = new LocMemory(new('?', Colours.DARK_GREY, Colours.DARK_GREY, Colours.BLACK, false), 0);
+      }
     }
     else
     {
