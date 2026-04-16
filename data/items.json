@@ -551,7 +551,8 @@
     "Value": 125,
     "Glyph": "o,white,grey,black,false",
     "Traits": [
-      "Grants#ACMod&1"
+      "Grants#ACMod&1",
+      "MagicItem"
     ]
   },
   {
@@ -561,7 +562,8 @@
     "Value": 50,
     "Glyph": "o,white,grey,black,false",
     "Traits": [
-      "Grants#WaterBreathing"
+      "Grants#WaterBreathing",
+      "MagicItem"
     ]
   },
   {
@@ -677,7 +679,8 @@
     "Value": 125,
     "Glyph": "☥,white,grey,black,false",
     "Traits": [
-      "Grants#Dodge&33"
+      "Grants#Dodge&33",
+      "MagicItem"
     ]
   },
   {
@@ -869,7 +872,8 @@
     "Glyph": "☥,brightred,dullred,black,false",
     "Traits": [
       "Grants#StatBuff&0&max&HP&20&item",
-      "Named"
+      "Named",
+      "MagicItem"
     ]
   },
   {
@@ -879,7 +883,8 @@
     "Value": 100,
     "Glyph": "☥,brightred,dullred,black,false",
     "Traits": [
-      "Grants#StatBuff&0&max&Strength&1&item"
+      "Grants#StatBuff&0&max&Strength&1&item",
+      "MagicItem"
     ]
   },
   {
@@ -899,7 +904,8 @@
     "Value": 100,
     "Glyph": "☥,green,darkgreen,black,false",
     "Traits": [
-      "Grants#StatBuff&0&max&Dexterity&1&item"
+      "Grants#StatBuff&0&max&Dexterity&1&item",
+      "MagicItem"
     ]
   },
   {
@@ -909,7 +915,8 @@
     "Value": 50,
     "Glyph": "o,white,grey,black,false",
     "Traits": [
-      "Grants#Likeable"
+      "Grants#Likeable",
+      "MagicItem"
     ]
   },
   {
@@ -921,7 +928,8 @@
     "Traits": [
       "Armour#Boots#0#0",
       "Grants#Alacrity&0.35",
-      "Plural"
+      "Plural",
+      "MagicItem"
     ]
   },
   {
@@ -933,14 +941,15 @@
     "Traits": [
       "Armour#Boots#0#0",
       "Grants#FeatherFall&owner&max",
-      "Plural"
+      "Plural",
+      "MagicItem"
     ]
   },
   {
     "Name": "HEAVY_BOOTS",
     "DescriptiveName": "heavy boots",
     "Type": "Armour",
-    "Value": 65,
+    "Value": 35,
     "Glyph": "[,grey,darkgrey,black,false",
     "Traits": [
       "Armour#Boots#2#0",
@@ -957,7 +966,8 @@
     "Traits": [
       "Armour#Boots#0#0",
       "Grants#WaterWalking",
-      "Plural"
+      "Plural",
+      "MagicItem"
     ]
   },
   {
@@ -1065,7 +1075,8 @@
     "Value": 100,
     "Glyph": "☥,dullred,brown,black,false",
     "Traits": [
-      "Grants#Regeneration&1&owner&false&max;Repugnant;Vulnerable&Fire"
+      "Grants#Regeneration&1&owner&false&max;Repugnant;Vulnerable&Fire",
+      "MagicItem"
     ]
   },
   {
@@ -1075,7 +1086,8 @@
     "Value": 100,
     "Glyph": "☥,brightred,dullred,black,false",
     "Traits": [
-      "Grants#Resistance&Fire;Damage&6&1&Fire"
+      "Grants#Resistance&Fire;Damage&6&1&Fire",
+      "MagicItem"
     ]
   },
   {
@@ -1095,7 +1107,8 @@
     "Value": 100,
     "Glyph": "☥,darkgrey,darkgrey,black,false",
     "Traits": [
-      "Grants#Cutpurse"
+      "Grants#Cutpurse",
+      "MagicItem"
     ]
   },
   {
@@ -1123,10 +1136,11 @@
     "Name": "CLOAK_OF_PROTECTION",
     "DescriptiveName": "cloak of protection",
     "Type": "Armour",
-    "Value": 10,
+    "Value": 40,
     "Glyph": "[,grey,darkgrey,black,false",
     "Traits": [
-      "Armour#Cloak#2#0"
+      "Armour#Cloak#2#0",
+      "MagicItem"
     ]
   },
   {
@@ -1138,7 +1152,8 @@
     "Traits": [
       "Armour#Gloves#1#0",
       "Plural",
-      "Grants#StatBuff&0&max&Strength&2&item"
+      "Grants#StatBuff&0&max&Strength&2&item",
+      "MagicItem"
     ]
   },
   {
@@ -1243,7 +1258,8 @@
     "Value": 333,
     "Glyph": "☥,yellow,yelloworange,black,false",
     "Traits": [
-      "Grants#CroesusTouch&owner"
+      "Grants#CroesusTouch&owner",
+      "MagicItem"
     ]
   },
   {
@@ -1343,7 +1359,8 @@
     "Value": 100,
     "Glyph": "☥,brightred,dullred,black,false",
     "Traits": [
-      "Grants#CrimsonWard"
+      "Grants#CrimsonWard",
+      "MagicItem"
     ]
   },
   {
@@ -1435,7 +1452,7 @@
     "Name": "SNEAKERS",
     "DescriptiveName": "shoes of sneaking",
     "Type": "Armour",
-    "Value": 333,
+    "Value": 100,
     "Glyph": "[,lightbrown,brown,black,false",
     "Traits": [
       "Armour#Boots#1#0",
@@ -1453,7 +1470,8 @@
       "Armour#Cloak#0#0",
       "Grants#Quiet&item",
       "CoolDown#30#0",
-      "UseSimple#blink"
+      "UseSimple#blink",
+      "MagicItem"
     ]
   },
   {
@@ -1464,7 +1482,8 @@
     "Glyph": "(,iceblue,lightblue,black,false",
     "Traits": [
       "UseSimple#castsleep",
-      "CoolDown#50#0"
+      "CoolDown#50#0",
+      "MagicItem"
     ]
   },
   {
@@ -1563,12 +1582,13 @@
     "Name": "GLOVES_OF_ARCHERY",
     "DescriptiveName": "gloves of archery",
     "Type": "Armour",
-    "Value": 30,
+    "Value": 40,
     "Glyph": "[,beige,lightbrown,black,false",
     "Traits": [
       "Armour#Gloves#0#0",
       "Plural",
-      "Grants#StatBuff&0&max&ArcheryBonus&2&item"
+      "Grants#StatBuff&0&max&ArcheryBonus&2&item",
+      "MagicItem"
     ]
   },
   {

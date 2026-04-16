@@ -754,6 +754,11 @@ class MageArmourTrait : TemporaryTrait
   }
 }
 
+class MagicItemTrait : Trait
+{
+  public override string AsText() => "MagicItem";
+}
+
 class MeleeDamageModTrait : Trait
 {
   public int Amt { get; set; }
@@ -4427,6 +4432,7 @@ class TraitFactory
     { "MageArmour", (pieces, gameObj) =>
       new MageArmourTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) }
     },
+    { "MagicItem", (pieces, gameObj) => new MagicItemTrait() },
     { "MeleeDamageMod", (pieces, gameObj) => new MeleeDamageModTrait() { Amt = int.Parse(pieces[1]), SourceId = ulong.Parse(pieces[2]) }},
     { "Metal", (pieces, gameObj) => new MetalTrait() { Type = (Metals)int.Parse(pieces[1]) } },
     { "MoldSpores", (pieces, gameObj) => new MoldSporesTrait() },
