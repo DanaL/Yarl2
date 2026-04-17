@@ -148,7 +148,8 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
       int adjFloors = 0;
       foreach (Loc adj in Util.Adj4Locs(prev))
       {
-        if (gs.TileAt(adj).Type == TileType.DungeonFloor)
+        TileType tt = gs.TileAt(adj).Type;
+        if (tt == TileType.DungeonFloor || tt == TileType.WoodBridge)
           ++adjFloors;
       }
       if (adjFloors > 2)
