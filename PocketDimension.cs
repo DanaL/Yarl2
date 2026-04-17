@@ -57,7 +57,7 @@ class PocketDimension
     map.SetTile(2, 2, new MonsterWall(new Glyph('/', mg.Lit, mg.Unlit, mg.BG, mg.Illuminate), monster.ID));
 
     int dungeonId = TempDungeonId(gs);
-    Dungeon belly = new(dungeonId, "a monster's belly", SwallowMessage(monster, victim, gs), true);
+    Dungeon belly = new(dungeonId, "a monster's belly", SwallowMessage(monster, victim, gs), true)  { PocketDimension = true };
     belly.AddMap(map);
     gs.Campaign.AddDungeon(belly, belly.ID);
 
@@ -171,7 +171,7 @@ class PocketDimension
     map.SetTile(4, 18, new MonsterWall(new Glyph('/', mg.Lit, mg.Unlit, mg.BG, false), monster.ID));
 
     int dungeonId = TempDungeonId(gs);
-    Dungeon belly = new(dungeonId, "a monster's belly", SwallowMessage(monster, victim, gs), true);
+    Dungeon belly = new(dungeonId, "a monster's belly", SwallowMessage(monster, victim, gs), true) { PocketDimension = true };
     belly.AddMap(map);
     gs.Campaign.AddDungeon(belly, belly.ID);
 

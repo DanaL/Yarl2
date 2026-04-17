@@ -1768,7 +1768,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
 
   public override string AsText() => $"UseSimple#{Spell}";
 
-  TemporaryTrait BuildBlindTrait(Actor victim, GameState gs)
+  static TemporaryTrait BuildBlindTrait(Actor victim, GameState gs)
   {
     int duration = gs.Rng.Next(150, 251);
     if (victim.Stats.TryGetValue(Attribute.Constitution, out var con))
@@ -3600,9 +3600,9 @@ sealed class CountdownTrait : BasicTrait, IGameEventListener, IOwner
     }
     else if (obj is Actor actor)
     {
-      gs.RemovePerformerFromGame(actor);
       string s = $"{actor.FullName.Capitalize()} fades away!";
       gs.UIRef().AlertPlayer(s, gs, actor.Loc);
+      gs.RemovePerformerFromGame(actor);
     }
   }  
 }

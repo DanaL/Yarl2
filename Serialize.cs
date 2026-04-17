@@ -359,7 +359,7 @@ class CampaignSaver
   }
 }
 
-internal class DungeonSaver
+sealed class DungeonSaver
 {
   public int ID { get; set; }
   public string? ArrivalMessage { get; set; }
@@ -368,6 +368,7 @@ internal class DungeonSaver
   public string Name { get; set; } = "";
   public int PopulationLow { get; set; }
   public int PopulationHigh { get; set; }
+  public bool PocketDimension { get; set; } = false;
 
   [JsonInclude]
   public List<string> RememberedLocs = [];
@@ -388,7 +389,8 @@ internal class DungeonSaver
       ExitLoc = dungeon.ExitLoc.ToString(),
       Name = dungeon.Name,
       PopulationLow = dungeon.PopulationLow,
-      PopulationHigh = dungeon.PopulationHigh
+      PopulationHigh = dungeon.PopulationHigh,
+      PocketDimension = dungeon.PocketDimension
     };
 
     foreach (var k in dungeon.LevelMaps.Keys)
@@ -411,7 +413,8 @@ internal class DungeonSaver
     {
       ExitLoc = Loc.FromStr(sd.ExitLoc),
       PopulationLow = sd.PopulationLow,
-      PopulationHigh = sd.PopulationHigh
+      PopulationHigh = sd.PopulationHigh,
+      PocketDimension = sd.PocketDimension
     };
 
     foreach (var s in sd.RememberedLocs)

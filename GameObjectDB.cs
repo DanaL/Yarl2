@@ -676,6 +676,8 @@ class Dungeon(int ID, string name, string arrivalMessage, bool desc)
   public string Name { get; set; } = name;
   public int PopulationLow { get; set; } = 8;
   public int PopulationHigh { get; set; } = 12;
+  public bool PocketDimension { get; set; } = false;
+
   public void AddMap(Map map)
   {
     int id = LevelMaps.Count == 0 ? 0 : LevelMaps.Keys.Max() + 1;

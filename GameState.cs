@@ -919,6 +919,9 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
   public void RemovePerformerFromGame(Actor performer)
   {
+    performer.Traits.OfType<SwallowedTrait>().FirstOrDefault()?.Remove(this);
+    performer.ClearAnchors(this);
+
     ObjDb.RemoveActor(performer);
     Performers.Remove(performer.ID);
   }
@@ -1142,9 +1145,16 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       if (obj.Loc == Loc.Nowhere)
         return true;
+
       if (obj.Loc.DungeonID == CurrDungeonID && obj.Loc.Level == CurrLevel)
         return true;
 
+      foreach (Dungeon d in Campaign.Dungeons.Values)
+      {
+        if (d.PocketDimension && obj.Loc.DungeonID == d.ID)
+          return true;
+      }
+      
       return false;
     }
 
