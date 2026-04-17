@@ -185,8 +185,8 @@ class GulpAction(GameState gs, Actor actor, int dc, int dmgDie, int numOfDice) :
 
         (entry, belly) = bellyType switch
         {
-          "Whale" => (entry, belly) = PocketDimension.WhaleBelly(Actor, GameState),
-          _ => (entry, belly) = PocketDimension.MonsterBelly(Actor, GameState)
+          "Whale" => (entry, belly) = PocketDimension.WhaleBelly(Actor, victim, GameState),
+          _ => (entry, belly) = PocketDimension.MonsterBelly(Actor, victim, GameState)
         };
 
         Actor.Traits.Add(new PocketDimensionTrait() { ID = belly.ID, Entry = entry });

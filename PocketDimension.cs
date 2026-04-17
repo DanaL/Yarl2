@@ -32,7 +32,17 @@ class PocketDimension
     return dungeonId;
   }
 
-  public static (Loc, Dungeon) MonsterBelly(Actor monster, GameState gs)
+  static string SwallowMessage(Actor monster, Actor victim, GameState gs)
+  {
+    if (victim is Player)
+      return $"You've been swallowed by {monster.Name.IndefArticle()}!";
+    else if (victim.VisibleTo(gs.Player))
+      return $"{victim.FullName.Capitalize()} is swallowed by {monster.Name.IndefArticle()}!";
+    else
+      return "Gulp!";
+  }
+
+  public static (Loc, Dungeon) MonsterBelly(Actor monster, Actor victim, GameState gs)
   {
     Glyph mg = monster.Glyph;
     Map map = new(3, 3);
@@ -47,14 +57,14 @@ class PocketDimension
     map.SetTile(2, 2, new MonsterWall(new Glyph('/', mg.Lit, mg.Unlit, mg.BG, mg.Illuminate), monster.ID));
 
     int dungeonId = TempDungeonId(gs);
-    Dungeon belly = new(dungeonId, "a monster's belly", $"You've been swallowed by {monster.Name.IndefArticle()}!", true);
+    Dungeon belly = new(dungeonId, "a monster's belly", SwallowMessage(monster, victim, gs), true);
     belly.AddMap(map);
     gs.Campaign.AddDungeon(belly, belly.ID);
 
     return (new Loc(dungeonId, 0, 1, 1), belly);
   }
 
-  public static (Loc, Dungeon) WhaleBelly(Actor monster, GameState gs)
+  public static (Loc, Dungeon) WhaleBelly(Actor monster, Actor victim, GameState gs)
   {
     Glyph mg = monster.Glyph;
 
@@ -161,7 +171,7 @@ class PocketDimension
     map.SetTile(4, 18, new MonsterWall(new Glyph('/', mg.Lit, mg.Unlit, mg.BG, false), monster.ID));
 
     int dungeonId = TempDungeonId(gs);
-    Dungeon belly = new(dungeonId, "a monster's belly", $"You've been swallowed by {monster.Name.IndefArticle()}!", true);
+    Dungeon belly = new(dungeonId, "a monster's belly", SwallowMessage(monster, victim, gs), true);
     belly.AddMap(map);
     gs.Campaign.AddDungeon(belly, belly.ID);
 
