@@ -58,7 +58,8 @@ class SorceressQuest
       return tile.Type switch
       {
         TileType.DeepWater or TileType.Dirt or TileType.StoneRoad
-          or TileType.Bridge or TileType.Portal
+          or TileType.Bridge or TileType.Portal or TileType.WoodWall
+          or TileType.HFence or TileType.VFence or TileType.CornerFence or TileType.Crops
           or TileType.Mountain or TileType.SnowPeak => false,
         _ => true,
       };
@@ -68,7 +69,6 @@ class SorceressQuest
   public static bool Setup(Map wilderness, Town town, GameObjectDB objDb, FactDb factDb, Campaign campaign, Rng rng)
   {    
     // First, pick a spot in the wilderness for the tower and draw it
-    // Find a place for the tower
     List<(int, int)> options = [];
     for (int r = 3; r < wilderness.Height - 13; r++)
     {
