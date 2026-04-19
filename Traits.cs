@@ -293,6 +293,7 @@ class SwallowedTrait : Trait, IGameEventListener
         gs.UIRef().AlertPlayer(s);
       }
 
+      Loc exitLoc;
       if (gs.ObjDb.GetObj(SwallowerID) is Actor swallower)
       {
         List<Trait> toKeep = [];
@@ -308,12 +309,17 @@ class SwallowedTrait : Trait, IGameEventListener
         }
 
         swallower.Traits = toKeep;
+        exitLoc = swallower.Loc;
+      }
+      else
+      {
+        exitLoc = Origin;
       }
 
       Loc start = victim.Loc;
-      gs.ActorEntersLevel(victim, Origin.DungeonID, Origin.Level);
-      gs.ResolveActorMove(victim, start, Origin);
-      victim.Loc = Origin;      
+      gs.ActorEntersLevel(victim, exitLoc.DungeonID, exitLoc.Level);
+      gs.ResolveActorMove(victim, start, exitLoc);
+      victim.Loc = exitLoc;      
       gs.FlushPerformers();
       gs.PrepareFieldOfView();
     }
