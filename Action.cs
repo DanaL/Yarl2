@@ -2165,6 +2165,9 @@ sealed class SummonDecoy(GameState gs, Actor actor) : Action(gs, actor)
 
     GameState.ObjDb.AddNewActor(decoy, loc);
 
+    string s = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "summon")} {decoy.Name.IndefArticle()}!";
+    GameState.UIRef().AlertPlayer(s, GameState, decoy.Loc);
+
     return 1.0;
   }
 }
