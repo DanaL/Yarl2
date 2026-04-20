@@ -450,6 +450,11 @@ abstract class Actor : GameObj, IZLevel
     }
     done_dividing:
 
+    if (HasTrait<FullBellyTrait>() && gs.Rng.NextDouble() < 0.6)
+    {
+      EmptyBelly(gs);  
+    }
+
     // Is the monster now afraid?
     if (!HasTrait<FrightenedTrait>())
     {

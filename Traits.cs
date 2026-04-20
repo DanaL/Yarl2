@@ -287,12 +287,7 @@ class SwallowedTrait : Trait, IGameEventListener
     {
       victim.Traits.Remove(this);
       gs.RemoveListener(this);
-      if (gs.LastPlayerFoV.ContainsKey(victim.Loc))
-      {
-        string s = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} expelled!";
-        gs.UIRef().AlertPlayer(s);
-      }
-
+      
       Loc exitLoc;
       if (gs.ObjDb.GetObj(SwallowerID) is Actor swallower)
       {
@@ -314,6 +309,14 @@ class SwallowedTrait : Trait, IGameEventListener
       else
       {
         exitLoc = Origin;
+      }
+
+      exitLoc = Util.NearestUnoccupiedLoc(gs, exitLoc);
+
+      if (gs.LastPlayerFoV.ContainsKey(exitLoc))
+      {
+        string s = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} expelled!";
+        gs.UIRef().AlertPlayer(s);
       }
 
       Loc start = victim.Loc;
