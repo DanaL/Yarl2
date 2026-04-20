@@ -68,8 +68,7 @@ class Kobold
     cultist.Traits.Add(new FriendlyMonsterTrait());
     cultist.Appearance = Appearance(rng);
     cultist.Stats[Attribute.MobAttitude] = new Stat(Mob.INDIFFERENT);
-    cultist.ResetPlan();
-
+    
     cultist.Glyph = cultist.Glyph with { Lit = Colours.SOFT_RED };
   }
 
@@ -81,8 +80,7 @@ class Kobold
     leader.Traits.Add(new NamedTrait());
     leader.Traits.Add(new FriendlyMonsterTrait());
     leader.Appearance = Appearance(rng);
-    leader.Stats[Attribute.MobAttitude] = new Stat(Mob.INDIFFERENT);
-    leader.ResetPlan();
+    leader.Stats[Attribute.MobAttitude] = new Stat(Mob.INDIFFERENT);    
   }
 
   public static bool OfferGold(GameState gs, Item zorkmids, Loc loc)

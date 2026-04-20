@@ -128,18 +128,13 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     
     // Sometimes the witch is invisible after experimenting with one of their
     // partner's potions
-    if (FactDb.FactCheck("WitchId") is SimpleFact witchFact)
+    if (FactDb.FactCheck("WitchId") is SimpleFact witchFact && ObjDb.GetObj(ulong.Parse(witchFact.Value)) is Mob witch)
     {
-      if (ObjDb.GetObj(ulong.Parse(witchFact.Value)) is Mob witch)
+      if (!witch.HasTrait<InvisibleTrait>() && Rng.NextDouble() < 0.2)
       {
-        if (!witch.HasTrait<InvisibleTrait>() && Rng.NextDouble() < 0.2)
-        {
-          InvisibleTrait it = new() { ExpiresOn = Turn + (ulong)Rng.Next(500, 1000) };
-          it.Apply(witch, this);
-
-          witch.ClearPlan();
-        }  
-      }    
+        InvisibleTrait it = new() { ExpiresOn = Turn + (ulong)Rng.Next(500, 1000) };
+        it.Apply(witch, this);
+      }
     }
 
     if (FactDb.FactCheck("AlchemistId") is SimpleFact af && ObjDb.GetObj(ulong.Parse(af.Value)) is Mob alc)

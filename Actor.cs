@@ -705,9 +705,12 @@ sealed class Mob : Actor
   public List<Power> Powers { get; set; } = []; // this will supersede the Actions list
   public Dictionary<string, ulong> LastPowerUse = []; // I'll probably want to eventually serialize these
 
-  BehaviourNode? CurrPlan { get; set; } = null;
-  public void ClearPlan() => CurrPlan = null;
-
+  // I'd like to just set these in constructor but a lot of the BehaviourNodes
+  // require a reference to GameState, so until/unless I can sort that out, or 
+  // reorganize starting a new game, I cannot
+  private BehaviourNode? BTNode { get; set; }
+  private BehaviourNode? BTHead { get; set; }
+  
   public const int INACTIVE = 0;
   public const int INDIFFERENT = 1;
   public const int AGGRESSIVE = 2;
@@ -777,8 +780,6 @@ sealed class Mob : Actor
     return Stats.TryGetValue(Attribute.AttackBonus, out var ab) ? ab.Curr : 0;
   }
 
-  //public override int AC => Stats.TryGetValue(Attribute.AC, out var ac) ? ac.Curr : base.AC;
-
   public override int AC
   {
     get
@@ -818,8 +819,6 @@ sealed class Mob : Actor
 
   public string GetBark(GameState gs) => _behaviour.GetBark(this, gs);
 
-  public void ResetPlan() => CurrPlan = null;
-
   public override void TakeTurn(GameState gs)
   {
     if (ActionQ.Count > 0)
@@ -828,17 +827,18 @@ sealed class Mob : Actor
     }
     else
     {
-      if (CurrPlan is null)
+      if (BTNode is null)
       {
         string planName = Traits.OfType<BehaviourTreeTrait>().First().Plan;
-        CurrPlan = Planner.GetPlan(planName, this, gs);
+        BTHead = Planner.GetPlan(planName, this, gs);
+        BTNode = BTHead;
       }
 
-      if (CurrPlan.Execute(this, gs) == PlanStatus.Failure)
+      if (BTNode.Execute(this, gs) == PlanStatus.Failure)
       {
-        CurrPlan = null;
+        BTNode = BTHead;
         ExecuteAction(new PassAction(gs));
-      }
+      }      
     }
     
     gs.PrepareFieldOfView();
