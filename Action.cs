@@ -1144,7 +1144,7 @@ class UpgradeItemAction : Action
     {
       GameState.Player.Inventory.Zorkmids -= Total;
 
-      var (_, msg) = Alchemy.UpgradeItem(item, reagent, GameState.Player);
+      var (_, msg) = Alchemy.UpgradeItem(item, reagent, GameState.Player, GameState);
 
       GameState.Player.Inventory.RemoveByID(reagent.ID, GameState);
 
@@ -3828,7 +3828,7 @@ class EnchantItemAction(GameState gs, Actor actor, Item item) : Action(gs, actor
     var (item, _) = Actor!.Inventory.ItemAt(Choice);
     if (item != null)
     {
-      var (_, msg) = Alchemy.UpgradeItem(item, SourceItem, Actor);
+      var (_, msg) = Alchemy.UpgradeItem(item, SourceItem, Actor, GameState);
       GameState.UIRef().AlertPlayer(msg);
     }
 

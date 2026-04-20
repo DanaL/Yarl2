@@ -3129,8 +3129,8 @@ class StatBuffTrait : TemporaryTrait
 
     // If the buffs share the same source, just increase the expires on rather
     // than letting the player spam stat buffs
-    StatBuffTrait? other = target.Traits.OfType<StatBuffTrait>().Where(t => t.SourceId == SourceId).FirstOrDefault();
-    if (other is not null)
+    StatBuffTrait? other = target.Traits.OfType<StatBuffTrait>().FirstOrDefault(t => t.SourceId == SourceId);
+    if (other is not null && ExpiresOn < ulong.MaxValue)
     {
       other.ExpiresOn = ulong.Max(other.ExpiresOn, ExpiresOn);
       return [];

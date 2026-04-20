@@ -64,7 +64,19 @@ class Alchemy
     return false;
   }
 
-  public static (bool, string) UpgradeItem(Item item, Item reagent, Actor actor)
+  static void IncArmourHPBuff(Item item, Actor actor, GameState gs)
+  {
+    string grantText = "StatBuff#0#max#HP#5#item";
+    GrantsTrait gt = new() { SourceId = 0, TraitsGranted = [ grantText ] };
+    gt.Grant(actor, gs, item);
+    
+    if (item.Traits.OfType<GrantsTrait>().FirstOrDefault() is GrantsTrait grants)
+      grants.TraitsGranted = [.. grants.TraitsGranted.Append(grantText)];
+    else
+      item.Traits.Add(gt); 
+  }
+
+  public static (bool, string) UpgradeItem(Item item, Item reagent, Actor actor, GameState gs)
   {
     bool success = false;
     string msg = "";
@@ -74,8 +86,11 @@ class Alchemy
       case "beetle carapace":
         if (item.Traits.OfType<ArmourTrait>().FirstOrDefault() is ArmourTrait armour)
         {
-          armour.Bonus += 1;
+          armour.Bonus += 1;      
           success = true;
+
+          IncArmourHPBuff(item, actor, gs);
+
           msg = $"Your {item.Name} now {Grammar.Conjugate(item, "offer")} more protection!\n\n{reagent.Name.IndefArticle().Capitalize()} was consumed.";
         }
         break;
@@ -92,6 +107,9 @@ class Alchemy
         {
           mithrilArmour.Bonus += 1;
           success = true;
+
+          IncArmourHPBuff(item, actor, gs);
+
           msg = $"Enhanced by mithril, your {item.Name} now offers more protection!\n\n{reagent.Name.IndefArticle().Capitalize()} was consumed.";
         }
         else if (item.Traits.OfType<WeaponBonusTrait>().FirstOrDefault() is WeaponBonusTrait mwbt)
