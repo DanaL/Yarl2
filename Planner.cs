@@ -11,6 +11,9 @@
 
 namespace Yarl2;
 
+// A class to build behaviour trees for mobs. I feel like I should be able to 
+// move this to Mob's constructor and get ride of GetPlan() altogether but I'd
+// have to do a lot of refactoring
 class Planner
 {
   static Sequence GoToBuilding(Actor actor, GameState gs, Map map, HashSet<Loc> area)
