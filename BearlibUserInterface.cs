@@ -19,7 +19,7 @@ internal class BLUserInterface : UserInterface, IDisposable
 {
   readonly Dictionary<int, char> KeyToChar = [];
   Dictionary<Colour, Color> _colours = [];
-
+  
   public BLUserInterface(string windowTitle, Options opt) : base()
   {
     FontSize = opt.FontSize;
@@ -155,12 +155,16 @@ internal class BLUserInterface : UserInterface, IDisposable
   public override void ClearScreen() => Terminal.Clear();
   protected override void Blit() => Terminal.Refresh();
 
+  static readonly Color _black = new () { R = 0, B = 0, G = 0 };
   public override void WriteSq(int row, int col, Sqr sq)
   {
     var (fg, bg, ch) = sq;
     Terminal.BkColor(ToBearLibColour(bg));
     Terminal.Color(ToBearLibColour(fg));
     Terminal.Put(col, row, ch);
+
+    if (bg != Colours.BLACK)
+      Terminal.BkColor(_black);
   }
 
   public override void UpdateDisplay(GameState? gs)
