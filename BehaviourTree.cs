@@ -192,7 +192,7 @@ class Sequence(List<BehaviourNode> nodes) : BehaviourNode
   int Curr { get; set; } = 0;
 
   public override PlanStatus Execute(Mob mob, GameState gs)
-  {    
+  {
     while (Curr < Children.Count)
     {
       PlanStatus status = Children[Curr].Execute(mob, gs);

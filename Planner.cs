@@ -219,6 +219,7 @@ class Planner
   {
     bool immobile = mob.HasTrait<ImmobileTrait>();
 
+    bool gupler = false;
     List<BehaviourNode> actions = [];
     List<BehaviourNode> passive = [];
     foreach (Power p in mob.Powers)
@@ -241,6 +242,9 @@ class Planner
       actions.Add(up);
       if (p.Type == PowerType.Passive)
         passive.Add(up);
+
+      if (p.Name == "Gulp")
+        gupler = true;
     }
 
     // This will make the monster move to toward the player/target until they 
@@ -280,7 +284,19 @@ class Planner
         actions.Add(new KeepDistance());
         actions.Add(new ChaseTarget());
       }
-      plan.Add(new Sequence([new CheckMonsterAttitude(Mob.AGGRESSIVE), new Selector(actions) { Label = "powers" }]) { Label = "aggressive" });
+
+      Sequence aggro = new([new CheckMonsterAttitude(Mob.AGGRESSIVE), new Selector(actions) { Label = "powers" }]) { Label = "aggressive" };
+      
+      if (gupler)
+      {
+        // If the gulper has a full belly, try to keep away from target (usually player) while digesting
+        Sequence fullBelly = new([new HasTrait<FullBellyTrait>(), new TryToEscape()]) { Label = "fully belly"};
+        plan.Add(new Selector([fullBelly, aggro]) { Label = "gulper " });
+      }
+      else
+      {
+        plan.Add(aggro);  
+      }
 
       plan.Add(new PassTurn() { Label = "default" });
     }
