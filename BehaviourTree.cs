@@ -730,7 +730,7 @@ class TryToEscape : BehaviourNode
       else
       {
         var path = AStar.FindPath(gs.ObjDb, gs.CurrentMap, mob.Loc, GoalLoc, costFunc, true);
-        loc = path.Peek();
+        loc = path.Count == 0 ? Loc.Nowhere : path.Peek();
       }
       
       if (loc != Loc.Nowhere)
