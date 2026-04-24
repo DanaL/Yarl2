@@ -1212,7 +1212,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     }
   }
 
-  void PlaceMoonDaughterCleric()
+  public void PlaceMoonDaughterCleric()
   {
     if (!(Player.Religion == "Moon Daughter" || FactDb.FactCheck("MD_CURIOUS") is not null))
       return;

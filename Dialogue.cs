@@ -25,6 +25,7 @@ enum TokenType
   BLESSINGS, GRANT_CHAMP_BLESSING, GRANT_PALADIN_BLESSING, GRANT_REAVER_BLESSING,
   GRANT_EMBER_BLESSING, GRANT_TRICKSTER_BLESSSING, GRANT_WINTER_BLESSING,
   SHOP_MENU, SHOP_SELECTION, DRAGON_CULT_QUEST, SELL_MENU,
+  CHECK_MD_CLERIC,
   EOF
 }
 
@@ -140,6 +141,7 @@ class ScriptScanner(string src)
       "sell-menu" => TokenType.SELL_MENU,
       "shop-selection" => TokenType.SHOP_SELECTION,
       "dragon-cult-quest" => TokenType.DRAGON_CULT_QUEST,
+      "check-md-cleric" => TokenType.CHECK_MD_CLERIC,
       _ => TokenType.IDENTIFIER
     };
 
@@ -250,6 +252,7 @@ class ScriptParser(List<ScriptToken> tokens)
       TokenType.OFFER => OfferExpr(),
       TokenType.BUMP => BumpExpr(),
       TokenType.DRAGON_CULT_QUEST => StartDragonCultQuest(),
+      TokenType.CHECK_MD_CLERIC => CheckMDCleric(),
       TokenType.DEF => DefExpr(),
       TokenType.APPEND => AppendExpr(),
       _ => ListExpr(),
@@ -396,6 +399,14 @@ class ScriptParser(List<ScriptToken> tokens)
     Consume(TokenType.RIGHT_PAREN);
 
     return new ScriptStartDragonCultQuest();
+  }
+
+  ScriptCheckMDCleric CheckMDCleric()
+  {
+    Consume(TokenType.CHECK_MD_CLERIC);
+    Consume(TokenType.RIGHT_PAREN);
+
+    return new ScriptCheckMDCleric();
   }
 
   ScriptSpend SpendExpr()
@@ -731,6 +742,7 @@ record class ScriptStartDragonCultQuest : ScriptExpr;
 record class ScriptTurnInSkull : ScriptExpr;
 record class ScriptBump(string Stat, ScriptExpr Value) : ScriptExpr;
 record class ScriptOffer(ScriptLiteral Identifier) : ScriptExpr;
+record class ScriptCheckMDCleric : ScriptExpr;
 
 record DialogueOption(string Text, char Ch, ScriptExpr Expr);
 
@@ -1132,6 +1144,10 @@ class DialogueInterpreter
     else if (Expr is ScriptStartDragonCultQuest)
     {
       EvalStartDragonCultQuest(mob, gs);
+    }
+    else if (Expr is ScriptCheckMDCleric)
+    {
+      EvalMDClericCheck(gs);
     }
     else if (Expr is ScriptDef def)
     {
@@ -1829,6 +1845,18 @@ class DialogueInterpreter
     Sb.Append("\n\nIf you can teach him the error of his ways, you will be much esteemed in the eyes of our scaley overlord.");
 
     mob.Stats[Attribute.DialogueState] = new Stat(2);
+  }
+
+  static void EvalMDClericCheck(GameState gs)
+  {
+    if (!gs.InWilderness)
+      return;
+
+    var (hour, _) = gs.CurrTime();
+    if ((hour >= 20 && hour <= 23) || (hour >= 0 && hour < 4))
+    {
+      gs.PlaceMoonDaughterCleric();
+    }    
   }
 }
 

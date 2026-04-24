@@ -28,7 +28,7 @@
                     "There is a path you could take, guided by moonlight."
         ))
 
-        (option "Tell me more." ( (set DIALOGUE_STATE 2) (set MD_CURIOUS true) (end "Seek the Standing Stones at night.")))
+        (option "Tell me more." ((set DIALOGUE_STATE 2) (set MD_CURIOUS true) (check-md-cleric) (end "Seek the Standing Stones at night.")))
         (option "Farewell." (end "Fare thee well."))
       )
     )
