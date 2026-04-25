@@ -690,6 +690,16 @@ class MapView : Inputer
       }
     }
 
+    if (GS.FactDb.FactCheck("Stone ring centre") is LocationFact srf)
+    {
+      Loc stoneRingCentre = srf.Loc;
+      if (GS.Campaign.Dungeons[GS.CurrDungeonID].RememberedLocs.ContainsKey(stoneRingCentre))
+      {
+        string dir = RelativeDir(centerLoc, stoneRingCentre);
+        PlaceLabel(sqs, "Stone Ring", dir, stoneRingCentre, startRow, startCol, OnScreen.Contains(stoneRingCentre));
+      }
+    }
+
     Loc witchCottageLoc = GS.Campaign.Town!.WitchesCottage.First(l => GS.TileAt(l) is Door || GS.TileAt(l).Type == TileType.BrokenDoor);
     if (GS.Campaign.Dungeons[GS.CurrDungeonID].RememberedLocs.ContainsKey(witchCottageLoc))
     {
