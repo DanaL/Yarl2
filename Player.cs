@@ -301,6 +301,10 @@ sealed class Player : Actor
     int mod = Stats[Attribute.Will].Curr;
     if (Stats.TryGetValue(Attribute.AttackBonus, out var attackBonus))
       mod += attackBonus.Curr;
+
+    if (Background == PlayerBackground.Scholar)
+      mod += 2;
+      
     return mod;
   }
 
