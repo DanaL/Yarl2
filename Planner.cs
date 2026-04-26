@@ -16,28 +16,6 @@ namespace Yarl2;
 // have to do a lot of refactoring
 class Planner
 {
-  static Sequence GoToBuilding(Actor actor, GameState gs, Map map, HashSet<Loc> area)
-  {
-    HashSet<Loc> floors = OnlyFloorsInArea(map, area);
-    FindPathToArea pathBuilder = new(floors, gs);
-    BehaviourNode movePlan = new WalkPath(pathBuilder.BuildPath(actor.Loc));
-
-    BehaviourNode nightTest = new IsNight();
-    return new Sequence([movePlan, new RepeatWhile(nightTest, new WanderInArea(floors))]);
-  }
-
-  static Sequence VisitTavern(Actor actor, GameState gs)
-  {
-    HashSet<Loc> tavernFloors = OnlyFloorsInArea(gs.Wilderness, gs.Town.Tavern);
-    FindPathToArea pathBuilder = new(tavernFloors, gs);
-    BehaviourNode movePlan = new WalkPath(pathBuilder.BuildPath(actor.Loc));
-
-    BehaviourNode eveningTest = new IsEvening();
-    return new Sequence(
-      [movePlan, new RepeatWhile(eveningTest, new WanderInArea(tavernFloors))]
-    );
-  }
-
   static HashSet<Loc> OnlyFloorsInArea(Map map, HashSet<Loc> area)
   {
     static bool IsFloor(Map map, Loc loc)
@@ -62,27 +40,15 @@ class Planner
 
   static BehaviourNode CreateMayorPlan(Actor actor, GameState gs)
   {
-    var (hour, _) = gs.CurrTime();
-    if (hour >= 7 && hour < 19)
-    {
-      // daytimeplan
-      FindPathToArea pathBuilder = new(gs.Town.TownSquare, gs);
-      BehaviourNode movePlan = new WalkPath(pathBuilder.BuildPath(actor.Loc));
-
-      BehaviourNode daytimeTest = new IsDaytime();
-      return new Sequence(
-        [movePlan, new RepeatWhile(daytimeTest, new WanderInArea(gs.Town.TownSquare))]
-      );
-    }
-    else if (hour >= 19 && hour < 22)
-    {
-      return VisitTavern(actor, gs);
-    }
-    else
-    {
-      int homeId = actor.Stats[Attribute.HomeID].Curr;
-      return GoToBuilding(actor, gs, gs.Wilderness, gs.Town.Homes[homeId]);
-    }
+    HashSet<Loc> tavernFloors = OnlyFloorsInArea(gs.Wilderness, gs.Town.Tavern);
+    int homeId = actor.Stats[Attribute.HomeID].Curr;
+    HashSet<Loc> home = OnlyFloorsInArea(gs.Wilderness, gs.Town.Homes[homeId]);
+    
+    return new Selector([
+      new Sequence([new IsDaytime(), new FindWayToArea(gs.Town.TownSquare), new WanderInArea(gs.Town.TownSquare)]),
+      new Sequence([new IsEvening(), new FindWayToArea(tavernFloors), new WanderInArea(tavernFloors)]),
+      new Sequence([new FindWayToArea(home), new WanderInArea(home)])
+    ]) { Label = "MayorPlan" };
   }
 
   static BehaviourNode CreateGreedyMonster(Mob mob, GameState gs)
