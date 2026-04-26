@@ -251,23 +251,8 @@ class CastSlumberingSong(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     int casterSpellDC = Actor.SpellDC;
     foreach (Loc loc in affected)
     {
-      if (GameState!.ObjDb.Occupant(loc) is Actor actor)
-      {
-        if (actor.HasTrait<UndeadTrait>())
-          continue;
-        if (actor.HasTrait<BrainlessTrait>())
-          continue;
-        if (actor.HasTrait<PlantTrait>())
-          continue;
-
-
-        int roll = GameState.Rng.Next(20) + 1;
-        if (roll < casterSpellDC)
-        {
-          GameState.UIRef().AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} asleep!");
-          actor.Traits.Add(new SleepingTrait());
-        } 
-      }
+      if (GameState.Rng.Next(20) + 1 < casterSpellDC && GameState!.ObjDb.Occupant(loc) is Actor actor)
+        Effects.ApplySleep(actor, GameState);
     }
    
     return 1.0;

@@ -546,6 +546,22 @@ class Effects
     }
   }
 
+  public static void ApplySleep(Actor victim, GameState gs)
+  {
+    foreach (Trait t in victim.Traits)
+    {
+      if (t is UndeadTrait)
+        return;
+      else if (t is BrainlessTrait)
+        return;
+      else if (t is PlantTrait)
+        return;
+    }
+    
+    gs.UIRef().AlertPlayer($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "fall")} asleep!");
+    victim.Traits.Add(new SleepingTrait());
+  }
+
   public static void BreakGrapple(Actor actor, GameState gs)
   {
     GrappledTrait? grappled = actor.Traits.OfType<GrappledTrait>().FirstOrDefault();
