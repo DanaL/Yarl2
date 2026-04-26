@@ -183,6 +183,10 @@ class CampaignCreator(UserInterface ui)
     wandMaterials.RemoveAt(j);
 
     j = rng.Next(wandMaterials.Count);
+    Item.IDInfo.Add("wand of sleep", new ItemIDInfo(false, $"{wandMaterials[j]} wand"));
+    wandMaterials.RemoveAt(j);
+
+    j = rng.Next(wandMaterials.Count);
     Item.IDInfo.Add("wand of digging", new ItemIDInfo(false, $"{wandMaterials[j]} wand"));
     wandMaterials.RemoveAt(j);
   }

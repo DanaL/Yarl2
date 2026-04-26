@@ -222,8 +222,8 @@ enum ItemNames
   SCROLL_TRAP_DETECTION, SCROLL_TREASURE_DETECTION, SEEWEED, SHIELD, SHORTBOW, SHORTSHORD, SILVER_ARROW, SILVER_DAGGER, 
   SILVER_LONGSWORD, SKELETON_KEY, SKULL, SMOULDERING_CHARM, SNEAKERS, SNOWBURST_ARROW, SPEAR, SPIDER_ARROW, STATUE, STONE_ALTAR, 
   STUDDED_LEATHER_ARMOUR, TALISMAN_OF_CIRCUMSPECTION, TINCTURE_CELERITY, TORCH, TROLL_BROOCH, VIAL_OF_POISON, VIAL_SPRITE_BLOOD, 
-  WAND_DIGGING, WAND_FIREBALLS, WAND_FROST, WAND_HEAL_MONSTER, WAND_MAGIC_MISSILES, WAND_SLOW_MONSTER, WAND_SUMMONING, WAND_SWAP, 
-  WIND_FAN, WOOL_CLOAK, YENDORIAN_SODA, ZORKMIDS, ZORKMIDS_GOOD, ZORKMIDS_MEDIOCRE, ZORKMIDS_PITTANCE, 
+  WAND_DIGGING, WAND_FIREBALLS, WAND_FROST, WAND_HEAL_MONSTER, WAND_MAGIC_MISSILES, WAND_SLEEP, WAND_SLOW_MONSTER, WAND_SUMMONING, 
+  WAND_SWAP, WIND_FAN, WOOL_CLOAK, YENDORIAN_SODA, ZORKMIDS, ZORKMIDS_GOOD, ZORKMIDS_MEDIOCRE, ZORKMIDS_PITTANCE, 
 
   RED_CRYSTAL, BLUE_CRYSTAL
 }
@@ -386,9 +386,12 @@ class ItemFactory
 
     return material switch
     {
+      "golden wand" => new Glyph('/', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, false),
       "maple wand" => new Glyph('/', Colours.BROWN, Colours.DULL_RED, Colours.BLACK, false),
       "oak wand" => new Glyph('/', Colours.BROWN, Colours.DULL_RED, Colours.BLACK, false),
+      "pine wand" => new Glyph('/', Colours.BEIGE, Colours.BROWN, Colours.BLACK, false),
       "birch wand" => new Glyph('/', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false),
+      "granite wand" => new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
       "balsa wand" => new Glyph('/', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false),
       "glass wand" => new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, false),
       "silver wand" => new Glyph('/', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, false),

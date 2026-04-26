@@ -29,7 +29,8 @@ enum DamageType
   Rust,
   Holy,
   Mud,
-  Grease
+  Grease,
+  Sleep
 }
 
 record struct Damage(int Die, int NumOfDie, DamageType Type);
@@ -968,6 +969,32 @@ class Battle
       Effects.ApplyDamageEffectToLoc(target.Loc, dmg.DamageType, gs);
     }
 
+    ClearObscured(attacker, gs);
+
+    return success;
+  }
+
+  public static bool MagicEffectAttack(Actor attacker, Actor target, GameState gs, DamageType effect, int attackBonus)
+  {
+    bool success = false;
+    int roll = AttackRoll(gs.Rng) + attacker.TotalSpellAttackModifier() + attackBonus;
+    if (!target.VisibleTo(attacker))
+      roll -= 5;
+
+    if (roll >= target.AC)
+    {
+      switch (effect)
+      {
+        case DamageType.Sleep:
+          Effects.ApplySleep(target, gs);
+          break;
+        default:
+          Effects.Apply(effect, gs, target, null, false);
+          break;
+      }
+      success = true;
+    }
+    
     ClearObscured(attacker, gs);
 
     return success;

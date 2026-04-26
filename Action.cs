@@ -4066,6 +4066,37 @@ class FireballAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
   }
 }
 
+class RayOfSleepAction(GameState gs, Actor actor, Trait src, ulong sourceId) : TargetedAction(gs, actor)
+{
+  readonly ulong _sourceId = sourceId;
+  readonly Trait _source = src;
+
+  public override double Execute()
+  {
+    base.Execute();
+
+    List<Loc> pts = [.. Trajectory(Actor!.Loc, true).Skip(1)];
+    BeamAnimation anim = new(GameState!, pts, Colours.PINK, Colours.BLACK);
+    GameState.UIRef().PlayAnimation(anim, GameState);
+
+    foreach (Loc loc in pts)
+    {
+      if (GameState.ObjDb.Occupant(loc) is Actor victim)
+      {
+        Battle.MagicEffectAttack(Actor, victim, GameState, DamageType.Sleep, 5);
+      }
+    }
+
+    if (_source is WandTrait wand)
+    {
+      Item.IDInfo["wand of sleep"] = Item.IDInfo["wand of sleep"] with { Known = true };
+      wand.Used();
+    }
+    
+    return 1.0;
+  }
+}
+
 class RayOfSlownessAction(GameState gs, Actor actor, Trait src, ulong sourceId) : TargetedAction(gs, actor)
 {
   readonly Trait _source = src;
@@ -4077,8 +4108,7 @@ class RayOfSlownessAction(GameState gs, Actor actor, Trait src, ulong sourceId) 
     
     Item ray = new()
     {
-      Name = "ray of slowness",
-      Type = ItemType.Weapon,
+      Name = "ray of slowness", Type = ItemType.Weapon,
       Glyph = new Glyph('*', Colours.FADED_PURPLE, Colours.FADED_PURPLE, Colours.BLACK, false)
     };
     GameState.ObjDb.Add(ray);
@@ -4712,6 +4742,13 @@ class UseWandAction(GameState gs, Actor actor, WandTrait wand, ulong wandId) : A
         inputer = new Aimer(GameState, player.Loc, 9)
         {
           DeferredAction = new RayOfSlownessAction(GameState, player, _wand, wandId)
+        };
+        GameState.UIRef().SetInputController(inputer);
+        break;
+      case "sleepmonster":
+        inputer = new Aimer(GameState, player.Loc, 9)
+        {
+          DeferredAction = new RayOfSleepAction(GameState, player, _wand, wandId)
         };
         GameState.UIRef().SetInputController(inputer);
         break;

@@ -1115,10 +1115,20 @@
     "Name": "WAND_SLOW_MONSTER",
     "DescriptiveName": "wand of slow monster",
     "Type": "Wand",
-    "Value": 150,
+    "Value": 75,
     "Glyph": "/,lightblue,blue,black,false",
     "Traits": [
       "Wand#10#false#slowmonster"
+    ]
+  },
+  {
+    "Name": "WAND_SLEEP",
+    "DescriptiveName": "wand of sleep",
+    "Type": "Wand",
+    "Value": 75,
+    "Glyph": "/,lightblue,blue,black,false",
+    "Traits": [
+      "Wand#10#false#sleepmonster"
     ]
   },
   {
