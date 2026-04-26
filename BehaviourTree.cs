@@ -162,7 +162,7 @@ class Selector(List<BehaviourNode> nodes) : BehaviourNode
   int Curr { get; set; } = 0;
 
   public override PlanStatus Execute(Mob mob, GameState gs)
-  {    
+  {
     while (Curr < Children.Count)
     {
       BehaviourNode node = Children[Curr];
@@ -804,7 +804,7 @@ class WanderInArea(HashSet<Loc> area) : BehaviourNode
         mv.Quip = bark;
       mob.ExecuteAction(mv);
 
-      return PlanStatus.Running;
+      return PlanStatus.Success;
     }
 
     return PlanStatus.Failure;

@@ -49,31 +49,15 @@ class Planner
     return [.. area.Where(l => IsFloor(map, l))];
   }
 
-  static Sequence CreateSmithPlan(Actor actor, GameState gs)
+  static Selector CreateSmithPlan(Actor actor, GameState gs)
   {
-    List<BehaviourNode> nodes = [];
     HashSet<Loc> smithy = OnlyFloorsInArea(gs.Wilderness, gs.Town.Smithy);
+    HashSet<Loc> tavernFloors = OnlyFloorsInArea(gs.Wilderness, gs.Town.Tavern);
 
-    var (hour, _) = gs.CurrTime();
-    if (hour >= 7 && hour < 19)
-    {
-      if (!gs.Town.Smithy.Contains(actor.Loc))
-      {
-        FindPathToArea pathBuilder = new(smithy, gs);
-        nodes.Add(new WalkPath(pathBuilder.BuildPath(actor.Loc)));
-      }
-
-      nodes.Add(new RepeatWhile(new IsDaytime(), new WanderInArea(smithy)));
-      return new Sequence(nodes);
-    }
-    else if (hour >= 19 && hour < 22)
-    {
-      return VisitTavern(actor, gs);
-    }
-    else
-    {
-      return GoToBuilding(actor, gs, gs.Wilderness, gs.Town.Smithy);
-    }
+    return new Selector([
+      new Sequence([new IsEvening(), new FindWayToArea(tavernFloors), new WanderInArea(tavernFloors)]),
+      new Sequence([new FindWayToArea(smithy), new WanderInArea(smithy)])
+    ]) { Label = "SmithPlan" };
   }
 
   static BehaviourNode CreateMayorPlan(Actor actor, GameState gs)
