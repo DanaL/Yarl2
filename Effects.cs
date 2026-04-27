@@ -558,7 +558,15 @@ class Effects
         return;
     }
     
-    gs.UIRef().AlertPlayer($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "fall")} asleep!");
+    string n = MsgFactory.CalcName(victim, gs.Player);
+    gs.UIRef().AlertPlayer($"{n.Capitalize()} {Grammar.Conjugate(victim, "fall")} asleep!", gs, victim.Loc);
+
+    if (victim.HasTrait<GrapplingTrait>())
+    {
+      BreakGrapple(victim, gs);
+      gs.UIRef().AlertPlayer($"{n.Capitalize()} {Grammar.Conjugate(victim, "release")} {Grammar.Possessive(victim)} grip!", gs, victim.Loc);
+    }
+        
     victim.Traits.Add(new SleepingTrait());
   }
 

@@ -299,8 +299,6 @@ abstract class DungeonBuilder
           deck.Reshuffle(rng);
         string m = deck.Monsters[deck.Indexes.Dequeue()];
 
-        // Some monsters are a bit special and take a bit of extra work
-        //Actor monster = MonsterFactory.Get(m, objDb, rng);
         Actor monster = MonsterFactory.Get(m, objDb, rng);
         monster.Loc = loc;
         if (rng.NextDouble() < 0.8)
