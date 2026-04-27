@@ -11,19 +11,7 @@
 
 namespace Yarl2;
 
-// Eventually this will addd NPCs, special features, etc. For now let's
-// just get the town buildings drawn on the map
-
-enum BuildingType
-{
-  Shrine,
-  Home,
-  Tavern,
-  Market,
-  Smithy,
-  WitchesCottage,
-  Tailor
-}
+enum BuildingType { Shrine, Home, Tavern, Market, Smithy, WitchesCottage, Tailor }
 
 class Town
 {
