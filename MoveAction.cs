@@ -242,7 +242,6 @@ class MoveAction(GameState gameState, Actor actor, Loc loc, bool involuntary) : 
     if (Actor is Player)
     {
       GameState.UIRef().AlertPlayer(GameState.LocDesc(Actor.Loc));
-      GameState.Noise(Actor.Loc.Row, Actor.Loc.Col, Actor.GetMovementNoise());
     }
 
     return 1.0;
