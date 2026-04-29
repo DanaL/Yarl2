@@ -1033,28 +1033,6 @@ class InDanger : BehaviourNode
   }
 }
 
-class IsFrightened : BehaviourNode
-{
-  public override PlanStatus Execute(Mob mob, GameState gs) =>
-    mob.HasTrait<FrightenedTrait>() ? PlanStatus.Success : PlanStatus.Failure;
-}
-
-class IsImmobilized : BehaviourNode
-{
-  public override PlanStatus Execute(Mob mob, GameState gs)
-  {
-    foreach (Trait t in mob.Traits)
-    {
-      if (t is ParalyzedTrait)
-        return PlanStatus.Success;
-      else if (t is SleepingTrait)
-        return PlanStatus.Success;
-    }
-
-    return PlanStatus.Failure;
-  }
-}
-
 class IsDisguised : BehaviourNode
 {
   public override PlanStatus Execute(Mob mob, GameState gs)

@@ -556,6 +556,8 @@ class Effects
         return;
       else if (t is PlantTrait)
         return;
+      else if (t is IllusionTrait)
+        return;
     }
     
     string n = MsgFactory.CalcName(victim, gs.Player);

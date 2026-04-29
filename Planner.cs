@@ -111,9 +111,9 @@ class Planner
     }
 
     List<BehaviourNode> plan = [
-      new Sequence([new IsImmobilized(), new PassTurn()]) { Label = "immobilized" },
+      new Sequence([new HasTrait<ParalyzedTrait>(), new PassTurn()]) { Label = "immobilized" },
       new Sequence([new CheckMonsterAttitude(Mob.INACTIVE), new PassTurn()]) { Label = "inactive" },
-      new Sequence([new IsFrightened(), new TryToEscape()]) { Label = "scared" }
+      new Sequence([new HasTrait<FrightenedTrait>(), new TryToEscape()]) { Label = "scared" }
     ];
 
     plan.Add(new Sequence([new IsDisguised(), new Selector([ new Selector(actions), new PassTurn()])]) { Label = "disguised" });
@@ -207,7 +207,7 @@ class Planner
     List<BehaviourNode> plan = [];
 
     // A paralyzed monster will just pass its turn
-    plan.Add(new Sequence([new IsImmobilized(), new PassTurn()]) { Label = "immobilized" });
+    plan.Add(new Sequence([new HasTrait<ParalyzedTrait>(), new PassTurn()]) { Label = "immobilized" });
 
     // As will an inactive one
     plan.Add(new Sequence([new CheckMonsterAttitude(Mob.INACTIVE), new PassTurn()]) { Label = "inactive" });
@@ -224,7 +224,7 @@ class Planner
     plan.Add(new Sequence(indifferentNodes) { Label = "indifferent" });
 
     // An afraid monster tries to escape
-    plan.Add(new Sequence([new IsFrightened(), new TryToEscape()]) { Label = "scared" });
+    plan.Add(new Sequence([new HasTrait<FrightenedTrait>(), new TryToEscape()]) { Label = "scared" });
 
     if (!mob.HasTrait<PassiveTrait>())
     {
