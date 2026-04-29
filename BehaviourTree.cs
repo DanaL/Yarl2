@@ -1087,6 +1087,43 @@ class PickWithOdds : BehaviourNode
   }
 }
 
+// This is the node that checks if a sleeping monster wakes up
+// when the player (or another target) is walking nearby
+class WakeUp : BehaviourNode
+{
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    Actor target = mob.PickTarget(gs);
+
+    if (target is NoOne)
+      return PlanStatus.Failure;
+
+    bool lightStep = false;
+    foreach (Trait t in target.Traits)
+    {
+      if (t is LightStepTrait)
+        lightStep = true;
+      else if (t is QuietTrait)
+        return PlanStatus.Failure;
+      else if (t is NondescriptTrait)
+        return PlanStatus.Failure;
+    }
+
+    int radius = lightStep ? 2 : 5;
+    if (!gs.CanSeeLoc(target.Loc, radius) || gs.Rng.Next(6) > 0)
+      return PlanStatus.Failure;
+
+    mob.Traits = [..mob.Traits.Where(t => t is not SleepingTrait)];
+    if (mob.VisibleTo(gs.Player))
+    {
+      string n = MsgFactory.CalcName(mob, gs.Player);
+      gs.UIRef().AlertPlayer($"{n.Capitalize()} {Grammar.Conjugate(mob, "wake")} up.");
+    }
+
+    return PlanStatus.Success;
+  }
+}
+
 class PickRandom(List<BehaviourNode> nodes) : BehaviourNode
 {
   List<BehaviourNode> Nodes { get; set; } = nodes;

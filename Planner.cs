@@ -209,6 +209,9 @@ class Planner
     // A paralyzed monster will just pass its turn
     plan.Add(new Sequence([new HasTrait<ParalyzedTrait>(), new PassTurn()]) { Label = "immobilized" });
 
+    // A sleeping monster might wake up.
+    plan.Add(new Sequence([new HasTrait<SleepingTrait>(), new Not(new WakeUp()), new PassTurn()]) { Label = "sleeping" });
+
     // As will an inactive one
     plan.Add(new Sequence([new CheckMonsterAttitude(Mob.INACTIVE), new PassTurn()]) { Label = "inactive" });
 
@@ -223,7 +226,7 @@ class Planner
       indifferentNodes.Add(new PickRandom([new PassTurn(), new RandomMove()]));
     plan.Add(new Sequence(indifferentNodes) { Label = "indifferent" });
 
-    // An afraid monster tries to escape
+    // A scared monster tries to escape
     plan.Add(new Sequence([new HasTrait<FrightenedTrait>(), new TryToEscape()]) { Label = "scared" });
 
     if (!mob.HasTrait<PassiveTrait>())
