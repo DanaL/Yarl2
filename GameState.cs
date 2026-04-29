@@ -224,29 +224,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     return true;
   }
 
-  public bool CanSeeLoc(Loc loc, int radius)
-  {
-    Map map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
-    Dictionary<Loc, int> fov = FieldOfView.CalcVisible(radius, loc, map, ObjDb);
-
-    return fov.ContainsKey(loc) && fov[loc] != Illumination.None;
-  }
-
-  public bool LOSBetween(Loc a, Loc b)
-  {
-    if (a.DungeonID != b.DungeonID || a.Level != b.Level)
-      return false;
-
-    Map map = Campaign.Dungeons[a.DungeonID].LevelMaps[a.Level];
-    foreach (var sq in Util.LerpLine(a.Row, a.Col, b.Row, b.Col))
-    {
-      if (!map.InBounds(sq) || map.TileAt(sq).Opaque())
-        return false;
-    }
-
-    return true;
-  }
-
   void SacrificeGoldToHuntokar(int amount, Loc loc)
   {
     if (amount >= 25)
@@ -457,7 +434,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     if (InWilderness && item.Name == "bone")
     {
       ulong pupId = FactDb.FactCheck("PupId") is SimpleFact pupFact ? ulong.Parse(pupFact.Value) : 0;
-      if (ObjDb.GetObj(pupId) is Actor pup && CanSeeLoc(loc, 7))
+      if (ObjDb.GetObj(pupId) is Actor pup && Util.CanSeeLoc(loc, 7, this))
       {
         pup.Stats[Attribute.MobAttitude] = new Stat(1);
       }

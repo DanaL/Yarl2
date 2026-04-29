@@ -897,6 +897,29 @@ static class Util
     return false;
   }
 
+  public static bool CanSeeLoc(Loc loc, int radius, GameState gs)
+  {
+    Map map = gs.Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
+    Dictionary<Loc, int> fov = FieldOfView.CalcVisible(radius, loc, map, gs.ObjDb);
+
+    return fov.ContainsKey(loc) && fov[loc] != Illumination.None;
+  }
+
+  public static bool LOSBetween(Loc a, Loc b, GameState gs)
+  {
+    if (a.DungeonID != b.DungeonID || a.Level != b.Level)
+      return false;
+
+    Map map = gs.Campaign.Dungeons[a.DungeonID].LevelMaps[a.Level];
+    foreach (var sq in Util.LerpLine(a.Row, a.Col, b.Row, b.Col))
+    {
+      if (!map.InBounds(sq) || map.TileAt(sq).Opaque())
+        return false;
+    }
+
+    return true;
+  }
+
   // The nearest location that is passable by flight. Not worrying if it is
   // occupied or if there are hazards.
   public static Loc NearestOpen(GameState gs, Loc loc)

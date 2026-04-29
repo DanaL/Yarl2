@@ -1110,7 +1110,7 @@ class WakeUp : BehaviourNode
     }
 
     int radius = lightStep ? 2 : 5;
-    if (!gs.CanSeeLoc(target.Loc, radius) || gs.Rng.Next(6) > 0)
+    if (!Util.CanSeeLoc(target.Loc, radius, gs) || gs.Rng.Next(6) > 0)
       return PlanStatus.Failure;
 
     mob.Traits = [..mob.Traits.Where(t => t is not SleepingTrait)];

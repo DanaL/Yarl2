@@ -236,7 +236,7 @@ abstract class Actor : GameObj, IZLevel
     {
       foreach (ulong id in allies.IDs)
       {
-        if (gs.ObjDb.GetObj(id) is Mob ally && gs.CanSeeLoc(Loc, 6))
+        if (gs.ObjDb.GetObj(id) is Mob ally && Util.CanSeeLoc(Loc, 6, gs))
         {
           ally.Traits.RemoveAll(t => t is SleepingTrait);
           ally.Stats[Attribute.MobAttitude] = new Stat(Mob.AGGRESSIVE);
@@ -625,7 +625,7 @@ abstract class Actor : GameObj, IZLevel
   // something which belongs to them
   public virtual string PossessionPickedUp(ulong itemID, Actor other, GameState gameState)
   {
-    if (gameState.CanSeeLoc(other.Loc, 6))
+    if (Util.CanSeeLoc(other.Loc, 6, gameState))
     {
       Stats[Attribute.MobAttitude].SetMax(Mob.AGGRESSIVE);
 
