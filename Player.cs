@@ -515,7 +515,8 @@ sealed class Player : Actor
     UserInterface ui = gs.UIRef();
 
     bool passTurn = false;
-    foreach (Trait t in Traits)
+    Trait[] traits = [.. Traits];
+    foreach (Trait t in traits)
     {
       if (t is ParalyzedTrait paralyzed)
       {
@@ -531,6 +532,24 @@ sealed class Player : Actor
         passTurn = true;
         action = new PassAction(gs, this);
         break;
+      }
+
+      // I never made Sleeping a event listening trait like Paralyzed and such,
+      // so I need to check here to give the Player a chance to wake up. Maybe
+      // I should convert it to a listener for consistency?
+      if (t is SleepingTrait)
+      {
+        if (gs.Rng.Next(10) == 0)
+        {
+          gs.UIRef().AlertPlayer("You awaken!");
+          Traits = [.. Traits.Where(s => s is not SleepingTrait)];
+        }
+        else
+        {
+          passTurn = true;
+          action = new PassAction(gs, this);
+          break;
+        }
       }
 
       if (t is RestingTrait)

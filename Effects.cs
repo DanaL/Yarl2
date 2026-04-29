@@ -558,6 +558,8 @@ class Effects
         return;
       else if (t is IllusionTrait)
         return;
+      else if (t is SleepingTrait)
+        return;
     }
     
     string n = MsgFactory.CalcName(victim, gs.Player);
