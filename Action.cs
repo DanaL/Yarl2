@@ -577,12 +577,25 @@ class ShriekAction(GameState gs, Actor actor, int radius) : Action(gs, actor)
       {
         if (!GameState.CurrentMap.InBounds(r, c))
           continue;
+
         Loc loc = Actor.Loc with { Row = r, Col = c };
-        if (GameState.ObjDb.Occupant(loc) is Mob mob && mob.Stats.ContainsKey(Attribute.MobAttitude))
+        if (GameState.ObjDb.Occupant(loc) is Mob mob)
         {
-          mob.Traits = [.. mob.Traits.Where(t => t is not SleepingTrait)];
-          mob.SetAttitude(Mob.AGGRESSIVE);
-        }
+          if (mob.Stats.ContainsKey(Attribute.MobAttitude))
+          {
+            mob.SetAttitude(Mob.AGGRESSIVE);
+          }
+
+          if (mob.HasTrait<SleepingTrait>())
+          {
+            mob.Traits = [..mob.Traits.Where(t => t is not SleepingTrait)];
+            if (mob.VisibleTo(GameState.Player))
+            {
+              string n = MsgFactory.CalcName(mob, GameState.Player);
+              GameState.UIRef().AlertPlayer($"{n.Capitalize()} {Grammar.Conjugate(mob, "wake")} up.");
+            }
+          }
+        }        
       }
     }
 
