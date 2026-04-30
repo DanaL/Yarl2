@@ -630,34 +630,26 @@ class ApplyAffectAction(GameState gs, Actor actor, Loc target, string effectTemp
 
 class SleepSpellAction(GameState gs, Actor actor, int radius, int dc) : Action(gs, actor)
 {
-  int Radius { get; set; } = radius;
-  int DC { get; set; } = dc;
+  readonly int _radius = radius;
+  readonly int _dc = dc;
 
   public override double Execute()
   {
     base.Execute();
 
-    UserInterface ui = GameState.UIRef();
-    ui.AlertPlayer($"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "cast")} a sleep spell!");
-    var affected = GameState.Flood(Actor.Loc, Radius);
-    foreach (var loc in affected)
+    Map map = GameState.MapForActor(Actor!);
+    List<Loc> nearby = [.. FieldOfView.CalcVisible(_radius, Actor!.Loc, map, GameState.ObjDb).Keys
+                                      .Where(loc => GameState.TileAt(loc).Passable())];
+
+    foreach (Loc loc in nearby)
     {
       if (GameState.ObjDb.Occupant(loc) is Actor occ && occ != Actor)
       {
         if (occ.HasTrait<UndeadTrait>() || occ.HasTrait<ConstructTrait>())
           continue;
 
-        if (!occ.AbilityCheck(Attribute.Constitution, DC, GameState.Rng))
-        {
-          occ.Traits.Add(new SleepingTrait());
-          if (occ.VisibleTo(GameState.Player))
-          {
-            string s = $"{occ.FullName.Capitalize()} {Grammar.Conjugate(occ, "fall")} asleep!";
-            ui.AlertPlayer(s, GameState, loc);
-            ui.RegisterAnimation(new BarkAnimation(GameState, 350, occ, "Zzz"));
-            ui.RegisterAnimation(new SqAnimation(GameState, occ.Loc, Colours.BLACK, Colours.PINK, '*'));
-          }
-        }
+        if (!occ.AbilityCheck(Attribute.Will, _dc, GameState.Rng))        
+          Effects.ApplySleep(occ, GameState);
       }
     }
 

@@ -805,3 +805,6 @@ Because tip-topeing through a field of wildflowers is lovely, dungeons not so mu
 #
 blindfold
 Put it on to block your vision. Which may be useful for self-care or protecting your eyes.
+#
+darkling fey
+A small, malicious pixie who uses its fairy magic to lull adventurers to sleep.

@@ -221,7 +221,6 @@ abstract class Actor : GameObj, IZLevel
     if (!Stats.TryGetValue(Attribute.HP, out var currHP))
       return (0, "", 0);
 
-    Traits.RemoveAll(t => t is SleepingTrait);
     if (Stats.TryGetValue(Attribute.MobAttitude, out Stat? attitude))
     {
       // Source is the weapon/actual source of damage, not the moral agent
@@ -432,6 +431,15 @@ abstract class Actor : GameObj, IZLevel
       currHP.SetCurr(1);
     }
 
+    if (HasTrait<SleepingTrait>())
+    {
+      string n = MsgFactory.CalcName(this, gs.Player);
+      string s = $"{n.Capitalize()} {Grammar.Conjugate(this, "wake")} up.";
+      gs.UIRef().AlertPlayer(s, gs, Loc);
+      
+      Traits.RemoveAll(t => t is SleepingTrait);  
+    }
+    
     if (HasTrait<DividerTrait>() && currHP.Curr > 2)
     {
       foreach (var dmg in damages)
@@ -1314,6 +1322,8 @@ class Power
         return new ApplyAffectAction(gs, mob, loc, poisoned, txt);
       case "Spores":
         return new ReleaseSporesAction(gs, mob, MaxRange);
+      case "SleepSpell":
+        return new SleepSpellAction(gs, mob, MaxRange, DC) { Quip = Quip };
       default:
         return new PassAction(gs);
     }

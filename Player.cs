@@ -539,13 +539,14 @@ sealed class Player : Actor
       // I should convert it to a listener for consistency?
       if (t is SleepingTrait)
       {
-        if (gs.Rng.Next(10) == 0)
+        if (gs.Rng.Next(20) == 0)
         {
           gs.UIRef().AlertPlayer("You awaken!");
           Traits = [.. Traits.Where(s => s is not SleepingTrait)];
         }
         else
         {
+          gs.UIRef().AlertPlayer("You sleeping.");
           passTurn = true;
           action = new PassAction(gs, this);
           break;

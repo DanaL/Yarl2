@@ -96,3 +96,4 @@ evil eye            |e|brightred    |dullred     |15|50|6| 0.5|10|10|CastCurse#1
 winter wolf         |d|iceblue      |lightblue   |14|45|7| 1.0|10|10|FrostyBreath#0#5#10#2#15#5#Attack,MeleePiercing#1#1#6#2#0#0#Attack|Resistance#Cold|
 infected mushroom   |F|limegreen    |green       |10|35|0| 1.0|10|10|Spores#0#2#0#0#0#5#Passive|Plant,Immunity#Confusion,Immobile,Brainless|
 troubled spirit     |p|sophiegreen  |green       |16|20|6| 1.0|10|14|MeleeNecrotic#1#1#5#2#0#0#Attack|Invisible#owner#false#max,SilverAllergy,Undead,Flying,Immunity#Poison,Frightening#owner#14|
+darkling fey        |i|fadedpurple  |purple      |13|25|4| 1.0|10|10|SleepSpell#0#3#0#0#15#7#Attack#Find ye Dreamland,MeleeSlashing#1#1#5#2#0#0#Attack|Intelligent,Flying,SilverAllergy|PoorLoot

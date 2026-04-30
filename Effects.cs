@@ -564,6 +564,8 @@ class Effects
     
     string n = MsgFactory.CalcName(victim, gs.Player);
     gs.UIRef().AlertPlayer($"{n.Capitalize()} {Grammar.Conjugate(victim, "fall")} asleep!", gs, victim.Loc);
+    gs.UIRef().RegisterAnimation(new BarkAnimation(gs, 350, victim, "Zzz"));
+    gs.UIRef().RegisterAnimation(new SqAnimation(gs, victim.Loc, Colours.BLACK, Colours.PINK, '*'));
 
     if (victim.HasTrait<GrapplingTrait>())
     {
