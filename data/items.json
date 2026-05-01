@@ -1505,7 +1505,8 @@
     "Traits": [
       "Consumable",
       "Stackable",
-      "UseSimple#clarity"
+      "UseSimple#clarity",
+      "UseSimple#resistsleep"
     ]
   },
   {

@@ -13,24 +13,8 @@ namespace Yarl2;
 
 enum DamageType
 {
-  Slashing,
-  Piercing,
-  Blunt,
-  Fire,
-  Cold,
-  Electricity,
-  Poison,
-  Acid,
-  Necrotic,
-  Force,
-  Confusion,
-  Fear,
-  Wet,
-  Rust,
-  Holy,
-  Mud,
-  Grease,
-  Sleep
+  Slashing, Piercing, Blunt, Fire, Cold, Electricity, Poison, Acid, Necrotic, 
+  Force, Confusion, Fear, Wet, Rust, Holy, Mud, Grease, Sleep
 }
 
 record struct Damage(int Die, int NumOfDie, DamageType Type);

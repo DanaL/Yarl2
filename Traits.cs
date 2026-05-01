@@ -1864,6 +1864,8 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
                         new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200 })),
     "resistcold" => new UseResult(new ApplyTraitAction(gs, user,
                         new ResistanceTrait() { Type = DamageType.Cold, ExpiresOn = gs.Turn + 200 })),
+    "resistsleep" => new UseResult(new ApplyTraitAction(gs, user,
+                        new ResistanceTrait() { Type = DamageType.Sleep, ExpiresOn = gs.Turn + 300 })),
     "recall" => new UseResult(new EscapeDungeonAction(gs)),
     "levitation" => new UseResult(new ApplyTraitAction(gs, user, new LevitationTrait()
     { ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(30, 75) })),
@@ -1924,7 +1926,7 @@ class SideEffectTrait : Trait
   {
     if (gs.Rng.Next(1, 101) > Odds)
       return [];
-
+  
     var trait = (TemporaryTrait)TraitFactory.FromText(Effect, target);
     return trait.Apply(target, gs);
   }
