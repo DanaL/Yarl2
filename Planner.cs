@@ -229,34 +229,34 @@ class Planner
     // A scared monster tries to escape
     plan.Add(new Sequence([new HasTrait<FrightenedTrait>(), new TryToEscape()]) { Label = "scared" });
 
-    if (!mob.HasTrait<PassiveTrait>())
+    plan.Add(new Sequence([new HasTrait<PassiveTrait>(), 
+      new Sequence([new Selector(actions), new RandomMove() { Label = "passive" }])
+    ]));
+
+    plan.Add(new Sequence([new HasTrait<ImmobileTrait>(), new PassTurn()]) { Label = "immobile" });
+
+    // Finally, try to attack the player or move toward them.
+    if (!mob.HasTrait<ImmobileTrait>())
     {
-      // Finally, try to attack the player or move toward them.
-      if (!mob.HasTrait<ImmobileTrait>())
-      {
-        actions.Add(new KeepDistance());
-        actions.Add(new ChaseTarget());
-      }
+      actions.Add(new KeepDistance());
+      actions.Add(new ChaseTarget());
+    }
 
-      Sequence aggro = new([new CheckMonsterAttitude(Mob.AGGRESSIVE), new Selector(actions) { Label = "powers" }]) { Label = "aggressive" };
-      
-      if (gupler)
-      {
-        // If the gulper has a full belly, try to keep away from target (usually player) while digesting
-        Sequence fullBelly = new([new HasTrait<FullBellyTrait>(), new TryToEscape()]) { Label = "fully belly"};
-        plan.Add(new Selector([fullBelly, aggro]) { Label = "gulper " });
-      }
-      else
-      {
-        plan.Add(aggro);  
-      }
-
-      plan.Add(new PassTurn() { Label = "default" });
+    Sequence aggro = new([new CheckMonsterAttitude(Mob.AGGRESSIVE), new Selector(actions) { Label = "powers" }]) { Label = "aggressive" };
+    
+    if (gupler)
+    {
+      // If the gulper has a full belly, try to keep away from target (usually player) while digesting
+      Sequence fullBelly = new([new HasTrait<FullBellyTrait>(), new TryToEscape()]) { Label = "fully belly"};
+      plan.Add(new Selector([fullBelly, aggro]) { Label = "gulper " });
     }
     else
     {
-      plan.Add(new Sequence([new Selector(actions), new RandomMove() { Label = "default" }]));
+      plan.Add(aggro);  
     }
+
+    plan.Add(new PassTurn() { Label = "default" });
+
 
     return new Selector(plan);
   }
