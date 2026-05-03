@@ -560,6 +560,10 @@ class Effects
         return;
       else if (t is SleepingTrait)
         return;
+      else if (t is ResistanceTrait res && res.Type == DamageType.Sleep)
+        return;
+      else if (t is ImmunityTrait imm && imm.Type == DamageType.Sleep)
+        return;
     }
     
     string n = MsgFactory.CalcName(victim, gs.Player);
