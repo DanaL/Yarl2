@@ -1112,12 +1112,14 @@ class WakeUp : BehaviourNode
     int radius = lightStep ? 2 : 5;
     if (!Util.CanSeeLoc(target.Loc, radius, gs) || gs.Rng.Next(6) > 0)
       return PlanStatus.Failure;
-
+    if (!ClearShot(gs, mob.Loc, gs.Player.Loc))
+      return PlanStatus.Failure;
+      
     mob.Traits = [..mob.Traits.Where(t => t is not SleepingTrait)];
     if (mob.VisibleTo(gs.Player))
     {
       string n = MsgFactory.CalcName(mob, gs.Player);
-      gs.UIRef().AlertPlayer($"{n.Capitalize()} {Grammar.Conjugate(mob, "wake")} up.");
+      gs.UIRef().AlertPlayer($"{n.Capitalize()} {Grammar.Conjugate(mob, "wake")} up.", gs, mob.Loc);
     }
 
     return PlanStatus.Success;
