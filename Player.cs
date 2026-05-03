@@ -458,6 +458,8 @@ sealed class Player : Actor
         traitsToShow.Add("You can [blue breath in water]");
       else if (trait is ShieldBashTrait)
         traitsToShow.Add("You know how to [grey shield bash]");
+      else if (trait is ResistanceTrait rt && rt.Type == DamageType.Sleep)
+        traitsToShow.Add("You are [green awake]");
     }
     
     if (alacrity < 0)

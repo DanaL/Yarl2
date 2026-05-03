@@ -1653,6 +1653,7 @@
     "Glyph": "!,lightpurple,purple,black,false",
     "Traits": [
       "UseSimple#restoremana",
+      "SideEffect#100#Resistance#Sleep#0",
       "Consumable",
       "Stackable"
     ]
