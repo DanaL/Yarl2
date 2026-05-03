@@ -1506,7 +1506,7 @@
       "Consumable",
       "Stackable",
       "UseSimple#clarity",
-      "UseSimple#resistsleep"
+      "SideEffect#100#Resistance#Sleep#0"
     ]
   },
   {

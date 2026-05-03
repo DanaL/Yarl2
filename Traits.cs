@@ -1928,6 +1928,12 @@ class SideEffectTrait : Trait
       return [];
   
     var trait = (TemporaryTrait)TraitFactory.FromText(Effect, target);
+
+    // A bit of a kludge because I wanted to have items that have a UseSimple
+    // but also a side effect whose expiry is relative to current turn
+    if (trait.ExpiresOn == 0)
+      trait.ExpiresOn = gs.Turn + 250;
+
     return trait.Apply(target, gs);
   }
 }
