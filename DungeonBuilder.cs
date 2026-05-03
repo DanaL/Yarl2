@@ -160,6 +160,7 @@ abstract class DungeonBuilder
       TileType.Downstairs => 1,
       TileType.WoodBridge => 1,
       TileType.SecretDoor => 1,
+      TileType.SecretPassage => 1,
       _ => int.MaxValue
     };
   }
@@ -340,8 +341,8 @@ abstract class DungeonBuilder
     }
   }
 
-  // Turn some doors into secret doors and add perhaps add soom secret  
-  // door in hallways
+  // Turn some doors into secret doors and add perhaps add some secret  
+  // doors in hallways
   protected static void AddSecretDoors(Map map, Rng rng)
   {
     List<(int, int)> candidates = [];
@@ -354,9 +355,8 @@ abstract class DungeonBuilder
         {
           map.SetTile(r, c, TileFactory.Get(TileType.SecretDoor));
         }
-        else if (tt == TileType.DungeonFloor && SecretDoorSpot(r, c))
-        {          
-          
+        else if (tt == TileType.DungeonFloor && SecretPassageSpot(r, c))
+        {
           candidates.Add((r, c));
         }
       }
@@ -368,15 +368,15 @@ abstract class DungeonBuilder
       for (int j = 0; j < numToAdd; j++)
       {
         (int, int) sq = candidates[rng.Next(candidates.Count)];
-        map.SetTile(sq, TileFactory.Get(TileType.SecretDoor));
+        map.SetTile(sq, TileFactory.Get(TileType.SecretPassage));
       }
     }
 
-    bool SecretDoorSpot(int row, int col)
+    bool SecretPassageSpot(int row, int col)
     {
       int adjWalls = Util.Adj8Sqs(row, col)
                           .Select(map.TileAt)
-                          .Where(t => t.Type == TileType.DungeonWall).Count();
+                          .Count(t => t.Type == TileType.DungeonWall);
       if (adjWalls != 6)
         return false;
 
@@ -554,14 +554,16 @@ abstract class DungeonBuilder
 
   static int StairsPathsCosts(Tile tile)
   {
-    if (tile.Type == TileType.ClosedDoor || tile.Type == TileType.LockedDoor || tile.Type == TileType.SecretDoor)
-      return 1;
-
-    // This will allow instances where the arrival stairs are in a chasm room,
-    // which I think I am going to allow for now. I'll revisit this later if
-    // it seems annoying
-    if (tile.Type == TileType.Chasm)
-      return 2;
+    switch (tile.Type)
+    {
+      case TileType.ClosedDoor:
+      case TileType.LockedDoor:
+      case TileType.SecretDoor:
+      case TileType.SecretPassage:
+        return 1;
+      case TileType.Chasm:
+        return 2;
+    }
 
     if (!tile.Passable())
       return int.MaxValue;

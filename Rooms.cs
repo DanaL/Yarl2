@@ -512,6 +512,7 @@ class Rooms
               case TileType.DungeonFloor:
               case TileType.Bridge:
               case TileType.SecretDoor:
+              case TileType.SecretPassage:
                 exits.Add(adj);
                 break;
               default:
@@ -639,7 +640,7 @@ class Rooms
       foreach (var adj in Util.Adj8Sqs(sq.Item1, sq.Item2))
       {
         TileType tt = map.TileAt(adj).Type;
-        if (tt == TileType.ClosedDoor || tt == TileType.LockedDoor || tt == TileType.SecretDoor || (!room.Contains(adj) && map.TileAt(adj).Passable()))
+        if (tt == TileType.ClosedDoor || tt == TileType.LockedDoor || tt == TileType.SecretDoor || tt == TileType.SecretPassage || (!room.Contains(adj) && map.TileAt(adj).Passable()))
         {
           exits.Add(new Loc(dungeonId, level, adj.Item1, adj.Item2));
         }
@@ -704,7 +705,7 @@ class Rooms
       foreach (var (r, c) in path)
       {
         Tile tile = map.TileAt(r, c);
-        if (!(tile.PassableByFlight() || tile.Type == TileType.ClosedDoor || tile.Type == TileType.SecretDoor))
+        if (!(tile.PassableByFlight() || tile.Type == TileType.ClosedDoor || tile.Type == TileType.SecretDoor || tile.Type == TileType.SecretPassage))
         {
           blocked = true;
           break;

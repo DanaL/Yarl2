@@ -290,7 +290,7 @@ class LightPuzzleSetup
     {
       TileType.ClosedDoor or TileType.LockedDoor or 
       TileType.SecretDoor or TileType.VaultDoor or 
-      TileType.Portcullis => true,
+      TileType.Portcullis or TileType.SecretPassage => true,
       _ => false,
     };
   }
@@ -314,6 +314,7 @@ class LightPuzzleSetup
     TileType.LockedDoor => true,
     TileType.OpenDoor => true,
     TileType.SecretDoor => true,
+    TileType.SecretPassage => true,
     TileType.VaultDoor => true,
     TileType.Portcullis => true,
     TileType.OpenPortcullis => true,

@@ -1320,7 +1320,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       }
     }
 
-    HashSet<TileType> doors = [TileType.ClosedDoor, TileType.LockedDoor, TileType.SecretDoor];
+    HashSet<TileType> doors = [TileType.ClosedDoor, TileType.LockedDoor, TileType.SecretDoor, TileType.SecretPassage];
     List<Loc> candidateSpots = [..Util.FloodFill(this, stairs, lowerLevel.Height, doors)
                                       .Where(loc => !ObjDb.Occupied(loc))];
 

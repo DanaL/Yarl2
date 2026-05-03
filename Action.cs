@@ -2294,8 +2294,19 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
           dc = int.Min(dc, 20);
           if (GameState.Rng.Next(1, 21) <= dc) 
           {
-            ui.AlertPlayer("You spot a secret door!");
+            ui.AlertPlayer($"You spot a secret door!");
             GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.ClosedDoor));
+          }
+          break;
+        case TileType.SecretPassage:
+          dc = 10 + GameState.CurrLevel + 1;
+          if (rogue)
+            dc -= 2;
+          dc = int.Min(dc, 20);
+          if (GameState.Rng.Next(1, 21) <= dc) 
+          {
+            ui.AlertPlayer($"You spot a secret passage!");
+            GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
           }
           break;
         case TileType.HiddenPit:

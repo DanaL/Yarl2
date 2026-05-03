@@ -28,7 +28,7 @@ enum TileType
   BusinessSign, FakeStairs, HiddenSummonsTrap, RevealedSummonsTrap,
   HFence, VFence, CornerFence, MonsterWall, Lever, Crops, IllusoryWall,
   Underwater, Kelp, MistyPortal, MysteriousMirror, BellyFloor, ProfanePortal,
-  Lava, BridgeLever, Arioch, Shackle, MoonDaughterSpot
+  Lava, BridgeLever, Arioch, Shackle, MoonDaughterSpot, SecretPassage
 }
 
 interface ITriggerable
@@ -83,6 +83,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.SnowPeak => true,
     TileType.VaultDoor => true,
     TileType.SecretDoor => true,
+    TileType.SecretPassage => true,
     _ => false
   };
 
@@ -202,6 +203,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.HiddenTrapDoor => "stone floor",
     TileType.TrapDoor => "trap door",
     TileType.SecretDoor => "a wall",
+    TileType.SecretPassage => "a wall",
     TileType.HiddenTeleportTrap => "stone floor",
     TileType.TeleportTrap => "teleport trap",
     TileType.HiddenDartTrap => "stone floor",
@@ -640,6 +642,7 @@ class TileFactory
   static readonly Tile HiddenTrapDoor = new BasicTile(TileType.HiddenTrapDoor, true, false, true);
   static readonly Tile TrapDoor = new BasicTile(TileType.TrapDoor, true, false, true);
   static readonly Tile SecretDoor = new BasicTile(TileType.SecretDoor, false, true, false);
+  static readonly Tile SecretPassage = new BasicTile(TileType.SecretPassage, false, true, false);
   static readonly Tile BrokenDoor = new BasicTile(TileType.BrokenDoor, true, false, true);
   static readonly Tile TeleportTrap = new BasicTile(TileType.HiddenTeleportTrap, true, false, true);
   static readonly Tile VisibileTeleportTrap = new BasicTile(TileType.TeleportTrap, true, false, true);
@@ -713,6 +716,7 @@ class TileFactory
     TileType.HiddenTrapDoor => HiddenTrapDoor,
     TileType.TrapDoor => TrapDoor,
     TileType.SecretDoor => SecretDoor,
+    TileType.SecretPassage => SecretPassage,
     TileType.BrokenDoor => BrokenDoor,
     TileType.HiddenTeleportTrap => TeleportTrap,
     TileType.TeleportTrap => VisibileTeleportTrap,
@@ -1012,6 +1016,7 @@ class Map : ICloneable
           TileType.Portcullis => '|',
           TileType.IllusoryWall => '?',
           TileType.SecretDoor => 'S',
+          TileType.SecretPassage => 'S',
           TileType.MysteriousMirror => 'M',
           TileType.Lava => '~',
           _ => ' '
