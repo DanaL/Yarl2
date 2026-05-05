@@ -66,7 +66,7 @@ class SorceressQuest
     }
   }
 
-  public static bool Setup(Map wilderness, Town town, GameObjectDB objDb, FactDb factDb, Campaign campaign, Rng rng)
+  public static void Setup(Map wilderness, Town town, GameObjectDB objDb, FactDb factDb, Campaign campaign, Rng rng)
   {    
     // First, pick a spot in the wilderness for the tower and draw it
     List<(int, int)> options = [];
@@ -87,13 +87,15 @@ class SorceressQuest
       wilderness.SetTile(sq, TileFactory.Get(TileType.PermWall));
     }
 
-    (int doorRow, int doorCol) = rng.Next(4) switch
-    {
-      0 => (row - 1, col),
-      1 => (row + 1, col),
-      2 => (row, col + 1),
-      _ => (row, col - 1)
-    };
+    List<(int, int)> doorCandidates = [];
+    if (wilderness.TileAt(row - 2, col).Passable()) doorCandidates.Add((row - 1, col));
+    if (wilderness.TileAt(row + 2, col).Passable()) doorCandidates.Add((row + 1, col));
+    if (wilderness.TileAt(row, col - 2).Passable()) doorCandidates.Add((row, col - 1));
+    if (wilderness.TileAt(row, col + 2).Passable()) doorCandidates.Add((row, col + 1));
+    if (doorCandidates.Count == 0)
+      throw new WildernessCreationException("Unable to place sorceress tower");
+
+    (int doorRow, int doorCol) = doorCandidates[rng.Next(doorCandidates.Count)];
     
     Portcullis p = new(false);
     wilderness.SetTile(doorRow, doorCol, p);
@@ -171,8 +173,6 @@ class SorceressQuest
     floorSqs = sorceressTower.LevelMaps[tl - 2].SqsOfType(TileType.DungeonFloor);
     (int lmRow, int lmCol) = floorSqs[rng.Next(floorSqs.Count)];
     sorceressTower.LevelMaps[tl - 2].SetTile(lmRow, lmCol, landmark);
-
-    return true;
   }
 }
 
