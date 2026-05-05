@@ -130,6 +130,7 @@ sealed class Player : Actor
       return faith;
     }
   }
+  
   public override int AC
   {
     get

@@ -41,15 +41,8 @@ abstract class DungeonBuilder
         if (map.TileAt(r, c).Type != TileType.DungeonWall)
           continue;
 
-        bool surroundedByWalls = true;
-        foreach (var sq in Util.Adj8Sqs(r, c))
-        {
-          if (map.TileAt(sq).Type != TileType.DungeonWall)
-          {
-            surroundedByWalls = false;
-            break;
-          }
-        }
+        bool surroundedByWalls = Util.Adj8Sqs(r, c)
+              .All(sq => map.TileAt(sq).Type == TileType.DungeonWall);
         if (!surroundedByWalls)
           continue;
 

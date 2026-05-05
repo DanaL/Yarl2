@@ -37,26 +37,9 @@ sealed class Item : GameObj, IEquatable<Item>
 
   public bool Equipable() => HasTrait<EquipableTrait>();
 
-  public bool IsUseableTool()
-  {
-    foreach (Trait t in Traits)
-    {
-      if (t is DiggingToolTrait)
-        return true;
-      else if (t is WoodChopperTrait)
-        return true;
-      else if (t is DoorKeyTrait)
-        return true;
-      else if (t is CleansingTrait)
-        return true;
-      else if (t is ExplosiveTrait)
-        return true;
-      else if (t is EmergencyDoorTrait)
-        return true;
-    }
-
-    return false;
-  }
+  public bool IsUseableTool() =>
+  Traits.Any(t => t is DiggingToolTrait or WoodChopperTrait or DoorKeyTrait
+                    or CleansingTrait or ExplosiveTrait or EmergencyDoorTrait);
 
   public bool IsUseableItem()
   {
