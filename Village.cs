@@ -308,9 +308,7 @@ class Village
       smith.Inventory.Add(ItemFactory.Get(ItemNames.RAPIER, objDb), smith.ID);
     if (rng.NextDouble() < 0.2)
       smith.Inventory.Add(ItemFactory.Get(ItemNames.PICKAXE, objDb), smith.ID);
-    if (rng.NextDouble() < 0.2)
-      smith.Inventory.Add(ItemFactory.Get(ItemNames.LEATHER_GLOVES, objDb), smith.ID);
-
+    
     return smith;
   }
 

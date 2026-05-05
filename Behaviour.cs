@@ -498,8 +498,6 @@ class SmithBehaviour : NPCBehaviour
         npc.Inventory.Add(ItemFactory.Get(ItemNames.RINGMAIL, gs.ObjDb), npc.ID);
       else if (roll == 9)
         npc.Inventory.Add(ItemFactory.Get(ItemNames.HELMET, gs.ObjDb), npc.ID);
-      else if (roll == 10)
-        npc.Inventory.Add(ItemFactory.Get(ItemNames.LEATHER_GLOVES, gs.ObjDb), npc.ID);
       else if (roll == 11)
         npc.Inventory.Add(ItemFactory.Get(ItemNames.QUARTERSTAFF, gs.ObjDb), npc.ID);
     }
