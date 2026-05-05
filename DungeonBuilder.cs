@@ -300,9 +300,9 @@ abstract class DungeonBuilder
           deck.Reshuffle(rng);
         string m = deck.Monsters[deck.Indexes.Dequeue()];
 
-        Actor monster = MonsterFactory.Get(m, objDb, rng);
+        Mob monster = MonsterFactory.Get(m, objDb, rng);
         monster.Loc = loc;
-        if (rng.NextDouble() < 0.8)
+        if (rng.NextDouble() < 0.3 && !monster.SleepResistant)          
           monster.Traits.Add(new SleepingTrait());
         objDb.AddNewActor(monster, loc);
       }

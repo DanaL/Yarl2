@@ -192,6 +192,32 @@ abstract class Actor : GameObj, IZLevel
     }
   }
 
+  public bool SleepResistant
+  {
+    get
+    {
+      foreach (Trait t in Traits)
+      {
+        if (t is UndeadTrait)
+          return true;
+        else if (t is BrainlessTrait)
+          return true;
+        else if (t is PlantTrait)
+          return true;
+        else if (t is IllusionTrait)
+          return true;
+        else if (t is SleepingTrait)
+          return true;
+        else if (t is ResistanceTrait res && res.Type == DamageType.Sleep)
+          return true;
+        else if (t is ImmunityTrait imm && imm.Type == DamageType.Sleep)
+          return true;
+      }
+
+      return false;
+    }
+  }
+
   public bool AbleToMove(GameObjectDB objDb)
   {
     bool teflon = false;
@@ -721,8 +747,8 @@ sealed class Mob : Actor
   // I'd like to just set these in constructor but a lot of the BehaviourNodes
   // require a reference to GameState, so until/unless I can sort that out, or 
   // reorganize starting a new game, I cannot
-  private BehaviourNode? BTNode { get; set; }
-  private BehaviourNode? BTHead { get; set; }
+  BehaviourNode? BTNode { get; set; }
+  BehaviourNode? BTHead { get; set; }
   
   public const int INACTIVE = 0;
   public const int INDIFFERENT = 1;
@@ -959,7 +985,7 @@ class MonsterFactory
     }
   }
 
-  public static Actor Get(string name, GameObjectDB objDb, Rng rng)
+  public static Mob Get(string name, GameObjectDB objDb, Rng rng)
   {
     if (_catalog.Count == 0)
       LoadCatalog();

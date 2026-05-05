@@ -548,23 +548,8 @@ class Effects
 
   public static void ApplySleep(Actor victim, GameState gs)
   {
-    foreach (Trait t in victim.Traits)
-    {
-      if (t is UndeadTrait)
-        return;
-      else if (t is BrainlessTrait)
-        return;
-      else if (t is PlantTrait)
-        return;
-      else if (t is IllusionTrait)
-        return;
-      else if (t is SleepingTrait)
-        return;
-      else if (t is ResistanceTrait res && res.Type == DamageType.Sleep)
-        return;
-      else if (t is ImmunityTrait imm && imm.Type == DamageType.Sleep)
-        return;
-    }
+    if (victim.SleepResistant)
+      return;
     
     string n = MsgFactory.CalcName(victim, gs.Player);
     gs.UIRef().AlertPlayer($"{n.Capitalize()} {Grammar.Conjugate(victim, "fall")} asleep!", gs, victim.Loc);
