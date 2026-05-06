@@ -109,7 +109,7 @@ abstract class BehaviourNode
   }
 }
 
-class Not(BehaviourNode node) : BehaviourNode
+sealed class Not(BehaviourNode node) : BehaviourNode
 {
   BehaviourNode Node { get; set; } = node;
 
@@ -126,7 +126,7 @@ class Not(BehaviourNode node) : BehaviourNode
   }
 }
 
-class RandoSelector(List<BehaviourNode> nodes) : BehaviourNode
+sealed class RandoSelector(List<BehaviourNode> nodes) : BehaviourNode
 {
   public List<BehaviourNode> Children { get; set; } = nodes;
 
@@ -156,7 +156,7 @@ class RandoSelector(List<BehaviourNode> nodes) : BehaviourNode
   }
 }
 
-class Selector(List<BehaviourNode> nodes) : BehaviourNode
+sealed class Selector(List<BehaviourNode> nodes) : BehaviourNode
 {
   public List<BehaviourNode> Children { get; set; } = nodes;
   int Curr { get; set; } = 0;
@@ -186,7 +186,7 @@ class Selector(List<BehaviourNode> nodes) : BehaviourNode
   }
 }
 
-class Sequence(List<BehaviourNode> nodes) : BehaviourNode
+sealed class Sequence(List<BehaviourNode> nodes) : BehaviourNode
 {
   public List<BehaviourNode> Children { get; set; } = nodes;
   int Curr { get; set; } = 0;
@@ -574,7 +574,7 @@ sealed class WithinRange(int range) : BehaviourNode
   }
 }
 
-class TryToEscape : BehaviourNode
+sealed class TryToEscape : BehaviourNode
 {
   Loc GoalLoc { get; set; } = Loc.Nowhere;
 
@@ -776,7 +776,7 @@ sealed class WanderInTavern : BehaviourNode
   }
 }
 
-class WanderInArea(HashSet<Loc> area) : BehaviourNode
+sealed class WanderInArea(HashSet<Loc> area) : BehaviourNode
 {
   HashSet<Loc> Area { get; set; } = area;
 
@@ -1087,10 +1087,12 @@ class PickWithOdds : BehaviourNode
   }
 }
 
-// This is the node that checks if a sleeping monster wakes up
-// when the player (or another target) is walking nearby
-class WakeUp : BehaviourNode
+// This is the node that checks if a sleeping monster or indifferent mob
+// notices the player (or another target) and becomes active
+class NoticeTarget(double odds) : BehaviourNode
 {
+  double _odds = odds;
+
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
     Actor target = mob.PickTarget(gs);
@@ -1110,19 +1112,23 @@ class WakeUp : BehaviourNode
     }
 
     int radius = lightStep ? 2 : 5;
-    if (!Util.CanSeeLoc(target.Loc, radius, gs) || gs.Rng.Next(6) > 0)
+    if (Util.Distance(target.Loc, mob.Loc) > radius || gs.Rng.NextDouble() > _odds)
       return PlanStatus.Failure;
     if (!ClearShot(gs, mob.Loc, gs.Player.Loc))
       return PlanStatus.Failure;
       
-    mob.Traits = [..mob.Traits.Where(t => t is not SleepingTrait)];
     mob.SetAttitude(Mob.AGGRESSIVE);
-    if (mob.VisibleTo(gs.Player))
-    {
-      string n = MsgFactory.CalcName(mob, gs.Player);
-      gs.UIRef().AlertPlayer($"{n.Capitalize()} {Grammar.Conjugate(mob, "wake")} up.", gs, mob.Loc);
-    }
 
+    if (mob.HasTrait<SleepingTrait>())
+    {
+      mob.Traits = [..mob.Traits.Where(t => t is not SleepingTrait)];
+      if (mob.VisibleTo(gs.Player))
+      {
+        string n = MsgFactory.CalcName(mob, gs.Player);
+        gs.UIRef().AlertPlayer($"{n.Capitalize()} {Grammar.Conjugate(mob, "wake")} up.", gs, mob.Loc);
+      }
+    }
+    
     return PlanStatus.Success;
   }
 }

@@ -210,14 +210,14 @@ class Planner
     plan.Add(new Sequence([new HasTrait<ParalyzedTrait>(), new PassTurn()]) { Label = "immobilized" });
 
     // A sleeping monster might wake up.
-    plan.Add(new Sequence([new HasTrait<SleepingTrait>(), new Not(new WakeUp()), new PassTurn()]) { Label = "sleeping" });
+    plan.Add(new Sequence([new HasTrait<SleepingTrait>(), new Not(new NoticeTarget(0.167)), new PassTurn()]) { Label = "sleeping" });
 
     // As will an inactive one
     plan.Add(new Sequence([new CheckMonsterAttitude(Mob.INACTIVE), new PassTurn()]) { Label = "inactive" });
 
     // An indifferent monster might use Passive abilities and/or wander randomly
     // (if not immobile)
-    List<BehaviourNode> indifferentNodes = [new CheckMonsterAttitude(Mob.INDIFFERENT)];
+    List<BehaviourNode> indifferentNodes = [new CheckMonsterAttitude(Mob.INDIFFERENT), new Not(new NoticeTarget(0.333))];
     if (passive.Count > 0)
       indifferentNodes.Add(new Selector(passive));
     if (immobile)
@@ -390,7 +390,7 @@ class Planner
       }
     }
 
-    RepeatWhile idleCondition = new RepeatWhile(new CheckMonsterAttitude(0), new WanderInArea(townSqs));
+    RepeatWhile idleCondition = new(new CheckMonsterAttitude(0), new WanderInArea(townSqs));
 
     Sequence pickupBone = new([
       new StandingOn("bone"),
