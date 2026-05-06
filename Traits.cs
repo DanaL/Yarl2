@@ -2298,6 +2298,9 @@ class ConfusedTrait : TemporaryTrait
 
       if (trait is BrainlessTrait)
         return [];
+
+      if (trait is IllusionTrait)
+        return [];
     }
 
     if (target.AbilityCheck(Attribute.Will, DC, gs.Rng))
