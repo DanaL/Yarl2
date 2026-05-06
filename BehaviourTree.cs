@@ -1116,6 +1116,7 @@ class WakeUp : BehaviourNode
       return PlanStatus.Failure;
       
     mob.Traits = [..mob.Traits.Where(t => t is not SleepingTrait)];
+    mob.SetAttitude(Mob.AGGRESSIVE);
     if (mob.VisibleTo(gs.Player))
     {
       string n = MsgFactory.CalcName(mob, gs.Player);
