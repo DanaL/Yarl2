@@ -29,7 +29,7 @@ owlbear             |Y|dullred      |brown       |13|25|5| 1.0|14|12|MeleeSlashi
 cloaker             |v|grey         |darkgrey    |13|20|4| 1.0|12|14|MirrorImage#1#3#0#0#0#7#Attack,MeleePiercing#1#1#8#1#0#0#Attack|Flying|
 shadow              | |black        |black       |13|20|4| 1.0|10|14|MeleeNecrotic#1#1#4#1#0#0#Attack|Weaken#13#1,SilverAllergy,Undead,Immunity#Poison|
 floating eye        |e|lightblue    |blue        |13|20|0|0.25|10|10||ParalyzingGaze#18,Floating,Brainless|
-screech bat         |v|green        |darkgreen   |13|20|6| 1.0|10|16|ConfusingScream#0#0#4#0#14#7#Attack,MeleePiercing#1#1#6#2#0#0#Attack|Flying,Immunity#Confusion|
+screech bat         |v|green        |darkgreen   |13|20|6| 1.0|10|16|ConfusingScream#0#4#0#0#14#7#Attack,MeleePiercing#1#1#6#2#0#0#Attack|Flying,Immunity#Confusion|
 deep one            |h|green        |darkgreen   |13|20|5| 1.0|12|12|MeleePiercing#1#1#8#1#0#0#Attack|Intelligent,Amphibious|
 deep one shaman     |h|limegreen    |green       |13|25|4| 1.0|12|12|HealAllies#0#0#0#0#0#05#Passive,MeleePiercing#1#1#8#1#0#0#Attack|Intelligent,Amphibious|
 rust monster        |R|dullred      |dullred     |14|25|5| 1.0|10|10|MeleeAcid#1#1#6#1#0#0#Attack|Corrosive|
@@ -97,4 +97,4 @@ winter wolf         |d|iceblue      |lightblue   |14|45|7| 1.0|10|10|FrostyBreat
 infected mushroom   |F|limegreen    |green       |10|35|0| 1.0|10|10|Spores#0#2#0#0#0#5#Passive|Plant,Immunity#Confusion,Immobile,Brainless|
 troubled spirit     |p|sophiegreen  |green       |16|20|6| 1.0|10|14|MeleeNecrotic#1#1#5#2#0#0#Attack|Invisible#owner#false#max,SilverAllergy,Undead,Flying,Immunity#Poison,Frightening#owner#14|
 darkling fey        |i|fadedpurple  |purple      |13|25|4| 1.0|10|10|SleepSpell#0#3#0#0#15#7#Attack#Find ye Dreamland,MeleeSlashing#1#1#5#2#0#0#Attack|Intelligent,Flying,SilverAllergy,Hunter|PoorLoot
-umber hulk          |U|brown        |grey        |16|40|0| 1.0|16|10||Burrower|
+umber hulk          |U|brown        |grey        |16|40|0| 1.0|16|10|MeleeSlashing#1#1#4#4#0#0#Attack|Burrower|
