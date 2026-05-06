@@ -131,7 +131,7 @@ class LungeAttackAction(GameState gs, Actor actor, Loc adj, Loc target) : Action
 
 class BurrowAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
 {
-  Loc _loc = loc;
+  readonly Loc _loc = loc;
 
   public override double Execute()
   {
@@ -165,6 +165,32 @@ class BurrowAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
 
     return 0.0;
   }   
+}
+
+class ConfusingGazeAction(GameState gs, Actor actor, Loc loc, int dc) : Action(gs, actor)
+{
+  readonly Loc _loc = loc;
+  readonly int _dc = dc;
+
+  public override double Execute()
+  {
+    base.Execute();
+
+    if (GameState.ObjDb.Occupant(_loc) is Actor victim && !victim.HasTrait<BlindTrait>())
+    {
+      string n = MsgFactory.CalcName(Actor!, GameState.Player).Capitalize();
+      string s = $"{n} {Grammar.Conjugate(Actor!, "gaze")} at {victim.FullName}.";
+      GameState.UIRef().AlertPlayer(s, GameState, _loc);
+
+      ConfusedTrait confused = new() { DC = _dc };
+      foreach (string msg in confused.Apply(victim, GameState))
+      {
+        GameState.UIRef().AlertPlayer(msg, GameState, _loc);
+      }
+    }
+
+    return 1.0;
+  }  
 }
 
 class GulpAction(GameState gs, Actor actor, int dc, int dmgDie, int numOfDice) : Action(gs, actor)

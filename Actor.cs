@@ -1315,6 +1315,8 @@ class Power
       case "ConfusingScream":
         txt = $"{mob.FullName.Capitalize()} screams!";
         return new AoEAction(gs, mob, mob.Loc, $"Confused#0#{DC}#0", DmgDie, txt);
+      case "ConfusingGaze":
+        return new ConfusingGazeAction(gs, mob, loc, DC);
       case "DrainTorch":
         return new DrainTorchAction(gs, mob, loc);
       case "FireBreath":

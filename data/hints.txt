@@ -11,3 +11,5 @@ The plague continues to ravage the land and in desperation we turn to old myths 
 ...which is to say that Adventuring Fashion isn't merely about vanity! While it is an obvious truism that an adventurer who looks better, feels better and thus fights better, there are also practicalities to consider. A stylish cloak, for example, can repel the elements and protect your gear.
 #
 Many adventurers find rapiers an excellent weapon: lunge at your foe from a distance and deal significant damage! However, we'd advise you to be mindful of accidentally leaping into danger.
+#
+Umber hulks have been gifted with a gaze that befuddles and baffles their prey. This also makes observational studies of their behaviour quite tricky. Few Yendorian universities give grants for umber hulk research these days.
