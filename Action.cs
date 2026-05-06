@@ -129,6 +129,44 @@ class LungeAttackAction(GameState gs, Actor actor, Loc adj, Loc target) : Action
   }
 }
 
+class BurrowAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
+{
+  Loc _loc = loc;
+
+  public override double Execute()
+  {
+    base.Execute();
+
+    Tile tile = GameState.TileAt(_loc);
+
+    if (GameState.ObjDb.Occupied(_loc))
+    {
+      string s = $"{Actor!.FullName.Capitalize()} is blocked!";
+      GameState.UIRef().AlertPlayer(s, GameState, _loc);
+
+      return 1.0;
+    }
+
+    if (GameState.Rng.Next(5) == 0) 
+    {
+      string msg = tile.Type switch
+      {
+        TileType.ClosedDoor or TileType.SecretDoor => "You feel an unexpected draft.",
+        TileType.WoodWall => "You hear splintering.",
+        _ => "You hear crashing rock."
+      };
+      GameState.UIRef().AlertPlayer(msg);
+    }
+
+    Map map = GameState.MapForActor(Actor!);
+    map.SetTile(_loc.Row, _loc.Col, TileFactory.Get(TileType.DungeonFloor));
+
+    Actor!.QueueAction(new MoveAction(GameState, Actor, _loc, false));
+
+    return 0.0;
+  }   
+}
+
 class GulpAction(GameState gs, Actor actor, int dc, int dmgDie, int numOfDice) : Action(gs, actor)
 {
   int DC { get; set; } = dc;

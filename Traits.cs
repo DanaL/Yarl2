@@ -781,7 +781,7 @@ sealed class MetalTrait : Trait
   public override string AsText() => $"Metal#{(int)Type}";
 }
 
-class BowTrait : Trait
+sealed class BowTrait : Trait
 {
   public override string AsText() => "Bow";
 }
@@ -789,6 +789,11 @@ class BowTrait : Trait
 sealed class BrainlessTrait : Trait
 {
   public override string AsText() => "Brainless";
+}
+
+sealed class BurrowerTrait : Trait
+{
+  public override string AsText() => "Burrower";
 }
 
 sealed class CudgelTrait : Trait
@@ -4253,6 +4258,7 @@ class TraitFactory
       return new BoostMaxStatTrait() { Stat = attr, Amount = int.Parse(pieces[2])}; }},
     { "Bow", (pieces, gameObj) => new BowTrait() },
     { "Brainless", (pieces, gameObj) => new BrainlessTrait() },
+    { "Burrower", (pieces, gameObj) => new BurrowerTrait() },
     { "CanApply", (pieces, gameObj) => new CanApplyTrait() },
     { "Cast", (pieces, gameObj) => new CastTrait() { Spell = pieces[1] }},
     {

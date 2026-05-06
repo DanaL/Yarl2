@@ -93,6 +93,34 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
     return 1;
   }
 
+  public static int CostForBurrower(Tile tile)
+  {
+    // The special cases for burrowers
+    // Hmm for now I'm not going to let them burrow through portcullises;
+    // let's assume those are magical
+    switch (tile.Type)
+    {
+      case TileType.ClosedDoor:
+      case TileType.SecretDoor:
+      case TileType.SecretPassage:
+      case TileType.DungeonWall:
+      case TileType.StoneWall:
+      case TileType.WoodWall:
+        return 1;
+    }
+      
+    if (!tile.Passable())
+      return int.MaxValue;
+
+    if (tile.IsVisibleTrap())
+      return int.MaxValue;
+
+    if (tile is JetTrigger trigger && trigger.Visible)
+      return int.MaxValue;
+
+    return 1;
+  }
+
   public static int CostForSwimming(Tile tile) => tile.Type switch
   {
     TileType.Water or TileType.DeepWater or TileType.Underwater or TileType.Lake => 1,

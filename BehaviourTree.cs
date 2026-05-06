@@ -1653,9 +1653,10 @@ class ChaseTarget : BehaviourNode
     else if (mob.HasTrait<AmphibiousTrait>())
       costFunc = DijkstraMap.CostForAmphibians;
     else if (mob.Traits.Any(t => t is ImmunityTrait it && it.Type == DamageType.Fire)) 
-    {
       costFunc = DijkstraMap.WrapCostFunction(new() { [TileType.Lava] = 1 });
-    }
+    else if (mob.HasTrait<BurrowerTrait>())
+      costFunc = DijkstraMap.CostForBurrower;
+      
     // For Swimmers, if the target is on a non-water tile on a non-submerged
     // level, look for adjacent water tile instead
     if (mob.HasTrait<SwimmerTrait>() && !submerged)
@@ -1687,7 +1688,12 @@ class ChaseTarget : BehaviourNode
       Loc loc = path.Pop();
       Tile tile = gs.TileAt(loc);
 
-      if (tile is Door door && !door.Open)
+      if (mob.HasTrait<BurrowerTrait>() && !tile.Passable())
+      {
+        mob.ExecuteAction(new BurrowAction(gs, mob, loc));
+        return PlanStatus.Success;
+      }
+      else if (tile is Door door && !door.Open)
       {
         mob.ExecuteAction(new OpenDoorAction(gs, mob, loc));
         return PlanStatus.Success;
