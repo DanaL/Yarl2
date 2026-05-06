@@ -86,9 +86,14 @@ sealed class ACModTrait : BasicTrait
   public override string AsText() => $"ACMod#{ArmourMod}#{SourceId}";
 }
 
-class AffixedTrait : Trait
+sealed class AffixedTrait : Trait
 {
-  public override string AsText() => $"Affixed";
+  public override string AsText() => "Affixed";
+}
+
+sealed class AggressiveTrait : Trait
+{
+  public override string AsText() => "Aggressive";
 }
 
 class AlluringTrait : TemporaryTrait
@@ -133,9 +138,9 @@ class AlluringTrait : TemporaryTrait
   }
 }
 
-class ArtifactTrait : Trait
+sealed class ArtifactTrait : Trait
 {
-  public override string AsText() => $"Artifact";
+  public override string AsText() => "Artifact";
 }
 
 sealed class AttackModTrait : Trait
@@ -4200,6 +4205,7 @@ class TraitFactory
     },
     { "Adjective", (pieces, gameObj) => new AdjectiveTrait(pieces[1]) },
     { "Affixed", (pieces, gameObj) => new AffixedTrait() },
+    { "Aggressive", (pieces, gameObj) => new AggressiveTrait() },
     { "Alacrity", (pieces, gameObj) =>
       new AlacrityTrait()
       {

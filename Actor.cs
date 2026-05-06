@@ -1016,9 +1016,7 @@ class MonsterFactory
     m.Stats.Add(Attribute.Strength, new Stat(str));
     int dex = Util.StatRollToMod(int.Parse(fields[8]));
     m.Stats.Add(Attribute.Dexterity, new Stat(dex));
-    int attitude = rng.NextDouble() <= 0.8 ? Mob.INDIFFERENT : Mob.AGGRESSIVE;
-    m.Stats.Add(Attribute.MobAttitude, new Stat(attitude));
-
+    
     if (fields[9] != "")
     {
       foreach (string powerTxt in fields[9].Split(','))
@@ -1045,6 +1043,10 @@ class MonsterFactory
       }
     }
 
+    int attitude = m.HasTrait<AggressiveTrait>() || rng.NextDouble() > 0.8 
+                      ? Mob.AGGRESSIVE : Mob.INDIFFERENT;    
+    m.Stats.Add(Attribute.MobAttitude, new Stat(attitude));      
+    
     m.Inventory = new Inventory(m.ID, objDb);
 
     if (!string.IsNullOrEmpty(fields[11]))
