@@ -4357,7 +4357,7 @@ class FrostRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
   }
 }
 
-class MagicMissleAction(GameState gs, Actor actor, Trait? src) : TargetedAction(gs, actor)
+class MagicMissileAction(GameState gs, Actor actor, Trait? src) : TargetedAction(gs, actor)
 {
   Trait? Source { get; set; } = src;
   
@@ -4786,7 +4786,7 @@ class UseWandAction(GameState gs, Actor actor, WandTrait wand, ulong wandId) : A
       case "magicmissile":
         inputer = new Aimer(GameState, player.Loc, 7)
         {
-          DeferredAction = new MagicMissleAction(GameState, player, _wand)
+          DeferredAction = new MagicMissileAction(GameState, player, _wand)
         };
         GameState.UIRef().SetInputController(inputer);
         break;

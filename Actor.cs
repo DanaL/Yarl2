@@ -1309,7 +1309,7 @@ class Power
       case "FireBolt":
         return new FireboltAction(gs, mob, loc);
       case "MagicMissile":
-        return new MagicMissleAction(gs, mob, null) { DamageDie = DmgDie, NumOfDie = NumOfDice, Target = loc };
+        return new MagicMissileAction(gs, mob, null) { DamageDie = DmgDie, NumOfDie = NumOfDice, Target = loc };
       case "MirrorImage":
         return new MirrorImageAction(gs, mob, loc);
       case "ConfusingScream":
