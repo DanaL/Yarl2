@@ -4689,7 +4689,7 @@ class ScatterAction(GameState gs, Actor actor) : Action(gs, actor)
     // I'm passing a new objdb because I am using CalcVisible() as a way to 
     // calculate a circular area of effect and I want to ignore objects like
     // fog and ink that reduce visibility.
-    foreach (var kvp in FieldOfView.CalcVisible(4, Actor!.Loc, GameState.CurrentMap, new GameObjectDB()))
+    foreach (var kvp in FieldOfView.CalcVisible(5, Actor!.Loc, GameState.CurrentMap, new GameObjectDB()))
     {
       if (kvp.Value != Illumination.Full)
         continue;
@@ -4705,7 +4705,7 @@ class ScatterAction(GameState gs, Actor actor) : Action(gs, actor)
       {
         Loc loc = new(GameState.CurrDungeonID, GameState.CurrLevel, r, c);
 
-        if (GameState.TileAt(loc).Passable() && !GameState.ObjDb.Occupied(loc))
+        if (Util.Distance(loc, Actor.Loc) >= 6 && GameState.TileAt(loc).Passable() && !GameState.ObjDb.Occupied(loc))
           landingSpots.Add(loc);
       }
     }
