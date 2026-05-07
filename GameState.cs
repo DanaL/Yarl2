@@ -125,6 +125,11 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       ((NPCBehaviour)grocer.Behaviour).RefreshShop(grocer, this);
     }
     
+    if (FactDb.FactCheck("TailorId") is SimpleFact tf && ObjDb.GetObj(ulong.Parse(tf.Value)) is Mob tailor)
+    {
+      ((NPCBehaviour)tailor.Behaviour).RefreshShop(tailor, this);
+    }
+
     // Sometimes the witch is invisible after experimenting with one of their
     // partner's potions
     if (FactDb.FactCheck("WitchId") is SimpleFact witchFact && ObjDb.GetObj(ulong.Parse(witchFact.Value)) is Mob witch)
