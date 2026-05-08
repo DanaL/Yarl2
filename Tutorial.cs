@@ -23,7 +23,6 @@ class Tutorial(UserInterface ui)
       { Attribute.Constitution, new Stat(1) },
       { Attribute.Dexterity, new Stat(1) },
       { Attribute.Will, new Stat(0) },
-      { Attribute.Depth, new Stat(0) },
       { Attribute.HP, new Stat(1) },
       { Attribute.BaseHP, new Stat(10) }
     };

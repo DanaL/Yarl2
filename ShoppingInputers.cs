@@ -814,7 +814,7 @@ class WitchDialogue : Inputer
 
   void SetupQuest()
   {
-    if (GS.Player.Stats[Attribute.Depth].Curr == 0)
+    if (GS.VisitedLevels.Count == 1)
     {
       Blurb = "I feel like you should see a little more of the world before you delve into the arcane arts. Magic benefits from the wisdom of experience.";      
     }

@@ -24,7 +24,6 @@ enum Attribute
   Constitution,
   Will,
   AttackBonus,
-  Depth,
   AC, // used for monsters who have a simple AC
   DmgDie,
   DmgRolls,

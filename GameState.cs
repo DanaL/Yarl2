@@ -72,24 +72,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     CurrLevel = level;
     CurrDungeonID = dungeonId;
-    int maxDepth = Player.Stats[Attribute.Depth].Max;
-
-    if (!InWilderness && level + 1 > maxDepth)
-    {
-      Player.Stats[Attribute.Depth] = new Stat(level + 1);
-    }
-
-    if (dungeonId == 1)
-    {
-      // When the player reaches certain details for the first time, raise
-      // their nerve.
-      // Or maybe I should do it 50/level?
-      if (level + 1 == 5 && maxDepth < 5)
-      {
-        Player.Stats[Attribute.Nerve].ChangeMax(250);
-        Player.Stats[Attribute.Nerve].Change(250);
-      }
-    }
 
     if (CurrentMap.Alerts.Count > 0)
     {
@@ -1267,12 +1249,13 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       // The player accrues stress more slowly on levels they've already
       // explored
-      int maxDepth = Player.Stats[Attribute.Depth].Curr - 1;
-      if (CurrLevel < maxDepth && Turn % 4 == 0)
+      int deepest = VisitedLevels.Keys.Where(v => v.DungeonId == CurrDungeonID)
+                                      .Select(v => v.Level).Order().Last();
+      if (CurrLevel < deepest && Turn % 4 == 0)
         return;
 
       // limit how stressed the player will get depending on how deep we are
-      int stresssFloor = CurrLevel switch
+      int stressFloor = CurrLevel switch
       {
         0 or 1 or 2 => 601,
         3 or 4 or 5 => 301,
@@ -1280,7 +1263,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         _ => 0
       };
       int curr = Player.Stats[Attribute.Nerve].Curr;
-      if (curr > stresssFloor)
+      if (curr > stressFloor)
       {
         int delta = Player.TotalLightRadius() < 2 ? -2 : -1;
         Player.Stats[Attribute.Nerve].Change(delta);

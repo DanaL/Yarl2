@@ -503,7 +503,7 @@ class SmithBehaviour : NPCBehaviour
     }
 
     bool bowInStock = npc.Inventory.Items().Any(i => i.Type == ItemType.Bow);
-    if (!bowInStock && gs.Player.Stats[Attribute.Depth].Curr > 0 && gs.Rng.Next(4) == 0)
+    if (!bowInStock && gs.VisitedLevels.Count > 1 && gs.Rng.Next(4) == 0)
     {
       npc.Inventory.Add(ItemFactory.Get(ItemNames.SHORTBOW, gs.ObjDb), npc.ID);
     }

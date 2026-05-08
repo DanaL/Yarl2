@@ -504,11 +504,6 @@ sealed class Player : Actor
     //   lines.Add("");
     // }
 
-    if (Stats[Attribute.Depth].Max == 0)
-      lines.Add("\nYou have yet to venture into the Dungeon.");
-    else
-      lines.Add($"\nYou have ventured as deep as level {Stats[Attribute.Depth].Max}.");
-
     return lines;
   }
 

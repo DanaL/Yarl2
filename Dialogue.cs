@@ -855,7 +855,7 @@ class DialogueInterpreter
         else
           return false;
       case "PLAYER_DEPTH":
-        return gs.Player.Stats[Attribute.Depth].Max;
+        return gs.VisitedLevels.Count - 1;
       case "DIALOGUE_STATE":
         return mob.Stats.TryGetValue(Attribute.DialogueState, out var dialogueState) ? dialogueState.Curr : 0;
       case "PLAYER_WALLET":
