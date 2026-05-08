@@ -1303,15 +1303,26 @@ class InnkeeperServiceAction(GameState gs, Mob innkeeper) : Action(gs)
 
     if (Service == "Booze")
     {
-      GameState!.Player.Inventory.Zorkmids -= Invoice;
+      GameState.Player.Inventory.Zorkmids -= Invoice;
       Item booze = ItemFactory.Get(ItemNames.FLASK_OF_BOOZE, GameState.ObjDb);
       GameState.Player.AddToInventory(booze, GameState);
       GameState.UIRef().AlertPlayer($"You purchase a flask of booze from {_innkeeper.FullName}.");
     }
     else if (Service == "Rest")
     {
-      GameState!.Player.Inventory.Zorkmids -= Invoice;
+      int hpGained = 0;
+      foreach (var visited in GameState.VisitedLevels.Keys)
+      {
+        if (!GameState.VisitedLevels[visited])
+          hpGained += 2;
+        GameState.VisitedLevels[visited] = true;
+      }
+      GameState.Player.Stats[Attribute.BaseHP].ChangeMax(hpGained);
+      GameState.Player.Stats[Attribute.BaseHP].Reset();
+      GameState.Player.CalcHP();
       GameState.Player.Stats[Attribute.HP].Reset();
+
+      GameState.Player.Inventory.Zorkmids -= Invoice;      
       GameState.Player.Stats[Attribute.Nerve].Change(500);
 
       // Resting at an inn cures poison. It's part of room service.
