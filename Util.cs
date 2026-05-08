@@ -20,6 +20,8 @@ record struct Sqr(Colour Fg, Colour Bg, char Ch);
 
 enum Dir { North, South, East, West, None }
 
+record struct VisitedLevel(int DungeonId, int Level);
+
 // I didn't want to be beholden to someone else's colour class and anyhow
 // Bearlib's didn't have a comparison operator implemented, which was 
 // inconvenient for me

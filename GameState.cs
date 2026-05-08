@@ -57,6 +57,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   public GameSignal GameSignal { get; set; } = GameSignal.None;
   public string SignalMessage { get; set; } = "";
 
+  public Dictionary<VisitedLevel, bool> VisitedLevels = [];
+
   public void ActorEntersLevel(Actor actor, int dungeonId, int level)
   {
     if (actor is not Yarl2.Player)
@@ -111,6 +113,12 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       RefreshOverworld();
     }
+
+    if (!CurrentDungeon.PocketDimension)
+    {
+      VisitedLevel visit = new(dungeonId, level);
+      VisitedLevels.TryAdd(visit, false); 
+    }    
   }
 
   void RefreshOverworld()

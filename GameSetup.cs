@@ -588,6 +588,7 @@ class CampaignCreator(UserInterface ui)
     int startRow, startCol;
     (campaign, startRow, startCol, objDb) = BeginNewCampaign(rng);
     GameState gameState = new(campaign, options, UI, rng) { ObjDb = objDb, Turn = 1 };
+    gameState.VisitedLevels[new(0, 0)] = true;
 
     var (player, result) = PlayerCreator.NewPlayer(playerName, gameState, startRow, startCol, UI, rng);
     if (result == SetupResult.Quit || result == SetupResult.Cancel || player is null) 

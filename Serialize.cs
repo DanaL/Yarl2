@@ -185,6 +185,7 @@ class GameStateSave
   public ulong Turn { get; set; }
   public ulong[] Seed { get; set; } = [];
   public int InitialSeed { get; set; }
+  public List<string> VisitedLevels { get; set; } = [];
 
   public static GameStateSave Shrink(GameState gs) => new()
   {
@@ -192,7 +193,9 @@ class GameStateSave
     CurrLevel = gs.CurrLevel,
     Turn = gs.Turn,
     Seed = gs.Rng.State,
-    InitialSeed = gs.Rng.InitialSeed
+    InitialSeed = gs.Rng.InitialSeed,
+    VisitedLevels = [..gs.VisitedLevels
+                      .Select(kvp => $"{kvp.Key.DungeonId},{kvp.Key.Level},{kvp.Value}")]                     
   };
 
   public static GameState Inflate(Campaign camp, GameStateSave gss, Options opt, UserInterface ui)
@@ -204,6 +207,13 @@ class GameStateSave
       CurrLevel = gss.CurrLevel,
       Turn = gss.Turn
     };
+
+    foreach (var entry in gss.VisitedLevels)
+    {
+      var parts = entry.Split(',');
+      var key = new VisitedLevel(int.Parse(parts[0]), int.Parse(parts[1]));
+      gs.VisitedLevels[key] = bool.Parse(parts[2]);
+    }
 
     return gs;
   }
