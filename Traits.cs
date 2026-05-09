@@ -2074,7 +2074,7 @@ class DiseasedTrait : TemporaryTrait
         disease.ExpiresOn += (ulong) gs.Rng.Next(50, 101);
         return [];
       }
-      else if (t is ConstructTrait || t is PlantTrait || t is UndeadTrait)
+      else if (t is ConstructTrait || t is PlantTrait || t is UndeadTrait || t is IllusionTrait)
       {
         return [];
       }
