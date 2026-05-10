@@ -1291,24 +1291,24 @@ class RepairItemAction(GameState gs, Mob shopkeeper) : Action(gs)
   }
 }
 
-class InnkeeperServiceAction(GameState gs, Mob innkeeper) : Action(gs)
+sealed class InnkeeperServiceAction(GameState gs, Mob innkeeper) : Action(gs)
 {
   readonly Mob _innkeeper = innkeeper;
-  int Invoice { get; set; } = 0;
-  string Service { get; set; } = "";
+  int _invoice = 0;
+  string _service = "";
 
   public override double Execute()
   {
     base.Execute();
 
-    if (Service == "Booze")
+    if (_service == "Booze")
     {
-      GameState.Player.Inventory.Zorkmids -= Invoice;
+      GameState.Player.Inventory.Zorkmids -= _invoice;
       Item booze = ItemFactory.Get(ItemNames.FLASK_OF_BOOZE, GameState.ObjDb);
       GameState.Player.AddToInventory(booze, GameState);
       GameState.UIRef().AlertPlayer($"You purchase a flask of booze from {_innkeeper.FullName}.");
     }
-    else if (Service == "Rest")
+    else if (_service == "Rest")
     {
       int hpGained = 0;
       foreach (var visited in GameState.VisitedLevels.Keys)
@@ -1322,7 +1322,7 @@ class InnkeeperServiceAction(GameState gs, Mob innkeeper) : Action(gs)
       GameState.Player.CalcHP();
       GameState.Player.Stats[Attribute.HP].Reset();
 
-      GameState.Player.Inventory.Zorkmids -= Invoice;      
+      GameState.Player.Inventory.Zorkmids -= _invoice;      
       GameState.Player.Stats[Attribute.Nerve].Change(500);
 
       // Resting at an inn cures poison. It's part of room service.
@@ -1351,8 +1351,8 @@ class InnkeeperServiceAction(GameState gs, Mob innkeeper) : Action(gs)
   public override void ReceiveUIResult(UIResult result)
   {
     var serviceResult = (ServiceResult)result;
-    Invoice = serviceResult.Zorkminds;
-    Service = serviceResult.Service;
+    _invoice = serviceResult.Zorkminds;
+    _service = serviceResult.Service;
   }
 }
 
