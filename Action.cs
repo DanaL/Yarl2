@@ -1314,11 +1314,17 @@ sealed class InnkeeperServiceAction(GameState gs, Mob innkeeper) : Action(gs)
       foreach (var visited in GameState.VisitedLevels.Keys)
       {
         if (!GameState.VisitedLevels[visited])
-          hpGained += 2;
+          hpGained += 3;
         GameState.VisitedLevels[visited] = true;
       }
-      GameState.Player.Stats[Attribute.BaseHP].ChangeMax(hpGained);
-      GameState.Player.Stats[Attribute.BaseHP].Reset();
+
+      if (hpGained > 0)
+      {
+        GameState.Player.Stats[Attribute.BaseHP].ChangeMax(hpGained);
+        GameState.Player.Stats[Attribute.BaseHP].Reset();
+        GameState.UIRef().AlertPlayer("Your innate endurance has increased.");
+      }
+      
       GameState.Player.CalcHP();
       GameState.Player.Stats[Attribute.HP].Reset();
 
