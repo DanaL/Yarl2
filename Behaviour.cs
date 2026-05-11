@@ -419,15 +419,28 @@ class SmithBehaviour : NPCBehaviour
     var sb = new StringBuilder();
     sb.Append('"');
 
-    List<string> blurbs = [
-      "If you're looking for arms or armour, I'm the only game in town!",
-      "Weapons or armour showing signs of wear and tear? I can help with that!",
-      "If you find weird gems or monster parts, I may be able to use them to spruce up your gear!"      
-    ];
+    List<string> blurbs = [];
 
-    if (gs.FactDb.FactCheck("DwarfMine") is not null && gs.Rng.NextDouble() < 0.25)
+    if (gs.FactDb.FactCheck("SmithHammerReturned") is null)
     {
-      blurbs.Add("The ancient dwarves used to mine mithril in their tunnels. I could do some keen work with mithril!");
+      string monsters = "";
+      if (gs.FactDb!.FactCheck("EarlyDenizen") is SimpleFact ed)
+        monsters = ed.Value;
+      blurbs.Add("I haven't been able to do much work since my favourite hammer was stolen.");
+      blurbs.Add("I'm sorry my shelves are so bare.");
+      blurbs.Add($"I think {monsters.Pluralize()} stole my hammer when I was at the tavern. How rude!");
+      blurbs.Add("If you can retrieve my hammer, I can start forging again. I'd reward you!");
+    }      
+    else
+    {
+      blurbs.Add("If you're looking for arms or armour, I'm the only game in town!");
+      blurbs.Add("Weapons or armour showing signs of wear and tear? I can help with that!");
+      blurbs.Add("If you find weird gems or monster parts, I may be able to use them to spruce up your gear!");
+
+      if (gs.FactDb.FactCheck("DwarfMine") is not null && gs.Rng.NextDouble() < 0.25)
+      {
+        blurbs.Add("The ancient dwarves used to mine mithril in their tunnels. I could do some keen work with mithril!");
+      }
     }
 
     if (gs.Player.HasTrait<RepugnantTrait>())
@@ -460,7 +473,7 @@ class SmithBehaviour : NPCBehaviour
   {
     if (gs.FactDb.FactCheck("SmithHammerReturned") is null)
       return;
-      
+
     int lastRefresh = npc.Stats[Attribute.InventoryRefresh].Curr;
     int turn = (int)(gs.Turn % int.MaxValue);
 
