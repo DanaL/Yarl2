@@ -289,11 +289,17 @@ class Village
     smith.Traits.Add(new BehaviourTreeTrait() { Plan = "SmithPlan" });
 
     smith.Inventory = new Inventory(smith.ID, objDb);
-    smith.Inventory.Add(ItemFactory.Get(ItemNames.RINGMAIL, objDb), smith.ID);
-    smith.Inventory.Add(ItemFactory.Get(ItemNames.HELMET, objDb), smith.ID);
-    if (rng.NextDouble() < 0.25)
-      smith.Inventory.Add(ItemFactory.Get(ItemNames.CHAINMAIL, objDb), smith.ID);
-    smith.Inventory.Add(ItemFactory.Get(ItemNames.DAGGER, objDb), smith.ID);
+
+    if (rng.NextDouble() < 0.50)
+      smith.Inventory.Add(ItemFactory.Get(ItemNames.HELMET, objDb), smith.ID);
+    if (rng.Next(3) == 0)
+      smith.Inventory.Add(ItemFactory.Get(ItemNames.DAGGER, objDb), smith.ID);
+    if (rng.Next(3) == 0)
+      smith.Inventory.Add(ItemFactory.Get(ItemNames.DAGGER, objDb), smith.ID);
+    if (rng.Next(3) < 2)
+      smith.Inventory.Add(ItemFactory.Get(ItemNames.SPEAR, objDb), smith.ID);
+
+    /*
     smith.Inventory.Add(ItemFactory.Get(ItemNames.DAGGER, objDb), smith.ID);
     smith.Inventory.Add(ItemFactory.Get(ItemNames.DAGGER, objDb), smith.ID);
     if (rng.NextDouble() < 0.33)
@@ -308,6 +314,7 @@ class Village
       smith.Inventory.Add(ItemFactory.Get(ItemNames.RAPIER, objDb), smith.ID);
     if (rng.NextDouble() < 0.2)
       smith.Inventory.Add(ItemFactory.Get(ItemNames.PICKAXE, objDb), smith.ID);
+    */
     
     return smith;
   }
