@@ -458,6 +458,9 @@ class SmithBehaviour : NPCBehaviour
 
   public override void RefreshShop(Actor npc, GameState gs) 
   {
+    if (gs.FactDb.FactCheck("SmithHammerReturned") is null)
+      return;
+      
     int lastRefresh = npc.Stats[Attribute.InventoryRefresh].Curr;
     int turn = (int)(gs.Turn % int.MaxValue);
 
