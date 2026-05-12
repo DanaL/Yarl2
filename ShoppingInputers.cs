@@ -331,23 +331,29 @@ class InnkeeperInputer : Inputer
 class SmithyInputer : ShopMenuInputer
 {
   bool _offerRepair;
-  bool _offerUpgrade;
+  bool _offerUpgrade;  
   char _reagent;
   HashSet<char> opts { get; set; } = [];
+
+  bool HammerRetrieved(GameState gs) => gs.FactDb.FactCheck("SmithHammerReturned") is not null;
 
   public SmithyInputer(Actor shopkeeper, string blurb, GameState gs) : base(shopkeeper, blurb, gs)
   {
     _offerRepair = false;
     _offerUpgrade = false;
-    foreach (Item item in GS.Player.Inventory.Items())
+
+    if (HammerRetrieved(gs))
     {
-      if (item.HasTrait<RustedTrait>())
-        _offerRepair = true;
+      foreach (Item item in GS.Player.Inventory.Items())
+      {
+        if (item.HasTrait<RustedTrait>())
+          _offerRepair = true;
 
-      if (item.Type == ItemType.Reagent)
-        _offerUpgrade = true;
+        if (item.Type == ItemType.Reagent)
+          _offerUpgrade = true;
+      }  
     }
-
+    
     // Menu state:
     // 0 - Offer choice of shop/repair/upgrade
     // 1 - Shopping
