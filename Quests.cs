@@ -366,3 +366,18 @@ class WitchQuest
     return (dungeon, new Loc(id, 0, exitSq.Item1, exitSq.Item2));
   }
 }
+
+class SmithQuest
+{
+  public static void Setup(Dungeon dungeon, string denizen, GameObjectDB objDb, FactDb factDb, Rng rng)
+  {
+    if (factDb.FactCheck("SmithId") is not SimpleFact smithFact)
+      throw new WildernessCreationException("Village smith info was not found!");
+
+    ulong smithId = ulong.Parse(smithFact.Value);
+    if (objDb.GetObj(smithId) is not Actor smith)
+      throw new WildernessCreationException("Village smith info was not found!");
+
+    Console.WriteLine(smith.FullName);
+  }
+}

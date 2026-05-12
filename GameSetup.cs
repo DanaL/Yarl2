@@ -515,6 +515,8 @@ class CampaignCreator(UserInterface ui)
         }
         //(startR, startC) = entrance;
 
+        SmithQuest.Setup(firstDungeon, earlyMainOccupant, objDb, factDb, rng);
+        
         break;
       }                  
       catch (WildernessCreationException)
