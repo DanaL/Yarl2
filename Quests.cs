@@ -378,6 +378,35 @@ class SmithQuest
     if (objDb.GetObj(smithId) is not Actor smith)
       throw new WildernessCreationException("Village smith info was not found!");
 
-    Console.WriteLine(smith.FullName);
+    string name = "hammer".Possessive(smith);
+    Item hammer = new()
+    {
+      Name = name,
+      Type = ItemType.Trinket,
+      Value = 0,
+      Glyph = new Glyph('(', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false)
+    };
+    hammer.Traits.Add(new MetalTrait { Type = Metals.Iron });
+    hammer.Traits.Add(new NamedTrait());
+    hammer.Traits.Add(new DescriptionTrait("A well-used and well-cared for smith's hammer. Someone is probably looking for this."));
+    objDb.Add(hammer);
+
+    factDb.Add(new SimpleFact() { Name = "SmithHammerId", Value = hammer.ID.ToString() });
+
+    NameGenerator ng = new(rng, Util.NamesFile);
+    string thiefName = ng.BossName();
+    string template = denizen == "kobold" ? "kobold bully" : "penny pincher";
+    
+    Actor thief = MonsterFactory.NamedActor(thiefName, template, objDb, rng);
+    thief.Glyph = thief.Glyph with { Lit = Colours.LIGHT_PURPLE, Unlit = Colours.PURPLE };
+    thief.Inventory.Add(hammer, thief.ID);
+
+    Map map = dungeon.LevelMaps[1];
+    List<Loc> floors = map.ClearFloors(dungeon.ID, 1, objDb);
+    if (floors.Count == 0)
+      throw new WildernessCreationException("Could not place the smith's hammer thief!");
+
+    Loc loc = floors[rng.Next(floors.Count)];
+    objDb.AddNewActor(thief, loc);
   }
 }

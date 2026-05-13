@@ -221,7 +221,7 @@ class JsonItem
   public List<string> Traits { get; set; } = [];
 }
 
-class ItemTemplate
+sealed class ItemTemplate
 {
   public string Name { get; set; } = "";
   public ItemType Type { get; set; }
@@ -230,7 +230,7 @@ class ItemTemplate
   public List<string> TraitTemplates { get; set; } = [];
 }
 
-class ItemFactory
+sealed class ItemFactory
 {
   static Dictionary<ItemNames, ItemTemplate> Items { get; } = LoadItemDefs();
 
