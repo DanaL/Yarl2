@@ -1527,6 +1527,10 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         else
           return ("are", $"{item.Value} zorkmids");
       }
+      else if (item.HasTrait<NamedTrait>())
+      {
+        return ("is", item.FullName);
+      }
       else if (item.HasTrait<ArtifactTrait>())
       {
         return ("is", $"{item.FullName.DefArticle()}");
@@ -1617,6 +1621,10 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
           sb.Append($" There is a lone zorkmid here.");
         else
           sb.Append($" There are {item.Value} zorkmids here!");
+      }
+      else if (item.HasTrait<NamedTrait>())
+      {
+        sb.Append($" {item.FullName.Capitalize()} is here.");
       }
       else if (item.HasTrait<ArtifactTrait>())
       {
