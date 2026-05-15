@@ -39,7 +39,7 @@
 				(= DIALOGUE_STATE 4) ; player gave the trinket to the widower
 				(
 					(say "Thank you, oh thank you!")
-					(give MINOR_GIFT "Please, take this. It's small but I must repay you.")
+					(give WIDOWER_REWARD "Please, take this. It's small but I must repay you.")
 					(set DIALOGUE_STATE 5)
 				)
 			)

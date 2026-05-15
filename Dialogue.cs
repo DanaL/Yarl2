@@ -1450,10 +1450,12 @@ class DialogueInterpreter
       Faiths.TricksterBlessing(mob, gs);
       return;      
     }
+    
     Item item = gift.Gift switch
     {
       "MINOR_GIFT" => Treasure.MinorGift(gs.ObjDb, gs.Rng),
       "SORCERESS_TOME" => History.SorceressTome(gs.ObjDb),
+      "WIDOWER_REWARD" => ItemFactory.Get(ItemNames.SCROLL_ENCHANTING, gs.ObjDb),
       _ => throw new Exception($"Unknown variable: {gift.Gift}"),
     };
 
