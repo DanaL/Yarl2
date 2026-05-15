@@ -1204,7 +1204,7 @@ class UpgradeItemAction : Action
     base.Execute();
     double result = 1.0;
 
-    var (item, _) = GameState!.Player.Inventory.ItemAt(ItemSlot);
+    var (item, _) = GameState.Player.Inventory.ItemAt(ItemSlot);
     var (reagent, _) = GameState.Player.Inventory.ItemAt(ReagentSlot);
 
     if (item is null || reagent is null)
@@ -1251,7 +1251,7 @@ class ReturnSmithHammerAction(GameState gs, Mob smith, ulong hammerId) : Action(
   {
     base.Execute();
 
-    GameState.FactDb.Add(new SimpleFact() { Name = "SmithHammerReturned", Value = "true "});
+    GameState.FactDb.Add(new SimpleFact() { Name = "SmithHammerReturned", Value = "true"});
     GameState.Player.Inventory.RemoveByID(_hammerId, GameState);
 
     StringBuilder sb = new();
@@ -1265,6 +1265,8 @@ class ReturnSmithHammerAction(GameState gs, Mob smith, ulong hammerId) : Action(
     sb.Append("\n\n");
     sb.Append(_smith.FullName.Capitalize());
     sb.Append(" gives you some [ICEBLUE mithril ore].");
+
+    GameState.FactDb.Add(new SimpleFact() { Name = "FreeUpgradeCoupon", Value = "true" });
 
     GameState.UIRef().SetPopup(new Popup(sb.ToString(), "", -1, -1));
 

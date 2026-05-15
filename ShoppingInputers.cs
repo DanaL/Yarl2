@@ -338,6 +338,7 @@ class SmithyInputer : ShopMenuInputer
   HashSet<char> opts { get; set; } = [];
 
   static bool HammerRetrieved(GameState gs) => gs.FactDb.FactCheck("SmithHammerReturned") is not null;
+  static bool UpgradeCoupon(GameState gs) => gs.FactDb.FactCheck("FreeUpgradeCoupon") is not null;
   bool PlayerHasHammer(GameState gs) => gs.Player.Inventory.Items().Any(i => i.ID == _hammerId);
 
   public SmithyInputer(Actor shopkeeper, string blurb, GameState gs) : base(shopkeeper, blurb, gs)
@@ -406,7 +407,7 @@ class SmithyInputer : ShopMenuInputer
       MenuItems = RepairMenu();
     }
     else if (menuState == 0 && ch == 'c')
-    {
+    {      
       Shopkeeper.Stats[Attribute.ShopMenu] = new Stat(3);
       opts = [.. MenuItems.Select(i => i.Key)];
       MenuItems = ReagentMenu();
@@ -432,7 +433,20 @@ class SmithyInputer : ShopMenuInputer
     {
       DeferredAction = new UpgradeItemAction(GS, Shopkeeper);
       SingleSelection = true;
-      base.Input(ch);
+
+      if (UpgradeCoupon(GS) && (ch == '\n' || ch == '\r'))
+      {
+        // We have to do this here when there's a free upgrade because by default we don't
+        // exit the menu if the current invoice is 0
+        GS.FactDb.ClearFact(GS.FactDb.FactCheck("FreeUpgradeCoupon")!);
+        Close();
+        QueueDeferredAction();
+        Done = true;
+      }
+      else 
+      {
+        base.Input(ch);
+      }
     }
     else if (menuState == 5 && ch == 'a')
     {
@@ -483,7 +497,7 @@ class SmithyInputer : ShopMenuInputer
         continue;
 
       double markup = CalcMarkup();
-      int price = (int)(25 * markup);
+      int price = UpgradeCoupon(GS) ? 0 : (int)(25 * markup);
       menuItems.Add(item.Slot, new ShopMenuItem(item.Slot, item, 1, price));
     }
 
@@ -559,8 +573,9 @@ class SmithyInputer : ShopMenuInputer
         opts.Add('b');
       }
       if (_offerUpgrade)
-      {
+      {          
         sb.Append("c) Try to enchant an item.\n");
+
         opts.Add('c');
       }
 
@@ -578,7 +593,9 @@ class SmithyInputer : ShopMenuInputer
     }
     else if (menuState == 3)
     {
-      dialogueText = MenuScreen("What reagent shall we use?");
+      string s = UpgradeCoupon(GS) ? "No charge for this one! Thanks for returning my hammer.\n\nWhat reagent shall we use?" 
+                                   : "What reagent shall we use?";
+      dialogueText = MenuScreen(s);
       opts = [.. MenuItems.Select(i => i.Key)];
     }
     else if (menuState == 4)
