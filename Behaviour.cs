@@ -430,7 +430,7 @@ class SmithBehaviour : NPCBehaviour
       blurbs.Add("I'm sorry my shelves are so bare.");
       blurbs.Add($"I think {monsters.Pluralize()} stole my hammer when I was at the tavern. How rude!");
       blurbs.Add("If you can retrieve my hammer, I can start forging again. I'd reward you!");
-      blurbs.Add("I can't even repair rusty gear without my equipment.");
+      blurbs.Add("I can't even repair rusty gear without my tools.");
     }      
     else
     {

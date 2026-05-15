@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text;
+
 namespace Yarl2;
 
 abstract class Action
@@ -1237,6 +1239,36 @@ class UpgradeItemAction : Action
     Total = upgradeResult.Zorkminds;
     ItemSlot = upgradeResult.ItemSlot;
     ReagentSlot = upgradeResult.ReagentSlot;
+  }
+}
+
+class ReturnSmithHammerAction(GameState gs, Mob smith, ulong hammerId) : Action(gs)
+{
+  readonly Mob _smith = smith;
+  readonly ulong _hammerId = hammerId;
+
+  public override double Execute()
+  {
+    base.Execute();
+
+    GameState.FactDb.Add(new SimpleFact() { Name = "SmithHammerReturned", Value = "true "});
+    GameState.Player.Inventory.RemoveByID(_hammerId, GameState);
+
+    StringBuilder sb = new();
+    sb.Append("\"Thank you so much!\n\nHere take this ore and come back when you want me to upgrade some of your kit!\"\n\n");
+    sb.Append(_smith.FullName.Capitalize());
+    sb.Append(" turns to their forge and begins to excitedly work.");
+
+    Item ore = ItemFactory.Get(ItemNames.MITHRIL_ORE, GameState.ObjDb);
+    gs.Player.AddToInventory(ore, GameState);
+
+    sb.Append("\n\n");
+    sb.Append(_smith.FullName.Capitalize());
+    sb.Append(" gives you some [ICEBLUE mithril ore].");
+
+    GameState.UIRef().SetPopup(new Popup(sb.ToString(), "", -1, -1));
+
+    return 1.0;
   }
 }
 

@@ -333,14 +333,21 @@ class SmithyInputer : ShopMenuInputer
   bool _offerRepair;
   bool _offerUpgrade;  
   char _reagent;
+  ulong _hammerId;
+
   HashSet<char> opts { get; set; } = [];
 
-  bool HammerRetrieved(GameState gs) => gs.FactDb.FactCheck("SmithHammerReturned") is not null;
+  static bool HammerRetrieved(GameState gs) => gs.FactDb.FactCheck("SmithHammerReturned") is not null;
+  bool PlayerHasHammer(GameState gs) => gs.Player.Inventory.Items().Any(i => i.ID == _hammerId);
 
   public SmithyInputer(Actor shopkeeper, string blurb, GameState gs) : base(shopkeeper, blurb, gs)
   {
     _offerRepair = false;
     _offerUpgrade = false;
+
+    if (gs.FactDb.FactCheck("SmithHammerId") is not SimpleFact hidFact)
+      throw new Exception("Smith hammer ID should exist.");
+    _hammerId = ulong.Parse(hidFact.Value);
 
     if (HammerRetrieved(gs))
     {
@@ -364,7 +371,7 @@ class SmithyInputer : ShopMenuInputer
 
     WritePopup(blurb);
   }
-
+  
   public override void Input(char ch)
   {
     int menuState;
@@ -426,6 +433,15 @@ class SmithyInputer : ShopMenuInputer
       DeferredAction = new UpgradeItemAction(GS, Shopkeeper);
       SingleSelection = true;
       base.Input(ch);
+    }
+    else if (menuState == 5 && ch == 'a')
+    {
+      DeferredAction = new ReturnSmithHammerAction(GS, Shopkeeper, _hammerId);
+      SingleSelection = true;
+      Close();
+      QueueDeferredAction();
+      
+      return;
     }
 
     if (Done)
@@ -502,6 +518,20 @@ class SmithyInputer : ShopMenuInputer
       return;
     }
 
+    if (!HammerRetrieved(GS) && PlayerHasHammer(GS))
+    {
+      StringBuilder sb = new(Shopkeeper.Appearance.IndefArticle().Capitalize());
+      sb.Append(".\n\nYou found my hammer! May I have it back?\n\n");            
+      sb.Append($"a) Return hammer to {Shopkeeper.FullName}.\n");
+
+      Shopkeeper.Stats[Attribute.ShopMenu].SetMax(5);
+      opts = new(['a']);
+
+      GS.UIRef().SetPopup(new Popup(sb.ToString(), Shopkeeper.FullName, -1, -1));
+
+      return;
+    }
+
     // If the player has any rusty items, offer a menu where they can choose between
     // shopping or repair. (And eventually also upgrade items)
     int menuState;
@@ -516,7 +546,7 @@ class SmithyInputer : ShopMenuInputer
     string dialogueText;
     if (menuState == 0)
     {
-      var sb = new StringBuilder(Shopkeeper.Appearance.IndefArticle().Capitalize());
+      StringBuilder sb = new(Shopkeeper.Appearance.IndefArticle().Capitalize());
       sb.Append(".\n\n");
       sb.Append(Blurb);
       sb.Append("\n\n");
