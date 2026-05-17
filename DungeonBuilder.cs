@@ -554,8 +554,6 @@ abstract class DungeonBuilder
       case TileType.SecretDoor:
       case TileType.SecretPassage:
         return 1;
-      case TileType.Chasm:
-        return 2;
     }
 
     if (!tile.Passable())
