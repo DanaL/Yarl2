@@ -37,9 +37,8 @@
   )
   ((AND (= RELIGION "Moon Daughter") (= MAIN_QUEST_STATUS 2))
     (
-        (say (pick ("Woah! What a sick eldritch tablet!"
-                    "Woah! What a sick eldritch tablet!!"
-                    "Woah! What a sick eldritch tablet!!!"
+        (say (pick ("The witch known as Kylie studies old lore. Bring the tablet to her to translate and we should learn our next steps."
+                    "It is as we suspected: Arioch aims to break his ancient bonds. We must read this tablet. Seek out the witches."
               )))
         (cond
           ( (AND (= TRICKSTER true) (= DECEIVER false))
