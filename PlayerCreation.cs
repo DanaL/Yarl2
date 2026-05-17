@@ -602,6 +602,41 @@ class ReaverBlessingTrait : BlessingTrait
   }
 }
 
+class DeceiverBlessingTrait : MoonDaughtersBlessingTrait
+{
+  public override void Remove(GameState gs)
+  {
+    gs.Player.SpellsKnown.Remove("mirror image");
+    gs.Player.Stats[Attribute.MagicPoints].ChangeMax(-1);
+    gs.Player.Stats[Attribute.MagicPoints].Change(-1);
+
+    gs.Player.Traits = [.. gs.Player.Traits.Where(t => t.SourceId != SourceId)];
+
+    gs.Player.Traits.Remove(this);
+  }
+
+  public override string AsText() => $"DeceiverBlessing#{SourceId}#{OwnerID}";
+  public override string Description(Actor owner) => "The Deceiver talent grants a spell to summon a magic duplicate of yourself";
+
+  public override void Apply(GameObj granter, GameState gs)
+  {
+    SourceId = granter.ID;
+    QuietTrait quiet = new() { SourceId = granter.ID };
+    gs.Player.Traits.Add(quiet);
+
+    if (!gs.Player.SpellsKnown.Contains("mirror image"))
+      gs.Player.SpellsKnown.Add("mirror image");
+
+    if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var mp))
+    {
+      mp.ChangeMax(1);
+      mp.Change(1);
+    }
+    
+    gs.Player.Traits.Add(this);
+  }
+}
+
 class TricksterBlessingTrait : MoonDaughtersBlessingTrait
 {
   public override void Apply(GameObj granter, GameState gs)
@@ -638,7 +673,7 @@ class TricksterBlessingTrait : MoonDaughtersBlessingTrait
   }
 
   public override string AsText() => $"TricksterBlessing#{SourceId}#{OwnerID}";
-  public override string Description(Actor owner) => "The Trickster blessing grants abilities that help you evade your foes";
+  public override string Description(Actor owner) => "The Trickster talent grants abilities that help you evade and escape your foes";
 }
 
 class WinterBlessingTrait : HuntokarBlessingTrait

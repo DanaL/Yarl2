@@ -908,7 +908,11 @@ class DialogueInterpreter
       case "RELIGION":
         return gs.Player.Religion;
       case "FAITH":
-        return gs.Player.Faith;      
+        return gs.Player.Faith;
+      case "TRICKSTER":
+        return gs.Player.Traits.Any(t => t is TricksterBlessingTrait);
+      case "DECEIVER":
+        return gs.Player.Traits.Any(t => t is DeceiverBlessingTrait);
       default:
         throw new Exception($"Unknown variable {name}");
     }    
@@ -1450,7 +1454,12 @@ class DialogueInterpreter
       Faiths.TricksterBlessing(mob, gs);
       return;      
     }
-    
+    else if (gift.Gift == "DECEIVER_BLESSING")
+    {
+      Faiths.DeceiverBlessing(mob, gs);
+      return;  
+    }
+
     Item item = gift.Gift switch
     {
       "MINOR_GIFT" => Treasure.MinorGift(gs.ObjDb, gs.Rng),

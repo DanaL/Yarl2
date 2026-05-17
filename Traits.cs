@@ -1858,7 +1858,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "blink" => new UseResult(new BlinkAction(gs, user)),
     "booze" => new UseResult(new DrinkBoozeAction(gs, user)),
     "celerity" => new UseResult(new ApplyTraitAction(gs, user, new CelerityTrait())),
-    "decoy" => new UseResult(new SummonDecoy(gs, user)),
+    "decoy" => new UseResult(new SummonDecoyAction(gs, user)),
     "curedisease" => new UseResult(new CureDisease(gs, user)),
     "disarm" => new UseResult(new DisarmAction(gs, user, user.Loc)),
     "minorheal" => new UseResult(new HealAction(gs, user, 4, 4)),

@@ -21,6 +21,7 @@ class Spells
       case "cone of cold":
       case "gust of wind":
       case "breathe fire":
+      case "mirror image":
         return true;
       default:
         return false;
@@ -478,10 +479,23 @@ class CastPhaseDoor(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     base.Execute();
     
     if (CheckCost(1, 20))
-    {
       GameState.Player.QueueAction(new BlinkAction(GameState, Actor!));
-    }
+    
+    return 0.0;
+  }
 
+  public override void ReceiveUIResult(UIResult result) { }
+}
+
+class CastMirrorImage(GameState gs, Actor actor) : CastSpellAction(gs, actor)
+{
+  public override double Execute()
+  {
+    base.Execute();
+    
+    if (CheckCost(2, 20))
+      GameState.Player.QueueAction(new SummonDecoyAction(GameState, Actor!));
+    
     return 0.0;
   }
 
@@ -1032,6 +1046,11 @@ class SpellcastMenu : Inputer
         break;
       case "phase door":
         GS.Player.QueueAction(new CastPhaseDoor(GS, GS.Player));
+        GS.UIRef().SetInputController(new PlayerCommandController(GS));
+        GS.UIRef().ClosePopup();
+        break;
+      case "mirror image":
+        GS.Player.QueueAction(new CastMirrorImage(GS, GS.Player));
         GS.UIRef().SetInputController(new PlayerCommandController(GS));
         GS.UIRef().ClosePopup();
         break;

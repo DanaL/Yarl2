@@ -17,8 +17,8 @@
                       )
       ))
 
-      (option "Accept the Blessing of the Trickster."
-	      ((give TRICKSTER_BLESSING "Receive the Trickster's Blessing") (end "A faint shimmering surrounds you as you are gifted with some eldritch power!")))
+      (option "Accept the Talent of the Trickster."
+	      ((give TRICKSTER_BLESSING "Receive the Trickster's Talent") (end "A faint shimmering surrounds you as you are gifted with some eldritch power!")))
   ))
 
   ((AND (= RELIGION "Huntokar") (> FAITH 1))
@@ -33,6 +33,21 @@
                     "Delve into the ancient ruins, slip pass the monsters lurking therein. Learn what you can about the evil that is stirring."
                     "Long ago we build a monument to the moon's light deep underground."
               )))
+    )
+  )
+  ((AND (= RELIGION "Moon Daughter") (= MAIN_QUEST_STATUS 2))
+    (
+        (say (pick ("Woah! What a sick eldritch tablet!"
+                    "Woah! What a sick eldritch tablet!!"
+                    "Woah! What a sick eldritch tablet!!!"
+              )))
+        (cond
+          ( (AND (= TRICKSTER true) (= DECEIVER false))
+            (option "Learn the Talent of the Deceiver: learn to summon a magic duplicate of yourself."
+              ((give DECEIVER_BLESSING "Receive the Deceiver's Talent") (end "You learn how to mislead and misdirect your foes!"))
+            )          
+          )
+        )
     )
   )
 )
