@@ -12,6 +12,8 @@
           "These days #WIDOWER_NAME just sits at home and mopes. This is what happens when you get involved with an adventurer. No offense."
           "What did #WIDOWER_NAME expect? I guess there's no accounting for young love."
           "Sometimes you see lights in the windows of that old tower."
+          "In the old days, some folks sacrificed to the Crimson King."
+          "They say there is a shrine to the Crimson King out in the wilderness somewhere."
         ))))
   (else 
     (
