@@ -116,7 +116,6 @@ sealed class Player : Actor
           return "Crimson King";
       }
 
-      return "Crimson King";
       return "Agnostic";
     }
   }
@@ -142,7 +141,6 @@ sealed class Player : Actor
           faith = 2;
       }
 
-      return 3;
       return faith;
     }
   }

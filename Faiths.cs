@@ -139,14 +139,25 @@ class Faiths
 
   public static void CrimsonKingShrineFoyer(GameState gs)
   {
-    string s = "So a mortal enters my shrine!";
+    bool heretic = gs.Player.Faith > 1 && gs.Player.Religion != "Crimson King";
+    string s = "So a mortal enters my shrine! Take up My blade and prove thyself worthy!";
+    if (gs.Player.Religion == "Crimson King" && gs.MainQuestState < 2)
+    {
+      s = "It seems My old foe rattles his chains! Seek ye the dusty ruins for news of Arioch!";
+    }
+    else if (gs.Player.Religion == "Crimson King" && gs.MainQuestState >= 2)
+    {
+      s = "Fah! Sorceries and chants! Seek one can read the ancient text and learn where our foe stirs!";
+    }
+    else if (heretic)
+    {
+      s = "Beyond from this sacred place, though mewling coward!";
+    }
+    
     gs.UIRef().AlertPlayer(s);
     gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
 
-    string religion = gs.Player.Religion;
-    int faith = gs.Player.Faith;
-
-    if (religion != "Crimson King" && faith > 1)
+    if (heretic)
     {
       ulong bladeId = 0;
       if (gs.FactDb.FactCheck("CrimsonKingBladeId") is SimpleFact bid)
