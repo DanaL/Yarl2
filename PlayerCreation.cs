@@ -391,6 +391,7 @@ abstract class BlessingTrait : Trait
 
 abstract class HuntokarBlessingTrait : BlessingTrait {}
 abstract class MoonDaughtersBlessingTrait : BlessingTrait {}
+abstract class CrimsonKingBlessingTrait : BlessingTrait {}
 
 class ChampionBlessingTrait : HuntokarBlessingTrait
 {  
@@ -563,10 +564,12 @@ class PaladinBlessingTrait : HuntokarBlessingTrait
   public override string AsText() => $"PaladinBlessing#{SourceId}#{OwnerID}";
 }
 
-class ReaverBlessingTrait : BlessingTrait
+class ReaverBlessingTrait : CrimsonKingBlessingTrait
 {
   public override void Apply(GameObj granter, GameState gs)
-  {  
+  {
+    Faiths.RemoveOtherFaithBlessings<CrimsonKingBlessingTrait>(gs);
+    
     MeleeDamageModTrait dmg = new() { Amt = 2, SourceId = granter.ID };
     gs.Player.Traits.Add(dmg);
 
