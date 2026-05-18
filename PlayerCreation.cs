@@ -561,6 +561,11 @@ class ReaverBlessingTrait : CrimsonKingBlessingTrait
     FrighteningTrait fright = new() { DC = 13, SourceId = granter.ID };
     gs.Player.Traits.Add(fright);
 
+    if (gs.Player.Faith >= 2)
+    {
+      gs.Player.Traits.Add(new KnockBackTrait() { SourceId = granter.ID });  
+    }
+
     gs.Player.Traits.Add(this);
 
     gs.UIRef().AlertPlayer("A voice booms: Take up my Blade and bring War and Fury to our foes! Strike them down with wrath!");
@@ -585,7 +590,10 @@ class ReaverBlessingTrait : CrimsonKingBlessingTrait
       s += " and your attacks may [brightred frighten] your foes";
     }
 
-    s += ".";
+    if (owner.Traits.OfType<KnockBackTrait>().Any(t => t.SourceId == SourceId))
+    {
+      s += " and your attacks may [brightred knock] your foes away";
+    }
 
     return s;
   }
