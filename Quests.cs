@@ -447,24 +447,24 @@ class CKShrine
 
   public static void Setup(Campaign campaign, Loc start, Map wilderness, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
-    Dungeon dungeon = new(campaign.Dungeons.Count, "the Shrine of the Crimson King", "A musty shrine. There is a metallic tang in the air.", true);
-    Map map = new(15, 15, TileType.PermWall) { Features = MapFeatures.NoTeleport };
+    Dungeon dungeon = new(campaign.Dungeons.Count, "the Red Shrine", "A musty shrine. There is a metallic tang in the air.", true);
+    Map map = new(15, 17, TileType.PermWall) { Features = MapFeatures.NoTeleport | MapFeatures.UndiggableFloor | MapFeatures.NoRandomEncounters };
     
-    for (int c = 5; c < 10; c++) map.SetTile(1, c, TileFactory.Get(TileType.DungeonFloor));
-    for (int c = 4; c < 11; c++) map.SetTile(2, c, TileFactory.Get(TileType.DungeonFloor));
-    for (int c = 3; c < 12; c++) map.SetTile(3, c, TileFactory.Get(TileType.DungeonFloor));
-    for (int c = 2; c < 13; c++) map.SetTile(4, c, TileFactory.Get(TileType.DungeonFloor));
+    for (int c = 5; c < 10; c++) map.SetTile(3, c, TileFactory.Get(TileType.DungeonFloor));
+    for (int c = 4; c < 11; c++) map.SetTile(4, c, TileFactory.Get(TileType.DungeonFloor));
+    for (int c = 3; c < 12; c++) map.SetTile(5, c, TileFactory.Get(TileType.DungeonFloor));
+    for (int c = 2; c < 13; c++) map.SetTile(6, c, TileFactory.Get(TileType.DungeonFloor));
 
-    for (int c = 1; c < 14; c++) map.SetTile(5, c, TileFactory.Get(TileType.DungeonFloor));
-    for (int c = 1; c < 14; c++) map.SetTile(6, c, TileFactory.Get(TileType.DungeonFloor));
     for (int c = 1; c < 14; c++) map.SetTile(7, c, TileFactory.Get(TileType.DungeonFloor));
     for (int c = 1; c < 14; c++) map.SetTile(8, c, TileFactory.Get(TileType.DungeonFloor));
     for (int c = 1; c < 14; c++) map.SetTile(9, c, TileFactory.Get(TileType.DungeonFloor));
+    for (int c = 1; c < 14; c++) map.SetTile(10, c, TileFactory.Get(TileType.DungeonFloor));
+    for (int c = 1; c < 14; c++) map.SetTile(11, c, TileFactory.Get(TileType.DungeonFloor));
 
-    for (int c = 2; c < 13; c++) map.SetTile(10, c, TileFactory.Get(TileType.DungeonFloor));
-    for (int c = 3; c < 12; c++) map.SetTile(11, c, TileFactory.Get(TileType.DungeonFloor));
-    for (int c = 4; c < 11; c++) map.SetTile(12, c, TileFactory.Get(TileType.DungeonFloor));
-    for (int c = 5; c < 10; c++) map.SetTile(13, c, TileFactory.Get(TileType.DungeonFloor));
+    for (int c = 2; c < 13; c++) map.SetTile(12, c, TileFactory.Get(TileType.DungeonFloor));
+    for (int c = 3; c < 12; c++) map.SetTile(13, c, TileFactory.Get(TileType.DungeonFloor));
+    for (int c = 4; c < 11; c++) map.SetTile(14, c, TileFactory.Get(TileType.DungeonFloor));
+    for (int c = 5; c < 10; c++) map.SetTile(15, c, TileFactory.Get(TileType.DungeonFloor));
 
     List<Loc> mountains = FindMountains(start, wilderness);
     Loc shrineLoc = mountains[rng.Next(mountains.Count)];
@@ -473,11 +473,24 @@ class CKShrine
 
     Portal exit = new("", TileType.CKShrineExit) { Destination = shrineLoc };
     map.SetTile(1, 7, exit);
+    map.SetTile(2, 7, TileFactory.Get(TileType.CKShrineFoyer));
 
-    Statue(6, 6);
-    Statue(6, 8);
     Statue(8, 6);
     Statue(8, 8);
+    Statue(10, 6);
+    Statue(10, 8);
+
+    Item blade = ItemFactory.Get(ItemNames.GREATSWORD, objDb);
+    blade.Glyph = blade.Glyph with { Lit = Colours.DULL_RED, Unlit = Colours.DULL_RED };
+    blade.Name = "Crimson King's Blade";
+    blade.Traits.Add(new NamedTrait());
+    blade.Traits.Add(new ArtifactTrait());
+    blade.Traits.Add(new RustProofTrait());
+    blade.Traits.Add(new GrantsTrait() { TraitsGranted = [ "ReaverBlessing#0#0" ]});
+    blade.Traits.Add(new WeaponBonusTrait() { Bonus = 1 });
+    blade.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Blunt });
+    blade.Traits.Add(new DescriptionTrait("This weapon is the vessel of the Crimson King. When you hold it, your mind is filled visions of battles and war. Be forewarned: this blade's power and fury is fueled by your very [BRIGHTRED life force]."));
+    objDb.SetToLoc(new (dungeon.ID, 0, 9, 7), blade);
 
     dungeon.AddMap(map);
     campaign.AddDungeon(dungeon);

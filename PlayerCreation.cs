@@ -566,7 +566,7 @@ class PaladinBlessingTrait : HuntokarBlessingTrait
 class ReaverBlessingTrait : BlessingTrait
 {
   public override void Apply(GameObj granter, GameState gs)
-  {
+  {  
     MeleeDamageModTrait dmg = new() { Amt = 2, SourceId = granter.ID };
     gs.Player.Traits.Add(dmg);
 
@@ -574,6 +574,9 @@ class ReaverBlessingTrait : BlessingTrait
     gs.Player.Traits.Add(fright);
 
     gs.Player.Traits.Add(this);
+
+    gs.UIRef().AlertPlayer("A voice booms: Take up my Blade and bring War and Fury to our foes! Strike them down with wrath!");
+    gs.UIRef().SetPopup(new Popup("A voice booms:\n\nTake up my Blade and bring War and Fury to our foes! Strike them down with wrath!", "", -1, -1));
   }
 
   public override void Remove(GameState gs) => throw new NotImplementedException();

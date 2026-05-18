@@ -327,7 +327,7 @@ class Battle
       bonusDamage += gs.Rng.Next(8) + gs.Rng.Next(8) + gs.Rng.Next(8) + 3;
     }
 
-    var (hpLeft, dmgMsg, dmgDone) = target.ReceiveDmg(dmg, bonusDamage, gs, attacker, dmgScale);    
+    var (hpLeft, dmgMsg, dmgDone) = target.ReceiveDmg(dmg, bonusDamage, gs, attacker, dmgScale);
     if (dmgMsg != "")
       gs.UIRef().AlertPlayer(dmgMsg);
     
@@ -346,6 +346,22 @@ class Battle
       gs.UIRef().AlertPlayer(s, gs, target.Loc, target);
     }
     
+    if (attacker.HasTrait<ReaverBlessingTrait>())
+    {
+      var (attackerHPLeft, _, _) = attacker.ReceiveDmg([(2, DamageType.Force)], 0, gs, attacker, 1.0);
+      if (attackerHPLeft < 1)
+      {
+        gs.ActorKilled(attacker, "the Crimson King's hunger", null);
+        return;
+      }
+
+      if (gs.Rng.Next(50) == 0)
+        gs.UIRef().AlertPlayer("Blood and strife!");
+
+      if (target.HasTrait<DeadTrait>())      
+        Faiths.CrimsonKingSacrifice(attacker, gs);
+    }
+
     if (weapon is not null) 
     { 
       CheckAttackTraits(target, gs, weapon, dmgDone);

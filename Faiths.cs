@@ -94,4 +94,27 @@ class Faiths
       mdlv.Value = gs.Turn.ToString();
     }
   }
+
+  // Passing actor who is wielding the Crimson King's blade but I don't imagine
+  // a scenario where it isn't the player
+  public static void CrimsonKingSacrifice(Actor actor, GameState gs)
+  {
+    int totalSacrifices;
+    if (actor.Stats.TryGetValue(Attribute.CrimsonKingSacrifice, out var sacrifices))
+    {
+      totalSacrifices = sacrifices.ChangeMax(1);
+    }
+    else
+    {
+      actor.Stats[Attribute.CrimsonKingSacrifice] = new Stat(1);
+      totalSacrifices = 1;
+    }
+  }
+
+  public static void CrimsonKingShrineFoyer(GameState gs)
+  {
+    string s = "So a mortal enters my shrime!";
+    gs.UIRef().AlertPlayer(s);
+    gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
+  }
 }

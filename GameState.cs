@@ -1418,6 +1418,11 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       Faiths.VisitMoonDaughterLocation(this);
     }
 
+    if (actor is Player && tile.Type == TileType.CKShrineFoyer)
+    {
+      Faiths.CrimsonKingShrineFoyer(this);
+    }
+
     if (actor is Player && tile.Type == TileType.MysteriousMirror)
     {
       MysteriousMirror mm = (MysteriousMirror)TileAt(dest);

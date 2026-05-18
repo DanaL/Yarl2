@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Runtime.InteropServices;
+
 namespace Yarl2;
 
 enum TileType
@@ -29,7 +31,7 @@ enum TileType
   HFence, VFence, CornerFence, MonsterWall, Lever, Crops, IllusoryWall,
   Underwater, Kelp, MistyPortal, MysteriousMirror, BellyFloor, ProfanePortal,
   Lava, BridgeLever, Arioch, Shackle, MoonDaughterSpot, SecretPassage,
-  CKShrineEntrance, CKShrineExit
+  CKShrineEntrance, CKShrineExit, CKShrineFoyer
 }
 
 interface ITriggerable
@@ -241,6 +243,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.BellyFloor => "soft tissue",
     TileType.Arioch => "a writhing, imprisoned demon lord",
     TileType.MoonDaughterSpot => "stone floor",
+    TileType.CKShrineFoyer => "stone floor",
     TileType.Lava => "lava",
     TileType.CKShrineEntrance => "red-stained steps",
     TileType.CKShrineExit => "red-stained steps",
@@ -678,6 +681,7 @@ class TileFactory
   static readonly Tile Lava = new BasicTile(TileType.Lava, false, false, true);
   static readonly Tile Arioch = new BasicTile(TileType.Arioch, false, false, false);
   static readonly Tile MoonDaughterSpot = new BasicTile(TileType.MoonDaughterSpot, true, true, false);
+  static readonly Tile CKShrineFoyer = new BasicTile(TileType.CKShrineFoyer, true, true, false);
 
   public static Tile Get(TileType type) => type switch
   {
@@ -751,6 +755,7 @@ class TileFactory
     TileType.Lava => Lava,
     TileType.Arioch => Arioch,
     TileType.MoonDaughterSpot => MoonDaughterSpot,
+    TileType.CKShrineFoyer => CKShrineFoyer,
     _ => Unknown
   };
 }

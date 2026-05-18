@@ -1119,7 +1119,7 @@ class GrantsTrait : Trait
   public List<string> Grant(GameObj obj, GameState gs, GameObj srcItem)
   {
     List<string> msgs = [];
-
+    
     foreach (string t in TraitsGranted)
     {
       Trait trait = TraitFactory.FromText(t, obj);
@@ -1130,6 +1130,10 @@ class GrantsTrait : Trait
       {
         if (obj is Actor actor)
           msgs.AddRange(tmp.Apply(actor, gs));
+      }
+      else if (trait is BlessingTrait blessing)
+      {
+        blessing.Apply(srcItem, gs);
       }
       else
       {

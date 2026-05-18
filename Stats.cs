@@ -53,7 +53,8 @@ enum Attribute
   GoldSacrificed,
   KoboldCultLevel,
   MainQuestState,
-  LastVisit
+  LastVisit,
+  CrimsonKingSacrifice
 }
 
 class Stat
