@@ -28,7 +28,8 @@ enum TileType
   BusinessSign, FakeStairs, HiddenSummonsTrap, RevealedSummonsTrap,
   HFence, VFence, CornerFence, MonsterWall, Lever, Crops, IllusoryWall,
   Underwater, Kelp, MistyPortal, MysteriousMirror, BellyFloor, ProfanePortal,
-  Lava, BridgeLever, Arioch, Shackle, MoonDaughterSpot, SecretPassage
+  Lava, BridgeLever, Arioch, Shackle, MoonDaughterSpot, SecretPassage,
+  CKShrineEntrance
 }
 
 interface ITriggerable
@@ -241,6 +242,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Arioch => "a writhing, imprisoned demon lord",
     TileType.MoonDaughterSpot => "stone floor",
     TileType.Lava => "lava",
+    TileType.CKShrineEntrance => "red-stained steps",
     _ => "unknown"
   };
 

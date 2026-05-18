@@ -1149,23 +1149,21 @@ abstract class PortalAction(GameState gs) : Action(gs)
 class DownstairsAction(GameState gameState) : PortalAction(gameState)
 {
   public override double Execute()
-  {
-    var p = GameState!.Player!;
-       
-    Tile t = GameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
-    if (t.Type == TileType.Downstairs || t.Type == TileType.Portal || t.Type == TileType.ProfanePortal)
+  {       
+    Tile t = GameState.TileAt(GameState.Player.Loc);
+    switch (t.Type)
     {
-      UsePortal((Portal)t, true);
+      case TileType.Downstairs:
+      case TileType.Portal:
+      case TileType.ProfanePortal:
+      case TileType.CKShrineEntrance:
+        UsePortal((Portal)t, true);
+        break;
+      default:
+        GameState.UIRef().AlertPlayer("You cannot go down here.");
+        break;
     }
-    else
-    {
-      GameState!.UIRef().AlertPlayer("You cannot go down here.");
-    }
-
-    // Bit of a kludge: because we change current level in the UsePortal() 
-    // call, the list of performers is rebuilt and the actors all get their
-    // energy recharged, but this happens 
-
+    
     return 1.0;
   }
 }
@@ -1174,9 +1172,7 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
 {
   public override double Execute()
   {
-    var p = GameState!.Player!;
-    var t = GameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
-
+    Tile t = GameState.TileAt(GameState.Player.Loc);
     if (t.Type == TileType.Upstairs)
     {
       UsePortal((Portal)t, true);

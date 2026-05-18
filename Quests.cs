@@ -410,3 +410,46 @@ class SmithQuest
     objDb.AddNewActor(thief, loc);
   }
 }
+
+class CKShrine
+{
+  // Copying FloodFill() code from Util.cs mostly, but instead here I am 
+  // looking mountains around the 'perimeter' of the start wilderness area
+  static List<Loc> FindMountains(Loc start, Map wilderness)
+  {
+    HashSet<Loc> mountains = [];
+    HashSet<Loc> locs = [];
+    Queue<Loc> q = [];
+    q.Enqueue(start);
+
+    while (q.Count > 0)
+    {
+      Loc curr = q.Dequeue();
+      if (locs.Contains(curr))
+        continue;
+      locs.Add(curr);
+
+      foreach (Loc adj in Util.Adj8Locs(curr))
+      {
+        if (locs.Contains(adj))
+          continue;
+        Tile tile = wilderness.TileAt(adj.Row, adj.Col);
+        if (tile.Type == TileType.Mountain)
+          mountains.Add(adj);
+
+        if (tile.Passable())
+          q.Enqueue(adj);
+      }
+    }
+
+    return [.. mountains];
+  }
+
+  public static void Set(Loc start, Map wilderness, GameObjectDB objDb, FactDb factDb, Rng rng)
+  {
+    List<Loc> mountains = FindMountains(start, wilderness);
+    Loc shrineLoc = mountains[rng.Next(mountains.Count)];
+    Portal entrance = new("", TileType.CKShrineEntrance) { Destination = shrineLoc };
+    wilderness.SetTile(shrineLoc.Row, shrineLoc.Col, entrance);
+  }
+}
