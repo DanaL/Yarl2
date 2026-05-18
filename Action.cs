@@ -1260,7 +1260,7 @@ class ReturnSmithHammerAction(GameState gs, Mob smith, ulong hammerId) : Action(
     sb.Append(" turns to their forge and begins to excitedly work.");
 
     Item ore = ItemFactory.Get(ItemNames.MITHRIL_ORE, GameState.ObjDb);
-    gs.Player.AddToInventory(ore, GameState);
+    GameState.Player.AddToInventory(ore, GameState);
 
     sb.Append("\n\n");
     sb.Append(_smith.FullName.Capitalize());

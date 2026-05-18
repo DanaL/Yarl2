@@ -485,7 +485,7 @@ class CampaignCreator(UserInterface ui)
         SorceressQuest.Setup(wildernessMap, town, objDb, factDb, campaign, rng);
 
         HashSet<(int, int)>[] smallRegions = [.. regions.Values.Where(r => r.Count <= 30)];        
-        Wilderness.CarveBurriedValley(wildernessMap, smallRegions, mainRegion, town, objDb, factDb, rng);
+        Wilderness.CarveBuriedValley(wildernessMap, smallRegions, mainRegion, town, objDb, factDb, rng);
         if (factDb.FactCheck("RLEntrance") is LocationFact rle)
         {
           RoguelikeDungeonBuilder rlb = new(campaign.Dungeons.Count);
@@ -564,7 +564,6 @@ class CampaignCreator(UserInterface ui)
   public (GameState?, SetupResult) Create(Options options)
   {
     int seed = DateTime.UtcNow.GetHashCode();
-    seed = 641010586;
     Console.WriteLine($"Seed: {seed}");
 
     var (playerName, setup) = QueryPlayerName();

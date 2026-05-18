@@ -601,7 +601,7 @@ class Wilderness(Rng rng, int length)
     _ => int.MaxValue
   };
 
-  public static void CarveBurriedValley(Map map, HashSet<(int, int)>[] regions, HashSet<(int, int)> mainRegion, Town town, GameObjectDB objDb, FactDb factDb, Rng rng)
+  public static void CarveBuriedValley(Map map, HashSet<(int, int)>[] regions, HashSet<(int, int)> mainRegion, Town town, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     List<HashSet<(int, int)>> valleys = [.. regions.Where(r => IsValley(r))];
 
