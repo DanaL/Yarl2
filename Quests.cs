@@ -434,12 +434,37 @@ class CKShrine
         if (locs.Contains(adj))
           continue;
         Tile tile = wilderness.TileAt(adj.Row, adj.Col);
-        if (tile.Type == TileType.Mountain)
+        if (tile.Type == TileType.Mountain && GoodSpot(adj))
           mountains.Add(adj);
 
         if (tile.Passable())
           q.Enqueue(adj);
       }
+    }
+
+    bool GoodSpot(Loc loc)
+    {
+      int count = 0;
+
+      foreach (Loc adj in Util.Adj8Locs(loc))
+      {
+        switch (wilderness.TileAt(adj.Row, adj.Col).Type)
+        {
+          case TileType.Sand:
+          case TileType.Dirt:
+          case TileType.Grass:
+          case TileType.GreenTree:
+          case TileType.YellowTree:
+          case TileType.OrangeTree:
+          case TileType.RedTree:
+          case TileType.Conifer:
+          case TileType.Bridge:
+            ++count;
+            break;
+        }
+      }
+
+      return count > 2;
     }
 
     return [.. mountains];
