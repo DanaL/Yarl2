@@ -985,7 +985,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     int dmg = 0;
     for (int i = 0; i < retribution.NumOfDice; i++)
       dmg += Rng.Next(retribution.DmgDie) + 1;
-    HashSet<Loc> pts = Util.FloodFill(this, src.Loc, retribution.Radius, []);
+    Map map = MapForActor(src);
+    HashSet<Loc> pts = Util.FloodFill(ObjDb, map, src.Loc, retribution.Radius, []);
     Animation anim = retribution.Type switch
     {
       DamageType.Cold => new ExplosionAnimation(this) { MainColour = Colours.LIGHT_BLUE, AltColour1 = Colours.ICE_BLUE, AltColour2 = Colours.BLUE, Highlight = Colours.WHITE, Centre = src.Loc, Sqs = pts },
@@ -1317,7 +1318,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     }
 
     HashSet<TileType> doors = [TileType.ClosedDoor, TileType.LockedDoor, TileType.SecretDoor, TileType.SecretPassage];
-    List<Loc> candidateSpots = [..Util.FloodFill(this, stairs, lowerLevel.Height, doors)
+    List<Loc> candidateSpots = [..Util.FloodFill(ObjDb, lowerLevel, stairs, lowerLevel.Height, doors)
                                       .Where(loc => !ObjDb.Occupied(loc))];
 
     if (candidateSpots.Count > 0)

@@ -233,8 +233,9 @@ class CastSlumberingSong(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     if (!CheckCost(5, 15))
       return 0.0;
 
-    GameState!.UIRef().AlertPlayer("Ala-ca-zzzzzzzzz!");
-    HashSet<Loc> flooded = Util.FloodFill(GameState!, Actor!.Loc, 3, []);
+    GameState.UIRef().AlertPlayer("Ala-ca-zzzzzzzzz!");
+    Map map = GameState.MapForActor(Actor!);
+    HashSet<Loc> flooded = Util.FloodFill(GameState.ObjDb, map, Actor!.Loc, 3, []);
     HashSet<Loc> affected = [];
     foreach (Loc loc in flooded)
     {

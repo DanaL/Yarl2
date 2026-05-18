@@ -613,7 +613,7 @@ static class Util
 
   // I've written floodfill here and there for various effects and noise, etc
   // but I'm hoping I can consolidate on this veresion of the function
-  public static HashSet<Loc> FloodFill(GameState gs, Loc origin, int range, HashSet<TileType> exceptions)
+  public static HashSet<Loc> FloodFill(GameObjectDB objDb, Map map, Loc origin, int range, HashSet<TileType> exceptions)
   {
     HashSet<Loc> locs = [];
     Queue<Loc> q = [];
@@ -632,8 +632,8 @@ static class Util
           continue;
         if (locs.Contains(adj))
           continue;
-        Tile tile = gs.TileAt(adj);
-        if (gs.ObjDb.AreBlockersAtLoc(adj))
+        Tile tile = map.TileAt(adj.Row, adj.Col);
+        if (objDb.AreBlockersAtLoc(adj))
           continue;
         if (tile.Passable() || tile.PassableByFlight() || exceptions.Contains(tile.Type))
         {
