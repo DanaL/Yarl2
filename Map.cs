@@ -29,7 +29,7 @@ enum TileType
   HFence, VFence, CornerFence, MonsterWall, Lever, Crops, IllusoryWall,
   Underwater, Kelp, MistyPortal, MysteriousMirror, BellyFloor, ProfanePortal,
   Lava, BridgeLever, Arioch, Shackle, MoonDaughterSpot, SecretPassage,
-  CKShrineEntrance
+  CKShrineEntrance, CKShrineExit
 }
 
 interface ITriggerable
@@ -243,6 +243,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.MoonDaughterSpot => "stone floor",
     TileType.Lava => "lava",
     TileType.CKShrineEntrance => "red-stained steps",
+    TileType.CKShrineExit => "red-stained steps",
     _ => "unknown"
   };
 

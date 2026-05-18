@@ -639,11 +639,9 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     }
     else if (cmd == KeyCmd.Climb)
     {
-      Action action;
-      if (!GS.CurrentMap.HasFeature(MapFeatures.Submerged) || GS.TileAt(GS.Player.Loc).Type == TileType.Upstairs)
-        action = new UpstairsAction(GS);
-      else
-        action = new SwimAction(GS, GS.Player, true);
+      Action action = !GS.CurrentMap.HasFeature(MapFeatures.Submerged) || GS.TileAt(GS.Player.Loc).Type == TileType.Upstairs
+        ? new UpstairsAction(GS)
+        : new SwimAction(GS, GS.Player, true);
       GS.Player.QueueAction(action);
     }
     else if (cmd == KeyCmd.Messages)

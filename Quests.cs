@@ -445,11 +445,49 @@ class CKShrine
     return [.. mountains];
   }
 
-  public static void Set(Loc start, Map wilderness, GameObjectDB objDb, FactDb factDb, Rng rng)
+  public static void Setup(Campaign campaign, Loc start, Map wilderness, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
+    Dungeon dungeon = new(campaign.Dungeons.Count, "the Shrine of the Crimson King", "A musty shrine. There is a metallic tang in the air.", true);
+    Map map = new(15, 15, TileType.PermWall);
+    
+    for (int c = 5; c < 10; c++) map.SetTile(1, c, TileFactory.Get(TileType.DungeonFloor));
+    for (int c = 4; c < 11; c++) map.SetTile(2, c, TileFactory.Get(TileType.DungeonFloor));
+    for (int c = 3; c < 12; c++) map.SetTile(3, c, TileFactory.Get(TileType.DungeonFloor));
+    for (int c = 2; c < 13; c++) map.SetTile(4, c, TileFactory.Get(TileType.DungeonFloor));
+
+    for (int c = 1; c < 14; c++) map.SetTile(5, c, TileFactory.Get(TileType.DungeonFloor));
+    for (int c = 1; c < 14; c++) map.SetTile(6, c, TileFactory.Get(TileType.DungeonFloor));
+    for (int c = 1; c < 14; c++) map.SetTile(7, c, TileFactory.Get(TileType.DungeonFloor));
+    for (int c = 1; c < 14; c++) map.SetTile(8, c, TileFactory.Get(TileType.DungeonFloor));
+    for (int c = 1; c < 14; c++) map.SetTile(9, c, TileFactory.Get(TileType.DungeonFloor));
+
+    for (int c = 2; c < 13; c++) map.SetTile(10, c, TileFactory.Get(TileType.DungeonFloor));
+    for (int c = 3; c < 12; c++) map.SetTile(11, c, TileFactory.Get(TileType.DungeonFloor));
+    for (int c = 4; c < 11; c++) map.SetTile(12, c, TileFactory.Get(TileType.DungeonFloor));
+    for (int c = 5; c < 10; c++) map.SetTile(13, c, TileFactory.Get(TileType.DungeonFloor));
+
     List<Loc> mountains = FindMountains(start, wilderness);
     Loc shrineLoc = mountains[rng.Next(mountains.Count)];
-    Portal entrance = new("", TileType.CKShrineEntrance) { Destination = shrineLoc };
+    Portal entrance = new("", TileType.CKShrineEntrance) { Destination = new(dungeon.ID, 0, 1, 7) };
     wilderness.SetTile(shrineLoc.Row, shrineLoc.Col, entrance);
+
+    Portal exit = new("", TileType.CKShrineExit) { Destination = shrineLoc };
+    map.SetTile(1, 7, exit);
+
+    Statue(6, 6);
+    Statue(6, 8);
+    Statue(8, 6);
+    Statue(8, 8);
+
+    dungeon.AddMap(map);
+    campaign.AddDungeon(dungeon);
+
+    void Statue(int row, int col)
+    {
+      Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
+      statue.Glyph = statue.Glyph with { Lit = Colours.BRIGHT_RED, Unlit = Colours.DULL_RED };
+      statue.Traits.Add(new DescriptionTrait("a statue of a fur-clad warrior, leaning on a massive sword."));
+      objDb.SetToLoc(new(dungeon.ID, 0, row, col), statue);
+    }
   }
 }

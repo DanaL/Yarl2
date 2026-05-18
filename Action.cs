@@ -1173,7 +1173,7 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
   public override double Execute()
   {
     Tile t = GameState.TileAt(GameState.Player.Loc);
-    if (t.Type == TileType.Upstairs)
+    if (t.Type == TileType.Upstairs || t.Type == TileType.CKShrineExit)
     {
       UsePortal((Portal)t, true);
     }
@@ -2644,7 +2644,7 @@ class MagicMapAction(GameState gs, Actor caster) : Action(gs, caster)
     // It's probably a bug if a monster invokes this action??
     if (Actor is Player player)
     {
-      if (GameState!.CurrentMap.HasFeature(MapFeatures.Unmappable))
+      if (GameState.CurrentMap.HasFeature(MapFeatures.Unmappable))
       {
         GameState.UIRef().AlertPlayer("This region cannot be encompassed by such puny magicks! The spell fails.");
       }
