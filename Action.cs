@@ -4045,7 +4045,7 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
     }
 
     double energyCost = 0.0;
-    var (equipResult, conflict) = ((Player)Actor).Inventory.ToggleEquipStatus(Choice);
+    var (equipResult, conflict, swapped) = ((Player)Actor).Inventory.ToggleEquipStatus(Choice);
     string s;
     switch (equipResult)
     {
@@ -4104,21 +4104,8 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
         break;
     }
 
-    if (item.Traits.OfType<GrantsTrait>().FirstOrDefault() is GrantsTrait grants)
-    {
-      if (Item.IDInfo.TryGetValue(item.Name, out ItemIDInfo? value))
-        Item.IDInfo[item.Name] = value with { Known = true };
-
-      if (equipResult == EquipingResult.Equipped)
-      {
-        foreach (string msg in grants.Grant(Actor, GameState, item))
-          GameState.UIRef().AlertPlayer(msg);
-      }
-      else if (equipResult == EquipingResult.Unequipped)
-      {
-        grants.Remove(Actor, GameState, item);
-      }
-    }
+    item.ToggleGrantedTraits(Actor, GameState, equipResult);
+    swapped?.ToggleGrantedTraits(Actor, GameState, EquipingResult.Unequipped);
 
     GameState.UIRef().SetInputController(new PlayerCommandController(GameState));
 

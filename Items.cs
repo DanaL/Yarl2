@@ -131,6 +131,27 @@ sealed class Item : GameObj, IEquatable<Item>
 
   public override string FullName => CalcFullName();
 
+  public void ToggleGrantedTraits(Actor owner, GameState gs, EquipingResult equipped)
+  {
+    if (Traits.OfType<GrantsTrait>().FirstOrDefault() is not GrantsTrait grants)
+    {
+      return;
+    }
+
+    if (IDInfo.TryGetValue(Name, out ItemIDInfo? value))
+        IDInfo[Name] = value with { Known = true };
+
+    if (equipped == EquipingResult.Equipped)
+    {
+      foreach (string msg in grants.Grant(owner, gs, this))
+        gs.UIRef().AlertPlayer(msg);
+    }
+    else if (equipped == EquipingResult.Unequipped)
+    {
+      grants.Remove(owner, gs, this);
+    }
+  }
+
   public Metals MetalType()
   {
     var t = Traits.OfType<MetalTrait>().FirstOrDefault();
@@ -942,14 +963,14 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     return removed;
   }
 
-  static (EquipingResult, ArmourParts) UnequipItem(Item item)
+  static (EquipingResult, ArmourParts, Item?) UnequipItem(Item item)
   {    
     item.Equipped = false;
     
-    return (EquipingResult.Unequipped, ArmourParts.None);
+    return (EquipingResult.Unequipped, ArmourParts.None, null);
   }
 
-  static (EquipingResult, ArmourParts) ToggleWand(Item wand, int freeHands)
+  static (EquipingResult, ArmourParts, Item?) ToggleWand(Item wand, int freeHands)
   {
     if (wand.Equipped)
     {
@@ -959,16 +980,16 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     if (freeHands > 0)
     {
       wand.Equipped = true;
-      return (EquipingResult.Equipped, ArmourParts.None);
+      return (EquipingResult.Equipped, ArmourParts.None, null);
     }
 
-    return (EquipingResult.NoFreeHand, ArmourParts.None);
+    return (EquipingResult.NoFreeHand, ArmourParts.None, null);
   }
 
   // This toggles the equip status of gear only and recalculation of stuff
   // like armour class has to be done elsewhere because it felt icky to 
   // have a reference back to the inventory's owner in the inventory object
-  public (EquipingResult, ArmourParts) ToggleEquipStatus(char slot)
+  public (EquipingResult, ArmourParts, Item?) ToggleEquipStatus(char slot)
   {
     bool twoHandedWeapon = ReadiedWeapon() is Item w && w.HasTrait<TwoHandedTrait>();
     bool bowEquipped = ReadiedBow() is not null;
@@ -1009,7 +1030,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       if (item.Equipped && item.Type == ItemType.Arrow)
       {
         int count = EquipStackable(item, false);
-        return (count > 1 ? EquipingResult.StackUnequipped : EquipingResult.Unequipped, ArmourParts.None);
+        return (count > 1 ? EquipingResult.StackUnequipped : EquipingResult.Unequipped, ArmourParts.None, null);
       }
       else if (item.Equipped)
       {
@@ -1019,32 +1040,43 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool)
       {
         if (freeHands == 0 && shield && item.HasTrait<TwoHandedTrait>())
-          return (EquipingResult.NoFreeHand, ArmourParts.None);
+          return (EquipingResult.NoFreeHand, ArmourParts.None, null);
 
+
+        Item? swappedItem = null;
         // If there is a weapon already equipped, unequip it
         foreach (Item other in Items())
         {
-          if ((other.Type == ItemType.Weapon || other.Type == ItemType.Tool) && other.Equipped)
+          if ((other.Type == ItemType.Weapon || other.Type == ItemType.Tool) && other.Equipped) 
+          {
             other.Equipped = false;
+            swappedItem = other;
+            break;
+          }
         }
 
         item.Equipped = true;
 
-        return (EquipingResult.Equipped, ArmourParts.None);
+        return (EquipingResult.Equipped, ArmourParts.None, swappedItem);
       }
       else if (item.Type == ItemType.Bow)
       {
         if (ShieldEquipped())
-          return (EquipingResult.NoFreeHand, ArmourParts.None);
+          return (EquipingResult.NoFreeHand, ArmourParts.None, null);
 
+        Item? swapped = null;
         foreach (Item other in Items())
         {
           if ((other.Type == ItemType.Bow) && other.Equipped)
+          {
             other.Equipped = false;
+            swapped = other;
+            break;
+          }
         }
 
         item.Equipped = true;
-        return (EquipingResult.Equipped, ArmourParts.None);
+        return (EquipingResult.Equipped, ArmourParts.None, swapped);
       }
       else if (item.Type == ItemType.Armour)
       {
@@ -1061,21 +1093,21 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
           foreach (var t in other.Traits.OfType<ArmourTrait>())
           {
             if (t.Part == part)
-              return (EquipingResult.Conflict, part);
+              return (EquipingResult.Conflict, part, null);
           }
         }
 
         if (part is ArmourParts.Shield && freeHands == 0)
-          return (EquipingResult.NoFreeHand, part);
+          return (EquipingResult.NoFreeHand, part, null);
 
         if (part is ArmourParts.Shield && twoHandedWeapon)
-          return (EquipingResult.TwoHandedConflict, part);
+          return (EquipingResult.TwoHandedConflict, part, null);
         else if (part is ArmourParts.Shield && bowEquipped)
-          return (EquipingResult.BowConflict, part);
+          return (EquipingResult.BowConflict, part, null);
           
         item.Equipped = !item.Equipped;
 
-        return (EquipingResult.Equipped, ArmourParts.Shirt);
+        return (EquipingResult.Equipped, ArmourParts.Shirt, null);
       }
       else if (item.Type == ItemType.Ring)
       {
@@ -1087,11 +1119,11 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         {
           int ringCount = Items().Count(i => i.Type == ItemType.Ring && i.Equipped);
           if (ringCount == 2)
-            return (EquipingResult.TooManyRings, ArmourParts.None);
+            return (EquipingResult.TooManyRings, ArmourParts.None, null);
 
           item.Equipped = true;
 
-          return (EquipingResult.Equipped, ArmourParts.None);
+          return (EquipingResult.Equipped, ArmourParts.None, null);
         }
       }
       else if (item.Type == ItemType.Talisman)
@@ -1104,17 +1136,17 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         {
           int talismanCount = Items().Count(i => i.Type == ItemType.Talisman && i.Equipped);
           if (talismanCount == 2)
-            return (EquipingResult.TooManyTalismans, ArmourParts.None);
+            return (EquipingResult.TooManyTalismans, ArmourParts.None, null);
 
           item.Equipped = true;
 
-          return (EquipingResult.Equipped, ArmourParts.None);
+          return (EquipingResult.Equipped, ArmourParts.None, null);
         }
       }
       else if (item.Type == ItemType.Arrow)
       {
         int count = EquipStackable(item, !item.Equipped);
-        return (count > 1 ? EquipingResult.StackEquipped : EquipingResult.Equipped, ArmourParts.None);
+        return (count > 1 ? EquipingResult.StackEquipped : EquipingResult.Equipped, ArmourParts.None, null);
       }
       // I think by this point it would be error for an item to not have the 
       // equipable trait, but check for it here because and item that does not
@@ -1122,11 +1154,11 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       else if (item.HasTrait<EquipableTrait>())
       {
         item.Equipped = !item.Equipped;
-        return (EquipingResult.Equipped, ArmourParts.None);
+        return (EquipingResult.Equipped, ArmourParts.None, null);
       }
     }
 
-    return (EquipingResult.Conflict, ArmourParts.None);
+    return (EquipingResult.Conflict, ArmourParts.None, null);
 
     int EquipStackable(Item item, bool status)
     {
