@@ -515,6 +515,12 @@ internal class MapSaver
             digits = Util.ToNums(pieces[2]);
             ((Portal)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
             break;
+          case TileType.CKShrineExit:
+          case TileType.CKShrineEntrance:
+            tile = new Portal(pieces[3], type);
+            digits = Util.ToNums(pieces[2]);
+            ((Portal)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
+            break;
           case TileType.MysteriousMirror:
             tile = new MysteriousMirror(pieces[3]);
             digits = Util.ToNums(pieces[2]);
