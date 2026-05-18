@@ -41,94 +41,96 @@ if (dialogueErrors.Count > 0)
   Environment.Exit(1);
 }
 
-RunningState state = RunningState.Pregame;
-string alert = "";
-do
+try
 {
-  display.ClosePopup();
-  TitleScreen ts = new(display) { Alert = alert };
-  SetupType gameSetup = ts.Display();    
-  GameState? gameState = null;
-  (GameState? GS, SetupResult R) result;
-
-  switch (gameSetup)
+  RunningState state = RunningState.Pregame;
+  string alert = "";
+  do
   {
-    case SetupType.Quit:
-      state = RunningState.ExitGame;
-      break;
-    case SetupType.NewGame:
-      result = new CampaignCreator(display).Create(options);
-      if (result.R == SetupResult.Cancel)
-        state = RunningState.Pregame;
-      else if (result.R == SetupResult.Quit)
+    display.ClosePopup();
+    TitleScreen ts = new(display) { Alert = alert };
+    SetupType gameSetup = ts.Display();    
+    GameState? gameState = null;
+    (GameState? GS, SetupResult R) result;
+
+    switch (gameSetup)
+    {
+      case SetupType.Quit:
         state = RunningState.ExitGame;
+        break;
+      case SetupType.NewGame:
+        result = new CampaignCreator(display).Create(options);
+        if (result.R == SetupResult.Cancel)
+          state = RunningState.Pregame;
+        else if (result.R == SetupResult.Quit)
+          state = RunningState.ExitGame;
 
-      display.InTutorial = false;
-      gameState = result.GS;
-      break;
-    case SetupType.Tutorial:
-      display.InTutorial = true;
-      gameState = new Tutorial(display).Setup(options);
-      break;
-    default:
-      display.InTutorial = false;
-      result = new GameLoader(display).Load(options);
-      if (result.R == SetupResult.Quit)
-        state = RunningState.ExitGame;
-      else if (result.R == SetupResult.Cancel)
-        state = RunningState.Pregame;
+        display.InTutorial = false;
+        gameState = result.GS;
+        break;
+      case SetupType.Tutorial:
+        display.InTutorial = true;
+        gameState = new Tutorial(display).Setup(options);
+        break;
+      default:
+        display.InTutorial = false;
+        result = new GameLoader(display).Load(options);
+        if (result.R == SetupResult.Quit)
+          state = RunningState.ExitGame;
+        else if (result.R == SetupResult.Cancel)
+          state = RunningState.Pregame;
 
-      gameState = result.GS;
+        gameState = result.GS;
+        break;
+    }
+
+    if (gameSetup == SetupType.Quit)
       break;
+
+    if (gameState is not null)
+    {
+      display.State = UIState.InGame;
+      alert = GameLoop(display, gameState);
+    }
+    display.Reset();
+    
+    display.CheatSheetMode = CheatSheetMode.Messages;
+    display.MessageHistory = [];
   }
-
-  if (gameSetup == SetupType.Quit)
-    break;
-
-  if (gameState is not null)
-  {
-    display.State = UIState.InGame;
-    alert = GameLoop(display, gameState);
-  }
-  display.Reset();
-  
-  display.CheatSheetMode = CheatSheetMode.Messages;
-  display.MessageHistory = [];
+  while (state != RunningState.ExitGame);
 }
-while (state != RunningState.ExitGame);
+catch (Exception ex)
+{
+  List<string> lines = [];
+  lines.Add("");
+  lines.Add(" Uhoh, Delve seems to have crashed, likely due to Dana's incompetence :'( ");
+  lines.Add(" The execption thrown was: ");
+  lines.Add(" " + ex.Message);
 
-// catch (Exception ex)
-// {
-//   List<string> lines = [];
-//   lines.Add("");
-//   lines.Add(" Uhoh, Delve seems to have crashed, likely due to Dana's incompetence :'( ");
-//   lines.Add(" The execption thrown was: ");
-//   lines.Add(" " + ex.Message);
+  if (ex.InnerException is not null)
+    lines.Add(" " + ex.InnerException.Message);
 
-//   if (ex.InnerException is not null)
-//     lines.Add(" " + ex.InnerException.Message);
+  lines.Add("");
+  lines.Add(" Delve will now need to exit.");
 
-//   lines.Add("");
-//   lines.Add(" Delve will now need to exit.");
+  var userDir = Util.UserDir;
+  if (!userDir.Exists)
+    userDir.Create();
 
-//   var userDir = Util.UserDir;
-//   if (!userDir.Exists)
-//     userDir.Create();
+  string logPath = Path.Combine(userDir.FullName, "crash.txt");
+  File.WriteAllLines(logPath, lines);
 
-//   string logPath = Path.Combine(userDir.FullName, "crash.txt");
-//   File.WriteAllLines(logPath, lines);
+  if (ex.StackTrace is not null)
+    File.AppendAllText(logPath, ex.StackTrace);
 
-//   if (ex.StackTrace is not null)
-//     File.AppendAllText(logPath, ex.StackTrace);
+  if (ex.InnerException is not null)
+    File.AppendAllText(logPath, ex.InnerException.StackTrace);
 
-//   if (ex.InnerException is not null)
-//     File.AppendAllText(logPath, ex.InnerException.StackTrace);
+  display.ClosePopup();
+  display.SetLongMessage(lines);
 
-//   display.ClosePopup();
-//   display.SetLongMessage(lines);
-
-//   display.BlockForInput(null);
-// }
+  display.BlockForInput(null);
+}
 
 static string GameLoop(UserInterface ui, GameState gameState)
 {
