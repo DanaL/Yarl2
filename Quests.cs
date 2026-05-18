@@ -448,7 +448,7 @@ class CKShrine
   public static void Setup(Campaign campaign, Loc start, Map wilderness, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     Dungeon dungeon = new(campaign.Dungeons.Count, "the Shrine of the Crimson King", "A musty shrine. There is a metallic tang in the air.", true);
-    Map map = new(15, 15, TileType.PermWall);
+    Map map = new(15, 15, TileType.PermWall) { Features = MapFeatures.NoTeleport };
     
     for (int c = 5; c < 10; c++) map.SetTile(1, c, TileFactory.Get(TileType.DungeonFloor));
     for (int c = 4; c < 11; c++) map.SetTile(2, c, TileFactory.Get(TileType.DungeonFloor));

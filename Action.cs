@@ -3291,7 +3291,15 @@ class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
     List<Loc> sqs = [];
     Loc start = Actor!.Loc;
     Map map = GameState.Campaign.Dungeons[start.DungeonID].LevelMaps[start.Level];
-    bool submered = map.HasFeature(MapFeatures.Submerged);
+    bool submerged = map.HasFeature(MapFeatures.Submerged);
+    
+    if (map.HasFeature(MapFeatures.NoTeleport))
+    {
+      string s = Actor is Player ? "You shudder for a moment as the magic fizzles." : $"A spell fizzles.";
+      GameState.UIRef().AlertPlayer(s, GameState, Actor.Loc);
+      return 1.0;  
+    }
+
     for (int r = start.Row - 12; r < start.Row + 12; r++)
     {
       for (int c = start.Col - 12; c < start.Col + 12; c++)
@@ -3304,7 +3312,7 @@ class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
         Tile tile = GameState!.TileAt(loc);
         if (tile.Passable())
           sqs.Add(loc);
-        else if (submered && tile.IsWater())
+        else if (submerged && tile.IsWater())
           sqs.Add(loc);
       }
     }
