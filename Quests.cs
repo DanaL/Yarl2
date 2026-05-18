@@ -516,6 +516,8 @@ class CKShrine
     blade.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Blunt });
     blade.Traits.Add(new DescriptionTrait("This weapon is the vessel of the Crimson King. When you hold it, your mind is filled visions of battles and war. Be forewarned: this blade's power and fury is fueled by your very [BRIGHTRED life force]."));
     objDb.SetToLoc(new (dungeon.ID, 0, 9, 7), blade);
+    factDb.Add(new SimpleFact() { Name = "CrimsonKingBladeId", Value = blade.ID.ToString() });
+    factDb.Add(new LocationFact() { Desc = "CrimsonKingAltar", Loc = new (dungeon.ID, 0, 9, 7) });
 
     dungeon.AddMap(map);
     campaign.AddDungeon(dungeon);

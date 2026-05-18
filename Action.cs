@@ -4044,6 +4044,14 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
       return 0.0;
     }
 
+    // A kludgy but simple way to handle this. I'll do something better if I 
+    // add more items that reject being wielded under some circumstances
+    if (Actor is Player && item.Name == "Crimson King's Blade" && GameState.Player.Faith > 1 && GameState.Player.Religion != "Crimson King")
+    {
+      Faiths.CKBladeRejectsPlayer(GameState, Actor.Loc, item);
+      return 1.0;
+    }
+
     double energyCost = 0.0;
     var (equipResult, conflict, swapped) = ((Player)Actor).Inventory.ToggleEquipStatus(Choice);
     string s;

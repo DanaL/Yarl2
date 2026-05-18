@@ -118,8 +118,39 @@ class Faiths
 
   public static void CrimsonKingShrineFoyer(GameState gs)
   {
-    string s = "So a mortal enters my shrime!";
+    string s = "So a mortal enters my shrine!";
     gs.UIRef().AlertPlayer(s);
     gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
+
+    string religion = gs.Player.Religion;
+    int faith = gs.Player.Faith;
+
+    if (religion != "Crimson King" && faith > 1)
+    {
+      ulong bladeId = 0;
+      if (gs.FactDb.FactCheck("CrimsonKingBladeId") is SimpleFact bid)
+      {
+        bladeId = ulong.Parse(bid.Value);
+      }
+      Loc altarLoc = Loc.Nowhere;
+      if (gs.FactDb.FactCheck("CrimsonKingAltar") is LocationFact altar)
+      {
+        altarLoc = altar.Loc;
+      }
+
+      bool removeBlade = gs.ObjDb.ItemsAt(altarLoc).Any(i => i.ID == bladeId);
+      if (gs.ObjDb.ItemsAt(altarLoc).Any(i => i.ID == bladeId) && gs.ObjDb.GetObj(bladeId) is Item blade)
+      {
+        gs.ObjDb.RemoveItemFromGame(altarLoc, blade);
+      }
+    }
+  }
+
+  public static void CKBladeRejectsPlayer(GameState gs, Loc loc, Item blade)
+  {
+    gs.UIRef().AlertPlayer("A voice booms: you are not worthy to wield My blade!");
+    gs.Player.Inventory.RemoveByID(blade.ID, gs);
+    gs.ItemDropped(blade, loc);
+    gs.UIRef().AlertPlayer($"{blade.FullName.DefArticle().Capitalize()} falls to the ground.", gs, loc);
   }
 }
