@@ -589,6 +589,11 @@ abstract class UserInterface
       WriteSideBarLine(Colours.GREY, "BLESSED", statusLineNum--);
       _statuses.Add("BLESSED");
     }
+    if (!_statuses.Contains("BLESSED") && gs.Player.HasTrait<CrimsonKingBlessingTrait>())
+    {
+      WriteSideBarLine(Colours.DULL_RED, "BLESSED", statusLineNum--);
+      _statuses.Add("BLESSED");
+    }
     if (!_statuses.Contains("DISEASED") && gs.Player.HasTrait<DiseasedTrait>())
     {
       WriteSideBarLine(Colours.LIME_GREEN, "DISEASED", statusLineNum--);
