@@ -385,9 +385,20 @@ abstract class BlessingTrait : Trait
 
   public abstract string Description(Actor owner);
   public abstract void Apply(GameObj granter, GameState gs);
-  public abstract void Remove(GameState gs);
-}
 
+  public virtual void Remove(GameState gs)
+  {
+    List<Trait> toRemove = [.. gs.Player.Traits.Where(t => t.SourceId == SourceId)];
+    foreach (var t in toRemove)
+    {
+      if (t is TemporaryTrait tt)
+        tt.Remove(gs);
+      else
+        gs.Player.Traits.Remove(t);
+    }
+    gs.Player.Traits.Remove(this);
+  }
+}
 
 abstract class HuntokarBlessingTrait : BlessingTrait {}
 abstract class MoonDaughtersBlessingTrait : BlessingTrait {}
@@ -407,20 +418,6 @@ class ChampionBlessingTrait : HuntokarBlessingTrait
     gs.Player.Traits.Add(amt);
     
     gs.Player.Traits.Add(this);
-  }
-
-  public override void Remove(GameState gs)
-  {
-    List<Trait> toRemove = [.. gs.Player.Traits.Where(t => t.SourceId == SourceId)];
-    foreach (var t in toRemove)
-    {
-      if (t is TemporaryTrait tt)
-        tt.Remove(gs);
-      else 
-        gs.Player.Traits.Remove(t);
-    }
-
-    gs.Player.Traits.Remove(this);
   }
 
   public override string AsText() => $"ChampionBlessing#{SourceId}#{OwnerID}";
@@ -540,20 +537,6 @@ class PaladinBlessingTrait : HuntokarBlessingTrait
     gs.Player.Traits.Add(dt);
   }
 
-  public override void Remove(GameState gs)
-  {
-    var toRemove = gs.Player.Traits.Where(t => t.SourceId == SourceId);
-    foreach (var t in toRemove)
-    {
-      if (t is TemporaryTrait tt)
-      {
-        tt.Remove(gs);
-      }
-    }
-
-    gs.Player.Traits.Remove(this);
-  }
-
   public override string Description(Actor owner)
   {    
     DamageTrait dt = owner.Traits.OfType<DamageTrait>()
@@ -568,8 +551,10 @@ class ReaverBlessingTrait : CrimsonKingBlessingTrait
 {
   public override void Apply(GameObj granter, GameState gs)
   {
+    SourceId = granter.ID;
+
     Faiths.RemoveOtherFaithBlessings<CrimsonKingBlessingTrait>(gs);
-    
+
     MeleeDamageModTrait dmg = new() { Amt = 2, SourceId = granter.ID };
     gs.Player.Traits.Add(dmg);
 
@@ -581,8 +566,6 @@ class ReaverBlessingTrait : CrimsonKingBlessingTrait
     gs.UIRef().AlertPlayer("A voice booms: Take up my Blade and bring War and Fury to our foes! Strike them down with wrath!");
     gs.UIRef().SetPopup(new Popup("A voice booms:\n\nTake up my Blade and bring War and Fury to our foes! Strike them down with wrath!", "", -1, -1));
   }
-
-  public override void Remove(GameState gs) => throw new NotImplementedException();
 
   public override string AsText() => $"ReaverBlessing#{SourceId}#{OwnerID}";
 
@@ -615,10 +598,7 @@ class DeceiverBlessingTrait : MoonDaughtersBlessingTrait
     gs.Player.SpellsKnown.Remove("mirror image");
     gs.Player.Stats[Attribute.MagicPoints].ChangeMax(-1);
     gs.Player.Stats[Attribute.MagicPoints].Change(-1);
-
-    gs.Player.Traits = [.. gs.Player.Traits.Where(t => t.SourceId != SourceId)];
-
-    gs.Player.Traits.Remove(this);
+    base.Remove(gs);
   }
 
   public override string AsText() => $"DeceiverBlessing#{SourceId}#{OwnerID}";
@@ -672,10 +652,7 @@ class TricksterBlessingTrait : MoonDaughtersBlessingTrait
     gs.Player.SpellsKnown.Remove("phase door");
     gs.Player.Stats[Attribute.MagicPoints].ChangeMax(-2);
     gs.Player.Stats[Attribute.MagicPoints].Change(-2);
-
-    gs.Player.Traits = [.. gs.Player.Traits.Where(t => t.SourceId != SourceId)];
-
-    gs.Player.Traits.Remove(this);
+    base.Remove(gs);
   }
 
   public override string AsText() => $"TricksterBlessing#{SourceId}#{OwnerID}";
@@ -718,10 +695,7 @@ class WinterBlessingTrait : HuntokarBlessingTrait
     gs.Player.SpellsKnown.Remove("gust of wind");
     gs.Player.Stats[Attribute.MagicPoints].ChangeMax(-2);
     gs.Player.Stats[Attribute.MagicPoints].Change(-2);
-
-    gs.Player.Traits = [.. gs.Player.Traits.Where(t => t.SourceId != SourceId)];
-
-    gs.Player.Traits.Remove(this);
+    base.Remove(gs);
   }
 
   public override string AsText() => $"WinterBlessing#{SourceId}#{OwnerID}";
