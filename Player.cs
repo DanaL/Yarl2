@@ -100,12 +100,20 @@ sealed class Player : Actor
   {
     get
     {
+      if (Stats.TryGetValue(Attribute.CrimsonKingSacrifice, out var sacrifices))
+      {
+        if (sacrifices.Max > 24)
+          return "Crimson King";
+      }
+
       foreach (Trait t in Traits)
       {
-        if (t is ChampionBlessingTrait || t is PaladinBlessingTrait || t is WinterBlessingTrait)
+        if (t is HuntokarBlessingTrait)
           return "Huntokar";
         else if (t is MoonDaughtersBlessingTrait)
           return "Moon Daughter";
+        else if (t is CrimsonKingBlessingTrait)
+          return "Crimson King";
       }
 
       return "Agnostic";
@@ -115,15 +123,21 @@ sealed class Player : Actor
   public int Faith
   {
     get
-    {
+    {      
       int faith = 0;
       foreach (Trait t in Traits)
       {
         if (t is ChampionBlessingTrait && faith < 1)
-          faith = 1;
+          return 1;
         else if (t is PaladinBlessingTrait && faith < 2)
           faith = 2;
         else if (t is WinterBlessingTrait && faith < 2)
+          faith = 2;
+        else if (t is CrimsonKingBlessingTrait && Stats.TryGetValue(Attribute.CrimsonKingSacrifice, out var sacrifices))
+          faith = sacrifices.Max / 25;        
+        else if (t is TricksterBlessingTrait && faith < 1)
+          faith = 1;
+        else if (t is DeceiverBlessingTrait && faith < 2)
           faith = 2;
       }
 

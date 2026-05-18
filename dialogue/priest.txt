@@ -18,6 +18,18 @@
       )
     )
 
+    ((and (= RELIGION "Crimson King") (< FAITH 2)) (        
+        (def lines '("Unchecked war and battle, even toward a just cause can never bring peace." 
+                     "The Crimson King rebelled against Huntokar."
+                     "My child I worry this path will consume you."))
+      )
+    )
+
+    ((and (= RELIGION "Crimson King") (>= FAITH 2)) (        
+        (def lines '("You have chosen your path. I can only pray Huntokar continues to watch over you regardless." ))
+      )
+    )
+
     (else (
         (say "Greetings, [GREEN Child]. ")
     
@@ -48,7 +60,7 @@
     )
   )
 
-  (cond
+  (cond;
     ((= HERETICAL_ITEM true) 
       ((append lines "[YELLOW Please don't wear such things in this place.]")
       (append lines "[YELLOW Are you straying from the path?]")

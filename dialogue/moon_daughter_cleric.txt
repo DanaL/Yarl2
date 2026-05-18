@@ -21,6 +21,14 @@
 	      ((give TRICKSTER_BLESSING "Receive the Trickster's Talent") (end "A faint shimmering surrounds you as you are gifted with some eldritch power!")))
   ))
 
+  ((= RELIGION "Crimson King")
+      (
+        (say (pick ("While the Crimson King is a cousin of the Moon Daughters, I cannot assist you while you stride His path."
+                    "The Crimson King's path of wrath and violence is entirely incompatible with the Moonlit Path."
+                      )
+      ))
+  ))
+
   ((AND (= RELIGION "Huntokar") (> FAITH 1))
       (
         (say (pick ("Best of luck on your quest. We will watch from the shadows and pray for your success.")

@@ -109,6 +109,11 @@ class Faiths
       actor.Stats[Attribute.CrimsonKingSacrifice] = new Stat(1);
       totalSacrifices = 1;
     }
+
+    if (totalSacrifices == 25)
+    {
+      gs.UIRef().SetPopup(new Popup("A voice booms:\n\nThose who battle in My name are rewarded with greater power!", "", -1, -1));
+    }
   }
 
   public static void CrimsonKingShrineFoyer(GameState gs)

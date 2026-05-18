@@ -22,7 +22,7 @@ enum TokenType
   EQ, NEQ, LT, LTE, GT, GTE, ELSE,
   TRUE, FALSE,
   OPTION, SPEND, END, DEF, APPEND,
-  BLESSINGS, GRANT_CHAMP_BLESSING, GRANT_PALADIN_BLESSING, GRANT_REAVER_BLESSING,
+  BLESSINGS, GRANT_CHAMP_BLESSING, GRANT_PALADIN_BLESSING,
   GRANT_EMBER_BLESSING, GRANT_TRICKSTER_BLESSSING, GRANT_WINTER_BLESSING,
   SHOP_MENU, SHOP_SELECTION, DRAGON_CULT_QUEST, SELL_MENU,
   CHECK_MD_CLERIC,
@@ -133,7 +133,6 @@ class ScriptScanner(string src)
       "append" => TokenType.APPEND,
       "blessings-options" => TokenType.BLESSINGS,
       "grant-champion-blessing" => TokenType.GRANT_CHAMP_BLESSING,
-      "grant-reaver-blessing" => TokenType.GRANT_REAVER_BLESSING,
       "ember-blessing" => TokenType.GRANT_EMBER_BLESSING,
       "trickster-blessing" => TokenType.GRANT_TRICKSTER_BLESSSING,
       "winter-blessing" => TokenType.GRANT_WINTER_BLESSING,
@@ -241,7 +240,6 @@ class ScriptParser(List<ScriptToken> tokens)
       TokenType.BLESSINGS => BlessingsExpr(),
       TokenType.GRANT_CHAMP_BLESSING => GrantChampionBlessingExpr(),
       TokenType.GRANT_PALADIN_BLESSING => GrantPaladinBlessingExpr(),
-      TokenType.GRANT_REAVER_BLESSING => GrantReaverBlessingExpr(),
       TokenType.GRANT_EMBER_BLESSING => GrantEmberBlessingExpr(),
       TokenType.GRANT_TRICKSTER_BLESSSING => GrantTricksterBlessingExpr(),
       TokenType.GRANT_WINTER_BLESSING => GrantWinterBlessing(),
@@ -359,14 +357,6 @@ class ScriptParser(List<ScriptToken> tokens)
     Consume(TokenType.GRANT_PALADIN_BLESSING);
     Consume(TokenType.RIGHT_PAREN);
     return new ScriptPaladinBlessing();
-  }
-
-  ScriptReaverBlessing GrantReaverBlessingExpr()
-  {
-    Consume(TokenType.GRANT_REAVER_BLESSING);
-    Consume(TokenType.RIGHT_PAREN);
-
-    return new ScriptReaverBlessing();
   }
 
   ScriptEmberBlessing GrantEmberBlessingExpr()
@@ -733,7 +723,6 @@ record class ScriptSellSelection(char Choice) : ScriptExpr;
 record class ScriptSpend(int Amount) : ScriptExpr;
 record class ScriptChampionBlessing : ScriptExpr;
 record class ScriptPaladinBlessing : ScriptExpr;
-record class ScriptReaverBlessing : ScriptExpr;
 record class ScriptEmberBlessing : ScriptExpr;
 record class ScriptTricksterBlessing : ScriptExpr;
 record class ScriptWinterBlessing : ScriptExpr;
@@ -1108,10 +1097,6 @@ class DialogueInterpreter
     else if (Expr is ScriptPaladinBlessing)
     {
       EvalPaladinBlessing(mob, gs);
-    }
-    else if (Expr is ScriptReaverBlessing)
-    {
-      EvalReaverBlessing(mob, gs);
     }
     else if (Expr is ScriptEmberBlessing)
     {
@@ -1735,6 +1720,11 @@ class DialogueInterpreter
         winterBlessing = true;
     }
  
+    if (gs.Player.Religion == "Moon Daughter" && gs.Player.Faith > 1)
+      return;
+    else if (gs.Player.Religion == "Crimson King")
+      return;
+      
     int questState = gs.Player.Stats[Attribute.MainQuestState].Curr;
     char opt = 'a';
 
@@ -1752,7 +1742,6 @@ class DialogueInterpreter
       Sb.Append("\n\nYou go forth with Huntokar's blessing and aid. Seek out and defeat the evil that is plauging our town!");
     }
     
-    //Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Reaver]: Bring Huntokar's wrath to your foes, turning you into a frightening presence!", opt++, new ScriptReaverBlessing()));
     //Options.Add(new DialogueOption("The [ICEBLUE Blessing of Embers]: Huntokar will surround you in holy fire and immolate evil you face!", opt++, new ScriptEmberBlessing()));
     
     int lastHWPurchase = mob.Stats[Attribute.ShopMenu].Curr;
@@ -1786,14 +1775,6 @@ class DialogueInterpreter
 
     PaladinBlessingTrait blessing = new() { SourceId = mob.ID, OwnerID = gs.Player.ID };
     blessing.Apply(mob, gs);
-    
-    throw new ConversationEnded("You are bathed in holy light!");
-  }
-
-  static void EvalReaverBlessing(Actor mob, GameState gs)
-  {
-    ReaverBlessingTrait reaver = new() { SourceId = mob.ID, OwnerID = gs.Player.ID };
-    reaver.Apply(mob, gs);
     
     throw new ConversationEnded("You are bathed in holy light!");
   }

@@ -1163,6 +1163,10 @@ class GrantsTrait : Trait
       {
         tt.Remove(gs);
       }
+      else if (t is BlessingTrait bt)
+      {
+        bt.Remove(gs);
+      }
       obj.Traits.Remove(t);
 
       if (obj is Player && t is QuietTrait)
