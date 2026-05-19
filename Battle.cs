@@ -697,6 +697,26 @@ class Battle
         }
       }
 
+      string verb = "hit";
+      if (attacker.Traits.OfType<AttackVerbTrait>().FirstOrDefault() is AttackVerbTrait avt)
+        verb = avt.Verb;
+      ResolveMeleeHit(attacker, target, gs, verb, weaponBonus, attackEffect);
+
+      if (target.HasTrait<DeadTrait>())
+      {
+        return result;
+      }
+
+      if (messages.Count > 0)
+      {        
+        gs.UIRef().AlertPlayer(string.Join(' ', messages).Trim(), gs, target.Loc);      
+      }
+
+      if (thief)
+      {
+        HandleThief(attacker, target, gs);
+      }
+
       if (grappler is not null)
         messages.Add(ResolveGrapple(attacker, target, gs, grappler));
 
@@ -707,21 +727,6 @@ class Battle
         {
           gs.UIRef().AlertPlayer(s, gs, target.Loc);
         }
-      }
-
-      string verb = "hit";
-      if (attacker.Traits.OfType<AttackVerbTrait>().FirstOrDefault() is AttackVerbTrait avt)
-        verb = avt.Verb;
-      ResolveMeleeHit(attacker, target, gs, verb, weaponBonus, attackEffect);
-
-      if (messages.Count > 0)
-      {        
-        gs.UIRef().AlertPlayer(string.Join(' ', messages).Trim(), gs, target.Loc);      
-      }
-
-      if (thief)
-      {
-        HandleThief(attacker, target, gs);
       }
 
       if (weapon is not null && cleaveTrait && !swallowed)
