@@ -804,7 +804,7 @@ static class Util
     TileType.Lava => new Glyph('~', Colours.LIGHT_GREY, Colours.YELLOW_ORANGE, Colours.BURNT_ORANGE, false),
     TileType.Arioch => new Glyph('Ұ', Colours.BRIGHT_RED, Colours.BRIGHT_RED, Colours.BLACK, false),
     TileType.Shackle => ((Shackle)tile).Glyph,
-    TileType.CKShrineEntrance => new Glyph('>', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, false),
+    TileType.CKShrineEntrance => new Glyph('Ո', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, false),
     TileType.CKShrineExit => new Glyph('<', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, false),
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
   };
