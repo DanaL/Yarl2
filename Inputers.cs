@@ -670,16 +670,6 @@ class MapView : Inputer
     int maxCol = OnScreen.Max(l => l.Col);
     Loc centerLoc = new(0, 0, startRow + UserInterface.ScreenHeight / 2 - 1, startCol + UserInterface.ScreenWidth / 2 - 1);
 
-    if (GS.FactDb.FactCheck("Dungeon Entrance") is LocationFact lf)
-    {
-      Loc dungeonLoc = lf.Loc;
-      if (GS.Campaign.Dungeons[GS.CurrDungeonID].RememberedLocs.ContainsKey(dungeonLoc))
-      {
-        string dir = RelativeDir(centerLoc, dungeonLoc);
-        PlaceLabel(sqs, "The Dungeon", dir, dungeonLoc, startRow, startCol, OnScreen.Contains(dungeonLoc));
-      }
-    }
-  
     if (GS.FactDb.FactCheck("Tower Gate") is LocationFact tlf)
     {
       Loc towerLoc = tlf.Loc;
@@ -712,6 +702,16 @@ class MapView : Inputer
     {
       string dir = RelativeDir(centerLoc, tavernLoc);
       PlaceLabel(sqs, "The Tavern", dir, tavernLoc, startRow, startCol, OnScreen.Contains(tavernLoc));
+    }
+
+    if (GS.FactDb.FactCheck("Dungeon Entrance") is LocationFact lf)
+    {
+      Loc dungeonLoc = lf.Loc;
+      if (GS.Campaign.Dungeons[GS.CurrDungeonID].RememberedLocs.ContainsKey(dungeonLoc))
+      {
+        string dir = RelativeDir(centerLoc, dungeonLoc);
+        PlaceLabel(sqs, "The Dungeon", dir, dungeonLoc, startRow, startCol, OnScreen.Contains(dungeonLoc));
+      }
     }
   }
 
