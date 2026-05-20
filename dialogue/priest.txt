@@ -21,6 +21,8 @@
     ((and (= RELIGION "Crimson King") (< FAITH 2)) (        
         (def lines '("Unchecked war and battle, even toward a just cause can never bring peace." 
                      "The Crimson King rebelled against Huntokar."
+                     "The Crimson King's thirst for violence is never sated."
+                     "The Crimson King was an allay of Huntokar but They argued over the means to achieve their aims."
                      "My child I worry this path will consume you."))
       )
     )
