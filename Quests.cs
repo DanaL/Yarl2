@@ -496,6 +496,27 @@ class CKShrine
     Portal entrance = new("", TileType.CKShrineEntrance) { Destination = new(dungeon.ID, 0, 1, 7) };
     wilderness.SetTile(shrineLoc.Row, shrineLoc.Col, entrance);
 
+    List<Loc> nearBy = [];
+    for (int r = shrineLoc.Row - 3; r <= shrineLoc.Row + 3; r++)
+    {
+      for (int c = shrineLoc.Col - 3; c <= shrineLoc.Col + 3; c++)
+      {
+        if (!wilderness.InBounds(r, c))
+          continue;
+        Tile nb = wilderness.TileAt(r, c);
+        if (nb.Type == TileType.Grass || nb.Type == TileType.Dirt || nb.IsTree())
+          nearBy.Add(new (0, 0, r, c));
+      }
+    }
+    nearBy.Shuffle(rng);
+    for (int s = 0; s < int.Min(nearBy.Count, rng.Next(1, 3)); s++)
+    {
+      Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
+      statue.Glyph = statue.Glyph with { Lit = Colours.BRIGHT_RED, Unlit = Colours.DULL_RED };
+      statue.Traits.Add(new DescriptionTrait("a shattered statue, carved from red stone."));
+      objDb.SetToLoc(nearBy[s], statue);
+    }
+
     Portal exit = new("", TileType.CKShrineExit) { Destination = shrineLoc };
     map.SetTile(1, 7, exit);
     map.SetTile(2, 7, TileFactory.Get(TileType.CKShrineFoyer));
