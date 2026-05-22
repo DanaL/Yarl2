@@ -1123,8 +1123,7 @@ class GrantsTrait : Trait
     foreach (string t in TraitsGranted)
     {
       Trait trait = TraitFactory.FromText(t, obj);
-      if (srcItem is not null)
-        trait.SourceId = srcItem.ID;
+      trait.SourceId = srcItem.ID;
 
       if (trait is TemporaryTrait tmp)
       {
