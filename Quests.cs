@@ -511,10 +511,8 @@ class CKShrine
     nearBy.Shuffle(rng);
     for (int s = 0; s < int.Min(nearBy.Count, rng.Next(1, 3)); s++)
     {
-      Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
-      statue.Glyph = statue.Glyph with { Lit = Colours.BRIGHT_RED, Unlit = Colours.DULL_RED };
-      statue.Traits.Add(new DescriptionTrait("a shattered statue, carved from red stone."));
-      objDb.SetToLoc(nearBy[s], statue);
+      RedLandmark marker = new("A shattered statue, carved from red stone.");
+      wilderness.SetTile(nearBy[s].Row, nearBy[s].Col, marker);
     }
 
     Portal exit = new("", TileType.CKShrineExit) { Destination = shrineLoc };

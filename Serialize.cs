@@ -550,12 +550,17 @@ internal class MapSaver
             break;
           case TileType.GateTrigger:
             digits = Util.ToNums(pieces[2]);
-            GateTrigger gt = new(new Loc(digits[0], digits[1], digits[2], digits[3]));
-            gt.Found = bool.Parse(pieces[3]);
+            GateTrigger gt = new(new Loc(digits[0], digits[1], digits[2], digits[3]))
+            {
+              Found = bool.Parse(pieces[3])
+            };
             tile = gt;
             break;
           case TileType.Landmark:
             tile = new Landmark(pieces[2]);
+            break;
+          case TileType.RedLandmark:
+            tile = new RedLandmark(pieces[2]);
             break;
           case TileType.Gravestone:
             tile = new Gravestone(pieces[2]);

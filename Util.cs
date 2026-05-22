@@ -749,6 +749,7 @@ static class Util
     TileType.Bridge => new Glyph('=', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, false),
     TileType.WoodBridge => new Glyph('=', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false),
     TileType.Landmark => new Glyph('_', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, true),
+    TileType.RedLandmark => new Glyph('_', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, false),
     TileType.IdolAltar => new Glyph('_', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, true),
     TileType.Chasm => new Glyph('\u2237', Colours.FAR_BELOW, Colours.FAR_BELOW, Colours.BLACK, false),
     TileType.CharredGrass => new Glyph('.', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),

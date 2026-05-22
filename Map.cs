@@ -21,8 +21,8 @@ enum TileType
   GreenTree, OrangeTree, RedTree, YellowTree, Conifer, Lake, FrozenLake,
   SnowPeak, Portal, Upstairs, Downstairs, Cloud, WoodWall, WoodFloor, Forge,
   Dirt, StoneRoad, Well, Bridge, WoodBridge, Pool, FrozenPool,
-  Landmark, Chasm, CharredGrass, CharredStump, Portcullis, OpenPortcullis,
-  BrokenPortcullis, GateTrigger, VaultDoor, HiddenTrapDoor, TrapDoor,
+  Landmark, RedLandmark, Chasm, CharredGrass, CharredStump, Portcullis, 
+  OpenPortcullis, BrokenPortcullis, GateTrigger, VaultDoor, HiddenTrapDoor, TrapDoor,
   SecretDoor, HiddenTeleportTrap, TeleportTrap, HiddenDartTrap, DartTrap,
   FireJetTrap, JetTrigger, HiddenPit, Pit, WaterTrap, HiddenWaterTrap,
   MagicMouth, HiddenMagicMouth, IdolAltar, Gravestone, DisturbedGrave,
@@ -189,7 +189,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Bridge => "a bridge",
     TileType.WoodBridge => "a wood bridge",
     TileType.Chasm => "a chasm",
-    TileType.Landmark => "a landmark",
+    TileType.Landmark or TileType.RedLandmark => "a landmark",
     TileType.Forge => "a forge",
     TileType.Upstairs => "some stairs up",
     TileType.Downstairs => "some stairs down",
@@ -446,6 +446,11 @@ class Landmark(string stepMessage) : Tile(TileType.Landmark)
   public override string StepMessage => _stepMessage;
 
   public override string ToString() => $"{(int)Type};{_stepMessage}";
+}
+
+class RedLandmark : Landmark
+{
+  public RedLandmark(string stepMessage) : base(stepMessage) => Type = TileType.RedLandmark;
 }
 
 class Gravestone : Landmark
