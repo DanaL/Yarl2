@@ -359,7 +359,7 @@ class Battle
         gs.UIRef().AlertPlayer("Blood and strife!");
 
       if (target.HasTrait<DeadTrait>())      
-        Faiths.CrimsonKingSacrifice(attacker, gs);
+        Faiths.CrimsonKingSacrifice(attacker, target, gs);
     }
 
     if (weapon is not null) 

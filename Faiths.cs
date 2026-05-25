@@ -98,8 +98,16 @@ class Faiths
 
   // Passing actor who is wielding the Crimson King's blade but I don't imagine
   // a scenario where it isn't the player
-  public static void CrimsonKingSacrifice(Actor actor, GameState gs)
+  public static void CrimsonKingSacrifice(Actor actor, Actor victim, GameState gs)
   {
+    foreach (Trait t in victim.Traits)
+    {
+      if (t is PlantTrait)
+        return;
+      else if (t is IllusionTrait)
+        return;  
+    }
+
     int totalSacrifices;
     if (actor.Stats.TryGetValue(Attribute.CrimsonKingSacrifice, out var sacrifices))
     {
