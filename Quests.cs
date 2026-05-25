@@ -473,7 +473,10 @@ class CKShrine
   public static void Setup(Campaign campaign, Loc start, Map wilderness, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     Dungeon dungeon = new(campaign.Dungeons.Count, "the Red Shrine", "A musty shrine. There is a metallic tang in the air.", true);
-    Map map = new(15, 17, TileType.PermWall) { Features = MapFeatures.NoTeleport | MapFeatures.UndiggableFloor | MapFeatures.NoRandomEncounters };
+    Map map = new(15, 17, TileType.PermWall) 
+    { 
+      Features = MapFeatures.UndiggableFloor | MapFeatures.NoRandomEncounters | MapFeatures.NoExplore
+    };
     
     for (int c = 5; c < 10; c++) map.SetTile(3, c, TileFactory.Get(TileType.DungeonFloor));
     for (int c = 4; c < 11; c++) map.SetTile(4, c, TileFactory.Get(TileType.DungeonFloor));

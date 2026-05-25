@@ -45,7 +45,7 @@ class PocketDimension
   public static (Loc, Dungeon) MonsterBelly(Actor monster, Actor victim, GameState gs)
   {
     Glyph mg = monster.Glyph;
-    Map map = new(3, 3);
+    Map map = new(3, 3) { Features = MapFeatures.NoExplore };
     map.SetTile(0, 0, new MonsterWall(new Glyph('/', mg.Lit, mg.Unlit, mg.BG, mg.Illuminate), monster.ID));
     map.SetTile(0, 1, new MonsterWall(new Glyph('-', mg.Lit, mg.Unlit, mg.BG, mg.Illuminate), monster.ID));
     map.SetTile(0, 2, new MonsterWall(new Glyph('\\', mg.Lit, mg.Unlit, mg.BG, mg.Illuminate), monster.ID));
@@ -68,7 +68,7 @@ class PocketDimension
   {
     Glyph mg = monster.Glyph;
 
-    Map map = new(19, 5);
+    Map map = new(19, 5)  { Features = MapFeatures.NoExplore };
 
     map.SetTile(0, 0, new MonsterWall(new Glyph('/', mg.Lit, mg.Unlit, mg.BG, false), monster.ID));
     map.SetTile(0, 1, new MonsterWall(new Glyph('-', mg.Lit, mg.Unlit, mg.BG, false), monster.ID));

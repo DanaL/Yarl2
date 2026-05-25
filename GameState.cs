@@ -96,11 +96,10 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       RefreshOverworld();
     }
 
-    if (!CurrentDungeon.PocketDimension)
-    {
-      VisitedLevel visit = new(dungeonId, level);
-      VisitedLevels.TryAdd(visit, false); 
-    }    
+    VisitedLevel visit = new(dungeonId, level);
+    // You don't get exploration credit for some levels
+    bool visited = (CurrentMap.Features & MapFeatures.NoExplore) == MapFeatures.NoExplore;
+    VisitedLevels.TryAdd(visit, visited);    
   }
 
   void RefreshOverworld()

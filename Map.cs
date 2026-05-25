@@ -774,6 +774,7 @@ public enum MapFeatures
   NoRandomEncounters = 0b1000,
   Unmappable = 0b10000,
   NoTeleport = 0b100000,
+  NoExplore = 0b1000000, // doesn't count toward visited level HP boost
 }
 
 class Map : ICloneable
