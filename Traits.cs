@@ -1713,7 +1713,7 @@ class FrightenedTrait : TemporaryTrait
     ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(15, 26);
 
     string victimName = MsgFactory.CalcName(obj, gs.Player).Capitalize();    
-    return [$"{victimName} {Grammar.Conjugate(target, "become")} frightened!"];
+    return [$"{victimName} {Grammar.Conjugate(target, "is")} frightened!"];
   }
 
   public void Remove(Actor victim, GameState gs)
