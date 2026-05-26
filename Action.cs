@@ -1553,7 +1553,7 @@ class SelectActionAction(GameState gs, Actor actor) : DirectionalAction(gs, acto
 
     Tile tile = GameState!.TileAt(Loc);
 
-    if (GameState.ObjDb.ItemsAt(Loc).Where(i => i.Type == ItemType.Device).Any())
+    if (GameState.ObjDb.ItemsAt(Loc).Any(i => i.Type == ItemType.Device))
     {
       Actor!.QueueAction(new DeviceInteractionAction(GameState, Actor) { Loc = Loc });
     }

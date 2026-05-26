@@ -113,7 +113,7 @@ class GameLoader(UserInterface ui)
     gameState.PrepareFieldOfView();
     gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
 
-    File.Delete(path);
+    //File.Delete(path);
 
     if (gameState.CurrentMap.HasFeature(MapFeatures.Foggy))
     {
@@ -565,7 +565,6 @@ class CampaignCreator(UserInterface ui)
   public (GameState?, SetupResult) Create(Options options)
   {
     int seed = DateTime.UtcNow.GetHashCode();
-    seed = 1561074536;
     Console.WriteLine($"Seed: {seed}");
 
     var (playerName, setup) = QueryPlayerName();

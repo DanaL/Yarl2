@@ -13,20 +13,11 @@ namespace Yarl2;
 
 class Spells
 {
-  public static bool NoFocus(string spell)
+  public static bool NoFocus(string spell) => spell.ToLower() switch
   {
-    switch (spell.ToLower())
-    {
-      case "phase door":
-      case "cone of cold":
-      case "gust of wind":
-      case "breathe fire":
-      case "mirror image":
-        return true;
-      default:
-        return false;
-    }
-  }
+    "phase door" or "cone of cold" or "gust of wind" or "breathe fire" or "mirror image" => true,
+    _ => false,
+  };
 }
 
 abstract class CastSpellAction(GameState gs, Actor actor) : TargetedAction(gs, actor)
@@ -282,6 +273,69 @@ class CastIllume(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   public override void ReceiveUIResult(UIResult result) {}
 }
 
+class CastPhaseDoor(GameState gs, Actor actor) : CastSpellAction(gs, actor)
+{
+  public Loc Loc { get; set; }
+
+  public override double Execute()
+  {
+    base.Execute();
+    
+    GameState.UIRef().SetInputController(new PlayerCommandController(GameState));
+
+    if (!CheckCost(1, 20))
+      return 0.0;
+    
+    if (GameState.MapForActor(Actor!).HasFeature(MapFeatures.NoTeleport))
+    {
+      string s = Actor is Player ? "You shudder for a moment as the magic fizzles." : "A spell fizzles.";
+      GameState.UIRef().AlertPlayer(s, GameState, Actor!.Loc);
+      return 1.0;  
+    }
+
+    (int, int) delta = (Loc.Row - Actor!.Loc.Row, Loc.Col - Actor.Loc.Col );    
+    List<Loc> locs = [];
+    for (int d = 1; d <= 5; d++)
+    {
+      Loc loc = Actor.Loc with { Row = Actor.Loc.Row + d * delta.Item1, Col = Actor.Loc.Col + d * delta.Item2 };
+      if (!GameState.TileAt(loc).PassableByFlight() || GameState.ObjDb.AreBlockersAtLoc(loc))
+        break;
+      locs.Add(loc);
+    }
+
+    locs.Reverse();
+    foreach (Loc landingSpot in locs)
+    {
+      if (!GameState.ObjDb.Occupied(landingSpot))
+      {
+        Actor.ClearAnchors(GameState!);
+      
+        GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, landingSpot, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
+        GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, Actor.Loc, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
+
+      base.Execute();
+      Actor.QueueAction(new MoveAction(GameState, Actor, landingSpot, false));
+      if (GameState.LastPlayerFoV.ContainsKey(Actor.Loc)) 
+      {
+        GameState.UIRef().AlertPlayer($"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "jump")}!");
+      }
+
+      return 0.0;
+      }      
+    }
+    
+    GameState.UIRef().AlertPlayer("A spell fizzles.", GameState, Actor!.Loc);
+
+    return 1.0;
+  }
+
+  public override void ReceiveUIResult(UIResult result)
+  {
+    var dirResult = (DirectionUIResult)result;
+    Loc = Actor!.Loc with { Row = Actor.Loc.Row + dirResult.Row, Col = Actor.Loc.Col + dirResult.Col };
+  }
+}
+
 class CastErsatzElevator(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 {
   char Dir { get; set; } = '\0';
@@ -290,7 +344,7 @@ class CastErsatzElevator(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     base.Execute();
 
-    GameState!.UIRef().SetInputController(new PlayerCommandController(GameState));
+    GameState.UIRef().SetInputController(new PlayerCommandController(GameState));
 
     if (!CheckCost(3, 25))
       return 0.0;
@@ -471,21 +525,6 @@ class CastSummonDecoy(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 
     return 0.0;
   }
-}
-
-class CastPhaseDoor(GameState gs, Actor actor) : CastSpellAction(gs, actor)
-{
-  public override double Execute()
-  {
-    base.Execute();
-    
-    if (CheckCost(1, 20))
-      GameState.Player.QueueAction(new BlinkAction(GameState, Actor!));
-    
-    return 0.0;
-  }
-
-  public override void ReceiveUIResult(UIResult result) { }
 }
 
 class CastMirrorImage(GameState gs, Actor actor) : CastSpellAction(gs, actor)
@@ -1046,9 +1085,9 @@ class SpellcastMenu : Inputer
         PopupRow = -3;
         break;
       case "phase door":
-        GS.Player.QueueAction(new CastPhaseDoor(GS, GS.Player));
-        GS.UIRef().SetInputController(new PlayerCommandController(GS));
-        GS.UIRef().ClosePopup();
+        DirectionalInputer dir = new(GS, false) { DeferredAction = new CastPhaseDoor(GS, GS.Player) };
+        GS.UIRef().SetInputController(dir);
+        SpellSelection = false;
         break;
       case "mirror image":
         GS.Player.QueueAction(new CastMirrorImage(GS, GS.Player));
