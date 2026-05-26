@@ -1712,6 +1712,13 @@ class FrightenedTrait : TemporaryTrait
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(15, 26);
 
+    if (target.HasTrait<GrapplingTrait>())
+    {
+      Effects.BreakGrapple(target, gs);
+      string n = MsgFactory.CalcName(target, gs.Player);
+      gs.UIRef().AlertPlayer($"{n.Capitalize()} {Grammar.Conjugate(target, "release")} {Grammar.Possessive(target)} grip!", gs, target.Loc);
+    }
+
     string victimName = MsgFactory.CalcName(obj, gs.Player).Capitalize();    
     return [$"{victimName} {Grammar.Conjugate(target, "is")} frightened!"];
   }

@@ -569,6 +569,7 @@ class Effects
   {
     GrappledTrait? grappled = actor.Traits.OfType<GrappledTrait>().FirstOrDefault();
     grappled?.Remove(gs);
+    
     GrapplingTrait? grappling = actor.Traits.OfType<GrapplingTrait>().FirstOrDefault();
     if (grappling is not null && gs.ObjDb.GetObj(grappling.VictimId) is Actor victim)
     {

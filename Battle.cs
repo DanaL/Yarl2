@@ -653,7 +653,8 @@ class Battle
       List<string> messages = [];
       GrapplerTrait? grappler = null;
       bool thief = false, shieldBash = false;
-      foreach (Trait t in attacker.Traits)
+      List<Trait> attackTraits = [.. attacker.Traits];
+      foreach (Trait t in attackTraits)
       {
         if (t is KnockBackTrait)
         {
