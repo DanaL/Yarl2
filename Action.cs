@@ -339,6 +339,8 @@ class ArrowShotAction(GameState gs, Actor actor, Item? bow, Item ammo, int attac
 
   public override double Execute()
   {
+    int totalBonus = _attackBonus + (bow?.Traits.OfType<WeaponBonusTrait>().Sum(wbt => wbt.Bonus) ?? 0);
+
     base.Execute();
     var trajectory = Trajectory(Actor!.Loc, false);
     List<Loc> pts = [];
@@ -351,7 +353,7 @@ class ArrowShotAction(GameState gs, Actor actor, Item? bow, Item ammo, int attac
       if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
       {
         pts.Add(pt);
-        targetHit = Battle.MissileAttack(Actor!, occ, GameState, _ammo, _attackBonus, new ArrowAnimation(GameState, pts, _ammo.Glyph.Lit));
+        targetHit = Battle.MissileAttack(Actor!, occ, GameState, _ammo, totalBonus, new ArrowAnimation(GameState, pts, _ammo.Glyph.Lit));
         creatureTargeted = true;
 
         if (targetHit)
