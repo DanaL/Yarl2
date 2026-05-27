@@ -330,10 +330,10 @@ class InnkeeperInputer : Inputer
 
 class SmithyInputer : ShopMenuInputer
 {
-  bool _offerRepair;
-  bool _offerUpgrade;  
+  readonly bool _offerRepair;
+  readonly bool _offerUpgrade;  
   char _reagent;
-  ulong _hammerId;
+  readonly ulong _hammerId;
 
   HashSet<char> opts { get; set; } = [];
 
@@ -575,7 +575,6 @@ class SmithyInputer : ShopMenuInputer
       if (_offerUpgrade)
       {          
         sb.Append("c) Try to enchant an item.\n");
-
         opts.Add('c');
       }
 
