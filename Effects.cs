@@ -575,6 +575,8 @@ class Effects
     {
       grappled = victim.Traits.OfType<GrappledTrait>().FirstOrDefault();
       grappled?.Remove(gs);
+
+      actor.Traits = [.. actor.Traits.Where(t => t is not GrapplingTrait)];
     }
   }
 
