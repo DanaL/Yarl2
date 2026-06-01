@@ -3134,6 +3134,34 @@ class EscapeDungeonAction(GameState gs) : Action(gs, gs.Player)
   }
 };
 
+class LoudBangAction(GameState gs, Actor actor) : Action(gs, actor)
+{
+  public override double Execute()
+  {
+    base.Execute();
+
+    GameState.UIRef().AlertPlayer("You hear a loud bang!");
+
+    foreach (Loc loc in GameState.Flood(Actor!.Loc, 4, true))
+    {
+      if (GameState.ObjDb.Occupant(loc) is Actor victim)
+      {
+        victim.HearNoise(int.MaxValue, loc.Row, loc.Col, GameState);
+        FrightenedTrait frightened = new() { DC = 20 };
+        var msgs = frightened.Apply(victim, GameState);
+        if (msgs.Count > 0)
+        {
+          foreach (var s in msgs)
+            GameState.UIRef().AlertPlayer(s, GameState, loc);
+          GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, loc, Colours.BRIGHT_RED, Colours.BLACK, '*'));
+        }
+      }
+    }
+
+    return 1.0;
+  }
+}
+
 class KnockAction(GameState gs, Actor caster) : Action(gs, caster)
 {  
   public override double Execute()
@@ -3142,9 +3170,9 @@ class KnockAction(GameState gs, Actor caster) : Action(gs, caster)
 
     if (Actor is Actor caster)
     {
-      GameState!.UIRef().AlertPlayer("You hear a spectral knocking.");
+      GameState.UIRef().AlertPlayer("You hear a spectral knocking.");
 
-      var sqs = GameState!.Flood(caster.Loc, 4, true);
+      var sqs = GameState.Flood(caster.Loc, 4, true);
       foreach (Loc sq in sqs)
       {
         Tile tile = GameState.TileAt(sq);

@@ -1901,6 +1901,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     { ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(30, 75) })),
     "protection" => new UseResult(new ApplyTraitAction(gs, user,
                         new AuraOfProtectionTrait() { HP = 40 })),
+    "bang" => new UseResult(new LoudBangAction(gs, user)),
     "blindness" => new UseResult(new ApplyTraitAction(gs, user, BuildBlindTrait(user, gs))),
     "buffstrength" => new UseResult(new ApplyTraitAction(gs, user,
                         new StatBuffTrait()

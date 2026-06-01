@@ -1705,5 +1705,16 @@
       "Armour#Boots#1#0",
       "Plural"
     ]
+  },
+  {
+    "Name": "GNOME_GNOISEMAKER",
+    "DescriptiveName": "gnome gnoisemaker",
+    "Type": "Tool",
+    "Value": 15,
+    "Glyph": "(,brightred,dullred,black,false",
+    "Traits": [
+      "Stackable",
+      "UseSimple#bang"
+    ]
   }
 ]

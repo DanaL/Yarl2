@@ -148,7 +148,8 @@ class DebugCommand(GameState gs)
     {"gingerbread man", ItemNames.GINGERBREAD_MAN },
     {"wool cloak", ItemNames.WOOL_CLOAK },
     {"leather boots", ItemNames.LEATHER_BOOTS },
-    {"wand of sleep", ItemNames.WAND_SLEEP }
+    {"wand of sleep", ItemNames.WAND_SLEEP },
+    {"gnome gnoisemaker", ItemNames.GNOME_GNOISEMAKER }
   };
 
   public string DoCommand(string txt)
