@@ -108,6 +108,16 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       Zorkmids += item.Value;
       return '$';
     }
+    else if (item.Type == ItemType.Component)
+    {
+      switch (item.Name)
+      {
+        case "suluphurous ash":
+          _components[Component.SulphurousAsh]++;
+          break;
+      }
+      return '$';
+    }
 
     char slotToUse = '\0';
 

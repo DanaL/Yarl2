@@ -214,6 +214,11 @@ class PlayerCreator
       _ => ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb)
     };
     player.Inventory.Add(scroll, player.ID);
+
+    for (int i = 0; i < 5; i++)
+    {
+      player.Inventory.Add(ItemFactory.Get(ItemNames.SULPHUROUS_ASH, objDb), player.ID);
+    }
   }
 
   static void CreateRogue(Player player, GameState gs, Rng rng)

@@ -1716,5 +1716,16 @@
       "Stackable",
       "UseSimple#bang"
     ]
+  },
+  {
+    "Name": "SULPHUROUS_ASH",
+    "DescriptiveName": "suluphurous ash",
+    "Type": "Component",
+    "Value": 1,
+    "Glyph": ",,grey,darkgrey,black,false",
+    "Traits": [
+      "Plural",
+      "Stackable"
+    ]
   }
 ]
