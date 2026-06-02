@@ -319,7 +319,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     Item arrow;
 
     // Does player have an equipped special arrows?
-    Item? equippedArrow= gs.Player.Inventory.Items()
+    Item? equippedArrow = gs.Player.Inventory.Items()
                                             .FirstOrDefault(a => a.Type == ItemType.Arrow && a.Equipped);
 
     if (equippedArrow is not null)

@@ -36,6 +36,8 @@ class Alchemy
           upgradableWeapon = true;
         else if (t is FinesseTrait)
           upgradableWeapon = true;
+        else if (t is BowTrait)
+          upgradableWeapon = true;
       }
 
       if (upgradableWeapon && !item.HasTrait<WeaponBonusTrait>())
