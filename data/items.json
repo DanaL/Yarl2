@@ -1719,10 +1719,54 @@
   },
   {
     "Name": "SULPHUROUS_ASH",
-    "DescriptiveName": "suluphurous ash",
+    "DescriptiveName": "sulphurous ash",
     "Type": "Component",
     "Value": 1,
     "Glyph": ",,grey,darkgrey,black,false",
+    "Traits": [
+      "Plural",
+      "Stackable"
+    ]
+  },
+   {
+    "Name": "BLACK_PEARL",
+    "DescriptiveName": "black pearl",
+    "Type": "Component",
+    "Value": 1,
+    "Glyph": ",,darkgrey,grey,black,false",
+    "Traits": [
+      "Plural",
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "SPIDER_SILK",
+    "DescriptiveName": "spider silk",
+    "Type": "Component",
+    "Value": 1,
+    "Glyph": ",,white,lightgrey,black,false",
+    "Traits": [
+      "Plural",
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "GINSENG",
+    "DescriptiveName": "ginseng",
+    "Type": "Component",
+    "Value": 1,
+    "Glyph": ",,lightbrown,brown,black,false",
+    "Traits": [
+      "Plural",
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "GARLIC",
+    "DescriptiveName": "garlic",
+    "Type": "Component",
+    "Value": 1,
+    "Glyph": ",,lightbeige,beige,black,false",
     "Traits": [
       "Plural",
       "Stackable"

@@ -101,6 +101,13 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     return null;
   }
 
+  static Component TxtToComponent(string s) => s switch
+  {
+    "sulphurous ash" => Component.SulphurousAsh,
+    "black pearl" => Component.BlackPearl,
+    _ => throw new Exception($"Unknown spell component: {s}")
+  };
+
   public char Add(Item item, ulong ownerID)
   {
     if (item.Type == ItemType.Zorkmid)
@@ -110,12 +117,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     }
     else if (item.Type == ItemType.Component)
     {
-      switch (item.Name)
-      {
-        case "suluphurous ash":
-          _components[Component.SulphurousAsh]++;
-          break;
-      }
+      _components[TxtToComponent(item.Name)]++;
       return '$';
     }
 

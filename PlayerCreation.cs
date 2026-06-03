@@ -218,6 +218,7 @@ class PlayerCreator
     for (int i = 0; i < 5; i++)
     {
       player.Inventory.Add(ItemFactory.Get(ItemNames.SULPHUROUS_ASH, objDb), player.ID);
+      player.Inventory.Add(ItemFactory.Get(ItemNames.BLACK_PEARL, objDb), player.ID);
     }
   }
 
