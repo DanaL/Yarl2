@@ -511,8 +511,12 @@ abstract class DungeonBuilder
 
     if (sumOfCosts < 0)
     {
-      currLvl.Dump();
+      // We'll bail and regenerate the wilderness completely because it's too 
+      // messy figuring out if we have to move already placed stairs on earlier
+      // levels, etc.
+      throw new CampaignCreationException("Unable to place stairs in initial dungeon");
     }
+
     int n = rng.Next(sumOfCosts);
     int j = floors[0].Item3, i = 0;
     while (j < n)

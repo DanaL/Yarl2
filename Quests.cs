@@ -93,7 +93,7 @@ class SorceressQuest
     if (wilderness.TileAt(row, col - 2).Passable()) doorCandidates.Add((row, col - 1));
     if (wilderness.TileAt(row, col + 2).Passable()) doorCandidates.Add((row, col + 1));
     if (doorCandidates.Count == 0)
-      throw new WildernessCreationException("Unable to place sorceress tower");
+      throw new CampaignCreationException("Unable to place sorceress tower");
 
     (int doorRow, int doorCol) = doorCandidates[rng.Next(doorCandidates.Count)];
     
@@ -372,11 +372,11 @@ class SmithQuest
   public static void Setup(Dungeon dungeon, string denizen, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     if (factDb.FactCheck("SmithId") is not SimpleFact smithFact)
-      throw new WildernessCreationException("Village smith info was not found!");
+      throw new CampaignCreationException("Village smith info was not found!");
 
     ulong smithId = ulong.Parse(smithFact.Value);
     if (objDb.GetObj(smithId) is not Actor smith)
-      throw new WildernessCreationException("Village smith info was not found!");
+      throw new CampaignCreationException("Village smith info was not found!");
 
     string name = "hammer".Possessive(smith);
     Item hammer = new()
@@ -404,7 +404,7 @@ class SmithQuest
     Map map = dungeon.LevelMaps[1];
     List<Loc> floors = map.ClearFloors(dungeon.ID, 1, objDb);
     if (floors.Count == 0)
-      throw new WildernessCreationException("Could not place the smith's hammer thief!");
+      throw new CampaignCreationException("Could not place the smith's hammer thief!");
 
     Loc loc = floors[rng.Next(floors.Count)];
     objDb.AddNewActor(thief, loc);

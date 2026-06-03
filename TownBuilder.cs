@@ -582,7 +582,7 @@ class TownBuilder
     List<Loc> smithySqs = [.. Town.Smithy];
 
     if (smithySqs.Count == 0)
-      throw new WildernessCreationException("Could not place smithy");
+      throw new CampaignCreationException("Could not place smithy");
 
     smithySqs.Shuffle(rng);
     int f = 0;
@@ -984,7 +984,7 @@ class TownBuilder
       }
     }
 
-    throw new WildernessCreationException("Unable to place witches' cottage.");
+    throw new CampaignCreationException("Unable to place witches' cottage.");
   }
 
   void CalcRoofs(Map map)
@@ -1073,7 +1073,7 @@ class TownBuilder
 
     if (Town.Homes.Count < 4)
     {
-      throw new WildernessCreationException("Too few cottages");
+      throw new CampaignCreationException("Too few cottages");
     }
 
     int centreRow = startRow + TOWN_HEIGHT / 2;

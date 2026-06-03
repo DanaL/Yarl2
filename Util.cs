@@ -1333,7 +1333,7 @@ class MapUtils
 }
 
 class InvalidRoomException : Exception { }
-class WildernessCreationException(string msg) : Exception(msg) { }
+class CampaignCreationException(string msg) : Exception(msg) { }
 
 class AbnormalMovement(Loc dest) : Exception
 {

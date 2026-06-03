@@ -1020,7 +1020,7 @@ class Map : ICloneable
           TileType.OrangeTree => 'T',
           TileType.YellowTree => 'T',
           TileType.Conifer => 'T',
-          TileType.DeepWater => ' ',
+          TileType.DeepWater => '~',
           TileType.Water => '~',
           TileType.Lake => '~',
           TileType.WoodBridge => '=',
@@ -1034,6 +1034,7 @@ class Map : ICloneable
           TileType.SecretPassage => 'S',
           TileType.MysteriousMirror => 'M',
           TileType.Lava => '~',
+          TileType.Chasm => '_',
           _ => ' '
         };
         Console.Write(ch);

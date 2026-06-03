@@ -580,7 +580,7 @@ class Wilderness(Rng rng, int length)
     }
 
     map.Dump();
-    throw new WildernessCreationException("No valleys at all!");
+    throw new CampaignCreationException("No valleys at all!");
   }
 
   static int CostsToCarveValley(Tile tile) => tile.Type switch

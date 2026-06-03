@@ -347,7 +347,7 @@ class CampaignCreator(UserInterface ui)
     options = [.. options.OrderBy(sq => sq.Item3)];
 
     if (options.Count == 0)
-      throw new WildernessCreationException("Could not find a place for Initial Dungeon entrance");
+      throw new CampaignCreationException("Could not find a place for Initial Dungeon entrance");
 
     // The dividing by 4 thing is to try to bias the selection toward locations
     // further from town.
@@ -520,7 +520,7 @@ class CampaignCreator(UserInterface ui)
 
         break;
       }                  
-      catch (WildernessCreationException)
+      catch (CampaignCreationException)
       {
         //Console.WriteLine(wce.Message);
       }
