@@ -185,6 +185,9 @@ class PlayerCreator
     player.Stats[Attribute.Strength] = new Stat(_basicStatArray[rng.Next(_basicStatArray.Length - 2)]);
     player.Stats.Add(Attribute.MagicPoints, new Stat(rng.Next(2, 5)));
     player.SpellsKnown.Add("arcane spark");
+    player.SpellsKnown.Add("illume");
+    player.SpellsKnown.Add("frogify");
+    player.SpellsKnown.Add("ersatz elevator");
 
     char slot;
 

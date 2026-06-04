@@ -1143,7 +1143,12 @@ class SpellcastMenu : Inputer
         width = 25;
       }
 
-      GS.UIRef().SetPopup(new PopupMenu("Cast which spell?", SpellList, footer) { SelectedRow = row, Width = width });
+      GS.UIRef().SetPopup(
+        new PopupMenu("Cast which spell?", SpellList, GS.Player.Inventory.Components(),  footer) 
+        { 
+          SelectedRow = row, 
+          Width = width }
+      );
     }
     else
     {

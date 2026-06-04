@@ -335,19 +335,39 @@ class Popup : IPopup
   public void SetDefaultTextColour(Colour colour) => DefaultTextColour = colour;
 }
 
-class PopupMenu(string title, List<string> menuItems, string footer = "") : IPopup
+class PopupMenu : IPopup
 {
   public int SelectedRow { get; set; } = 0;
   public int Width { get; set; } = 0;
-
+  
   Colour DefaultTextColour { get; set; } = Colours.WHITE;
-  string Title { get; set; } = title;
-  List<string> MenuItems { get; set; } = menuItems;
-  string Footer { get; set; } = footer;
+  string Title { get; set; }
+  List<string> MenuItems { get; set; }
+  List<string> SidePanelItems { get; set; }
+  string Footer { get; set; }
+
+  public PopupMenu(string title, List<string> menuItems, string footer = "")
+  {
+    Title = title;
+    MenuItems = menuItems;
+    Footer = footer;
+    SidePanelItems = [];
+  }
+
+  public PopupMenu(string title, List<string> menuItems, List<string> sidePanelItems, string footer = "")
+  {
+    Title = title;
+    MenuItems = menuItems;
+    Footer = footer;
+    SidePanelItems = sidePanelItems;
+  }
 
   void IPopup.Draw(UserInterface ui)
-  {
-    int width = MenuItems.Max(i => i.Length) + 4;
+  {    
+    int menuWidth = MenuItems.Max(i => i.Length);
+    int sidePanelWidth = SidePanelItems.Count == 0 ? 0 : SidePanelItems.Max(i => i.Length) + 6;
+    int width = menuWidth + sidePanelWidth + 4;
+
     if (Title.Length + 4 > width)
       width = Title.Length + 5;
     if (Width > width)
@@ -370,15 +390,26 @@ class PopupMenu(string title, List<string> menuItems, string footer = "") : IPop
       ui.WriteLine(topBorder, row++, col, width, DefaultTextColour);
     }
 
-    for (int i = 0; i < MenuItems.Count; i++)
+    int rows = int.Max(MenuItems.Count, SidePanelItems.Count);
+    for (int i = 0; i < rows; i++)
     {
-      string item = MenuItems[i];
+      string item = "";
+      if (i < MenuItems.Count)
+        item = MenuItems[i].PadRight(menuWidth);
+      if (i < SidePanelItems.Count)
+      {
+        if (item.Length == 0)
+          item = " ".PadRight(menuWidth);
+        item += "      " + SidePanelItems[i];
+      }
+      
       if (i == SelectedRow)
       {
         // Mild kludge: HILITE makes the tile transparent, so write a black background
         // before we draw highlighted line
         ui.WriteLine($"│ {" ".PadRight(width - 4)} │", row, col, width, DefaultTextColour);
-        ui.WriteLine($"{item.PadRight(width - 8)}", row++, col + 2, width - 4, DefaultTextColour, Colours.HILITE);
+        ui.WriteLine($"{MenuItems[i].PadRight(menuWidth)}", row, col + 2, menuWidth, DefaultTextColour, Colours.HILITE);
+        ui.WriteLine($"{SidePanelItems[i]}", row++, col + menuWidth + 8, menuWidth, DefaultTextColour);        
       }
       else
       {

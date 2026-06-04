@@ -682,6 +682,8 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     };
   }
 
+  public List<string> Components() => [.. _components.Select(kvp => $"{kvp.Key} {kvp.Value}")];
+
   public virtual string ToText()
   {
     string items = string.Join(',', _items.Select(i => $"{i.Item1}#{i.Item2}"));
