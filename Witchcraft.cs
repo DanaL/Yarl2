@@ -22,7 +22,7 @@ class Spells
 
 abstract class CastSpellAction(GameState gs, Actor actor) : TargetedAction(gs, actor)
 {
-  protected bool CheckCost(int mpCost, int stressCost)
+  protected bool CheckCost(int mpCost)
   {
     Stat magicPoints = Actor!.Stats[Attribute.MagicPoints];
     if (magicPoints.Curr < mpCost)
@@ -32,8 +32,6 @@ abstract class CastSpellAction(GameState gs, Actor actor) : TargetedAction(gs, a
     }
 
     magicPoints.Change(-mpCost);
-    int stress = int.Max(0, stressCost - Actor!.Stats[Attribute.Will].Curr);
-    Actor.Stats[Attribute.Nerve].Change(-stress);
 
     return true;
   }
@@ -43,7 +41,7 @@ class CastArcaneSpark(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 {
   public override double Execute()
   {
-    if (!CheckCost(1, 10))
+    if (!CheckCost(1))
       return 0.0;
 
     Item spark = new()
@@ -105,7 +103,7 @@ class CastSparkArc(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     base.Execute();
     
-    if (!CheckCost(2, 10))
+    if (!CheckCost(2))
       return 0.0;
 
     PreviousTargets.Add(Actor!.ID);
@@ -202,7 +200,7 @@ class CastMageArmour(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     base.Execute();
     
-    if (!CheckCost(2, 25))
+    if (!CheckCost(2))
       return 0.0;
 
     MageArmourTrait t = new();
@@ -221,7 +219,7 @@ class CastSlumberingSong(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     base.Execute();
     
-    if (!CheckCost(5, 15))
+    if (!CheckCost(5))
       return 0.0;
 
     GameState.UIRef().AlertPlayer("Ala-ca-zzzzzzzzz!");
@@ -260,7 +258,7 @@ class CastIllume(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     base.Execute();
     
-    if (!CheckCost(1, 20))
+    if (!CheckCost(1))
       return 0.0;
 
     LightSpellTrait ls = new();
@@ -283,7 +281,7 @@ class CastPhaseDoor(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     
     GameState.UIRef().SetInputController(new PlayerCommandController(GameState));
 
-    if (!CheckCost(1, 20))
+    if (!CheckCost(1))
       return 0.0;
     
     if (GameState.MapForActor(Actor!).HasFeature(MapFeatures.NoTeleport))
@@ -346,7 +344,7 @@ class CastErsatzElevator(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 
     GameState.UIRef().SetInputController(new PlayerCommandController(GameState));
 
-    if (!CheckCost(3, 25))
+    if (!CheckCost(3))
       return 0.0;
 
     bool desc = GameState.CurrentDungeon.Descending;
@@ -466,7 +464,7 @@ class CastFrogify(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     base.Execute();
     
-    if (!CheckCost(0, 10))
+    if (!CheckCost(0))
       return 0.0;
 
     // I don't yet want to deal with the player being polymorphed...
@@ -518,7 +516,7 @@ class CastSummonDecoy(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     base.Execute();
 
-    if (CheckCost(3, 10))
+    if (CheckCost(3))
     {
       GameState.Player.QueueAction(new PassAction(GameState, Actor!));
     }
@@ -533,7 +531,7 @@ class CastMirrorImage(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     base.Execute();
     
-    if (CheckCost(2, 20))
+    if (CheckCost(2))
       GameState.Player.QueueAction(new SummonDecoyAction(GameState, Actor!));
     
     return 0.0;
@@ -553,7 +551,7 @@ class CastConeOfCold(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     GameState!.UIRef().SetInputController(new PlayerCommandController(GameState));
     GameState.UIRef().ClosePopup();
 
-    if (!CheckCost(1, 0))
+    if (!CheckCost(1))
       return 0.0;
 
     HashSet<Loc> animLocs = [..Affected.Where(l => GameState.LastPlayerFoV.ContainsKey(l))];
@@ -612,7 +610,7 @@ class CastGustOfWindAction(GameState gs, Actor actor, Item? item) : CastSpellAct
     GameState!.UIRef().SetInputController(new PlayerCommandController(GameState));
     GameState.UIRef().ClosePopup();
     
-    if (!FreeToCast && !CheckCost(1, 0))
+    if (!FreeToCast && !CheckCost(1))
       return 0.0;
 
     GameState!.UIRef().AlertPlayer("Whoooosh!!");
@@ -899,7 +897,7 @@ class CastFireBreath(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     GameState!.UIRef().SetInputController(new PlayerCommandController(GameState));
     GameState.UIRef().ClosePopup();
 
-    if (!CheckCost(3, 0))
+    if (!CheckCost(3))
       return 0.0;
 
     HashSet<Loc> animLocs = [.. Affected.Where(l => GameState.LastPlayerFoV.ContainsKey(l))];
