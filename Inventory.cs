@@ -682,7 +682,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     };
   }
 
-  public List<string> Components() => [.. _components.Select(kvp => $"{kvp.Key} {kvp.Value}")];
+  public Dictionary<Component, int> Components() => _components;
 
   public virtual string ToText()
   {

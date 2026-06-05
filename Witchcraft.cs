@@ -18,17 +18,38 @@ class Spells
     "phase door" or "cone of cold" or "gust of wind" or "breathe fire" or "mirror image" => true,
     _ => false,
   };
+
+  public static Dictionary<string, Dictionary<Component, int>> Components = new()
+  {
+    ["arcane spark"] = new() { [Component.BlackPearl] = 1, [Component.SulphurousAsh] = 1 },
+    ["spark arc"]    = new() { [Component.BlackPearl] = 1, [Component.SulphurousAsh] = 2 },
+    ["illume"]       = new() { [Component.SulphurousAsh] = 10  },
+  };
 }
 
 abstract class CastSpellAction(GameState gs, Actor actor) : TargetedAction(gs, actor)
 {
-  protected bool CheckCost(int mpCost)
+  protected bool CheckCost(int mpCost, string spellName)
   {
     Stat magicPoints = Actor!.Stats[Attribute.MagicPoints];
     if (magicPoints.Curr < mpCost)
     {
-      GameState!.UIRef().AlertPlayer("You don't have enough mana!");
+      GameState.UIRef().AlertPlayer("You don't have enough mana!");
       return false;
+    }
+
+    if (Spells.Components.TryGetValue(spellName, out var components))
+    {
+      var inv = Actor!.Inventory.Components();
+      foreach (var component in components.Keys)
+      {
+        int required = components[component];
+        if (inv[component] < required)
+        {
+          GameState.UIRef().AlertPlayer("You are missing some spell components!");
+          return false;
+        }
+      }
     }
 
     magicPoints.Change(-mpCost);
@@ -41,7 +62,7 @@ class CastArcaneSpark(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 {
   public override double Execute()
   {
-    if (!CheckCost(1))
+    if (!CheckCost(1, "spark"))
       return 0.0;
 
     Item spark = new()
@@ -103,7 +124,7 @@ class CastSparkArc(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     base.Execute();
     
-    if (!CheckCost(2))
+    if (!CheckCost(2, "spark arc"))
       return 0.0;
 
     PreviousTargets.Add(Actor!.ID);
@@ -200,7 +221,7 @@ class CastMageArmour(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     base.Execute();
     
-    if (!CheckCost(2))
+    if (!CheckCost(2, "mage armour"))
       return 0.0;
 
     MageArmourTrait t = new();
@@ -219,7 +240,7 @@ class CastSlumberingSong(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     base.Execute();
     
-    if (!CheckCost(5))
+    if (!CheckCost(5, "slumbering song"))
       return 0.0;
 
     GameState.UIRef().AlertPlayer("Ala-ca-zzzzzzzzz!");
@@ -258,7 +279,7 @@ class CastIllume(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     base.Execute();
     
-    if (!CheckCost(1))
+    if (!CheckCost(1, "illume"))
       return 0.0;
 
     LightSpellTrait ls = new();
@@ -281,7 +302,7 @@ class CastPhaseDoor(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     
     GameState.UIRef().SetInputController(new PlayerCommandController(GameState));
 
-    if (!CheckCost(1))
+    if (!CheckCost(1, "phase door"))
       return 0.0;
     
     if (GameState.MapForActor(Actor!).HasFeature(MapFeatures.NoTeleport))
@@ -344,7 +365,7 @@ class CastErsatzElevator(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 
     GameState.UIRef().SetInputController(new PlayerCommandController(GameState));
 
-    if (!CheckCost(3))
+    if (!CheckCost(3, "ersatz elevator"))
       return 0.0;
 
     bool desc = GameState.CurrentDungeon.Descending;
@@ -464,7 +485,7 @@ class CastFrogify(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     base.Execute();
     
-    if (!CheckCost(0))
+    if (!CheckCost(0, "frogify"))
       return 0.0;
 
     // I don't yet want to deal with the player being polymorphed...
@@ -516,7 +537,7 @@ class CastSummonDecoy(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     base.Execute();
 
-    if (CheckCost(3))
+    if (CheckCost(3, "summon decoy"))
     {
       GameState.Player.QueueAction(new PassAction(GameState, Actor!));
     }
@@ -531,7 +552,7 @@ class CastMirrorImage(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     base.Execute();
     
-    if (CheckCost(2))
+    if (CheckCost(2, "mirror image"))
       GameState.Player.QueueAction(new SummonDecoyAction(GameState, Actor!));
     
     return 0.0;
@@ -551,7 +572,7 @@ class CastConeOfCold(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     GameState!.UIRef().SetInputController(new PlayerCommandController(GameState));
     GameState.UIRef().ClosePopup();
 
-    if (!CheckCost(1))
+    if (!CheckCost(1, "cone of cold"))
       return 0.0;
 
     HashSet<Loc> animLocs = [..Affected.Where(l => GameState.LastPlayerFoV.ContainsKey(l))];
@@ -610,7 +631,7 @@ class CastGustOfWindAction(GameState gs, Actor actor, Item? item) : CastSpellAct
     GameState!.UIRef().SetInputController(new PlayerCommandController(GameState));
     GameState.UIRef().ClosePopup();
     
-    if (!FreeToCast && !CheckCost(1))
+    if (!FreeToCast && !CheckCost(1, "gust of wind"))
       return 0.0;
 
     GameState!.UIRef().AlertPlayer("Whoooosh!!");
@@ -897,7 +918,7 @@ class CastFireBreath(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     GameState!.UIRef().SetInputController(new PlayerCommandController(GameState));
     GameState.UIRef().ClosePopup();
 
-    if (!CheckCost(3))
+    if (!CheckCost(3, "fire breath"))
       return 0.0;
 
     HashSet<Loc> animLocs = [.. Affected.Where(l => GameState.LastPlayerFoV.ContainsKey(l))];
@@ -1141,8 +1162,9 @@ class SpellcastMenu : Inputer
         width = 25;
       }
 
+      List<string> components = [.. GS.Player.Inventory.Components().Select(kvp => $"{kvp.Key} {kvp.Value}")];
       GS.UIRef().SetPopup(
-        new PopupMenu("Cast which spell?", SpellList, GS.Player.Inventory.Components(),  footer) 
+        new PopupMenu("Cast which spell?", SpellList, components,  footer) 
         { 
           SelectedRow = row, 
           Width = width }
