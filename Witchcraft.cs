@@ -23,7 +23,7 @@ class Spells
   {
     ["arcane spark"] = new() { [Component.BlackPearl] = 1, [Component.SulphurousAsh] = 1 },
     ["spark arc"]    = new() { [Component.BlackPearl] = 1, [Component.SulphurousAsh] = 2 },
-    ["illume"]       = new() { [Component.SulphurousAsh] = 10  },
+    ["illume"]       = new() { [Component.SulphurousAsh] = 1  },
   };
 }
 
@@ -40,15 +40,20 @@ abstract class CastSpellAction(GameState gs, Actor actor) : TargetedAction(gs, a
 
     if (Spells.Components.TryGetValue(spellName, out var components))
     {
-      var inv = Actor!.Inventory.Components();
+      var ownedComponents = Actor!.Inventory.Components();
       foreach (var component in components.Keys)
       {
         int required = components[component];
-        if (inv[component] < required)
+        if (ownedComponents[component] < required)
         {
           GameState.UIRef().AlertPlayer("You are missing some spell components!");
           return false;
         }
+      }
+
+      foreach (var component in components.Keys)
+      {
+        Actor!.Inventory.UseComponent(component, components[component]);
       }
     }
 
@@ -62,13 +67,12 @@ class CastArcaneSpark(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 {
   public override double Execute()
   {
-    if (!CheckCost(1, "spark"))
+    if (!CheckCost(1, "arcane spark"))
       return 0.0;
 
     Item spark = new()
     {
-      Name = "spark",
-      Type = ItemType.Weapon,
+      Name = "spark", Type = ItemType.Weapon,
       Glyph = new Glyph('*', Colours.ICE_BLUE, Colours.LIGHT_BLUE, Colours.BLACK, false)
     };
     spark.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Electricity });

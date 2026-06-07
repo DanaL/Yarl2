@@ -684,6 +684,8 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
   public Dictionary<Component, int> Components() => _components;
 
+  public void UseComponent(Component component, int amount) => _components[component] -= amount;
+
   public virtual string ToText()
   {
     string items = string.Join(',', _items.Select(i => $"{i.Item1}#{i.Item2}"));
