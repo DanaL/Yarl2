@@ -326,10 +326,7 @@ class WitchQuest
     ItemNames itemName = gs.Rng.NextDouble() < 0.8 ? ItemNames.DAGGER : ItemNames.SILVER_DAGGER;
     Item dagger = ItemFactory.Get(itemName, gs.ObjDb);
     gs.ObjDb.SetToLoc(loc, dagger);
-    itemName = gs.Rng.NextDouble() < 0.5 ? ItemNames.QUARTERSTAFF : ItemNames.GENERIC_WAND;
-    Item focus = ItemFactory.Get(itemName, gs.ObjDb);
-    gs.ObjDb.SetToLoc(loc, focus);
-
+    
     sq = floors[gs.Rng.Next(floors.Count)];
     loc = new Loc(id, 0, sq.Item1, sq.Item2);
     Item crystal = ItemFactory.Get(ItemNames.MEDITATION_CRYSTAL, gs.ObjDb);

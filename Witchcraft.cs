@@ -13,12 +13,6 @@ namespace Yarl2;
 
 class Spells
 {
-  public static bool NoFocus(string spell) => spell.ToLower() switch
-  {
-    "phase door" or "cone of cold" or "gust of wind" or "breathe fire" or "mirror image" => true,
-    _ => false,
-  };
-
   public static Dictionary<string, Dictionary<Component, int>> Components = new()
   {
     ["arcane spark"] = new() { [Component.BlackPearl] = 1, [Component.SulphurousAsh] = 1 },
@@ -975,7 +969,6 @@ class SpellcastMenu : Inputer
   string PopupText { get; set; } = "";
   int PopupRow { get; set; } = -1;
   List<string> SpellList { get; set; } = [];
-  List<string> SpellsNoFocus { get; set; } = [];
 
   public SpellcastMenu(GameState gs) : base(gs)
   {       
@@ -989,32 +982,7 @@ class SpellcastMenu : Inputer
     WritePopup();
   }
 
-  void SetSpellMenu()
-  {
-    bool focusEquipped;
-    if (GS.Player.Inventory.FocusEquipped())
-      focusEquipped = true;
-    else if (GS.Player.Inventory.ReadiedWeapon() is Item rw && rw.Name == "quarterstaff")
-      focusEquipped = true;
-    else
-      focusEquipped = false;
-
-    if (focusEquipped)
-    {
-      SpellList = [..GS.Player.SpellsKnown
-                        .Select(s => s.CapitalizeWords())];
-    }
-    else
-    {
-      SpellList = [..GS.Player.SpellsKnown
-                        .Where(Spells.NoFocus)
-                        .Select(s => s.CapitalizeWords())];
-
-      SpellsNoFocus = [..GS.Player.SpellsKnown
-                        .Where(s => !Spells.NoFocus(s))
-                        .Select(s => s.CapitalizeWords())];
-    }
-  }
+  void SetSpellMenu() => SpellList = [..GS.Player.SpellsKnown.Select(s => s.CapitalizeWords())];
 
   public override void Input(char ch)
   {
@@ -1154,21 +1122,10 @@ class SpellcastMenu : Inputer
   {    
     if (SpellSelection)
     {
-      int width = 0;
-      string footer = "";
-      foreach (string nf in SpellsNoFocus)
-      {
-        footer += $"[grey {nf}*]\n";
-      }
-      if (footer != "")
-      {
-        footer += "\n[grey *needs a spell focus]";  
-        width = 25;
-      }
-
+      int width = 0;      
       List<string> components = [.. GS.Player.Inventory.Components().Select(kvp => $"{kvp.Key} {kvp.Value}")];
       GS.UIRef().SetPopup(
-        new PopupMenu("Cast which spell?", SpellList, components,  footer) 
+        new PopupMenu("Cast which spell?", SpellList, components,  "") 
         { 
           SelectedRow = row, 
           Width = width }

@@ -80,8 +80,6 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     return false;
   }
 
-  public bool FocusEquipped() => Items().Any(i => i.Type == ItemType.Wand && i.Equipped);
-
   public Item? ReadiedWeapon()
   {
     foreach (var item in Items())
@@ -251,22 +249,6 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     return (EquipingResult.Unequipped, ArmourParts.None, null);
   }
 
-  static (EquipingResult, ArmourParts, Item?) ToggleWand(Item wand, int freeHands)
-  {
-    if (wand.Equipped)
-    {
-      return UnequipItem(wand);
-    }
-
-    if (freeHands > 0)
-    {
-      wand.Equipped = true;
-      return (EquipingResult.Equipped, ArmourParts.None, null);
-    }
-
-    return (EquipingResult.NoFreeHand, ArmourParts.None, null);
-  }
-
   // This toggles the equip status of gear only and recalculation of stuff
   // like armour class has to be done elsewhere because it felt icky to
   // have a reference back to the inventory's owner in the inventory object
@@ -300,13 +282,8 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         if (ReadiedWeapon() is not null)
           --freeHands;
         if (shield)
-          --freeHands;
-        if (FocusEquipped())
-          --freeHands;
+          --freeHands;        
       }
-
-      if (item.Type == ItemType.Wand)
-        return ToggleWand(item, freeHands);
 
       if (item.Equipped && item.Type == ItemType.Arrow)
       {
@@ -629,9 +606,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         else if (item.Type == ItemType.Bow)
           desc += " [GREY (equipped)]";
         else if (item.Type == ItemType.Ring)
-          desc += " [GREY (wearing)]";
-        else if (item.Type == ItemType.Wand)
-          desc += " [LIGHTBLUE (focus)]";
+          desc += " [GREY (wearing)]";        
         else if (item.Type == ItemType.Arrow)
           desc += " [GREY (readied)]";
         else

@@ -1187,14 +1187,7 @@
     "Traits": [
       "Wand#20#false#summoning"
     ]
-  },
-  {
-    "Name": "GENERIC_WAND",
-    "DescriptiveName": "generic wand",
-    "Type": "Wand",
-    "Value": 5,
-    "Glyph": "/,lightbrown,brown,black,false"
-  },
+  },  
   {
     "Name": "MEDITATION_CRYSTAL",
     "DescriptiveName": "meditation crystal",

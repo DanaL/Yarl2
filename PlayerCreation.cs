@@ -195,10 +195,6 @@ class PlayerCreator
     slot = player.Inventory.Add(dagger, player.ID);
     player.Inventory.ToggleEquipStatus(slot);
 
-    Item focus = ItemFactory.Get(ItemNames.GENERIC_WAND, objDb);
-    slot = player.Inventory.Add(focus, player.ID);
-    player.Inventory.ToggleEquipStatus(slot);
-
     for (int i = 0; i < rng.Next(3, 6); i++)
     {
       player.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), player.ID);

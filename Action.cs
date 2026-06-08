@@ -1444,13 +1444,10 @@ class WitchServiceAction(GameState gs, Mob witch) : Action(gs, witch)
       GameState.Player.SpellsKnown.Add("arcane spark");
 
       Item? crystal = null;
-      bool hasFocus = false;
       foreach (Item item in GameState.Player.Inventory.Items())
       {
         if (item.Name == "meditation crystal")
-          crystal = item;
-        if (item.Type == ItemType.Wand || item.Name == "quarterstaff")
-          hasFocus = true;
+          crystal = item;        
       }
 
       if (crystal is not null)
@@ -1464,9 +1461,7 @@ class WitchServiceAction(GameState gs, Mob witch) : Action(gs, witch)
         fact.Value = "complete";
       }
       
-      string s = $"{Actor!.FullName.Capitalize()} gives you a crash course in elementary magic! After some light magic theory and learning to focus through the meditation crystal, you become able to tap into your inner arcane power!";
-      if (!hasFocus)
-        s += "\n\nOh! You'll also need a magical focus to cast spells through. Any wand will do, or a good quarterstaff!";
+      string s = $"{Actor!.FullName.Capitalize()} gives you a crash course in elementary magic! After some light magic theory and learning to focus through the meditation crystal, you become able to tap into your inner arcane power!";      
       GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
       GameState.UIRef().AlertPlayer("You have mastered Magic 101.");
       GameState.UIRef().AlertPlayer("You have learned to cast arcane spark.");
@@ -4086,19 +4081,7 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
     var (equipResult, conflict, swapped) = ((Player)Actor).Inventory.ToggleEquipStatus(Choice);
     string s;
     switch (equipResult)
-    {
-      case EquipingResult.Equipped:
-        s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "ready")} {item.FullName.DefArticle()}";
-        s += item.Type == ItemType.Wand ? " as a casting focus." : ".";
-        GameState.UIRef().AlertPlayer(s);
-        energyCost = 1.0;
-        break;
-      case EquipingResult.StackEquipped:
-        s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "ready")} {item.FullName.DefArticle().Pluralize()}";
-        s += item.Type == ItemType.Wand ? " as a casting focus." : ".";
-        GameState.UIRef().AlertPlayer(s);
-        energyCost = 1.0;
-        break;
+    {      
       case EquipingResult.Unequipped:
         s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "unequip")} {item.FullName.DefArticle()}.";
         GameState.UIRef().AlertPlayer(s);
