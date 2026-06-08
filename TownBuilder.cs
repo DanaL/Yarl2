@@ -601,6 +601,8 @@ class TownBuilder
     List<string> shrines = [.. Templates.Keys.Where(k => k.StartsWith("shrine"))];
     string shrine = shrines[rng.Next(shrines.Count)];
     PlaceBuilding(map, townRow, townCol, Templates[shrine], BuildingType.Shrine, rng);
+    if (Town.Shrine.Count == 0)
+      throw new CampaignCreationException("Could not place temple");
 
     // place the cottages/homes
     for (int i = 0; i < 6; i++)
