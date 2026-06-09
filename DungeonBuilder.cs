@@ -60,33 +60,49 @@ abstract class DungeonBuilder
     return closets;
   }
 
+  // if there's a river, sometimes add seeweed and/or pearls nearby
   protected static void DecorateRiver(Map map, int dungeonId, int level, GameObjectDB objDb, Rng rng)
   {
-    // if there's a river, sometimes add seeweed nearby
-    if (rng.Next(3) == 0)
+    bool addSeeweed = rng.Next(3) == 0;
+    bool addPearls = rng.Next(3) == 0;
+
+    if (!(addSeeweed || addPearls))
+      return;
+    
+    HashSet<(int, int)> candidates = [];
+    for (int r = 0; r < map.Height; r++)
     {
-      HashSet<(int, int)> candidates = [];
-      for (int r = 0; r < map.Height; r++)
+      for (int c = 0; c < map.Width; c++)
       {
-        for (int c = 0; c < map.Width; c++)
+        if (map.TileAt(r, c).Type == TileType.DeepWater)
         {
-          if (map.TileAt(r, c).Type == TileType.DeepWater)
-          {
-            foreach (var sq in map.TilesNearSq(TileType.DungeonFloor, r, c, 2))
-              candidates.Add(sq);
-          }
+          foreach (var sq in map.TilesNearSq(TileType.DungeonFloor, r, c, 2))
+            candidates.Add(sq);
         }
       }
+    }
 
-      List<(int, int)> sqs = [.. candidates];
+    List<(int, int)> sqs = [.. candidates];
+
+    if (addSeeweed)
+    {
       sqs.Shuffle(rng);
-      int numOfWeeds = rng.Next(1, 4);
-      foreach (var sq in sqs.Take(numOfWeeds))
+      foreach (var sq in sqs.Take(rng.Next(1, 4)))
       {
         Item weed = ItemFactory.Get(ItemNames.SEEWEED, objDb);
         objDb.SetToLoc(new(dungeonId, level, sq.Item1, sq.Item2), weed);
       }
     }
+    
+    if (addPearls)
+    {
+      sqs.Shuffle(rng);
+      foreach (var sq in sqs.Take(rng.Next(1, 3)))
+      {
+        Item pearl = ItemFactory.Get(ItemNames.BLACK_PEARL, objDb);
+        objDb.SetToLoc(new(dungeonId, level, sq.Item1, sq.Item2), pearl);
+      }
+    }    
   }
 
   // If a river/chasm cuts the up stairs off from the down stairs, drop
