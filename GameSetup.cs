@@ -380,12 +380,16 @@ class CampaignCreator(UserInterface ui)
         
         // Redraw map if there aren't enough mountains
         int mountains = 0;
+        List<(int, int)> shoreSqs = [];
         for (int r = 0; r < wildernessMap.Height; r++)
         {
           for (int c = 0; c < wildernessMap.Width; c++)
           {
-            if (wildernessMap.TileAt(r, c).Type == TileType.Mountain)
+            Tile tile = wildernessMap.TileAt(r, c);
+            if (tile.Type == TileType.Mountain)
               ++mountains;
+            else if (tile.Passable() && Util.Adj8Sqs(r, c).Any(sq => wildernessMap.TileAt(sq).Type == TileType.DeepWater))
+              shoreSqs.Add((r, c));
           }
         }
         if (mountains < 20)
