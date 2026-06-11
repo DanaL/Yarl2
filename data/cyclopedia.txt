@@ -817,3 +817,6 @@ A prank device created by gnomes that creates a loud bang when set off. Very ann
 #
 black pearl
 An important spell component in spells where magic must be sent in a specific direction.
+#
+sulphurous ash
+A spell component commonly used in spells involved with flame and light. It is manufactured by alchemists and sometimes left behind when demons are defeated.
