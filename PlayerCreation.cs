@@ -183,12 +183,10 @@ class PlayerCreator
     player.Stats[Attribute.Constitution] = new Stat(_basicStatArray[rng.Next(_basicStatArray.Length)]);
     player.Stats[Attribute.Dexterity] = new Stat(_basicStatArray[rng.Next(_basicStatArray.Length)]);
     player.Stats[Attribute.Strength] = new Stat(_basicStatArray[rng.Next(_basicStatArray.Length - 2)]);
-    player.Stats.Add(Attribute.MagicPoints, new Stat(rng.Next(2, 5)));
-    player.SpellsKnown.Add("arcane spark");
-    player.SpellsKnown.Add("illume");
-    player.SpellsKnown.Add("frogify");
-    player.SpellsKnown.Add("ersatz elevator");
+    player.Stats.Add(Attribute.MagicPoints, new Stat(rng.Next(4, 7)));
 
+    player.SpellsKnown.Add("arcane spark");
+    
     char slot;
 
     Item dagger = ItemFactory.Get(ItemNames.DAGGER, objDb);
