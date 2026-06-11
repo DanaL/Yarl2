@@ -395,6 +395,17 @@ class CampaignCreator(UserInterface ui)
         if (mountains < 20)
           continue;
 
+        if (shoreSqs.Count > 0)
+        {
+          for (int j = 0; j < rng.Next(2, 5); j ++)
+          {
+            int x = rng.Next(shoreSqs.Count);
+            Loc loc = new(0, 0, shoreSqs[x].Item1, shoreSqs[x].Item2);
+            Item pearl = ItemFactory.Get(ItemNames.BLACK_PEARL, objDb);
+            objDb.SetToLoc(loc, pearl);
+          }  
+        }
+        
         TownBuilder tb = new();
         wildernessMap = tb.DrawnTown(wildernessMap, rng);
         town = tb.Town;
