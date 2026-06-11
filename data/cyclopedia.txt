@@ -814,3 +814,6 @@ An enormous bipedal insectoid creature whose claws are mighty enough to tunnel t
 #
 gnome gnoisemaker
 A prank device created by gnomes that creates a loud bang when set off. Very annoying at gnome parties, but also can frighten monsters in the dungeon.
+#
+black pearl
+An important spell component in spells where magic must be sent in a specific direction.
