@@ -1728,7 +1728,6 @@
     "Value": 1,
     "Glyph": ",,darkgrey,grey,black,false",
     "Traits": [
-      "Plural",
       "Stackable"
     ]
   },
@@ -1739,7 +1738,6 @@
     "Value": 1,
     "Glyph": ",,white,lightgrey,black,false",
     "Traits": [
-      "Plural",
       "Stackable"
     ]
   },
@@ -1750,7 +1748,6 @@
     "Value": 1,
     "Glyph": ",,lightbrown,brown,black,false",
     "Traits": [
-      "Plural",
       "Stackable"
     ]
   },
@@ -1761,7 +1758,6 @@
     "Value": 1,
     "Glyph": ",,lightbeige,beige,black,false",
     "Traits": [
-      "Plural",
       "Stackable"
     ]
   }
