@@ -141,6 +141,12 @@ class MoveAction(GameState gameState, Actor actor, Loc loc, bool involuntary) : 
           var txt = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "tear")} through {env.Name.DefArticle()}.";
           ui.AlertPlayer(txt, gs, actor.Loc);
           gs.ObjDb.RemoveItemFromGame(env.Loc, env);
+
+          if (gs.Rng.Next(4) == 0)
+          {
+            Item silk = ItemFactory.Get(ItemNames.SPIDER_SILK, gs.ObjDb);
+            gs.ItemDropped(silk, actor.Loc, false);
+          }
         }
       }
     }
