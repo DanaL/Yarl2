@@ -186,6 +186,7 @@ class PlayerCreator
     player.Stats.Add(Attribute.MagicPoints, new Stat(rng.Next(4, 7)));
 
     player.SpellsKnown.Add("arcane spark");
+    player.SpellsKnown.Add("phase door");
     
     char slot;
 
@@ -216,6 +217,8 @@ class PlayerCreator
     {
       player.Inventory.Add(ItemFactory.Get(ItemNames.SULPHUROUS_ASH, objDb), player.ID);
       player.Inventory.Add(ItemFactory.Get(ItemNames.BLACK_PEARL, objDb), player.ID);
+      player.Inventory.Add(ItemFactory.Get(ItemNames.SPIDER_SILK, objDb), player.ID);
+      player.Inventory.Add(ItemFactory.Get(ItemNames.BLOOD_MOSS, objDb), player.ID);
     }
   }
 
