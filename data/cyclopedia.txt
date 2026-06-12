@@ -820,3 +820,6 @@ An important spell component in spells where magic must be sent in a specific di
 #
 sulphurous ash
 A spell component commonly used in spells involved with flame and light. It is manufactured by alchemists and sometimes left behind when demons are defeated.
+#
+blood moss
+To farmers, a nuisance fungus that can invade fields and attack crops. To magic users, a precious component used in spells of travel and movement.
