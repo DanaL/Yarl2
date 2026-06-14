@@ -130,12 +130,26 @@ class ShopMenuInputer : Inputer
     }
   }
 
-  public override UIResult GetResult() => new ShoppingUIResult()
-  {
-    Zorkminds = TotalInvoice(),
-    Selections = [.. MenuItems.Values.Where(i => i.SelectedCount > 0)
-                                    .Select(i => (i.Slot, i.SelectedCount))]
-  };
+  public override UIResult GetResult()
+  {    
+    ShoppingUIResult result = new() { Zorkmids = TotalInvoice() };
+    foreach (var item in MenuItems.Values)
+    {
+      if (item.SelectedCount == 0)
+        continue;
+      if (item.Item.Type == ItemType.Component) 
+      {
+        Component c = Spells.StrToComponent(item.Item.Name);
+        result.Components.Add(new (c, item.SelectedCount));
+      }
+      else
+      {
+        result.Selections.Add(new (item.Slot, item.SelectedCount));
+      }
+    }
+
+    return result;
+  }
 
   protected int TotalInvoice() => MenuItems.Values.Sum(mi => mi.SelectedCount * mi.Price);
 
@@ -653,7 +667,7 @@ class SmithyInputer : ShopMenuInputer
     {
       return new ShoppingUIResult()
       {
-        Zorkminds = TotalInvoice(),
+        Zorkmids = TotalInvoice(),
         Selections = [.. MenuItems.Values.Where(i => i.SelectedCount > 0)
                                     .Select(i => (i.Slot, i.SelectedCount))]
       };
@@ -1105,7 +1119,8 @@ class PriestInputer : Inputer
 class ShoppingUIResult : UIResult
 {
   public List<(char, int)> Selections { get; set; } = [];
-  public int Zorkminds { get; set; } = 0;
+  public List<(Component, int)> Components { get; set; } = [];
+  public int Zorkmids { get; set; } = 0;
 }
 
 class RepairItemUIResult : UIResult

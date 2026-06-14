@@ -1492,6 +1492,7 @@ class ShoppingCompletedAction(GameState gs, Mob shopkeeper) : Action(gs)
   readonly Mob _shopkeeper = shopkeeper;
   int _invoice;
   List<(char, int)> _selections = [];
+  List<(Component, int)> _components = [];
 
   public override double Execute()
   {
@@ -1515,6 +1516,12 @@ class ShoppingCompletedAction(GameState gs, Mob shopkeeper) : Action(gs)
       }
     }
 
+    foreach (var comp in _components)
+    {
+      GameState.Player.Inventory.AddComponent(comp.Item1, comp.Item2);
+      _shopkeeper.Inventory.UseComponent(comp.Item1, comp.Item2);  
+    }
+
     if (overflow)
     {
       GameState.UIRef().AlertPlayer("Uh-oh - you didn't have enough room in your inventory!");      
@@ -1526,8 +1533,9 @@ class ShoppingCompletedAction(GameState gs, Mob shopkeeper) : Action(gs)
   public override void ReceiveUIResult(UIResult result)
   {
     var shopResult = (ShoppingUIResult) result;
-    _invoice = shopResult.Zorkminds;
+    _invoice = shopResult.Zorkmids;
     _selections = shopResult.Selections;
+    _components = shopResult.Components;
   }
 }
 

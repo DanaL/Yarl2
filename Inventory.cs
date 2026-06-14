@@ -23,7 +23,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
   readonly List<(char, ulong)> _items = [];
   public char LastSlot { get; set; } = '\0';
   readonly GameObjectDB _objDb = objDb;
-  Dictionary<Component, int> _components = Enum.GetValues<Component>().ToDictionary(c => c, _ => 0);
+  readonly Dictionary<Component, int> _components = Enum.GetValues<Component>().ToDictionary(c => c, _ => 0);
 
   public bool Contains(ulong itemID)
   {
@@ -665,6 +665,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
   public Dictionary<Component, int> Components() => _components;
 
+  public void AddComponent(Component component, int amount) => _components[component] += amount;
   public void UseComponent(Component component, int amount) => _components[component] -= amount;
 
   public virtual string ToText()

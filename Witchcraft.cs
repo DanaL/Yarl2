@@ -35,6 +35,17 @@ class Spells
     //Component.MandrakeRoot => ItemNames.MANDRAKE_ROOT,
     _ => throw new Exception("Unknown spell component")
   };
+
+  public static Component StrToComponent(string n) => n switch
+  {
+    "black pearl" => Component.BlackPearl,
+    "blood moss" => Component.BloodMoss,
+    "ginseng" => Component.Ginseng,
+    "garlic" => Component.Garlic,
+    "sulphurous ash" => Component.SulphurousAsh,
+    "spider silk" => Component.SpiderSilk,
+    _ => throw new Exception($"Unknown component name: {n}")
+  };
 }
 
 abstract class CastSpellAction(GameState gs, Actor actor) : TargetedAction(gs, actor)
