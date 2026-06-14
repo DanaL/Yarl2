@@ -606,6 +606,14 @@ class AlchemistBehaviour : NPCBehaviour
       item.Traits.Add(new SideEffectTrait() { Odds = 10, Effect = "Confused#0#13#0" });
       npc.Inventory.Add(item, npc.ID);
     }
+
+    var components = npc.Inventory.Components();
+    if (components[Component.SulphurousAsh] == 0)
+      npc.Inventory.AddComponent(Component.SulphurousAsh, gs.Rng.Next(10, 21));
+    if (components[Component.BlackPearl] == 0)
+      npc.Inventory.AddComponent(Component.BlackPearl, gs.Rng.Next(10, 21));
+    if (components[Component.BloodMoss] == 0)
+      npc.Inventory.AddComponent(Component.BloodMoss, gs.Rng.Next(5, 16));
   }
 }
 
@@ -831,6 +839,14 @@ class GrocerBehaviour : NPCBehaviour
         npc.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, gs.ObjDb), npc.ID);
       }
     }
+
+    var components = npc.Inventory.Components();
+    if (components[Component.Ginseng] == 0)
+      npc.Inventory.AddComponent(Component.Ginseng, gs.Rng.Next(10, 21));
+    if (components[Component.Garlic] == 0)
+      npc.Inventory.AddComponent(Component.Garlic, gs.Rng.Next(10, 21));
+    // if (components[Component.MandrakeRoot] == 0)
+    //   npc.Inventory.AddComponent(Component.MandrakeRoot, gs.Rng.Next(10, 21));
   }
 }
 
