@@ -1725,7 +1725,7 @@
     "Name": "BLACK_PEARL",
     "DescriptiveName": "black pearl",
     "Type": "Component",
-    "Value": 1,
+    "Value": 2,
     "Glyph": ",,darkgrey,grey,black,false",
     "Traits": [
       "Stackable"
@@ -1765,7 +1765,7 @@
     "Name": "BLOOD_MOSS",
     "DescriptiveName": "blood moss",
     "Type": "Component",
-    "Value": 1,
+    "Value": 3,
     "Glyph": ",,brightred,dullred,black,false",
     "Traits": [
       "Stackable"

@@ -273,6 +273,13 @@ class Village
         grocer.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_TRAP_DETECTION, objDb), grocer.ID);
     }
 
+    for (int j = 0; j < 5; j++)
+    {
+      grocer.Inventory.Add(ItemFactory.Get(ItemNames.GINSENG, objDb), grocer.ID);
+      grocer.Inventory.Add(ItemFactory.Get(ItemNames.GARLIC, objDb), grocer.ID);
+      //grocer.Inventory.Add(ItemFactory.Get(ItemNames.MANDRAKE_ROOT, objDb), grocer.ID);
+    }
+
     return grocer;
   }
 
@@ -549,6 +556,13 @@ class Village
       sophie.Inventory.Add(SophieItem(ItemNames.TINCTURE_CELERITY), sophie.ID);
     if (rng.NextDouble() < 0.33)
       sophie.Inventory.Add(SophieItem(ItemNames.POTION_CLARITY), sophie.ID);
+
+    for (int j = 0; j < 5; j++)
+    {
+      sophie.Inventory.Add(ItemFactory.Get(ItemNames.SULPHUROUS_ASH, objDb), sophie.ID);
+      sophie.Inventory.Add(ItemFactory.Get(ItemNames.BLACK_PEARL, objDb), sophie.ID);
+      sophie.Inventory.Add(ItemFactory.Get(ItemNames.BLOOD_MOSS, objDb), sophie.ID);
+    }
 
     Item SophieItem(ItemNames name)
     {

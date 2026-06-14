@@ -21,6 +21,20 @@ class Spells
     ["phase door" ]       = new() { [Component.SpiderSilk] = 1, [Component.BloodMoss] = 1 },
     ["ersatz elevator" ]  = new() { [Component.SpiderSilk] = 1, [Component.BloodMoss] = 1, [Component.SulphurousAsh] = 1 }
   };
+
+//, , , , , , Nightshade, MandrakeRoot
+  public static ItemNames ComponentName(Component component) => component switch
+  {
+    Component.BlackPearl => ItemNames.BLACK_PEARL,
+    Component.BloodMoss => ItemNames.BLOOD_MOSS,
+    Component.Ginseng => ItemNames.GINSENG,
+    Component.Garlic => ItemNames.GARLIC,
+    Component.SulphurousAsh => ItemNames.SULPHUROUS_ASH,
+    Component.SpiderSilk => ItemNames.SPIDER_SILK,
+    //Component.Nightshade => ItemNames.NIGHTSHADE,
+    //Component.MandrakeRoot => ItemNames.MANDRAKE_ROOT,
+    _ => throw new Exception("Unknown spell component")
+  };
 }
 
 abstract class CastSpellAction(GameState gs, Actor actor) : TargetedAction(gs, actor)

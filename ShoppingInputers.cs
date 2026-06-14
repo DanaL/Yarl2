@@ -74,6 +74,18 @@ class ShopMenuInputer : Inputer
       menuItems.Add(ch++, new ShopMenuItem(item!.Slot, item, count, price));
     }
 
+    var components = shopkeeper.Inventory.Components();
+    foreach (var kvp in components)
+    {
+      if (kvp.Value > 0)
+      {
+        ItemNames componentName = Spells.ComponentName(kvp.Key);
+        Item component = ItemFactory.Get(componentName, GS.ObjDb);
+        int price = (int)(component.Value * markup);
+        menuItems.Add(ch++, new ShopMenuItem('\0', component, kvp.Value, price));
+      }
+    }
+   
     return menuItems;
   }
 
