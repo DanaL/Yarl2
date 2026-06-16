@@ -1876,6 +1876,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "curedisease" => new UseResult(new CureDisease(gs, user)),
     "disarm" => new UseResult(new DisarmAction(gs, user, user.Loc)),
     "minorheal" => new UseResult(new HealAction(gs, user, 4, 4)),
+    "learnmagearmour" => new UseResult(new LearnSpellAction(gs, user, "mage armour")),
     "restoremana" => new UseResult(new RestoreMana(gs, user)),
     "maxheal" => new UseResult(new HealAction(gs, user, int.MaxValue, -1)),
     "trivialheal" => new UseResult(new HealAction(gs, user, 1, 1)),    

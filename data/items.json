@@ -1770,5 +1770,18 @@
     "Traits": [
       "Stackable"
     ]
+  },
+  {
+    "Name": "SPELLBOOK_MAGE_ARMOUR",
+    "DescriptiveName": "spellbook of mage armour",
+    "Type": "SpellBook",
+    "Value": 25,
+    "Glyph": "♪,white,lightgrey,black,false",
+    "Traits": [
+      "Consumable",
+      "Flammable",
+      "UseSimple#learnmagearmour"
+      
+    ]
   }
 ]

@@ -3511,6 +3511,28 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice) : Action
   }
 }
 
+class LearnSpellAction(GameState gs, Actor target, string spellName) : Action(gs, target)
+{
+  string _spellName = spellName;
+
+  public override double Execute()
+  {
+    base.Execute();
+
+    if (GameState.Player.SpellsKnown.Contains(_spellName))
+    {
+      GameState.UIRef().AlertPlayer($"You already known {_spellName}!");
+    }
+    else
+    {
+      GameState.Player.SpellsKnown.Add(_spellName);
+      GameState.UIRef().AlertPlayer($"You learn {_spellName}!");
+    }
+
+    return 1.0;
+  }
+}
+
 class ClarityAction(GameState gs, Actor target) : Action(gs, target)
 {
   public override double Execute()

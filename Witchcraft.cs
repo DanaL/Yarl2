@@ -747,6 +747,7 @@ class CastGustOfWindAction(GameState gs, Actor actor, Item? item) : CastSpellAct
     int distance = item.Type switch
     {
       ItemType.Scroll => 5,
+      ItemType.SpellBook => 5,
       ItemType.Document => 5,
       ItemType.Armour => 3,
       _ => 4

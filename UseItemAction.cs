@@ -995,6 +995,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
             GameState.UIRef().RegisterAnimation(anim);
             break;
           case ItemType.Scroll:
+          case ItemType.SpellBook:
             anim = new SqAnimation(GameState, animLoc, Colours.WHITE, Colours.FAINT_PINK, '?');
             GameState.UIRef().RegisterAnimation(anim);
             break;

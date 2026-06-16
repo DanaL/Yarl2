@@ -823,3 +823,6 @@ A spell component commonly used in spells involved with flame and light. It is m
 #
 blood moss
 To farmers, a nuisance fungus that can invade fields and attack crops. To magic users, a precious component used in spells of travel and movement.
+#
+spellbook of mage armour
+This text (stamped as property of the Yendorian University Library) has instructions for Mage Armour, a spell providing a temporary, magical boost to your AC. Casting the spell requires 2 pieces of [lightblue Spider Silk] for its binding, protecting nature.

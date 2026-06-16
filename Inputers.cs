@@ -1591,7 +1591,7 @@ class InventoryDetails : Inputer
           desc += item.Type switch
           {
             ItemType.Potion => "[ICEBLUE a)] drink potion\n",
-            ItemType.Scroll or ItemType.Document => $"[ICEBLUE a)] read {item.Type.ToString().ToLower()}\n",
+            ItemType.Scroll or ItemType.Document or ItemType.SpellBook => $"[ICEBLUE a)] read {item.Type.ToString().ToLower()}\n",
             _ => "[ICEBLUE a)] use item\n",
           };
           Options.Add('a');
