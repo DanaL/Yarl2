@@ -409,7 +409,9 @@ class PopupMenu : IPopup
         // before we draw highlighted line
         ui.WriteLine($"│ {" ".PadRight(width - 4)} │", row, col, width, DefaultTextColour);
         ui.WriteLine($"{MenuItems[i].PadRight(menuWidth)}", row, col + 2, menuWidth, DefaultTextColour, Colours.HILITE);
-        ui.WriteLine($"{SidePanelItems[i]}", row++, col + menuWidth + 8, menuWidth, DefaultTextColour);        
+        if (i < SidePanelItems.Count)
+          ui.WriteLine($"{SidePanelItems[i]}", row, col + menuWidth + 8, menuWidth, DefaultTextColour);
+        ++row;
       }
       else
       {
