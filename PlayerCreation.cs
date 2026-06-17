@@ -33,7 +33,7 @@ class PlayerCreator
       Stats = new Dictionary<Attribute, Stat>()
       {
         { Attribute.Nerve, new Stat(1250) },
-        { Attribute.BaseHP, new Stat(10) },
+        { Attribute.BaseHP, new Stat(12) },
         { Attribute.HP, new Stat(1) }
       }
     };
