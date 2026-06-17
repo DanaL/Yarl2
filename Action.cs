@@ -3521,7 +3521,7 @@ class LearnSpellAction(GameState gs, Actor target, string spellName) : Action(gs
 
     if (GameState.Player.SpellsKnown.Contains(_spellName))
     {
-      GameState.UIRef().AlertPlayer($"You already known {_spellName}!");
+      GameState.UIRef().AlertPlayer($"You already know {_spellName}!");
     }
     else
     {

@@ -186,7 +186,6 @@ class PlayerCreator
     player.Stats.Add(Attribute.MagicPoints, new Stat(rng.Next(4, 7)));
 
     player.SpellsKnown.Add("arcane spark");
-    player.SpellsKnown.Add("phase door");
     
     char slot;
 

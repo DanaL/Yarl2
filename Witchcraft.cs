@@ -18,7 +18,7 @@ class Spells
     ["arcane spark"]      = new() { [Component.BlackPearl] = 1, [Component.SulphurousAsh] = 1 },
     ["spark arc"]         = new() { [Component.BlackPearl] = 1, [Component.SulphurousAsh] = 2 },
     ["illume"]            = new() { [Component.SulphurousAsh] = 1  },
-    ["phase door" ]       = new() { [Component.SpiderSilk] = 1, [Component.BloodMoss] = 1 },
+    ["phase door" ]       = new() { [Component.SpiderSilk] = 1, [Component.BloodMoss] = 1, [Component.BlackPearl] = 1},
     ["ersatz elevator" ]  = new() { [Component.SpiderSilk] = 1, [Component.BloodMoss] = 1, [Component.SulphurousAsh] = 1 }
   };
 

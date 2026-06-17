@@ -826,3 +826,9 @@ To farmers, a nuisance fungus that can invade fields and attack crops. To magic 
 #
 spellbook of mage armour
 This text (stamped as property of the Yendorian University Library) has instructions for Mage Armour, a spell providing a temporary, magical boost to your AC. Casting the spell requires 2 pieces of [lightblue Spider Silk] for its binding, protecting nature.
+#
+spellbook of phase door
+Instructions for the phase door spell, a favourite of wizards who feel walking is beneath them. Phase door requires [lightblue Blood Moss] for magical movement, [lightblue Spider Silk] to bind your body together as it blinks through Ethereal Plane, and a [lightblue Black Pearl] to direct the magical energies in the direction you wish to travel.
+#
+spellbook of ersatz elevator
+A tome featuring the rare Ersatz Elevator spell, magic that allows the caster to move up or down between dungeon floors. Components needed are the [lightblue Blood Moss] and [lightblue Spider Silk] common to magical transportation as well as [lightblue Sulphurous Ash] to create a beacon above or below you to move toward.

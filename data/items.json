@@ -1780,8 +1780,31 @@
     "Traits": [
       "Consumable",
       "Flammable",
-      "UseSimple#learnmagearmour"
-      
+      "UseSimple#learnmagearmour"      
+    ]
+  },
+  {
+    "Name": "SPELLBOOK_PHASE_DOOR",
+    "DescriptiveName": "spellbook of phase door",
+    "Type": "SpellBook",
+    "Value": 25,
+    "Glyph": "♪,white,lightgrey,black,false",
+    "Traits": [
+      "Consumable",
+      "Flammable",
+      "UseSimple#learnphasedoor"      
+    ]
+  },
+  {
+    "Name": "SPELLBOOK_ERSATZ_ELEVATOR",
+    "DescriptiveName": "spellbook of ersatz elevator",
+    "Type": "SpellBook",
+    "Value": 25,
+    "Glyph": "♪,white,lightgrey,black,false",
+    "Traits": [
+      "Consumable",
+      "Flammable",
+      "UseSimple#learnelevator"      
     ]
   }
 ]
