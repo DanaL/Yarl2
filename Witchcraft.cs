@@ -96,7 +96,7 @@ class CastArcaneSpark(GameState gs, Actor actor) : CastSpellAction(gs, actor)
       Name = "spark", Type = ItemType.Weapon,
       Glyph = new Glyph('*', Colours.ICE_BLUE, Colours.LIGHT_BLUE, Colours.BLACK, false)
     };
-    spark.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Electricity });
+    spark.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 3, DamageType = DamageType.Electricity });
     GameState!.ObjDb.Add(spark);
 
     int attackMod = 2;
@@ -184,7 +184,7 @@ class CastSparkArc(GameState gs, Actor actor) : CastSpellAction(gs, actor)
       Name = "spark", Type = ItemType.Weapon,
       Glyph = new Glyph('*', Colours.ICE_BLUE, Colours.LIGHT_BLUE, Colours.BLACK, false)
     };
-    spark.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Electricity });
+    spark.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 3, DamageType = DamageType.Electricity });
     
     foreach (Loc pt in trajectory)
     {
