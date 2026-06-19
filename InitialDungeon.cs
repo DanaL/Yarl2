@@ -456,6 +456,15 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     }
     PlaceDocument(hintFloors, hint, hintDesc, hintAdj, objDb, rng);
 
+    for (int l = 0; l < levelMaps.Length; l++)
+    {
+      if (rng.Next(10) == 0)
+      {
+        List<Loc> floors = Floors(levelMaps[l], l);
+        AddAdventurerCorpse(floors, objDb, rng);
+      }
+    }
+    
     static bool ValidStatueSq(Map map, int r, int c)
     {
       int adjFloorCount = 0;
@@ -496,6 +505,30 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
       return floors;
     }
+  }
+
+  static void AddAdventurerCorpse(List<Loc> floors, GameObjectDB objDb, Rng rng)
+  {
+    Loc loc = floors[rng.Next(floors.Count)];
+
+    // Eventually I'll have other kinds but at the moment this is a chance to
+    // pepper some spell components here and there
+    foreach (var component in Enum.GetValues<Component>())
+    {
+      if (rng.Next(5) == 0)
+      {
+        int count = rng.Next(1, 6);
+        for (int j = 0; j < count; j++)
+        {
+          var name = Spells.ComponentName(component);
+          var c = ItemFactory.Get(name, objDb);
+          objDb.SetToLoc(loc, c);
+        }
+      }  
+    }
+
+    Item skull = ItemFactory.Get(ItemNames.SKULL, objDb);
+    objDb.SetToLoc(loc, skull);
   }
 
   static void PlaceFresco(Map map, List<Loc> floors, string frescoText, Rng rng)
