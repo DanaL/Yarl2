@@ -1721,7 +1721,7 @@
       "Stackable"
     ]
   },
-   {
+  {
     "Name": "BLACK_PEARL",
     "DescriptiveName": "black pearl",
     "Type": "Component",
@@ -1767,6 +1767,26 @@
     "Type": "Component",
     "Value": 3,
     "Glyph": ",,brightred,dullred,black,false",
+    "Traits": [
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "NIGHTSHADE",
+    "DescriptiveName": "nightshare",
+    "Type": "Component",
+    "Value": 2,
+    "Glyph": ",,green,darkgreen,black,false",
+    "Traits": [
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "MANDRAKE_ROOT",
+    "DescriptiveName": "mandrake root",
+    "Type": "Component",
+    "Value": 2,
+    "Glyph": ",,burntorange,dullred,black,false",
     "Traits": [
       "Stackable"
     ]
