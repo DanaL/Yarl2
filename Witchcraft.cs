@@ -31,8 +31,8 @@ class Spells
     Component.Garlic => ItemNames.GARLIC,
     Component.SulphurousAsh => ItemNames.SULPHUROUS_ASH,
     Component.SpiderSilk => ItemNames.SPIDER_SILK,
-    //Component.Nightshade => ItemNames.NIGHTSHADE,
-    //Component.MandrakeRoot => ItemNames.MANDRAKE_ROOT,
+    Component.Nightshade => ItemNames.NIGHTSHADE,
+    Component.MandrakeRoot => ItemNames.MANDRAKE_ROOT,
     _ => throw new Exception("Unknown spell component")
   };
 
@@ -44,6 +44,8 @@ class Spells
     "garlic" => Component.Garlic,
     "sulphurous ash" => Component.SulphurousAsh,
     "spider silk" => Component.SpiderSilk,
+    "nightshade" => Component.Nightshade,
+    "mandrake root" => Component.MandrakeRoot,
     _ => throw new Exception($"Unknown component name: {n}")
   };
 }
