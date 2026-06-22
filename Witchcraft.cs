@@ -18,6 +18,7 @@ class Spells
     ["arcane spark"]      = new() { [Component.BlackPearl] = 1, [Component.SulphurousAsh] = 1 },
     ["spark arc"]         = new() { [Component.BlackPearl] = 1, [Component.SulphurousAsh] = 2 },
     ["illume"]            = new() { [Component.SulphurousAsh] = 1  },
+    ["mage armour"]       = new() { [Component.SpiderSilk] = 2  },
     ["phase door" ]       = new() { [Component.SpiderSilk] = 1, [Component.BloodMoss] = 1, [Component.BlackPearl] = 1},
     ["ersatz elevator" ]  = new() { [Component.SpiderSilk] = 1, [Component.BloodMoss] = 1, [Component.SulphurousAsh] = 1 }
   };
@@ -1152,8 +1153,18 @@ class SpellcastMenu : Inputer
   {    
     if (SpellSelection)
     {
-      int width = 0;      
-      List<string> components = [.. GS.Player.Inventory.Components().Select(kvp => $"{kvp.Key} {kvp.Value}")];
+      int width = 0;
+
+      List<string> components = [];
+      var neededComponents = Spells.Components[SpellList[row].ToLower()];
+      foreach (var kvp in GS.Player.Inventory.Components())
+      {
+        if (neededComponents.ContainsKey(kvp.Key))
+          components.Add( $"[green {kvp.Key} {kvp.Value}]");
+        else
+          components.Add( $"{kvp.Key} {kvp.Value}");
+      }
+      
       GS.UIRef().SetPopup(
         new PopupMenu("Cast which spell?", SpellList, components,  "") 
         { 

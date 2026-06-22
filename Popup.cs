@@ -159,7 +159,7 @@ class Popup : IPopup
     PreferredCol = preferredCol;
   }
 
-  static int GuessWidth(string message) => message.Split('\n').Select(line => line.Length).Max();
+  static int GuessWidth(string message) => message.Split('\n').Max(line => line.Length);
   
   public void SetText(string message)
   {    
@@ -339,7 +339,7 @@ class PopupMenu : IPopup
 {
   public int SelectedRow { get; set; } = 0;
   public int Width { get; set; } = 0;
-  
+
   Colour DefaultTextColour { get; set; } = Colours.WHITE;
   string Title { get; set; }
   List<string> MenuItems { get; set; }
@@ -362,10 +362,16 @@ class PopupMenu : IPopup
     SidePanelItems = sidePanelItems;
   }
 
+  static int VisibleLength(string s)
+  {
+    LineScanner scanner = new(s);
+    return scanner.Scan().Sum(w => w.Item2.Length);
+  }
+
   void IPopup.Draw(UserInterface ui)
-  {    
-    int menuWidth = MenuItems.Max(i => i.Length);
-    int sidePanelWidth = SidePanelItems.Count == 0 ? 0 : SidePanelItems.Max(i => i.Length) + 6;
+  {
+    int menuWidth = MenuItems.Max(VisibleLength);
+    int sidePanelWidth = SidePanelItems.Count == 0 ? 0 : SidePanelItems.Max(VisibleLength) + 6;
     int width = menuWidth + sidePanelWidth + 4;
 
     if (Title.Length + 4 > width)
@@ -393,29 +399,70 @@ class PopupMenu : IPopup
     int rows = int.Max(MenuItems.Count, SidePanelItems.Count);
     for (int i = 0; i < rows; i++)
     {
-      string item = "";
-      if (i < MenuItems.Count)
-        item = MenuItems[i].PadRight(menuWidth);
-      if (i < SidePanelItems.Count)
-      {
-        if (item.Length == 0)
-          item = " ".PadRight(menuWidth);
-        item += "      " + SidePanelItems[i];
-      }
-      
       if (i == SelectedRow)
       {
         // Mild kludge: HILITE makes the tile transparent, so write a black background
         // before we draw highlighted line
         ui.WriteLine($"│ {" ".PadRight(width - 4)} │", row, col, width, DefaultTextColour);
-        ui.WriteLine($"{MenuItems[i].PadRight(menuWidth)}", row, col + 2, menuWidth, DefaultTextColour, Colours.HILITE);
+
+        var menuSegs = i < MenuItems.Count ? new LineScanner(MenuItems[i]).Scan() : [];
+        int segCol = col + 2;
+        int drawnWidth = 0;
+        foreach (var (segColour, segText) in menuSegs)
+        {
+          ui.WriteLine(segText, row, segCol, segText.Length, segColour, Colours.HILITE);
+          segCol += segText.Length;
+          drawnWidth += segText.Length;
+        }
+        if (drawnWidth < menuWidth)
+          ui.WriteLine(" ".PadRight(menuWidth - drawnWidth), row, segCol, menuWidth - drawnWidth, DefaultTextColour, Colours.HILITE);
+
         if (i < SidePanelItems.Count)
-          ui.WriteLine($"{SidePanelItems[i]}", row, col + menuWidth + 8, menuWidth, DefaultTextColour);
+        {
+          var sideSegs = new LineScanner(SidePanelItems[i]).Scan();
+          int sideCol = col + menuWidth + 8;
+          foreach (var (segColour, segText) in sideSegs)
+          {
+            ui.WriteLine(segText, row, sideCol, segText.Length, segColour);
+            sideCol += segText.Length;
+          }
+        }
         ++row;
       }
       else
       {
-        ui.WriteLine($"│ {item.PadRight(width - 4)} │", row++, col, width, DefaultTextColour);
+        List<(Colour, string)> line = [(DefaultTextColour, "│ ")];
+        int contentWidth = 0;
+
+        if (i < MenuItems.Count)
+        {
+          var segs = new LineScanner(MenuItems[i]).Scan();
+          int itemWidth = 0;
+          foreach (var seg in segs) { line.Add(seg); itemWidth += seg.Item2.Length; }
+          if (itemWidth < menuWidth)
+            line.Add((DefaultTextColour, " ".PadRight(menuWidth - itemWidth)));
+          contentWidth += menuWidth;
+        }
+        else
+        {
+          line.Add((DefaultTextColour, " ".PadRight(menuWidth)));
+          contentWidth += menuWidth;
+        }
+
+        if (i < SidePanelItems.Count)
+        {
+          line.Add((DefaultTextColour, "      "));
+          contentWidth += 6;
+          var segs = new LineScanner(SidePanelItems[i]).Scan();
+          int sideWidth = 0;
+          foreach (var seg in segs) { line.Add(seg); sideWidth += seg.Item2.Length; }
+          contentWidth += sideWidth;
+        }
+
+        int remaining = width - 4 - contentWidth;
+        line.Add((DefaultTextColour, remaining > 0 ? " │".PadLeft(remaining + 2, ' ') : " │"));
+
+        ui.WriteText(line.ToArray(), row++, col);
       }
     }
 
