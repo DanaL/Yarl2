@@ -754,12 +754,12 @@ class MageArmourTrait : TemporaryTrait
     {
       if (t is MageArmourTrait ma)
       {
-        ma.ExpiresOn += 150;
+        ma.ExpiresOn += 250;
         return [];
       }
     }
 
-    ExpiresOn = gs.Turn + 150;    
+    ExpiresOn = gs.Turn + 250;    
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     target.Traits.Add(this);
     OwnerID = target.ID;
