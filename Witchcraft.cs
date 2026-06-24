@@ -102,7 +102,7 @@ class CastArcaneSpark(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     spark.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 3, DamageType = DamageType.Electricity });
     GameState!.ObjDb.Add(spark);
 
-    int attackMod = 2;
+    int attackMod = 5;
     if (Actor!.Stats.TryGetValue(Attribute.Will, out Stat? will))
       attackMod += will.Curr;
     
@@ -157,7 +157,7 @@ class CastSparkArc(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 
     PreviousTargets.Add(Actor!.ID);
 
-    int attackMod = 2;
+    int attackMod = 5;
     if (Actor!.Stats.TryGetValue(Attribute.Will, out Stat? will))
       attackMod += will.Curr;
       
