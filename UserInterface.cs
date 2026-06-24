@@ -604,6 +604,11 @@ abstract class UserInterface
       WriteSideBarLine(Colours.WHITE, "INVISIBLE", statusLineNum--);
       _statuses.Add("INVISIBLE");
     }
+    if (!_statuses.Contains("MAGE ARMOUR") && gs.Player.HasTrait<MageArmourTrait>())
+    {
+      WriteSideBarLine(Colours.LIGHT_BLUE, "MAGE ARMOUR", statusLineNum--);
+      _statuses.Add("MAGE ARMOUR");
+    }
     foreach (StatDebuffTrait statBuff in gs.Player.Traits.OfType<StatDebuffTrait>())
     {
       if (!_statuses.Contains("WEAKENED") && statBuff.Attr == Attribute.Strength)

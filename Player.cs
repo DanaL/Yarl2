@@ -455,6 +455,8 @@ sealed class Player : Actor
         traitsToShow.Add(bt.Description(this));        
       else if (trait is ACModTrait acm)
         acmod += acm.ArmourMod;
+      else if (trait is MageArmourTrait)
+        acmod += 3;
       else if (trait is AttackModTrait attm)
         attackMod += attm.Amt;
       else if (trait is MeleeDamageModTrait mdm)
