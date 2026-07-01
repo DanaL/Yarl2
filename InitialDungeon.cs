@@ -23,7 +23,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
   {
     int numOfLevels = rng.Next(5, 8);
 
-    Dungeon dungeon = new(DungeonId, "the Old Ruins", arrivalMessage, true);
+    Dungeon dungeon = new(DungeonId, "the Old Ruins", arrivalMessage, true) { Permanent = false };
     DungeonMap mapper = new(rng);
     Map[] levels = new Map[numOfLevels];
 
