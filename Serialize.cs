@@ -379,6 +379,7 @@ sealed class DungeonSaver
   public int PopulationLow { get; set; }
   public int PopulationHigh { get; set; }
   public bool PocketDimension { get; set; } = false;
+  public bool Permanent { get; set; } = true;
 
   [JsonInclude]
   public List<string> RememberedLocs = [];
@@ -400,7 +401,8 @@ sealed class DungeonSaver
       Name = dungeon.Name,
       PopulationLow = dungeon.PopulationLow,
       PopulationHigh = dungeon.PopulationHigh,
-      PocketDimension = dungeon.PocketDimension
+      PocketDimension = dungeon.PocketDimension,
+      Permanent = dungeon.Permanent
     };
 
     foreach (var k in dungeon.LevelMaps.Keys)
@@ -424,7 +426,8 @@ sealed class DungeonSaver
       ExitLoc = Loc.FromStr(sd.ExitLoc),
       PopulationLow = sd.PopulationLow,
       PopulationHigh = sd.PopulationHigh,
-      PocketDimension = sd.PocketDimension
+      PocketDimension = sd.PocketDimension,
+      Permanent = sd.Permanent
     };
 
     foreach (var s in sd.RememberedLocs)

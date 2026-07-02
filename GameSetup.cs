@@ -471,6 +471,7 @@ class CampaignCreator(UserInterface ui)
 
         History history = new(rng);
         FactDb factDb = history.GenerateHistory(rng);
+        factDb.Add(new SimpleFact() { Name = "LastDungeonGen", Value = "0" });
         campaign.FactDb = factDb;
 
         string earlyMainOccupant = rng.NextDouble() < 0.5 ? "kobold" : "goblin";
@@ -479,7 +480,10 @@ class CampaignCreator(UserInterface ui)
         Loc entranceLoc = new(0, 0, entrance.Item1, entrance.Item2);
 
         InitialDungeonBuilder db = new(1, entrance, earlyMainOccupant);
+        var sw = System.Diagnostics.Stopwatch.StartNew();
         Dungeon firstDungeon = db.Generate("Musty smells. A distant clang. Danger.", factDb, objDb, rng);
+        sw.Stop();
+        Console.WriteLine($"db.Generate() took {sw.ElapsedMilliseconds}ms");
         firstDungeon.ExitLoc = entranceLoc;
         campaign.AddDungeon(firstDungeon);
 
