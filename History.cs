@@ -119,6 +119,7 @@ class Fact
         Type = (DisasterType)Enum.Parse(typeof(DisasterType), pieces[2])
       },
       "Flag" => new FlagFact() { Name = pieces[1] },
+      "DungeonGen" => new DungeonGenerationFact(int.Parse(pieces[1]), ulong.Parse(pieces[2])),
       _ => new SimpleFact()
       {
         Name = pieces[1],
@@ -134,6 +135,14 @@ class SimpleFact : Fact
   public string Value { get; set; } = "";
 
   public override string ToString() => $"SimpleFact#{Name}#{Value}";
+}
+
+class DungeonGenerationFact(int dungeonId, ulong genTime) : Fact
+{
+  public int DungeonId { get; set; }  = dungeonId;
+  public ulong GenTime { get; set; } = genTime;
+
+  public override string ToString() => $"DungeonGen#{DungeonId}#{GenTime}";
 }
 
 class FlagFact : Fact

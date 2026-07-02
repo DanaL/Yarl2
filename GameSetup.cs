@@ -471,7 +471,7 @@ class CampaignCreator(UserInterface ui)
 
         History history = new(rng);
         FactDb factDb = history.GenerateHistory(rng);
-        factDb.Add(new SimpleFact() { Name = "LastDungeonGen", Value = "0" });
+        factDb.Add(new DungeonGenerationFact(1, 0));
         campaign.FactDb = factDb;
 
         string earlyMainOccupant = rng.NextDouble() < 0.5 ? "kobold" : "goblin";
