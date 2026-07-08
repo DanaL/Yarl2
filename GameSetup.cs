@@ -534,7 +534,19 @@ class CampaignCreator(UserInterface ui)
         }
         //(startR, startC) = entrance;
 
-        SmithQuest.Setup(firstDungeon, earlyMainOccupant, objDb, factDb, rng);
+        Loc hammerLoc = Loc.Nowhere;
+        if (factDb.FactCheck("SmithHammerId") is SimpleFact shid)
+        {
+          ulong hammerId = ulong.Parse(shid.Value);
+          if (objDb.GetObj(hammerId) is Item hammer)
+            hammerLoc = hammer.Loc;
+        }
+
+        if (factDb.FactCheck("SmithHammerReturned") is null || hammerLoc.DungeonID == 1)
+        {
+          SmithQuest.Setup(firstDungeon, earlyMainOccupant, objDb, factDb, rng);  
+        }
+        
         CKShrine.Setup(campaign, new(0, 0, startR, startC), wildernessMap, objDb, factDb, rng);
 
         break;
