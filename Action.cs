@@ -1113,8 +1113,15 @@ abstract class PortalAction(GameState gs) : Action(gs)
 
     bool trip = level > start.Level && GameState.Player.HasTrait<TipsyTrait>() && GameState.Rng.NextDouble() < 0.33;
 
-    GameState.ActorEntersLevel(GameState.Player!, dungeon, level);
-    GameState.ResolveActorMove(GameState.Player!, start, portal.Destination);
+    // Do we need to regenerate the dungeon?
+    // (todo: remove magic numbers for main dungeon ID...)
+    if (dungeon == 1 && start.DungeonID != 1)
+    {
+      GameState.ObjDb.FlushObjectsInDungeon(dungeon);
+    }
+
+    GameState.ActorEntersLevel(GameState.Player, dungeon, level);
+    GameState.ResolveActorMove(GameState.Player, start, portal.Destination);
     
     if (trip)
     {

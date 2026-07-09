@@ -660,6 +660,28 @@ class GameObjectDB
 
     return listeners;
   }
+
+  public void FlushObjectsInDungeon(int dungeonId)
+  {
+    List<Item> items = [];
+    foreach (var loc in _itemLocs.Keys.Where(k => k.DungeonID == dungeonId))
+      items.AddRange(_itemLocs[loc]);    
+    foreach (Item item in items)
+      RemoveItemFromGame(item.Loc, item);
+
+    List<Actor> actors = [];
+    foreach (var loc in _actorLocs.Keys)
+    {
+      if (loc.DungeonID == dungeonId && GetObj(_actorLocs[loc]) is Actor actor)
+        actors.Add(actor);
+    }
+    foreach (Actor actor in actors)
+    {
+      foreach (Item item in actor.Inventory.Items())
+        RemoveItemFromGame(Loc.Nowhere, item);
+      RemoveActor(actor);
+    }      
+  }
 }
 
 // A structure to store info about a dungeon
