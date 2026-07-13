@@ -3505,6 +3505,29 @@ class RecallTrait : BasicTrait, IGameEventListener
   }
 }
 
+class RecordDeathTrait : Trait, IGameEventListener
+{
+  public bool Expired { get; set; } = false;
+  public bool Listening => true;
+  public ulong ObjId => SourceId;
+  public GameEventType EventType => GameEventType.Death;
+
+  public string Name { get; set; } = "";
+
+  public override string AsText() => $"RecordDeath#{Name}";
+
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (gs.ObjDb.GetObj(SourceId) is not GameObj obj)
+      return;
+
+    if (gs.FactDb.FactCheck(obj.Name) is DeathFact df)
+      return;
+
+    gs.FactDb.Add(new DeathFact() { Name = obj.Name });    
+  }
+}
+
 class RegenerationTrait : TemporaryTrait
 {
   public int Rate { get; set; }
@@ -4547,12 +4570,14 @@ class TraitFactory
     { "Quiet", (pieces, gameObj) => new QuietTrait() { SourceId = pieces[1] == "item" ? gameObj!.ID : ulong.Parse(pieces[1])} },
     { "QuestItem1", (pieces, gameObj) => new QuestItem1() },
     { "QuestItem2", (pieces, gameObj) => new QuestItem2() },
-    { "Rage", (pieces, gameObj) => new RageTrait(gameObj as Actor
-        ?? throw new ArgumentException("gameObj must be an Actor for RageTrait")) },
+    { "Rage", (pieces, gameObj) => new RageTrait(gameObj as Actor ?? throw new ArgumentException("gameObj must be an Actor for RageTrait")) },
     { "Reach", (pieces, gameObj) => new ReachTrait() },
     { "Readable", (pieces, gameObj) => new ReadableTrait(pieces[1].Replace("<br/>", "\n")) { OwnerID = ulong.Parse(pieces[2]) } },
     { "ReaverBlessing", (pieces, gameObj) => new ReaverBlessingTrait() { SourceId = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
     { "Recall", (pieces, gameObj) => new RecallTrait() { ExpiresOn = ulong.Parse(pieces[1]), Expired = bool.Parse(pieces[2]) } },
+    { "RecordDeath", (pieces, gameObj) => 
+      new RecordDeathTrait() { SourceId = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]), Name = pieces[2] }
+    },
     { "Regeneration", (pieces, gameObj) => {
       ulong sourceId = pieces.Length > 5 ? ulong.Parse(pieces[5]) : 0;
       return new RegenerationTrait()
@@ -4563,7 +4588,8 @@ class TraitFactory
           ExpiresOn = pieces[4] == "max" ? ulong.MaxValue : ulong.Parse(pieces[4]),
           SourceId = sourceId
         };
-    } },
+      } 
+    },
     { "Repugnant", (pieces, gameObj) =>
       {
         ulong sourceId = pieces.Length > 1 ? ulong.Parse(pieces[1]) : 0;

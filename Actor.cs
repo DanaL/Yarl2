@@ -1036,10 +1036,8 @@ class MonsterFactory
         Trait trait = TraitFactory.FromText(traitTxt, m);
         m.Traits.Add(trait);
 
-        if (trait is IGameEventListener listener)
-        {
-          objDb.EndOfRoundListeners.Add(listener);
-        }
+        if (trait is IGameEventListener listener)        
+          objDb.RegisterListener(listener.EventType, listener, m.ID);
       }
     }
 
