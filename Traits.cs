@@ -3521,10 +3521,11 @@ class RecordDeathTrait : Trait, IGameEventListener
     if (gs.ObjDb.GetObj(SourceId) is not GameObj obj)
       return;
 
-    if (gs.FactDb.FactCheck(obj.Name) is DeathFact df)
+    string f = $"DeathFact{obj.Name}";
+    if (gs.FactDb.FactCheck(f) is DeathFact df)
       return;
 
-    gs.FactDb.Add(new DeathFact() { Name = obj.Name });    
+    gs.FactDb.Add(new DeathFact() { Name = f });    
   }
 }
 
