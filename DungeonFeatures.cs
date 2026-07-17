@@ -333,15 +333,27 @@ class IdolAltarMaker
       Item idol = new() { Name = "idol", Type = ItemType.Trinket, Value = 10 };
       string altarDesc;
 
-      switch (rng.Next(3))
+      int altarRoll;
+      if (factDb.FactCheck("MDAltar") is not null)
+        altarRoll = 0;
+      else if (factDb.FactCheck("WTAltar") is not null)
+        altarRoll = 1;
+      else if (factDb.FactCheck("LevAltar") is not null)
+        altarRoll = 2;
+      else 
+        altarRoll = rng.Next(3);
+
+      switch (altarRoll)
       {
         case 0:
+          idol.Name = "moon idol";
           idol.Glyph = new Glyph('"', Colours.YELLOW, Colours.YELLOW, Colours.BLACK, false);
           idol.Traits.Add(new AdjectiveTrait("golden"));
           idol.Traits.Add(new AdjectiveTrait("crescent-shaped"));
           idol.Traits.Add(new DescriptionTrait("A gold, carved crescent moon, decorated with arcane symbols."));
           sacredSq = TileFactory.Get(TileType.DungeonFloor);
           altarDesc = "An altar carved with arcane depictions of the moon.";
+          factDb.Add(new FlagFact() { Name = "MDAltar" } );
           break;
         case 1:
           idol.Name = "tree branch";
@@ -352,6 +364,7 @@ class IdolAltarMaker
           idol.Traits.Add(new FlammableTrait());
           sacredSq = TileFactory.Get(TileType.OrangeTree);
           altarDesc = "An engraving of the World Tree.";
+          factDb.Add(new FlagFact() { Name = "WTAltar" } );
           break;
         default:
           idol.Name = "carving";
@@ -360,6 +373,7 @@ class IdolAltarMaker
           altarDesc = "An altar venerating the Leviathan.";
           idol.Traits.Add(new DescriptionTrait("A worn soapstone statue of a sea creature."));
           sacredSq = TileFactory.Get(TileType.Pool);
+          factDb.Add(new FlagFact() { Name = "LevAltar" } );
           break;
       }
 

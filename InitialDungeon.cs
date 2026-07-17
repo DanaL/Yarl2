@@ -148,8 +148,6 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
         AddRealtorGoblin(levels[2], DungeonId, 2, rng, objDb);
     }
 
-    // The idol 'puzzle' gives a guaranteed Potion of Hardiness, but I think 
-    // I'd like to have a few different mini-puzzles for variety
     int altarLevel = rng.Next(0, numOfLevels);
     IdolAltarMaker.MakeAltar(DungeonId, levels, objDb, factDb, rng, altarLevel);
 
