@@ -3522,7 +3522,7 @@ class RecordDeathTrait : Trait, IGameEventListener
       return;
 
     string f = $"DeathFact{obj.Name}";
-    if (gs.FactDb.FactCheck(f) is DeathFact df)
+    if (gs.FactDb.FactCheck(f) is DeathFact)
       return;
 
     gs.FactDb.Add(new DeathFact() { Name = f });    
