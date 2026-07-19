@@ -1153,7 +1153,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     foreach (var ce in ObjDb.ConditionalEvents)
     {
-      if (ce.CondtionMet(this))
+      if (ce.ConditionMet(this))
       {
         ce.Fire(this);
         ce.Complete = true;

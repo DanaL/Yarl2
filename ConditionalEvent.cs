@@ -15,7 +15,7 @@ abstract class ConditionalEvent
 {
   public bool Complete { get; set; }
   
-  public abstract bool CondtionMet(GameState gs);
+  public abstract bool ConditionMet(GameState gs);
   public abstract void Fire(GameState gs);
   public abstract string AsText();
 
@@ -32,6 +32,7 @@ abstract class ConditionalEvent
       "SetQuestStateAtLoc" => new SetQuestStateAtLoc(Loc.FromStr(pieces[1]), int.Parse(pieces[2])),
       "PlayerHasLitTorch" => new PlayerHasLitTorch(),
       "MessageAtLoc" => new MessageAtLoc(Loc.FromStr(pieces[1]), pieces[2]),
+      "SetFlagAtLoc" => new SetFlagAtLoc(Loc.FromStr(pieces[1]), pieces[2]),
       _ => throw new Exception("Invalid ConditionalEvent serialization")
     };
   }
@@ -42,7 +43,7 @@ class CanSeeLoc(Loc loc, string msg) : ConditionalEvent
   Loc Loc { get; set; } = loc;
   string Msg { get; set; } = msg;
 
-  public override bool CondtionMet(GameState gs) => gs.LastPlayerFoV.ContainsKey(Loc);
+  public override bool ConditionMet(GameState gs) => gs.LastPlayerFoV.ContainsKey(Loc);
 
   public override void Fire(GameState gs)
   {
@@ -58,7 +59,7 @@ class SetQuestStateAtLoc(Loc loc, int questState) : ConditionalEvent
   Loc Loc { get; set; } = loc;
   int QuestState { get; set; } = questState;
 
-  public override bool CondtionMet(GameState gs) => gs.Player.Loc == Loc;
+  public override bool ConditionMet(GameState gs) => gs.Player.Loc == Loc;
 
   public override void Fire(GameState gs)
   {
@@ -76,7 +77,7 @@ class MessageAtLoc(Loc loc, string msg) : ConditionalEvent
   Loc Loc { get; set; } = loc;
   string Msg { get; set; } = msg;
 
-  public override bool CondtionMet(GameState gs) => gs.Player.Loc == Loc;
+  public override bool ConditionMet(GameState gs) => gs.Player.Loc == Loc;
 
   public override void Fire(GameState gs)
   {
@@ -87,10 +88,20 @@ class MessageAtLoc(Loc loc, string msg) : ConditionalEvent
   public override string AsText() => $"MessageAtLoc{Constants.SEPARATOR}{Loc}{Constants.SEPARATOR}{Msg}";
 }
 
+class SetFlagAtLoc(Loc loc, string flag) : ConditionalEvent
+{
+  Loc Loc { get; set; } = loc;
+  string Flag { get; set; } = flag;
+
+  public override bool ConditionMet(GameState gs) => gs.Player.Loc == Loc;
+  public override void Fire(GameState gs) => gs.FactDb.Add(new FlagFact() { Name = Flag });
+  public override string AsText() => $"SetFlagAtLoc{Constants.SEPARATOR}{Loc}{Constants.SEPARATOR}{Flag}";
+}
+
 // Used in the tutorial
 class PlayerHasLitTorch : ConditionalEvent
 {
-  public override bool CondtionMet(GameState gs)
+  public override bool ConditionMet(GameState gs)
   {
     foreach (var item in gs.Player.Inventory.Items())
     {
@@ -127,7 +138,7 @@ class FullyEquipped(Loc loc) : ConditionalEvent
   Loc Loc { get; set; } = loc;
   public HashSet<ulong> IDs { get; set; } = [];
 
-  public override bool CondtionMet(GameState gs)
+  public override bool ConditionMet(GameState gs)
   {
     if (gs.Player.Loc == Loc)
     {
