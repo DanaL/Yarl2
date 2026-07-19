@@ -107,7 +107,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     "ginseng" => Component.Ginseng,
     "garlic" => Component.Garlic,
     "blood moss" => Component.BloodMoss,
-    "night shade" => Component.Nightshade,
+    "nightshade" => Component.Nightshade,
     "mandrake root" => Component.MandrakeRoot,
     _ => throw new Exception($"Unknown spell component: {s}")
   };
