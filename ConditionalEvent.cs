@@ -94,8 +94,7 @@ class SetFlagAtLoc(Loc loc, string flag) : ConditionalEvent
   string Flag { get; set; } = flag;
 
   public override bool ConditionMet(GameState gs) => gs.Player.Loc == Loc;
-  public override void Fire(GameState gs) => 
-    gs.FactDb.Add(new FlagFact() { Name = Flag });
+  public override void Fire(GameState gs) => gs.FactDb.Add(new FlagFact() { Name = Flag });
   public override string AsText() => $"SetFlagAtLoc{Constants.SEPARATOR}{Loc}{Constants.SEPARATOR}{Flag}";
 }
 

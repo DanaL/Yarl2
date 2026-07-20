@@ -148,9 +148,12 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
         AddRealtorGoblin(levels[2], DungeonId, 2, rng, objDb);
     }
 
-    int altarLevel = rng.Next(0, numOfLevels);
-    IdolAltarMaker.MakeAltar(DungeonId, levels, objDb, factDb, rng, altarLevel);
-
+    if (factDb.FactCheck("IdolAltarVisited") is null)
+    {
+      int altarLevel = rng.Next(0, numOfLevels);
+      IdolAltarMaker.MakeAltar(DungeonId, levels, objDb, factDb, rng, altarLevel);
+    }
+    
     SetPuzzle(dungeon, objDb, factDb, rng);
 
     if (rng.Next(3) == 0)
