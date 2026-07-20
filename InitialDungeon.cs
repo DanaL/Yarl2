@@ -19,25 +19,25 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
   (int, int) Entrance { get; set; } = entrance;
   string MainOccupant { get; set; } = mainOccupant;
 
-  public Dungeon Generate(string arrivalMessage, FactDb factDb, GameObjectDB objDb, Rng rng)
+  public Dungeon Generate(string arrivalMessage, GameState gs)
   {
-    int numOfLevels = rng.Next(5, 8);
+    int numOfLevels = gs.Rng.Next(5, 8);
 
     Dungeon dungeon = new(DungeonId, "the Old Ruins", arrivalMessage, true) { Permanent = false };
-    DungeonMap mapper = new(rng);
+    DungeonMap mapper = new(gs.Rng);
     Map[] levels = new Map[numOfLevels];
 
-    dungeon.MonsterDecks = DeckBuilder.ReadDeck(MainOccupant, rng);
+    dungeon.MonsterDecks = DeckBuilder.ReadDeck(MainOccupant, gs.Rng);
 
     for (int levelNum = 0; levelNum < numOfLevels; levelNum++)
     {
       levels[levelNum] = mapper.DrawLevel(WIDTH, HEIGHT);
       dungeon.AddMap(levels[levelNum]);
 
-      AddSecretDoors(levels[levelNum], rng);
+      AddSecretDoors(levels[levelNum], gs.Rng);
     }
 
-    AddRooms(levels, objDb, factDb, rng);
+    AddRooms(levels, gs.ObjDb, gs.FactDb, gs.Rng);
       
     dungeon.LevelMaps[numOfLevels - 1].Features |= MapFeatures.UndiggableFloor;
 
@@ -45,12 +45,12 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     for (int levelNum = 0; levelNum < numOfLevels; levelNum++)
     {
       // Maybe add a river/chasm to the level?
-      if (rng.Next(4) == 0)
+      if (gs.Rng.Next(4) == 0)
       {
         Map? nextLevel = null;
         RiverConfig riverConfig;
         TileType riverType = TileType.DeepWater;
-        if (levelNum < numOfLevels - 1 && rng.Next(3) == 0)
+        if (levelNum < numOfLevels - 1 && gs.Rng.Next(3) == 0)
         {
           riverConfig = new(TileType.Chasm, false, false);
           nextLevel = levels[levelNum + 1];
@@ -60,27 +60,27 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
           riverConfig = new(TileType.DeepWater, false, false);
         }
 
-        AddRiverToLevel(riverConfig, levels[levelNum], nextLevel, HEIGHT, WIDTH, rng);
+        AddRiverToLevel(riverConfig, levels[levelNum], nextLevel, HEIGHT, WIDTH, gs.Rng);
         riverLevels.Add((levelNum, riverType));
       }
     }
 
     TidyOrphanedDoors(levels);
 
-    SetStairs(DungeonId, levels, Entrance, dungeon.Descending, rng);
+    SetStairs(DungeonId, levels, Entrance, dungeon.Descending, gs.Rng);
 
     foreach ((int levelNum, TileType riverType) in riverLevels)
     {
-      RiverQoLCheck(levels[levelNum], DungeonId, levelNum, objDb, rng);
+      RiverQoLCheck(levels[levelNum], DungeonId, levelNum, gs.ObjDb, gs.Rng);
       if (riverType == TileType.DeepWater)
-        DecorateRiver(levels[levelNum], DungeonId, levelNum, objDb, rng);
+        DecorateRiver(levels[levelNum], DungeonId, levelNum, gs.ObjDb, gs.Rng);
     }
 
     for (int levelNum = 0; levelNum < levels.Length; levelNum++)
     {
       Map map = levels[levelNum];
 
-      SetTraps(map, DungeonId, levelNum, numOfLevels, rng);
+      SetTraps(map, DungeonId, levelNum, numOfLevels, gs.Rng);
 
       List<Loc> floors = [];
       for (int r = 0; r < map.Height; r++)
@@ -96,68 +96,64 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
             case TileType.HiddenTeleportTrap:
             case TileType.WoodBridge:
               Loc floor = new(DungeonId, levelNum, r, c);
-              if (Util.GoodFloorSpace(objDb, floor))
+              if (Util.GoodFloorSpace(gs.ObjDb, floor))
                 floors.Add(floor);
               break;
           }
         }
       }
       
-      AddTreasure(objDb, floors, levelNum, rng);
+      AddTreasure(gs.ObjDb, floors, levelNum, gs.Rng);
       
       // Maybe add an illusion/trap
-      if (levelNum < numOfLevels - 1 && rng.Next(10) == 0)
+      if (levelNum < numOfLevels - 1 && gs.Rng.Next(10) == 0)
       {
-        AddBaitIllusion(map, DungeonId, levelNum, objDb, rng);
+        AddBaitIllusion(map, DungeonId, levelNum, gs.ObjDb, gs.Rng);
       }
 
-      if (rng.Next(4) == 0)
+      if (gs.Rng.Next(4) == 0)
       {
-        TunnelCarver.MakeCollapsedTunnel(DungeonId, levelNum, map, objDb, rng);
+        TunnelCarver.MakeCollapsedTunnel(DungeonId, levelNum, map, gs.ObjDb, gs.Rng);
       }
 
-      if (rng.Next(6) == 0)
+      if (gs.Rng.Next(6) == 0)
       {
-        AddMoldPatch(map, floors, objDb, rng);
+        AddMoldPatch(map, floors, gs.ObjDb, gs.Rng);
       }
     }
 
     // 1 in 3 dungeons have a captive
-    if (rng.Next(3) == 0)
+    if (gs.Rng.Next(3) == 0)
     {
-      int captiveLevel = rng.Next(1, numOfLevels);
-      CaptiveFeature.Create(DungeonId, captiveLevel, levels[captiveLevel], objDb, factDb, rng);
+      int captiveLevel = gs.Rng.Next(1, numOfLevels);
+      CaptiveFeature.Create(DungeonId, captiveLevel, levels[captiveLevel], gs.ObjDb, gs.FactDb, gs.Rng);
     }
 
-    AddDecorations(levels, objDb, factDb, rng);
+    AddDecorations(levels, gs.ObjDb, gs.FactDb, gs.Rng);
 
-    PopulateDungeon(dungeon, rng, objDb);
+    PopulateDungeon(dungeon, gs.Rng, gs.ObjDb);
 
     // Add a couple of guaranteed good items to dungeon
-    AddTalismanToLevel(levels[1], DungeonId, 1, rng, objDb);
-    AddTalismanToLevel(levels[3], DungeonId, 3, rng, objDb);
+    AddTalismanToLevel(levels[1], DungeonId, 1, gs.Rng, gs.ObjDb);
+    AddTalismanToLevel(levels[3], DungeonId, 3, gs.Rng, gs.ObjDb);
 
-    int fallenAdventurer = rng.Next(1, numOfLevels);
-    AddWidowerBeau(objDb, levels[fallenAdventurer], fallenAdventurer, factDb, rng);
+    int fallenAdventurer = gs.Rng.Next(1, numOfLevels);
+    AddWidowerBeau(gs.ObjDb, levels[fallenAdventurer], fallenAdventurer, gs.FactDb, gs.Rng);
 
-    if (factDb.FactCheck("EarlyDenizen") is SimpleFact earlyOcc)
+    SetBoss(dungeon, gs.ObjDb, gs.FactDb, MainOccupant, gs.Rng);
+    if (MainOccupant == "goblin" && gs.FactDb.FactCheck("DeathFactRealtor") is null && gs.Rng.Next(3) == 0)
+      AddRealtorGoblin(levels[2], DungeonId, 2, gs.Rng, gs.ObjDb);
+    
+    if (gs.FactDb.FactCheck("IdolAltarVisited") is null)
     {
-      SetBoss(dungeon, objDb, factDb, earlyOcc.Value, rng);
-
-      if (earlyOcc.Value == "goblin" && factDb.FactCheck("DeathFactRealtor") is null && rng.Next(3) == 0)
-        AddRealtorGoblin(levels[2], DungeonId, 2, rng, objDb);
-    }
-
-    if (factDb.FactCheck("IdolAltarVisited") is null)
-    {
-      int altarLevel = rng.Next(0, numOfLevels);
-      IdolAltarMaker.MakeAltar(DungeonId, levels, objDb, factDb, rng, altarLevel);
+      int altarLevel = gs.Rng.Next(0, numOfLevels);
+      IdolAltarMaker.MakeAltar(DungeonId, levels, gs.ObjDb, gs.FactDb, gs.Rng, altarLevel);
     }
     
-    SetPuzzle(dungeon, objDb, factDb, rng);
+    SetPuzzle(dungeon, gs.ObjDb, gs.FactDb, gs.Rng);
 
-    if (rng.Next(3) == 0)
-      GnomeMerchant(levels, DungeonId, rng, objDb);
+    if (gs.Rng.Next(3) == 0)
+      GnomeMerchant(levels, DungeonId, gs.Rng, gs.ObjDb);
 
     // Update the main quest state when the player steps on the up stairs of 
     // the 3rd level. (This will mess up if the player somehow never actually 
@@ -166,9 +162,22 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     {
       Loc loc = new(DungeonId, 2, sq.Item1, sq.Item2);
       SetQuestStateAtLoc ce = new(loc, 1);
-      objDb.ConditionalEvents.Add(ce);
+      gs.ObjDb.ConditionalEvents.Add(ce);
     }
     
+    Loc hammerLoc = Loc.Nowhere;
+    if (gs.FactDb.FactCheck("SmithHammerId") is SimpleFact shid)
+    {
+      ulong hammerId = ulong.Parse(shid.Value);
+      if (gs.ObjDb.GetObj(hammerId) is Item hammer)
+        hammerLoc = hammer.Loc;
+    }
+
+    if (gs.FactDb.FactCheck("SmithHammerReturned") is null || hammerLoc.DungeonID == 1)
+    {
+      SmithQuest.Setup(dungeon, MainOccupant, gs);  
+    }
+
     return dungeon;
   }
 

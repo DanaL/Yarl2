@@ -722,8 +722,5 @@ class Campaign
     Dungeons.Add(id, dungeon);
   }
 
-  public void AddDungeon(Dungeon dungeon, int id)
-  {
-    Dungeons[id] = dungeon;
-  }
+  public void AddDungeon(Dungeon dungeon, int id) => Dungeons[id] = dungeon;
 }

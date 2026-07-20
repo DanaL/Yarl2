@@ -1104,7 +1104,7 @@ abstract class PortalAction(GameState gs) : Action(gs)
   {
     Player player = GameState.Player;
     Loc start = player.Loc;        
-    var (dungeon, level, _, _) = portal.Destination;
+    var (dungeonId, level, _, _) = portal.Destination;
     
     if (MoveAction.StuckOnLoc(player, portal.Destination, GameState))
     {
@@ -1115,12 +1115,29 @@ abstract class PortalAction(GameState gs) : Action(gs)
 
     // Do we need to regenerate the dungeon?
     // (todo: remove magic numbers for main dungeon ID...)
-    if (dungeon == 1 && start.DungeonID != 1)
+    if (dungeonId == 1 && start.DungeonID != 1)
     {
-      //GameState.ObjDb.FlushObjectsInDungeon(dungeon);
+      GameState.ObjDb.FlushObjectsInDungeon(dungeonId);
+
+      if (GameState.FactDb.FactCheck("Dungeon Entrance") is not LocationFact entranceFact)
+        throw new Exception("Entrance location fact must exist.");
+      Loc entranceLoc = entranceFact.Loc;
+      if (GameState.FactDb.FactCheck("EarlyDenizen") is not SimpleFact earlyOccupant)
+        throw new Exception("Early denizen fact must exist.");
+
+      InitialDungeonBuilder db = new(1, (entranceLoc.Row, entranceLoc.Col), earlyOccupant.Value);
+
+      var sw = System.Diagnostics.Stopwatch.StartNew();
+      Dungeon dungeon = db.Generate("Musty smells. A distant clang. Danger.", GameState);
+      sw.Stop();
+      Console.WriteLine($"db.Generate() took {sw.ElapsedMilliseconds}ms");
+      dungeon.ExitLoc = entranceLoc;
+      GameState.Campaign.AddDungeon(dungeon, 1);
+
+      portal.Destination = new(1, 0, db.ExitLoc.Item1, db.ExitLoc.Item2);
     }
 
-    GameState.ActorEntersLevel(GameState.Player, dungeon, level);
+    GameState.ActorEntersLevel(GameState.Player, dungeonId, level);
     GameState.ResolveActorMove(GameState.Player, start, portal.Destination);
     
     if (trip)
@@ -1136,7 +1153,7 @@ abstract class PortalAction(GameState gs) : Action(gs)
       }
     }
 
-    if (stairs && start.DungeonID == dungeon && AdjacentActor(start) is Actor follower)
+    if (stairs && start.DungeonID == dungeonId && AdjacentActor(start) is Actor follower)
     {
       start = follower.Loc;
       Loc dest = Util.NearestUnoccupiedLoc(GameState, portal.Destination);

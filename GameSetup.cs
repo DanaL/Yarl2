@@ -416,6 +416,10 @@ class CampaignCreator(UserInterface ui)
         wilderness.AddMap(wildernessMap);
         campaign.AddDungeon(wilderness);
 
+        // Add a placeholder dungeon to fill up the main dungeon's slot (which
+        // is actually generated when the player enters it)
+        campaign.AddDungeon(new Dungeon(1, "Placeholder", "", true), 1);
+
         // find the 'hidden valleys' that may be among the mountains
         RegionFinder regionFinder = new(new WildernessPassable());
         Dictionary<int, HashSet<(int, int)>> regions = regionFinder.Find(wildernessMap, false, 0, TileType.Unknown);
@@ -435,7 +439,7 @@ class CampaignCreator(UserInterface ui)
 
         DrawRoad(wildernessMap, wildernessWidth, entrance, town, TileType.StoneRoad, false, rng);
 
-        // Add a dash of devestation around the dungeon entrance
+        // Add a dash of devastation around the dungeon entrance
         foreach (var loc in Util.LocsInRadius(new(0, 0, entrance.Item1, entrance.Item2), 5, wildernessWidth, wildernessWidth))
         {
           if (!wildernessMap.InBounds(loc.Row, loc.Col))
@@ -471,32 +475,22 @@ class CampaignCreator(UserInterface ui)
 
         History history = new(rng);
         FactDb factDb = history.GenerateHistory(rng);
-        factDb.Add(new DungeonGenerationFact(1, 0));
-        campaign.FactDb = factDb;
 
         string earlyMainOccupant = rng.NextDouble() < 0.5 ? "kobold" : "goblin";
         factDb.Add(new SimpleFact() { Name = "EarlyDenizen", Value = earlyMainOccupant });
 
         Loc entranceLoc = new(0, 0, entrance.Item1, entrance.Item2);
-
-        InitialDungeonBuilder db = new(1, entrance, earlyMainOccupant);
-        var sw = System.Diagnostics.Stopwatch.StartNew();
-        Dungeon firstDungeon = db.Generate("Musty smells. A distant clang. Danger.", factDb, objDb, rng);
-        sw.Stop();
-        Console.WriteLine($"db.Generate() took {sw.ElapsedMilliseconds}ms");
-        firstDungeon.ExitLoc = entranceLoc;
-        campaign.AddDungeon(firstDungeon);
-
-        Portal portal = new("You stand before a looming portal.")
-        {
-          Destination = new Loc(1, 0, db.ExitLoc.Item1, db.ExitLoc.Item2)
-        };
+        Portal portal = new("You stand before a looming portal.") { Destination = new(1, 0, 0, 0) };
 
         wildernessMap.SetTile(entrance, portal);
         factDb.Add(new LocationFact() { Loc = entranceLoc, Desc = "Dungeon Entrance" });
 
         MessageAtLoc pal = new(entranceLoc, "A portal looms before you! Danger lurks within -- when you feel prepared you can enter via the [LIGHTBLUE >] command!");
         objDb.ConditionalEvents.Add(pal);
+
+        // This will be moved to UsePortalAction probably
+        factDb.Add(new DungeonGenerationFact(1, 0));
+        campaign.FactDb = factDb;
 
         Village.Populate(wildernessMap, town, objDb, factDb, rng);
         campaign.Town = town;
@@ -534,19 +528,6 @@ class CampaignCreator(UserInterface ui)
         }
         //(startR, startC) = entrance;
 
-        Loc hammerLoc = Loc.Nowhere;
-        if (factDb.FactCheck("SmithHammerId") is SimpleFact shid)
-        {
-          ulong hammerId = ulong.Parse(shid.Value);
-          if (objDb.GetObj(hammerId) is Item hammer)
-            hammerLoc = hammer.Loc;
-        }
-
-        if (factDb.FactCheck("SmithHammerReturned") is null || hammerLoc.DungeonID == 1)
-        {
-          SmithQuest.Setup(firstDungeon, earlyMainOccupant, objDb, factDb, rng);  
-        }
-        
         CKShrine.Setup(campaign, new(0, 0, startR, startC), wildernessMap, objDb, factDb, rng);
 
         break;

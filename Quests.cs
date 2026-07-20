@@ -366,13 +366,13 @@ class WitchQuest
 
 class SmithQuest
 {
-  public static void Setup(Dungeon dungeon, string denizen, GameObjectDB objDb, FactDb factDb, Rng rng)
+  public static void Setup(Dungeon dungeon, string denizen, GameState gs)
   {
-    if (factDb.FactCheck("SmithId") is not SimpleFact smithFact)
+    if (gs.FactDb.FactCheck("SmithId") is not SimpleFact smithFact)
       throw new CampaignCreationException("Village smith info was not found!");
 
     ulong smithId = ulong.Parse(smithFact.Value);
-    if (objDb.GetObj(smithId) is not Actor smith)
+    if (gs.ObjDb.GetObj(smithId) is not Actor smith)
       throw new CampaignCreationException("Village smith info was not found!");
 
     string name = "hammer".Possessive(smith);
@@ -386,25 +386,25 @@ class SmithQuest
     hammer.Traits.Add(new MetalTrait { Type = Metals.Iron });
     hammer.Traits.Add(new NamedTrait());
     hammer.Traits.Add(new DescriptionTrait("A well-used and well-cared for smith's hammer. Someone is probably looking for this."));
-    objDb.Add(hammer);
+    gs.ObjDb.Add(hammer);
 
-    factDb.Add(new SimpleFact() { Name = "SmithHammerId", Value = hammer.ID.ToString() });
+    gs.FactDb.Add(new SimpleFact() { Name = "SmithHammerId", Value = hammer.ID.ToString() });
 
-    NameGenerator ng = new(rng, Util.NamesFile);
+    NameGenerator ng = new(gs.Rng, Util.NamesFile);
     string thiefName = ng.BossName();
     string template = denizen == "kobold" ? "kobold bully" : "penny pincher";
     
-    Actor thief = MonsterFactory.NamedActor(thiefName, template, objDb, rng);
+    Actor thief = MonsterFactory.NamedActor(thiefName, template, gs.ObjDb, gs.Rng);
     thief.Glyph = thief.Glyph with { Lit = Colours.LIGHT_PURPLE, Unlit = Colours.PURPLE };
     thief.Inventory.Add(hammer, thief.ID);
 
     Map map = dungeon.LevelMaps[1];
-    List<Loc> floors = map.ClearFloors(dungeon.ID, 1, objDb);
+    List<Loc> floors = map.ClearFloors(dungeon.ID, 1, gs.ObjDb);
     if (floors.Count == 0)
       throw new CampaignCreationException("Could not place the smith's hammer thief!");
 
-    Loc loc = floors[rng.Next(floors.Count)];
-    objDb.AddNewActor(thief, loc);
+    Loc loc = floors[gs.Rng.Next(floors.Count)];
+    gs.ObjDb.AddNewActor(thief, loc);
   }
 }
 
