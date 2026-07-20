@@ -1117,7 +1117,7 @@ abstract class PortalAction(GameState gs) : Action(gs)
     // (todo: remove magic numbers for main dungeon ID...)
     if (dungeon == 1 && start.DungeonID != 1)
     {
-      GameState.ObjDb.FlushObjectsInDungeon(dungeon);
+      //GameState.ObjDb.FlushObjectsInDungeon(dungeon);
     }
 
     GameState.ActorEntersLevel(GameState.Player, dungeon, level);

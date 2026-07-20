@@ -411,6 +411,8 @@ class IdolAltarMaker
         Actor monster = MonsterFactory.Get(s, objDb, rng);
         objDb.AddNewActor(monster, prizeLoc);
       }
+
+      objDb.ConditionalEvents.Add(new SetFlagAtLoc(prizeLoc, "IdolAltarVisited"));
     }
 
     static Item PickPrize(GameObjectDB objDb, Rng rng) => rng.Next(6) switch
