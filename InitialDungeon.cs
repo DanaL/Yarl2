@@ -132,9 +132,12 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
     PopulateDungeon(dungeon, gs.Rng, gs.ObjDb);
 
-    int fallenAdventurer = gs.Rng.Next(1, DUNGEON_DEPTH);
-    AddWidowerBeau(gs.ObjDb, levels[fallenAdventurer], fallenAdventurer, gs.FactDb, gs.Rng);
-
+    if (gs.FactDb.FactCheck("WidowerTalismanFound") is null)
+    {
+      int fallenAdventurer = gs.Rng.Next(1, DUNGEON_DEPTH);
+      AddWidowerBeau(gs.ObjDb, levels[fallenAdventurer], fallenAdventurer, gs.FactDb, gs.Rng);  
+    }
+    
     SetBoss(dungeon, gs.ObjDb, gs.FactDb, MainOccupant, gs.Rng);
     if (MainOccupant == "goblin" && gs.FactDb.FactCheck("DeathFactRealtor") is null && gs.Rng.Next(3) == 0)
       AddRealtorGoblin(levels[2], DungeonId, 2, gs.Rng, gs.ObjDb);
@@ -883,6 +886,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       Value = 1, Glyph = new Glyph('"', Colours.GREY, Colours.LIGHT_GREY, Colours.BLACK, false)
     };
     trinket.Traits.Add(new EquipableTrait());
+    trinket.Traits.Add(new FlagOnPickUpTrait() { Flag = "WidowerTalismanFound"});
 
     GrantsTrait buff = rng.Next(3) switch
     {
