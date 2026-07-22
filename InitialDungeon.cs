@@ -145,7 +145,11 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       IdolAltarMaker.MakeAltar(DungeonId, levels, gs.ObjDb, gs.FactDb, gs.Rng, altarLevel);
     }
     
-    SetPuzzle(dungeon, gs.ObjDb, gs.FactDb, gs.Rng);
+    int mainQuestState = gs.Player.Stats[Attribute.MainQuestState].Curr;
+    if (mainQuestState < 2) 
+    {
+      SetPuzzle(dungeon, gs.ObjDb, gs.FactDb, gs.Rng);
+    }
 
     if (gs.Rng.Next(3) == 0)
       GnomeMerchant(levels, DungeonId, gs.Rng, gs.ObjDb);
