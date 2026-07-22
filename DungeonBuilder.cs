@@ -250,26 +250,6 @@ abstract class DungeonBuilder
     };
   }
 
-  protected static void AddTalismanToLevel(Map map, int dungeonId, int level, Rng rng, GameObjectDB objDb)
-  {
-    List<Loc> opts = [];
-    for (int r = 0; r < map.Height; r++)
-    {
-      for (int c = 0; c < map.Width; c++)
-      {
-        if (map.TileAt(r, c).Passable())
-          opts.Add(new Loc(dungeonId, level, r, c));
-      }
-    }
-
-    if (opts.Count > 0)
-    {
-      Loc loc = opts[rng.Next(opts.Count)];
-      Item item = Treasure.GetTalisman(rng, objDb);
-      objDb.SetToLoc(loc, item);
-    }
-  }
-
   protected void PopulateDungeon(Dungeon dungeon, Rng rng, GameObjectDB objDb)
   {
     for (int lvl = 0; lvl < dungeon.LevelMaps.Count; lvl++)

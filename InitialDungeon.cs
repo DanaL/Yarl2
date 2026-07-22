@@ -132,10 +132,6 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
     PopulateDungeon(dungeon, gs.Rng, gs.ObjDb);
 
-    // Add a couple of guaranteed good items to dungeon
-    AddTalismanToLevel(levels[1], DungeonId, 1, gs.Rng, gs.ObjDb);
-    AddTalismanToLevel(levels[3], DungeonId, 3, gs.Rng, gs.ObjDb);
-
     int fallenAdventurer = gs.Rng.Next(1, DUNGEON_DEPTH);
     AddWidowerBeau(gs.ObjDb, levels[fallenAdventurer], fallenAdventurer, gs.FactDb, gs.Rng);
 
