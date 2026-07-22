@@ -13,6 +13,7 @@ namespace Yarl2;
 
 class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccupant) : DungeonBuilder
 {
+  const int DUNGEON_DEPTH = 5;
   const int HEIGHT = 30;
   const int WIDTH = 70;
   int DungeonId { get; set; } = dungeonId;
@@ -20,16 +21,14 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
   string MainOccupant { get; set; } = mainOccupant;
 
   public Dungeon Generate(string arrivalMessage, GameState gs)
-  {
-    int numOfLevels = gs.Rng.Next(5, 8);
-
+  {    
     Dungeon dungeon = new(DungeonId, "the Old Ruins", arrivalMessage, true) { Permanent = false };
     DungeonMap mapper = new(gs.Rng);
-    Map[] levels = new Map[numOfLevels];
+    Map[] levels = new Map[DUNGEON_DEPTH];
 
     dungeon.MonsterDecks = DeckBuilder.ReadDeck(MainOccupant, gs.Rng);
 
-    for (int levelNum = 0; levelNum < numOfLevels; levelNum++)
+    for (int levelNum = 0; levelNum < DUNGEON_DEPTH; levelNum++)
     {
       levels[levelNum] = mapper.DrawLevel(WIDTH, HEIGHT);
       dungeon.AddMap(levels[levelNum]);
@@ -39,10 +38,10 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
     AddRooms(levels, gs.ObjDb, gs.FactDb, gs.Rng);
       
-    dungeon.LevelMaps[numOfLevels - 1].Features |= MapFeatures.UndiggableFloor;
+    dungeon.LevelMaps[DUNGEON_DEPTH - 1].Features |= MapFeatures.UndiggableFloor;
 
     List<(int, TileType)> riverLevels = [];
-    for (int levelNum = 0; levelNum < numOfLevels; levelNum++)
+    for (int levelNum = 0; levelNum < DUNGEON_DEPTH; levelNum++)
     {
       // Maybe add a river/chasm to the level?
       if (gs.Rng.Next(4) == 0)
@@ -50,7 +49,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
         Map? nextLevel = null;
         RiverConfig riverConfig;
         TileType riverType = TileType.DeepWater;
-        if (levelNum < numOfLevels - 1 && gs.Rng.Next(3) == 0)
+        if (levelNum < DUNGEON_DEPTH - 1 && gs.Rng.Next(3) == 0)
         {
           riverConfig = new(TileType.Chasm, false, false);
           nextLevel = levels[levelNum + 1];
@@ -80,7 +79,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     {
       Map map = levels[levelNum];
 
-      SetTraps(map, DungeonId, levelNum, numOfLevels, gs.Rng);
+      SetTraps(map, DungeonId, levelNum, DUNGEON_DEPTH, gs.Rng);
 
       List<Loc> floors = [];
       for (int r = 0; r < map.Height; r++)
@@ -106,7 +105,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       AddTreasure(gs.ObjDb, floors, levelNum, gs.Rng);
       
       // Maybe add an illusion/trap
-      if (levelNum < numOfLevels - 1 && gs.Rng.Next(10) == 0)
+      if (levelNum < DUNGEON_DEPTH - 1 && gs.Rng.Next(10) == 0)
       {
         AddBaitIllusion(map, DungeonId, levelNum, gs.ObjDb, gs.Rng);
       }
@@ -125,7 +124,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     // 1 in 3 dungeons have a captive
     if (gs.Rng.Next(3) == 0)
     {
-      int captiveLevel = gs.Rng.Next(1, numOfLevels);
+      int captiveLevel = gs.Rng.Next(1, DUNGEON_DEPTH);
       CaptiveFeature.Create(DungeonId, captiveLevel, levels[captiveLevel], gs.ObjDb, gs.FactDb, gs.Rng);
     }
 
@@ -137,7 +136,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     AddTalismanToLevel(levels[1], DungeonId, 1, gs.Rng, gs.ObjDb);
     AddTalismanToLevel(levels[3], DungeonId, 3, gs.Rng, gs.ObjDb);
 
-    int fallenAdventurer = gs.Rng.Next(1, numOfLevels);
+    int fallenAdventurer = gs.Rng.Next(1, DUNGEON_DEPTH);
     AddWidowerBeau(gs.ObjDb, levels[fallenAdventurer], fallenAdventurer, gs.FactDb, gs.Rng);
 
     SetBoss(dungeon, gs.ObjDb, gs.FactDb, MainOccupant, gs.Rng);
@@ -146,7 +145,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     
     if (gs.FactDb.FactCheck("IdolAltarVisited") is null)
     {
-      int altarLevel = gs.Rng.Next(0, numOfLevels);
+      int altarLevel = gs.Rng.Next(0, DUNGEON_DEPTH);
       IdolAltarMaker.MakeAltar(DungeonId, levels, gs.ObjDb, gs.FactDb, gs.Rng, altarLevel);
     }
     
