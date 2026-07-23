@@ -17,7 +17,7 @@ enum TokenType
 {
   LEFT_PAREN, RIGHT_PAREN, QUOTE,
   IDENTIFIER, STRING, NUMBER,
-  COND, GIVE, OFFER, SAY, PICK, SET, BUMP,
+  COND, GIVE, OFFER, SAY, PICK, SET, BUMP, SET_FLAG,
   AND, OR,
   EQ, NEQ, LT, LTE, GT, GTE, ELSE,
   TRUE, FALSE,
@@ -141,6 +141,7 @@ class ScriptScanner(string src)
       "shop-selection" => TokenType.SHOP_SELECTION,
       "dragon-cult-quest" => TokenType.DRAGON_CULT_QUEST,
       "check-md-cleric" => TokenType.CHECK_MD_CLERIC,
+      "set-flag" => TokenType.SET_FLAG,
       _ => TokenType.IDENTIFIER
     };
 
@@ -253,6 +254,7 @@ class ScriptParser(List<ScriptToken> tokens)
       TokenType.CHECK_MD_CLERIC => CheckMDCleric(),
       TokenType.DEF => DefExpr(),
       TokenType.APPEND => AppendExpr(),
+      TokenType.SET_FLAG => SetFlagExpr(),
       _ => ListExpr(),
     };
   }
@@ -634,6 +636,20 @@ class ScriptParser(List<ScriptToken> tokens)
     return new ScriptSet(lit.Name, val);
   }
 
+  ScriptSetFlag SetFlagExpr()
+  {
+    Consume(TokenType.SET_FLAG);
+    
+    if (!Check(TokenType.IDENTIFIER))
+      throw new Exception("Expected flag in Set-Flag expression");
+
+    ScriptLiteral lit = (ScriptLiteral)Expr();
+    
+    Consume(TokenType.RIGHT_PAREN);
+
+    return new ScriptSetFlag(lit);
+  }
+
   ScriptGive GiveExpr()
   {
     Consume(TokenType.GIVE);
@@ -732,6 +748,7 @@ record class ScriptTurnInSkull : ScriptExpr;
 record class ScriptBump(string Stat, ScriptExpr Value) : ScriptExpr;
 record class ScriptOffer(ScriptLiteral Identifier) : ScriptExpr;
 record class ScriptCheckMDCleric : ScriptExpr;
+record class ScriptSetFlag(ScriptLiteral Value) : ScriptExpr;
 
 record DialogueOption(string Text, char Ch, ScriptExpr Expr);
 
@@ -1146,6 +1163,10 @@ class DialogueInterpreter
     {
       EvalAppend(append);
     }
+    else if (Expr is ScriptSetFlag setFlag)
+    {
+      EvalSetFlag(setFlag.Value, gs);
+    }
 
     return result;
   }
@@ -1243,6 +1264,11 @@ class DialogueInterpreter
     {
       throw new Exception($"Unknown Attribute in bump statement: {set.Stat}");
     }
+  }
+
+  static void EvalSetFlag(ScriptLiteral flag, GameState gs)
+  {
+    gs.FactDb.Add(new FlagFact() { Name = flag.Name });
   }
 
   // At the moment, I only have on/off variables 
