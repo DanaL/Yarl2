@@ -906,9 +906,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     // Generate an actor for the fallen adventurer so I can store their 
     // name and such in the objDb. Maybe sometimes they'll be an actual
     // ghost?
-    NameGenerator ng = new(rng, Util.NamesFile);
-    string adventurerName = ng.GenerateName(rng.Next(5, 12)).Capitalize();
-    factDb.Add(new SimpleFact() { Name = "WidowerBeau", Value = adventurerName });
+    NameGenerator ng = new(rng, Util.NamesFile);    
     factDb.Add(new SimpleFact() { Name = "TrinketId", Value = trinket.ID.ToString() });
   }
 

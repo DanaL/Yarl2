@@ -471,6 +471,9 @@ class Village
       }
     }
 
+    string adventurerName = ng.GenerateName(rng.Next(5, 12)).Capitalize();
+    factDb.Add(new SimpleFact() { Name = "WidowerBeau", Value = adventurerName });
+
     return widower;
   }
 
