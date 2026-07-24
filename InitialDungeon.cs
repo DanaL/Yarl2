@@ -121,8 +121,8 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       }
     }
 
-    // 1 in 3 dungeons have a captive
-    if (gs.Rng.Next(3) == 0)
+    // If the prisoner hasn't previously been freed, 1 in 3 dungeons have a captive
+    if (gs.FactDb.FactCheck("prisoner-freed") is null && gs.Rng.Next(3) == 0)
     {
       int captiveLevel = gs.Rng.Next(1, DUNGEON_DEPTH);
       CaptiveFeature.Create(DungeonId, captiveLevel, levels[captiveLevel], gs.ObjDb, gs.FactDb, gs.Rng);
