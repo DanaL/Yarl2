@@ -972,22 +972,25 @@ class WitchDialogue : Inputer
         Options = [];
         if (PlayerMana > 0)
         {
-          Blurb = GS.Rng.Next(5) switch
+          Blurb = GS.Rng.Next(6) switch
           {
             0 => "Looking for spells? You're better off studying with us than one of those shady underground magic dealers!",
             1 => "I studied library magic at Yendor University.",
             2 => "Casting spells is stressful. But Sophie's mushroom stew is great for fraught nerves!",
             3 => "Have you considered joining the Adventurers' Union?",
+            4 => "The corridors and rooms in the Dungeon tend to twist and warp over time.",
             _ => "You can't put undead to sleep with magic!"
           };
           Witch.Stats[Attribute.NPCMenuState] = new Stat(LEARN_SPELLS);
         }
         else
         {
-          if (GS.Rng.NextDouble() < 0.5)
-            Blurb = "Need to learn the basics, huh? I used to TA Magic 101.";
-          else
-            Blurb = "Oh, anyone can learn magic. Don't listen to Big Thaumaturgy.";
+          Blurb = GS.Rng.Next(3) switch
+          {
+            0 => "Need to learn the basics, huh? I used to TA Magic 101.",
+            1 => "Oh, anyone can learn magic. Don't listen to Big Thaumaturgy.",
+            _ => "The corridors and rooms in the Dungeon tend to twist and warp over time."
+          };
           Witch.Stats[Attribute.NPCMenuState] = new Stat(START_KYLIE_QUEST);
         }
         break;

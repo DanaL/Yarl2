@@ -38,6 +38,7 @@
         (def lines '(
           "Long ago, the ruins were a mighty kindgom. But then a great evil arose deep underground."
           "Adventurers defeated Arioch but they appear to be waking again."
+          "Arioch's presence manifests Chaos in our world."
           "Huntokar weeps for those whose bones lay in the depths without having proper funerary rites."
           "There were shrines to Huntokar below ground, but foul monsters have desecrated them. A terrible sin!")
         )
@@ -57,7 +58,9 @@
                     "I don't know the language on that tablet, but it looks like spell-work. It may be best to seek the council of the [SOPHIEGREEN witches]."
                     "I am deeply concerned about what all of this portends! Please continue seeking a way to defeat [BRIGHTRED Arioch]."
                     "Huntokar helped us mortals defeat [BRIGHTRED Arioch] before and I have faith they will again!"
-                    "Huntokar grants mightier blessings to loyal followers.")
+                    "Huntokar grants mightier blessings to loyal followers."
+                    "If Arioch fully returns, the Chaos you found in the depths will spread across the entire world!"
+                    )
       )
     )
   )
