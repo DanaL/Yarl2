@@ -166,7 +166,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       SetQuestStateAtLoc ce = new(loc, 1);
       gs.ObjDb.ConditionalEvents.Add(ce);
     }
-    
+        
     Loc hammerLoc = Loc.Nowhere;
     if (gs.FactDb.FactCheck("SmithHammerId") is SimpleFact shid)
     {
@@ -174,12 +174,12 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       if (gs.ObjDb.GetObj(hammerId) is Item hammer)
         hammerLoc = hammer.Loc;
     }
-
+    
     if (gs.FactDb.FactCheck("SmithHammerReturned") is null || hammerLoc.DungeonID == 1)
     {
       SmithQuest.Setup(dungeon, MainOccupant, gs);  
     }
-
+    
     return dungeon;
   }
 

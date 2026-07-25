@@ -359,7 +359,7 @@ class SmithyInputer : ShopMenuInputer
   readonly bool _offerRepair;
   readonly bool _offerUpgrade;  
   char _reagent;
-  readonly ulong _hammerId;
+  readonly ulong _hammerId = 0;
 
   HashSet<char> opts { get; set; } = [];
 
@@ -372,9 +372,10 @@ class SmithyInputer : ShopMenuInputer
     _offerRepair = false;
     _offerUpgrade = false;
 
-    if (gs.FactDb.FactCheck("SmithHammerId") is not SimpleFact hidFact)
-      throw new Exception("Smith hammer ID should exist.");
-    _hammerId = ulong.Parse(hidFact.Value);
+    if (gs.FactDb.FactCheck("SmithHammerId") is SimpleFact hidFact)
+    {
+      _hammerId = ulong.Parse(hidFact.Value);  
+    }
 
     if (HammerRetrieved(gs))
     {
