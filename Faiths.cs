@@ -152,7 +152,7 @@ class Faiths
     string s = "So a mortal enters my shrine! Take up My blade and prove thyself worthy!";
     if (gs.Player.Religion == "Crimson King" && gs.MainQuestState < 2)
     {
-      s = "It seems My old foe rattles his chains! Seek ye the dusty ruins for news of Arioch!";
+      s = "It seems My old foe rattles his chains! Seek ye the dusty ruins for tell of Arioch!";
     }
     else if (gs.Player.Religion == "Crimson King" && gs.MainQuestState >= 2)
     {
