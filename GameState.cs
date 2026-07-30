@@ -1166,9 +1166,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       PlaceMoonDaughterCleric();
     }
 
-    if (!UI.InTutorial)
-      CheckForStress();
-
     ObjDb.ConditionalEvents = [.. ObjDb.ConditionalEvents.Where(ce => !ce.Complete)];
 
     PrepareFieldOfView();
@@ -1235,42 +1232,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     EndGameTriggerTrait trigger = new();
     trigger.Apply(Player, this);
-  }
-
-  void CheckForStress()
-  {
-    if (InWilderness)
-    {
-      var (hour, _) = CurrTime();
-      if (hour >= 5 && hour < 21)
-        Player.Stats[Attribute.Nerve].Change(1);
-    }
-    else if (!Player.HasTrait<HeroismTrait>())
-    {
-      // The player accrues stress more slowly on levels they've already
-      // explored
-      int deepest = VisitedLevels.Keys.Where(v => v.DungeonId == CurrDungeonID)
-                                      .Select(v => v.Level).Order().Last();
-      if (CurrLevel < deepest && Turn % 4 == 0)
-        return;
-
-      // limit how stressed the player will get depending on how deep we are
-      int stressFloor = CurrLevel switch
-      {
-        0 or 1 or 2 => 601,
-        3 or 4 or 5 => 301,
-        6 or 7 or 8 => 151,
-        _ => 0
-      };
-      int curr = Player.Stats[Attribute.Nerve].Curr;
-      if (curr > stressFloor)
-      {
-        int delta = Player.TotalLightRadius() < 2 ? -2 : -1;
-        Player.Stats[Attribute.Nerve].Change(delta);
-      }
-    }
-
-    Player.CalcStress();
   }
 
   // At the moment I can't use ResolveActorMove because it calls
@@ -1894,8 +1855,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         playerSeeInvisible = true;
       else if (t is BlindTrait)
         blind = true;
-      else if (t is StressTrait s)
-        stress = s.Stress;
       else if (t is GrappledTrait gt)
         grapplerID = gt.GrapplerID;
     }

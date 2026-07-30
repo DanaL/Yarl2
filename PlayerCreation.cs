@@ -32,7 +32,6 @@ class PlayerCreator
       ID = Constants.PLAYER_ID,
       Stats = new Dictionary<Attribute, Stat>()
       {
-        { Attribute.Nerve, new Stat(1250) },
         { Attribute.BaseHP, new Stat(12) },
         { Attribute.HP, new Stat(1) }
       }

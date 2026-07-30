@@ -344,11 +344,6 @@ class HeroismTrait : TemporaryTrait
     if (obj is not Actor target)
       return [];
 
-    if (target.Stats.TryGetValue(Attribute.Nerve, out var nerve))
-    {
-      nerve.Change(125);
-    }
-
     // You can't stack heroism, so if another source is applied, just extend
     // duration of current source
     foreach (Trait t in target.Traits)
@@ -1016,45 +1011,6 @@ class StoneTabletTrait(string text) : BasicTrait, IUSeable, IOwner
     
     return new UseResult(action);
   }
-}
-
-sealed class StressTrait : Trait 
-{
-  public StressLevel Stress { get; set; }
-  public ulong OwnerID { get; set; }
-
-  public override string AsText() => $"Stress#{Stress}#{OwnerID}";
-}
-
-class StressReliefAuraTrait : Trait, IGameEventListener
-{
-  public bool Expired { get => false; set { } }
-  public bool Listening => true;
-  public ulong ObjId { get; set; }
-  public int Radius { get; set; }
-  public ulong SourceID => ObjId;
-
-  public GameEventType EventType => GameEventType.EndOfRound;
-
-  static void CheckSq(GameState gs, Loc loc)
-  {
-    if (gs.ObjDb.Occupant(loc) is Actor actor)
-    {
-      if (actor.Stats.TryGetValue(Attribute.Nerve, out Stat? nerve))
-        nerve.Change(2);
-    }
-  }
-
-  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
-  {
-    if (gs.ObjDb.GetObj(ObjId) is GameObj source)
-    {
-      foreach (Loc sq in FieldOfView.CalcVisible(Radius, source.Loc, gs.CurrentMap, gs.ObjDb).Keys)
-        CheckSq(gs, sq);      
-    }    
-  }
-
-  public override string AsText() => $"StressReliefAura#{ObjId}#{Radius}";
 }
 
 class StrTrait(string n, string v) : Trait
@@ -1919,8 +1875,6 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
           new ApplyStainlessnessAction(gs, user, item))),
     "alchemicalcompound" => new UseResult(new ConsumeAlchemicalCompound(gs, user, item!)),
     "refreshbinding" => new UseResult(new BindSpellAction(gs, gs.Player)),
-    "soothe" => new UseResult(new SootheAction(gs, user, 21)),
-    "destress" => new UseResult(new SootheAction(gs, gs.Player, 125)),
     "enchant" => new UseResult(new InventoryChoiceAction(gs, user,
           new InventoryOptions() { Title = "Use on which item?" },
               new EnchantItemAction(gs, user, item!)    
@@ -4666,13 +4620,6 @@ class TraitFactory
     }},
     { "Sticky", (pieces, gameObj) => new StickyTrait() },
     { "StoneTablet", (pieces, gameObj) => new StoneTabletTrait(pieces[1].Replace("<br/>", "\n")) { OwnerID = ulong.Parse(pieces[2]) } },
-    { "Stress", (pieces, gameObj) =>
-      {
-        Enum.TryParse(pieces[1], out StressLevel stress);
-        return new StressTrait() { Stress = stress, OwnerID = ulong.Parse(pieces[2]) };
-      }
-    },
-    { "StressReliefAura", (pieces, gameObj) => new StressReliefAuraTrait() { ObjId = ulong.Parse(pieces[1]), Radius = int.Parse(pieces[2]) } },
     { "Str", (pieces, gameObj) => new StrTrait(pieces[1], pieces[2])},
     { "Swallowed", (pieces, gameObj) => new SwallowedTrait()
       {

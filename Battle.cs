@@ -611,9 +611,6 @@ class Battle
     
     int roll = AttackRoll(gs.Rng) + CalcAttackMod(attacker, weapon);
     
-    var (stressPenalty, _) = attacker.StressPenalty();
-    roll -= stressPenalty;
-
     if (!target.VisibleTo(attacker))
       roll -= 5;
 
@@ -951,9 +948,6 @@ class Battle
       roll -= gs.Rng.Next(1, 6);
     if (!target.VisibleTo(attacker))
       roll -= 5;
-      
-    var (stressPenalty, _) = attacker.StressPenalty();
-    roll -= stressPenalty;
 
     if (roll >= target.AC)
     {      

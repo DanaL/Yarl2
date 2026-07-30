@@ -307,15 +307,6 @@ class DebugCommand(GameState gs)
       case "timeskip":
         _gs.Turn += ulong.Parse(parts[1]);
         return "";
-      case "stress":
-        if (uint.TryParse(parts[1], out uint stress))
-        {
-          _gs.Player.Stats[Attribute.Nerve].SetCurr((int)stress);
-          _gs.Player.CalcStress();
-          return "";
-        }
-        else
-          return "Need integer stress level";
       default:
         return "Unknown debug command";
     }

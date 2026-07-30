@@ -998,14 +998,6 @@ class Rooms
     });
     objDb.SetToLoc(statueLoc, statue);
 
-    StressReliefAuraTrait aura = new()
-    {
-      ObjId = statue.ID,
-      Radius = range
-    };
-    statue.Traits.Add(aura);
-    objDb.EndOfRoundListeners.Add(aura);
-
     AuraMessageTrait auraMsg = new()
     {
       ObjId = statue.ID,

@@ -29,7 +29,6 @@ class Traps
       ui.SetPopup(new Popup("A trap door opens up underneath you!", "", -1, -1));
 
       loc = gs.FallIntoTrapdoor(actor, loc);
-      gs.Player.Stats[Attribute.Nerve].Change(-15);
       gs.Player.HaltTravel();
       
       string s = gs.ThingTouchesFloor(loc);      
@@ -46,15 +45,12 @@ class Traps
       string s = gs.ThingTouchesFloor(loc);
       gs.UIRef().AlertPlayer(s);
 
-      gs.Player.Stats[Attribute.Nerve].Change(-15);
-
       throw new AbnormalMovement(loc);
     }
     else if (!flying && (tile.Type == TileType.HiddenPit || tile.Type == TileType.Pit))
     {
       if (actor is Player player) 
       {
-        player.Stats[Attribute.Nerve].Change(-10);
         gs.Player.HaltTravel();
       }
 
@@ -119,7 +115,6 @@ class Traps
       if (actor is Player player) 
       {
         gs.Player.HaltTravel();
-        player.Stats[Attribute.Nerve].Change(-10);        
       }
 
       if (trapSqVisible)
@@ -162,7 +157,6 @@ class Traps
       string s;
       if (actor is Player player) 
       {
-        player.Stats[Attribute.Nerve].Change(-10);
         gs.Player.HaltTravel();
         s = "You are soaked by a blast of water!";
       }
@@ -184,7 +178,6 @@ class Traps
     {
       if (actor is Player player) 
       {
-        player.Stats[Attribute.Nerve].Change(-5);
         gs.Player.HaltTravel();
       }
       RevealTrap(tile, gs, loc);
@@ -250,7 +243,6 @@ class Traps
         }
       }
 
-      player.Stats[Attribute.Nerve].Change(-5);
       gs.Player.HaltTravel();
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
 
@@ -357,7 +349,6 @@ class Traps
     {
       bool fireResistance = player.Traits.OfType<ResistanceTrait>()
                                          .Any(rt => rt.Type == DamageType.Fire);
-      player.Stats[Attribute.Nerve].Change(fireResistance ? -5 : -15);
     }
 
     HashSet<Loc> affected = [];

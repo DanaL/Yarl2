@@ -46,7 +46,6 @@ enum Attribute
   ShopMenu,
   MobAttitude,
   InventoryRefresh,
-  Nerve,
   MagicPoints,  
   LastGiftTime,
   ShopInvoice,

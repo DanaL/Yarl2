@@ -172,18 +172,6 @@ sealed class Player : Actor
           ac += 3;
       }
 
-      // Anxious is sort of a sweet spot where I picture the character going 
-      // very defnesive to protect themselves, but with even more stress they
-      // are beginning to lose it
-      var (_, stress) = StressPenalty();
-      ac += stress switch 
-      {
-        StressLevel.Anxious => 1,
-        StressLevel.Paranoid => -1,
-        StressLevel.Hystrical => -2,
-        _ => 0
-      };
-
       return ac + armour;
     }
   }
@@ -258,40 +246,6 @@ sealed class Player : Actor
       hp.SetMax(baseHP);
     else
       hp.Max = baseHP;    
-  }
-
-  public void CalcStress()
-  {
-    int nerve = Stats[Attribute.Nerve].Curr;
-    StressLevel stress;
-    if (nerve > 750)
-      stress = StressLevel.None;
-    else if (nerve > 600)
-      stress = StressLevel.Skittish;
-    else if (nerve > 450)
-      stress = StressLevel.Nervous;
-    else if (nerve > 300)
-      stress = StressLevel.Anxious;
-    else if (nerve > 150)
-      stress = StressLevel.Paranoid;
-    else
-      stress = StressLevel.Hystrical;
-    
-    StressTrait? current = Traits.OfType<StressTrait>().FirstOrDefault();
-    if (stress == StressLevel.None)
-    {
-      if (current is not null)
-        Traits.Remove(current);
-    }
-    else if (current is null)
-    {
-      current = new StressTrait() { Stress = stress, OwnerID = ID };
-      Traits.Add(current);
-    }
-    else
-    {
-      current.Stress = stress;
-    }
   }
 
   public override int TotalMissileAttackModifier(Item weapon)
@@ -445,8 +399,6 @@ sealed class Player : Actor
         traitsToShow.Add("You have sticky fingers");
       else if (trait is AlacrityTrait alacrityTrait)
         alacrity -= alacrityTrait.Amt;
-      else if (trait is StressTrait st)
-        traitsToShow.Add($"You are feeling {st.Stress.ToString().ToLower()}");
       else if (trait is FeatherFallTrait)
         traitsToShow.Add("You have feather fall");
       else if (trait is FrighteningTrait)

@@ -621,12 +621,6 @@ class Effects
     if (immuneToBooze)
       return;
 
-    // Imbiding always reduces stress, even if you pass your saving throw
-    if (imbiber.Stats.TryGetValue(Attribute.Nerve, out var nerve))
-    {
-      nerve.Change(tipsy == null ? 100 : 25);
-    }
-
     int dc = tipsy is null ? 15 : 12;
     if (imbiber.AbilityCheck(Attribute.Constitution, dc, gs.Rng))
       return;

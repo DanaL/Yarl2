@@ -1383,10 +1383,8 @@ sealed class InnkeeperServiceAction(GameState gs, Mob innkeeper) : Action(gs)
       
       GameState.Player.CalcHP();
       GameState.Player.Stats[Attribute.HP].Reset();
-
       GameState.Player.Inventory.Zorkmids -= _invoice;      
-      GameState.Player.Stats[Attribute.Nerve].Change(500);
-
+      
       // Resting at an inn cures poison. It's part of room service.
       List<TemporaryTrait> toRemove = [.. GameState.Player.Traits.OfType<TemporaryTrait>()
                                                   .Where(t => t is PoisonedTrait)];
@@ -3622,32 +3620,6 @@ class ForgetAction(GameState gs, Actor actor) : Action(gs, actor)
       t.Remove(GameState!);
     }
 
-    if (Actor.Stats.TryGetValue(Attribute.Nerve, out Stat? nerve))
-    {
-      nerve.Reset();
-    }
-
-    return 1.0;
-  }
-}
-
-class SootheAction(GameState gs, Actor target, int amount) : Action(gs, target)
-{
-  int Amount { get; set; } = amount;
-  
-  public override double Execute()
-  {
-    base.Execute();
-    
-    if (Actor!.Stats.TryGetValue(Attribute.Nerve, out Stat? nerve))
-    {
-      GameState.UIRef().AlertPlayer($"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "feel")} more calm.");
-      SqAnimation anim = new(GameState!, Actor.Loc, Colours.WHITE, Colours.SOPHIE_GREEN, '\u2665');
-      GameState!.UIRef().RegisterAnimation(anim);
-
-      nerve.Change(Amount);
-    }
-    
     return 1.0;
   }
 }
