@@ -262,8 +262,6 @@ class CampaignSaver
   public List<string> HistoricalEvents { get; set; } = [];
   public List<string> Nations { get; set; } = [];
   public string RulerInfo { get; set; } = "";
-  public VillainType Villain { get; set; }
-  public string VillainName { get; set; } = "";
   
   public static CampaignSaver Shrink(Campaign c)
   {
@@ -301,9 +299,7 @@ class CampaignSaver
       Facts = [.. c.FactDb!.Facts.Select(f => f.ToString()!)],
       HistoricalEvents = [.. c.FactDb!.HistoricalEvents.Select(he => he.ToString()!)], 
       Nations = [.. c.FactDb!.Nations.Select(n => n.ToString())],  
-      RulerInfo = c.FactDb!.Ruler.ToString(),
-      Villain = c.FactDb!.Villain,
-      VillainName = c.FactDb!.VillainName      
+      RulerInfo = c.FactDb!.Ruler.ToString(),     
     };
 
     foreach (var k in c.Dungeons.Keys)
@@ -349,8 +345,7 @@ class CampaignSaver
 
     RulerInfo ruler = (RulerInfo)Fact.FromStr(sc.RulerInfo);
     FactDb factDb = new(ruler);
-    factDb.Villain = sc.Villain;
-    factDb.VillainName = sc.VillainName;
+
     foreach (var f in sc.Facts)
     {
       factDb.Add(Fact.FromStr(f));

@@ -174,7 +174,7 @@ namespace Yarl2
 
     char RandomStart()
     {
-      var total = _starts.Select(p => p.Item2).Sum();
+      var total = _starts.Sum(p => p.Item2);
       var x = _rng.Next(total);
 
       var sum = 0;

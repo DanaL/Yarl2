@@ -19,13 +19,6 @@ enum OGRulerType
 {
   ElfLord,
   DwarfLord,
-  //MadWizard
-}
-
-enum VillainType
-{
-  FieryDemon,
-  Necromancer
 }
 
 enum InvaderType
@@ -47,8 +40,6 @@ class FactDb(RulerInfo ruler)
   readonly List<Fact> _facts = [];
   public IReadOnlyList<Fact> Facts => _facts;
   public RulerInfo Ruler { get; init; } = ruler;
-  public VillainType Villain { get; set; }
-  public string VillainName { get; set; } = "";
 
   public void Add(Fact fact)
   {
@@ -384,9 +375,6 @@ class History(Rng rng)
     };
 
     FactDb factDb = new(ruler);
-
-    factDb.Villain = rng.NextDouble() < 0.5 ? VillainType.FieryDemon : VillainType.Necromancer;
-    factDb.VillainName = nameGen.GenerateName(rng.Next(8, 13));
 
     factDb.Add(GenNation(rng));
     factDb.Add(GenNation(rng));

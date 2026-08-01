@@ -111,7 +111,7 @@ class Artifacts
     Item artifact = ItemFactory.Get(type, objDb);
     artifact.Traits.Add(new  WeaponBonusTrait() { Bonus = 2, SourceId = artifact.ID });
 
-    DamageType dmgType = factDb.Villain == VillainType.FieryDemon ? DamageType.Holy : DamageType.Fire;
+    DamageType dmgType = rng.Next(2) == 0 ? DamageType.Holy : DamageType.Fire;
     artifact.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = dmgType });
 
     bool beloved = factDb.Ruler.Beloved;

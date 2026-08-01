@@ -119,7 +119,7 @@ class Decorations
         break;
       default:
         sb.Append(" brought to the land by the machinations of ");
-        sb.Append(factDb.VillainName);
+        sb.Append(ng.BossName());
         sb.Append('.');
         break;
     }
