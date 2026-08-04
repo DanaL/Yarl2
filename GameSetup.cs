@@ -501,20 +501,14 @@ class CampaignCreator(UserInterface ui)
 
         SorceressQuest.Setup(wildernessMap, town, objDb, factDb, campaign, rng);
 
-        HashSet<(int, int)>[] smallRegions = [.. regions.Values.Where(r => r.Count <= 30)];        
-        Wilderness.CarveBuriedValley(wildernessMap, smallRegions, mainRegion, town, objDb, factDb, rng);
-        if (factDb.FactCheck("RLEntrance") is LocationFact rle)
-        {
-          RoguelikeDungeonBuilder rlb = new(campaign.Dungeons.Count);
-          (Dungeon rld, Loc stairsLoc) = rlb.Generate(rle.Loc.Row, rle.Loc.Col, objDb, rng);
-          Downstairs rlEntrance = new("") { Destination = stairsLoc };
-          wildernessMap.SetTile(rle.Loc.Row, rle.Loc.Col, rlEntrance);
-          rld.ExitLoc = rle.Loc;
-          campaign.AddDungeon(rld);
-
-          // It would be a redo-the-wilderness if we couldn't make the valley/
-          // find a place for the entrance
-        }
+        // Old create Rogue dungeon code
+        // RoguelikeDungeonBuilder rlb = new(campaign.Dungeons.Count);
+        // (Dungeon rld, Loc stairsLoc) = rlb.Generate(rle.Loc.Row, rle.Loc.Col, objDb, rng);
+        // Downstairs rlEntrance = new("") { Destination = stairsLoc };
+        // wildernessMap.SetTile(rle.Loc.Row, rle.Loc.Col, rlEntrance);
+        // rld.ExitLoc = rle.Loc;
+          
+        // smallRegions
 
         Loc ringCentre = Wilderness.PlaceStoneRing(wildernessMap, town, objDb, factDb, rng);
 
