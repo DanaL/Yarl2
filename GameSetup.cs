@@ -488,6 +488,10 @@ class CampaignCreator(UserInterface ui)
         MessageAtLoc pal = new(entranceLoc, "A portal looms before you! Danger lurks within -- when you feel prepared you can enter via the [LIGHTBLUE >] command!");
         objDb.ConditionalEvents.Add(pal);
 
+        // Pick which levels the dungeon branches will be generated on
+        factDb.Add(new SimpleFact() { Name = "RogueBranchLevel", Value = rng.Next(6, 10).ToString() });
+        factDb.Add(new SimpleFact() { Name = "TempleBranchLevel", Value = rng.Next(8, 12).ToString() });
+
         // This will be moved to UsePortalAction probably
         factDb.Add(new DungeonGenerationFact(1, 0));
         campaign.FactDb = factDb;
