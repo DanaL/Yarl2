@@ -444,7 +444,6 @@ class History(Rng rng)
     };
     bell.Traits.Add(new DescriptionTrait("A brass bell of exquisite manufacture."));
     bell.Traits.Add(new ArtifactTrait());
-    bell.Traits.Add(new AbjurationBellTrait());
     bell.Traits.Add(new FlagOnPickUpTrait() { Flag = "AbjurationBellFound" });
     bell.Traits.Add(new CoolDownTrait() { Time = 5 });
     bell.Traits.Add(new UseSimpleTrait("scatter") { SourceId = bell.ID });

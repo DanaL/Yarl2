@@ -451,45 +451,6 @@ class MosquitoTrait : Trait
   public override string AsText() => "Mosquito";
 }
 
-class AbjurationBellTrait : Trait, IUSeable
-{
-  public override string AsText() => "AbjurationBell";
-
-  public UseResult Use(Actor caster, GameState gs, int row, int col, Item? item)
-  {    
-    Action action = new CloseMenuAction(gs, 1.0);
-
-    StringBuilder sb = new();
-    sb.AppendLine("The Abjuration Bell rings out a clarion tone!");
-
-    foreach (Loc adj in Util.Adj8Locs(caster.Loc))
-    {
-      List<Item> items = gs.ObjDb.ItemsAt(adj);
-      if (items.FirstOrDefault(i => i.HasTrait<DemonVisageTrait>()) is Item demonVisage)
-      {
-        sb.Append("\nThe demonic statue flares with red light, then explodes!");
-
-        gs.ObjDb.RemoveItemFromGame(adj, demonVisage);
-
-        Downstairs stairs = new("") { Destination =  adj };
-        gs.CurrentMap.SetTile(adj.Row, adj.Col, stairs);
-
-        Item light = ItemFactory.VirtualLight(Colours.BRIGHT_RED, Colours.DULL_RED, gs);
-        gs.ObjDb.SetToLoc(adj, light);
-
-        MessageAtLoc pal = new(adj, "[DULLRED An eerie red glow emanates from the depths beyond the stairs...]");
-        gs.ObjDb.ConditionalEvents.Add(pal);
-
-        break;
-      }
-    }
-
-    gs.UIRef().SetPopup(new Popup(sb.ToString(), "", -1, -1, 35));
-
-    return new UseResult(action);
-  }
-}
-
 class AcidSplashTrait : Trait
 {
   public override string AsText() => "AcidSplash";
@@ -1989,11 +1950,6 @@ sealed class DecoyTrait() : Trait
 sealed class DeliciousTrait : Trait
 {
   public override string AsText() => "Delicious";
-}
-
-class DemonVisageTrait : Trait
-{
-  public override string AsText() => "DemonVisage";
 }
 
 class DisguiseTrait : BasicTrait
@@ -4164,7 +4120,6 @@ class TraitFactory
 {
   static readonly Dictionary<string, Func<string[], GameObj?, Trait>> traitFactories = new()
   {
-    { "AbjurationBell", (pieces, gameObj) => new AbjurationBellTrait() },
     { "AcidSplash", (pieces, gameObj) => new AcidSplashTrait() },
     { "ACMod", (pieces, gameObj) =>
       {
@@ -4285,7 +4240,6 @@ class TraitFactory
     { "DeathMessage", (pieces, gameObj) => new DeathMessageTrait() { Message = pieces[1] } },
     { "Decoy", (pieces, gameObj) => new DecoyTrait() },
     { "Delicious", (pieces, gameObj) => new DeliciousTrait() },
-    { "DemonVisage", (pieces, gameObj) => new DemonVisageTrait() },
     { "Description", (pieces, gameObj) => new DescriptionTrait(pieces[1]) },
     { "Desecrated", (pieces, gameObj) => new DesecratedTrait() },
     { "DialogueScript", (pieces, gameObj) => new DialogueScriptTrait() { ScriptFile = pieces[1] } },

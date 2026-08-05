@@ -739,13 +739,8 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       }
     }
     
-    Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
-    statue.Traits.Add(new DescriptionTrait("a statue of a greater demon covered in cracks, from which red light streams."));
-    statue.Traits.Add(new LightSourceTrait() { FgColour = Colours.BRIGHT_RED, BgColour = Colours.RED_AURA, Radius = 1, OwnerID = statue.ID });
-    statue.Traits.Add(new DemonVisageTrait());
-
     Loc loc = new(dungeon.ID, levelNum, roomCenterRow, roomCenterCol);
-    objDb.SetToLoc(loc, statue);
+    cellar.SetTile(roomCenterRow, roomCenterCol, TileFactory.Get(TileType.BarredStairway));
 
     floors.Remove(loc);
     floors.Shuffle(rng);

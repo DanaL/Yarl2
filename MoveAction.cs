@@ -445,6 +445,7 @@ class BumpAction(GameState gameState, Actor actor, Loc loc, bool involuntary) : 
     TileType.DungeonWall => "",
     TileType.Lava => "Entering the lava seems like a terrible idea.",
     TileType.Arioch => "The awful visage of a Demon Lord, writhing in its shackles!",
+    TileType.BarredStairway => "A cage of golden light prevents access to a stairway.",
     _ => "You cannot go that way!"
   };
 }
