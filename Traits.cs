@@ -996,23 +996,6 @@ sealed class StickyTrait : BasicTrait
   public override string AsText() => "Sticky";
 }
 
-class StoneTabletTrait(string text) : BasicTrait, IUSeable, IOwner
-{
-  public ulong OwnerID { get; set; }
-  readonly string _text = text;
-  public override string AsText() => $"StoneTablet#{_text.Replace("\n", "<br/>")}#{OwnerID}";
-  
-  public UseResult Use(Actor user, GameState gs, int row, int col, Item? item)
-  {
-    List<string> lines = [.._text.Split('\n')];
-    gs.UIRef().SetPopup(new Hint(lines, 3));
-
-    Action action = new CloseMenuAction(gs, 1.0);
-    
-    return new UseResult(action);
-  }
-}
-
 class StrTrait(string n, string v) : Trait
 {
   public string Name { get; set; } = n;
@@ -1191,16 +1174,6 @@ class PolymorphedTrait : Trait
   }
 
   public override string AsText() => $"Polymorphed#{OriginalId}";
-}
-
-class QuestItem1 : Trait
-{
-  public override string AsText() => "QuestItem1";
-}
-
-class QuestItem2 : Trait
-{
-  public override string AsText() => "QuestItem2";
 }
 
 class RustedTrait : Trait
@@ -4523,8 +4496,6 @@ class TraitFactory
     { "Polymorphed", (pieces, gameObj) => new PolymorphedTrait() { OriginalId = ulong.Parse(pieces[1]) } },
     { "Prisoner", (pieces, gameObj) => new PrisonerTrait() { SourceId = ulong.Parse(pieces[1]), Cell = Loc.FromStr(pieces[2]) } },
     { "Quiet", (pieces, gameObj) => new QuietTrait() { SourceId = pieces[1] == "item" ? gameObj!.ID : ulong.Parse(pieces[1])} },
-    { "QuestItem1", (pieces, gameObj) => new QuestItem1() },
-    { "QuestItem2", (pieces, gameObj) => new QuestItem2() },
     { "Rage", (pieces, gameObj) => new RageTrait(gameObj as Actor ?? throw new ArgumentException("gameObj must be an Actor for RageTrait")) },
     { "Reach", (pieces, gameObj) => new ReachTrait() },
     { "Readable", (pieces, gameObj) => new ReadableTrait(pieces[1].Replace("<br/>", "\n")) { OwnerID = ulong.Parse(pieces[2]) } },
@@ -4619,7 +4590,6 @@ class TraitFactory
       };
     }},
     { "Sticky", (pieces, gameObj) => new StickyTrait() },
-    { "StoneTablet", (pieces, gameObj) => new StoneTabletTrait(pieces[1].Replace("<br/>", "\n")) { OwnerID = ulong.Parse(pieces[2]) } },
     { "Str", (pieces, gameObj) => new StrTrait(pieces[1], pieces[2])},
     { "Swallowed", (pieces, gameObj) => new SwallowedTrait()
       {

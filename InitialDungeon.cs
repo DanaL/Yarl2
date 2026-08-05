@@ -753,11 +753,6 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     Actor hh = MonsterFactory.Get("hellhound pup", objDb, rng);
     objDb.AddNewActor(hh, hellHoundLoc);
     
-    Item tablet = History.SealingTablet1(objDb);
-    List<Loc> locs = [.. Util.Adj8Locs(loc)];
-    Loc tabetLoc = locs[rng.Next(locs.Count)];
-    objDb.SetToLoc(tabetLoc, tablet);
-
     int startRow = int.Min(stairsLoc.Row, roomCenterRow);
     for (int r = startRow; r < startRow + 8; r++)    
       cellar.SetTile(r, roomCenterCol, TileFactory.Get(TileType.DungeonFloor));

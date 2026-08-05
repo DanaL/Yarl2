@@ -394,68 +394,6 @@ class History(Rng rng)
     3 => "ELAM EBOW",
     _ => "VELOX NEB"
   };
-
-  public static Item SealingTablet1(GameObjectDB objDb)
-  {
-    string txt = @"
-    Part of a broken tablet:
-      ┍────────────────┑
-      ┇                │
-      │ ՓլՈ ԿՈՄ թԺթԺ   |
-      ┇  ՄՓ լՓ լՓպՈ    │
-      | պՈՄԺ ՍեթՓպ     |
-      │  պՓ լԺwԺ ե     ┇
-      ┇                │
-      \\/\\/\__/\/\__/\/
-      ";
-
-    Item tablet = SealingTablet(objDb, txt);
-    tablet.Traits.Add(new QuestItem1());
-    tablet.Traits.Add(new OnPickupTrait()
-    {
-      Clear = true,
-      Event = "SetAttributeTrigger#MainQuestState#2#0"
-    });
-
-    return tablet;
-  }
-
-  public static Item SealingTablet2(GameObjectDB objDb)
-  {
-    string txt = @"
-    Part of a broken tablet:
-      //\\/\//\\_/\/\/\
-      ┇                │
-      │   ձՈՄՍԽտԺ      ┇
-      ┇   ՓԿե լՓ       |
-      |     պԺԿԺլԺ     │ 
-      │                │
-      ┕────────────────┙
-        ";
-
-    Item tablet = SealingTablet(objDb, txt);
-    tablet.Traits.Add(new QuestItem2());
-
-    return tablet;
-  }
-
-  static Item SealingTablet(GameObjectDB objDb, string txt)
-  {
-    Item tablet = new()
-    {
-      Name = "broken tablet",
-      Type = ItemType.Document,
-      Glyph = new Glyph('▫', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false)
-    };
-
-    ReadableTrait rt = new(txt) { OwnerID = tablet.ID };
-    tablet.Traits.Add(rt);
-    tablet.Traits.Add(new StoneTabletTrait(txt) { OwnerID = tablet.ID });
-
-    objDb.Add(tablet);
-
-    return tablet;
-  }
   
   public static Item SorceressTome(GameObjectDB objDb)
   {

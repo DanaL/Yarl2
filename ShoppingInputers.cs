@@ -753,14 +753,14 @@ class WitchDialogue : Inputer
     {
       Witch.Stats[Attribute.DialogueState] = new Stat(QUEST_ITEM_FOUND);
     }
-    else if (gs.MainQuestState == 2 && HasQuestItem1())
-    {
-      Witch.Stats[Attribute.DialogueState] = new Stat(AFTER_FIRST_DUNGEON_TABLET);
-    }
-    else if (gs.MainQuestState == 2 && !HasQuestItem1())
-    {
-      Witch.Stats[Attribute.DialogueState] = new Stat(AFTER_FIRST_DUNGEON_NO_TABLET);
-    }
+    // else if (gs.MainQuestState == 2 && HasQuestItem1())
+    // {
+    //   Witch.Stats[Attribute.DialogueState] = new Stat(AFTER_FIRST_DUNGEON_TABLET);
+    // }
+    // else if (gs.MainQuestState == 2 && !HasQuestItem1())
+    // {
+    //   Witch.Stats[Attribute.DialogueState] = new Stat(AFTER_FIRST_DUNGEON_NO_TABLET);
+    // }
     else if (gs.MainQuestState == 3)
     {
       Witch.Stats[Attribute.DialogueState] = new Stat(SEND_TO_TOWER);
@@ -768,17 +768,6 @@ class WitchDialogue : Inputer
 
     SetDialogueText();
     WritePopup();
-  }
-
-  bool HasQuestItem1()
-  {
-    foreach (Item item in GS.Player.Inventory.Items())
-    {
-      if (item.HasTrait<QuestItem1>())
-        return true;
-    }
-
-    return false;
   }
 
   public override void Input(char ch)

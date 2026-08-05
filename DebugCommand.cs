@@ -189,14 +189,7 @@ class DebugCommand(GameState gs)
       _gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Pit));
       _gs.PrepareFieldOfView();
       return "";
-    }
-    else if (txt == "quest1")
-    {
-      Item tablet1 = History.SealingTablet1(_gs.ObjDb);
-      _gs.Player.Inventory.Add(tablet1, _gs.Player.ID);
-      _gs.Player.Stats[Attribute.MainQuestState] = new Stat(2);
-      return "";
-    }
+    }    
     else if (txt == "quest2")
     {
       _gs.Player.Stats[Attribute.MainQuestState] = new Stat(3);
