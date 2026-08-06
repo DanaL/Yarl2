@@ -163,7 +163,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     foreach (var sq in levels[2].SqsOfType(TileType.Upstairs))
     {
       Loc loc = new(DungeonId, 2, sq.Item1, sq.Item2);
-      SetQuestStateAtLoc ce = new(loc, 1);
+      SetQuestStateAtLoc ce = new(loc, 1, "");
       gs.ObjDb.ConditionalEvents.Add(ce);
     }
         
@@ -741,6 +741,12 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     
     Loc loc = new(dungeon.ID, levelNum, roomCenterRow, roomCenterCol);
     cellar.SetTile(roomCenterRow, roomCenterCol, TileFactory.Get(TileType.BarredStairway));
+    
+    foreach (Loc adj in Util.Adj8Locs(loc))
+    {
+      SetQuestStateAtLoc ce = new(adj, 2, "A cage of glowing golden bars blocks access to a staircase leading deeper into darkness!");
+      objDb.ConditionalEvents.Add(ce);
+    }
 
     floors.Remove(loc);
     floors.Shuffle(rng);

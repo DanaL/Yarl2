@@ -29,7 +29,7 @@ abstract class ConditionalEvent
     return pieces[0] switch
     {
       "CanSeeLoc" => new CanSeeLoc(Loc.FromStr(pieces[1]), pieces[2]),
-      "SetQuestStateAtLoc" => new SetQuestStateAtLoc(Loc.FromStr(pieces[1]), int.Parse(pieces[2])),
+      "SetQuestStateAtLoc" => new SetQuestStateAtLoc(Loc.FromStr(pieces[1]), int.Parse(pieces[2]), pieces[3]),
       "PlayerHasLitTorch" => new PlayerHasLitTorch(),
       "MessageAtLoc" => new MessageAtLoc(Loc.FromStr(pieces[1]), pieces[2]),
       "SetFlagAtLoc" => new SetFlagAtLoc(Loc.FromStr(pieces[1]), pieces[2]),
@@ -54,10 +54,11 @@ class CanSeeLoc(Loc loc, string msg) : ConditionalEvent
   public override string AsText() => $"CanSeeLoc{Constants.SEPARATOR}{Loc}{Constants.SEPARATOR}{Msg}";
 }
 
-class SetQuestStateAtLoc(Loc loc, int questState) : ConditionalEvent
+class SetQuestStateAtLoc(Loc loc, int questState, string message) : ConditionalEvent
 {
   Loc Loc { get; set; } = loc;
   int QuestState { get; set; } = questState;
+  string Message { get; set; } = message;
 
   public override bool ConditionMet(GameState gs) => gs.Player.Loc == Loc;
 
@@ -65,11 +66,19 @@ class SetQuestStateAtLoc(Loc loc, int questState) : ConditionalEvent
   {
     // The quest state should alaways go up. If the player skips a trigger we
     // don't want to accidentally move progress backwards later on
-    if (gs.MainQuestState < QuestState)
+    if (gs.MainQuestState < QuestState) 
+    {
       gs.Player.Stats[Attribute.MainQuestState] = new Stat(QuestState);
+
+      if (Message != "")
+      {
+        gs.UIRef().SetPopup(new Popup(Message, "", -2, -1));
+        gs.UIRef().PauseForResponse = true;
+      }
+    }
   }
 
-  public override string AsText() => $"SetQuestStateAtLoc{Constants.SEPARATOR}{Loc}{Constants.SEPARATOR}{QuestState}";
+  public override string AsText() => $"SetQuestStateAtLoc{Constants.SEPARATOR}{Loc}{Constants.SEPARATOR}{QuestState}{Constants.SEPARATOR}{Message}";
 }
 
 class MessageAtLoc(Loc loc, string msg) : ConditionalEvent
