@@ -695,11 +695,8 @@ class WitchDialogue : Inputer
   const int GIVE_QUEST = 3;
   const int ON_QUEST = 4;
   const int QUEST_ITEM_FOUND = 5;
-  const int QUEST_DONE = 6;
-  const int AFTER_FIRST_DUNGEON_TABLET = 7;
-  const int AFTER_FIRST_DUNGEON_NO_TABLET = 8;
-  const int SORCERESS_HISTORY = 9;
   const int SEND_TO_TOWER = 8;
+  const int TOWER_REMINDER = 9;
 
   // Menu states
   const int NO_OPTIONS = 0;
@@ -707,8 +704,7 @@ class WitchDialogue : Inputer
   const int START_KYLIE_QUEST = 2;
   const int LEARN_MAGIC_101 = 3;
   const int SPELL_MENU = 4;
-  const int SHOW_TABLET = 5;
-
+  
   bool PlayerHasCrystal
   {
     get
@@ -753,17 +749,13 @@ class WitchDialogue : Inputer
     {
       Witch.Stats[Attribute.DialogueState] = new Stat(QUEST_ITEM_FOUND);
     }
-    // else if (gs.MainQuestState == 2 && HasQuestItem1())
-    // {
-    //   Witch.Stats[Attribute.DialogueState] = new Stat(AFTER_FIRST_DUNGEON_TABLET);
-    // }
-    // else if (gs.MainQuestState == 2 && !HasQuestItem1())
-    // {
-    //   Witch.Stats[Attribute.DialogueState] = new Stat(AFTER_FIRST_DUNGEON_NO_TABLET);
-    // }
-    else if (gs.MainQuestState == 3)
+    else if (gs.MainQuestState == 2)
     {
       Witch.Stats[Attribute.DialogueState] = new Stat(SEND_TO_TOWER);
+    }
+    else if (gs.MainQuestState == 3)
+    {
+      Witch.Stats[Attribute.DialogueState] = new Stat(TOWER_REMINDER);
     }
 
     SetDialogueText();
@@ -797,13 +789,7 @@ class WitchDialogue : Inputer
         case "farewell":
           GS.UIRef().AlertPlayer("Farewell.");
           Close();
-          return;
-        case "show tablet":
-          Witch.Stats[Attribute.DialogueState] = new Stat(SORCERESS_HISTORY);
-          string magicWord = History.MagicWord(GS.Rng);
-          GS.FactDb.Add(new SimpleFact() { Name = "SorceressPassword", Value = magicWord });
-          GS.Player.Stats[Attribute.MainQuestState] = new Stat(3);
-          break;
+          return;            
         default:
           PurchaseSpell(opt);
           return;
@@ -920,10 +906,6 @@ class WitchDialogue : Inputer
       case BUY_SPELLS:        
         Witch.Stats[Attribute.NPCMenuState] = new Stat(SPELL_MENU);        
         break;
-      case AFTER_FIRST_DUNGEON_TABLET:
-        Blurb = "That tablet you carry -- may I take a look at it?";
-        Witch.Stats[Attribute.NPCMenuState] = new Stat(SHOW_TABLET);        
-        break;
       case GIVE_QUEST:
         SetupQuest();
         break;
@@ -940,15 +922,20 @@ class WitchDialogue : Inputer
         Blurb = "We won't be able to make much progress on your lessons without that crystal. ";
         Blurb += $"You should be able to find it in that cave off to the [ICEBLUE {entranceDir}]!";
         break;
-      case SORCERESS_HISTORY:
-        magicWord = GS.FactDb.FactCheck("SorceressPassword") is SimpleFact mw ? mw.Value : "";
-        Blurb = "It was a mighty sorceress who long ago sealed away [BRIGHTRED Arioch] but now it appears her arcane fetters grow weaker.\n\n";
-        Blurb += "There is some hope! Her tower is nearby and still stands. I suggest you explore it and see what can be learned of her magic. Perhaps she left some hint we can use to restore her wards.\n\n";
-        Blurb += "The tablet you found contains a magic phrase that will grant access to her tower. Beware: the tower likely contains guardians and magical protections.\n";
-        Blurb += $"\nThe words to speak at the tower's gate are: [ICEBLUE {magicWord}]";
-        Witch.Stats[Attribute.NPCMenuState] = new Stat(NO_OPTIONS);
-        break;
       case SEND_TO_TOWER:
+        magicWord = History.MagicWord(GS.Rng);
+        GS.FactDb.Add(new SimpleFact() { Name = "SorceressPassword", Value = magicWord });
+        GS.Player.Stats[Attribute.MainQuestState] = new Stat(3);
+
+        Blurb = "Some time ago I sensed the fetters that imprison [BRIGHTRED Arioch] have begun to weaken and have been studying the researching how he was bound long ago. I have learned ";
+        Blurb += "it was a mighty sorceress who long ago sealed away the Foul One.\n\nMy guess is that the Sorceress also locked the stairs you found. ";
+        Blurb += "We need to learn more about her! Her tower is nearby and still stands. I suggest you explore it to hopefully learn more about her magic and her plans. ";    
+        Blurb += $"The magic phrase that will open the gates to her tower is [ICEBLUE {magicWord}]. Speak it at the tower's threshold!\n\n";
+        Blurb += "Beware: the tower likely contains guardians and magical protections.\n";
+        
+        Witch.Stats[Attribute.NPCMenuState] = new Stat(NO_OPTIONS);        
+        break;
+      case TOWER_REMINDER:
         magicWord = GS.FactDb.FactCheck("SorceressPassword") is SimpleFact mw2 ? mw2.Value : "";
         Blurb = $"You should explore the sorceress' tower. Speak the magical phrase [ICEBLUE {magicWord}] to open the gate, if you haven't already.";
 
@@ -1020,12 +1007,6 @@ class WitchDialogue : Inputer
       case SPELL_MENU:
         SetSpellMenu();
         break;
-      case SHOW_TABLET:
-        Blurb += $"\n\na) Show {Witch.Name.Capitalize()} the tablet";
-        Blurb += "\nb) Farewell";
-        Options.Add('a', "show tablet");
-        Options.Add('b', "farewell");
-        break;
     }
   }
 
@@ -1035,7 +1016,7 @@ class WitchDialogue : Inputer
     sb.Append("\n\n");
     sb.Append(Blurb);
 
-    GS.UIRef().SetPopup(new Popup(sb.ToString(), Witch.FullName, -1, -1));
+    GS.UIRef().SetPopup(new Popup(sb.ToString(), Witch.FullName, -2, -1));
   }
 
   public override UIResult GetResult()
