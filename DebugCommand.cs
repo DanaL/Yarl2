@@ -189,8 +189,13 @@ class DebugCommand(GameState gs)
       _gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Pit));
       _gs.PrepareFieldOfView();
       return "";
-    }    
+    }
     else if (txt == "quest2")
+    {
+      _gs.Player.Stats[Attribute.MainQuestState] = new Stat(2);
+      return "";
+    }
+    else if (txt == "quest3")
     {
       _gs.Player.Stats[Attribute.MainQuestState] = new Stat(3);
 

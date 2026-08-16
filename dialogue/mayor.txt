@@ -42,9 +42,9 @@
 
       ( (>= MAIN_QUEST_STATUS 2)
         (say (
-          pick ("A mysterious, ominous statue?! I don't like the sound of that."
-                "I deal with by-laws and tourism! Maybe talk to our pastor or the witches about glowing statues?"
-                "Of course, I wonder if this statue could become a tourist attraction."                
+          pick ("A mysterious, caged stairway? I wonder if it's meant to barricaded?"
+                "I deal with by-laws and tourism! Maybe talk to our pastor or the witches about magical cages and stairs?"
+                "There's even more to the dungeon? This could become a tourist attraction."                
           )))
       )
     )
