@@ -81,7 +81,6 @@ class Tower(int height, int width, int minLength)
     RegionFinder rf = new(new DungeonPassable());
     Dictionary<int, HashSet<(int, int)>> regions = rf.Find(map, false, 0, TileType.DungeonFloor);
 
-    // Convert the hashset of floor tiles to Room objects
     List<Room> rooms = [];
     foreach (var room in regions.Values)
     {

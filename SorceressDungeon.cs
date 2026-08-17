@@ -323,8 +323,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
     int CountAdjFloors(Map map, int row, int col)
     {
       return Util.Adj8Sqs(row, col)
-                 .Where(adj => map.TileAt(adj.Item1, adj.Item2).Type == TileType.DungeonFloor)
-                 .Count();
+                 .Count(adj => map.TileAt(adj.Item1, adj.Item2).Type == TileType.DungeonFloor);
     }
   }
 
