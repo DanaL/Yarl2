@@ -167,11 +167,6 @@ class SorceressQuest
     Loc diaryLoc = new(dungeonId, tl - 1, drow, dcol);
     objDb.Add(diary1);
     objDb.SetToLoc(diaryLoc, diary1);
-
-    Landmark landmark = new("Written 100 times on a chalkboard: I will not borrow my mistress' favourite Bell and lose it in an ancient dungeon in a hidden valley.");
-    floorSqs = sorceressTower.LevelMaps[tl - 2].SqsOfType(TileType.DungeonFloor);
-    (int lmRow, int lmCol) = floorSqs[rng.Next(floorSqs.Count)];
-    sorceressTower.LevelMaps[tl - 2].SetTile(lmRow, lmCol, landmark);
   }
 }
 

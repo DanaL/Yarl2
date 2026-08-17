@@ -206,7 +206,7 @@ class Tower(int height, int width, int minLength)
   {    
     // Just rebuilding the set of rooms here. It seemed simpler than trying to
     // merge Room objects when we are merged interior rooms and I can't imagine
-    // the inefficiency will be even noticable.
+    // the inefficiency will be even noticeable.
     Dictionary<int, Room> rooms = [];
     int i = 0;
     foreach (Room r in FindRooms(map))
