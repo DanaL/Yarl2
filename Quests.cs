@@ -151,22 +151,6 @@ class SorceressQuest
     int tl = sorceressTower.LevelMaps.Count - 1;
     Map topLevel = sorceressTower.LevelMaps[tl];
     SetupSorceress(topLevel, tl, dungeonId, objDb, rng);
-
-    Item diary1 = new()
-    {
-      Name = "exerpt of a memoir",
-      Type = ItemType.Document,
-      Glyph = new Glyph('♪', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, false)
-    };
-    
-    string txt = $"...and so I borrowed -- well, borrowed without permission -- the Candle from the Moon Daughter's hidden temple. I did return it when I was finished! It wasn't even that hard to find. You just stand in the centre of the Moonstone Ring on a clear night and speak: {magicWord}.";
-    diary1.Traits.Add(new ReadableTrait(txt) { OwnerID = diary1.ID });
-    diary1.Traits.Add(new DescriptionTrait("A hastily scrawled document with many passages crossed out and rewritten."));
-    List<(int, int)> floorSqs = sorceressTower.LevelMaps[tl - 1].SqsOfType(TileType.DungeonFloor);
-    (int drow, int dcol) = floorSqs[rng.Next(floorSqs.Count)];
-    Loc diaryLoc = new(dungeonId, tl - 1, drow, dcol);
-    objDb.Add(diary1);
-    objDb.SetToLoc(diaryLoc, diary1);
   }
 }
 
