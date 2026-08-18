@@ -395,6 +395,21 @@ class History(Rng rng)
     _ => "VELOX NEB"
   };
   
+  public static Item JewelledKey(GameState gs)
+  {
+    Item key = new() { 
+      Name = "key", Type = ItemType.Tool, Value = 1,
+      Glyph = new Glyph(';', Colours.ICE_BLUE, Colours.BLUE, Colours.BLACK, false)
+    };
+    key.Traits.Add(new JewelledKeyTrait());
+    gs.ObjDb.Add(key);
+
+    if (gs.Player.Stats[Attribute.MainQuestState].Curr < 3)
+      gs.Player.Stats[Attribute.MainQuestState] = new Stat(3);
+      
+    return key;
+  }
+
   public static Item SorceressTome(GameObjectDB objDb)
   {
     Item tome = new()

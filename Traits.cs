@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Text;
-
 namespace Yarl2;
 
 record UseResult(Action? ReplacementAction, string Message = "");
@@ -1397,14 +1395,19 @@ class CleansingTrait : Trait
   public override string AsText() => "Cleansing";
 }
 
-class CleaveTrait : Trait
+sealed class CleaveTrait : Trait
 {
   public override string AsText() => "Cleave";
 }
 
-class ImpaleTrait : Trait
+sealed class ImpaleTrait : Trait
 {
   public override string AsText() => "Impale";
+}
+
+sealed class JewelledKeyTrait : Trait
+{
+  public override string AsText() => "JewelledKey";
 }
 
 sealed class KnockBackTrait : Trait
@@ -4361,6 +4364,7 @@ class TraitFactory
         ExpiresOn = pieces[3] == "max" ? ulong.MaxValue : ulong.Parse(pieces[3])
       }
     },
+    { "JewelledKey", (pieces, gameObj) => new JewelledKeyTrait() },
     { "KnockBack", (pieces, gameObj) => new KnockBackTrait() },
     { "KoboldAltar", (pieces, gameObj) => new KoboldAltarTrait() },
     { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},

@@ -763,6 +763,34 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     return 0.0;
   }
 
+  double UseJewelledKey(Item key)
+  {
+    Loc gateLoc = Loc.Nowhere;
+    foreach (var adj in Util.Adj8Locs(Actor!.Loc))
+    {
+      if (GameState.CurrentMap.TileAt(adj.Row, adj.Col).Type == TileType.BarredStairway)
+      {
+        gateLoc = adj;
+        break;
+      }
+    }
+
+    if (gateLoc == Loc.Nowhere)
+    {
+      GameState.UIRef().AlertPlayer("You see nowhere to use that key.");
+      return 0.0;
+    }
+
+    string s = "The glowing cage bursts into sparks and glitter and disappears. The way forward now beckons!";
+    GameState.UIRef().AlertPlayer(s);
+    GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
+    
+    Actor.Inventory.RemoveByID(key.ID, GameState);
+    GameState.ObjDb.RemoveItemFromGame(Actor.Loc, key);
+
+    return 1.0;
+  }
+
   double UseVaultKey(Item key)
   {
     VaultKeyTrait? keyTrait = key.Traits.OfType<VaultKeyTrait>()
@@ -782,11 +810,11 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
 
       if (!adj)
       {
-        GameState!.UIRef().AlertPlayer("You see nowhere to use that key.");
+        GameState.UIRef().AlertPlayer("You see nowhere to use that key.");
         return 0.0;
       }
 
-      GameState!.UIRef().AlertPlayer("The metal doors swing open.");
+      GameState.UIRef().AlertPlayer("The metal doors swing open.");
       var door = (VaultDoor) GameState!.CurrentMap.TileAt(doorLoc.Row, doorLoc.Col);
       door.Open = true;
 
@@ -854,7 +882,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       return UseArrow(item);
     }
 
-    bool torch = false, written = false, vaultKey = false;
+    bool torch = false, written = false, vaultKey = false, jewelledKey = false;
     bool onCooldown = false;
     bool needsToBeEquipped = false;
     foreach (Trait t in item.Traits)
@@ -863,6 +891,8 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
         written = true;
       if (t is VaultKeyTrait)
         vaultKey = true;
+      if (t is JewelledKeyTrait)
+        jewelledKey = true;
 
       if (t is CoolDownTrait cd) 
       { 
