@@ -12,23 +12,29 @@
 namespace Yarl2;
 
 class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccupant) : DungeonBuilder
-{
-  const int DUNGEON_DEPTH = 5;
+{  
   const int HEIGHT = 30;
   const int WIDTH = 70;
   int DungeonId { get; set; } = dungeonId;
   (int, int) Entrance { get; set; } = entrance;
   string MainOccupant { get; set; } = mainOccupant;
+  int _dungeonDepth;
 
   public Dungeon Generate(string arrivalMessage, GameState gs)
   {    
+    if (gs.MainQuestState < 3)
+      _dungeonDepth = 5;
+    else
+      _dungeonDepth = 10;
+    bool generateCellar = gs.FactDb.FactCheck("BarredGateUnlocked") is not null;
+    
     Dungeon dungeon = new(DungeonId, "the Old Ruins", arrivalMessage, true) { Permanent = false };
     DungeonMap mapper = new(gs.Rng);
-    Map[] levels = new Map[DUNGEON_DEPTH];
+    Map[] levels = new Map[_dungeonDepth];
 
     dungeon.MonsterDecks = DeckBuilder.ReadDeck(MainOccupant, gs.Rng);
 
-    for (int levelNum = 0; levelNum < DUNGEON_DEPTH; levelNum++)
+    for (int levelNum = 0; levelNum < _dungeonDepth; levelNum++)
     {
       levels[levelNum] = mapper.DrawLevel(WIDTH, HEIGHT);
       dungeon.AddMap(levels[levelNum]);
@@ -38,10 +44,10 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
     AddRooms(levels, gs.ObjDb, gs.FactDb, gs.Rng);
       
-    dungeon.LevelMaps[DUNGEON_DEPTH - 1].Features |= MapFeatures.UndiggableFloor;
+    dungeon.LevelMaps[_dungeonDepth - 1].Features |= MapFeatures.UndiggableFloor;
 
     List<(int, TileType)> riverLevels = [];
-    for (int levelNum = 0; levelNum < DUNGEON_DEPTH; levelNum++)
+    for (int levelNum = 0; levelNum < _dungeonDepth; levelNum++)
     {
       // Maybe add a river/chasm to the level?
       if (gs.Rng.Next(4) == 0)
@@ -49,7 +55,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
         Map? nextLevel = null;
         RiverConfig riverConfig;
         TileType riverType = TileType.DeepWater;
-        if (levelNum < DUNGEON_DEPTH - 1 && gs.Rng.Next(3) == 0)
+        if (levelNum < _dungeonDepth - 1 && gs.Rng.Next(3) == 0)
         {
           riverConfig = new(TileType.Chasm, false, false);
           nextLevel = levels[levelNum + 1];
@@ -79,7 +85,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     {
       Map map = levels[levelNum];
 
-      SetTraps(map, DungeonId, levelNum, DUNGEON_DEPTH, gs.Rng);
+      SetTraps(map, DungeonId, levelNum, _dungeonDepth, gs.Rng);
 
       List<Loc> floors = [];
       for (int r = 0; r < map.Height; r++)
@@ -105,7 +111,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       AddTreasure(gs.ObjDb, floors, levelNum, gs.Rng);
       
       // Maybe add an illusion/trap
-      if (levelNum < DUNGEON_DEPTH - 1 && gs.Rng.Next(10) == 0)
+      if (levelNum < _dungeonDepth - 1 && gs.Rng.Next(10) == 0)
       {
         AddBaitIllusion(map, DungeonId, levelNum, gs.ObjDb, gs.Rng);
       }
@@ -124,7 +130,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     // If the prisoner hasn't previously been freed, 1 in 3 dungeons have a captive
     if (gs.FactDb.FactCheck("prisoner-freed") is null && gs.Rng.Next(5) == 0)
     {
-      int captiveLevel = gs.Rng.Next(1, DUNGEON_DEPTH);
+      int captiveLevel = gs.Rng.Next(1, _dungeonDepth);
       CaptiveFeature.Create(DungeonId, captiveLevel, levels[captiveLevel], gs.ObjDb, gs.FactDb, gs.Rng);
     }
 
@@ -134,7 +140,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
     if (gs.FactDb.FactCheck("WidowerTalismanFound") is null)
     {
-      int fallenAdventurer = gs.Rng.Next(1, DUNGEON_DEPTH);
+      int fallenAdventurer = gs.Rng.Next(1, _dungeonDepth);
       AddWidowerBeau(gs.ObjDb, levels[fallenAdventurer], fallenAdventurer, gs.FactDb, gs.Rng);  
     }
     
@@ -144,7 +150,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     
     if (gs.FactDb.FactCheck("IdolAltarVisited") is null)
     {
-      int altarLevel = gs.Rng.Next(0, DUNGEON_DEPTH);
+      int altarLevel = gs.Rng.Next(0, _dungeonDepth);
       IdolAltarMaker.MakeAltar(DungeonId, levels, gs.ObjDb, gs.FactDb, gs.Rng, altarLevel);
     }
     

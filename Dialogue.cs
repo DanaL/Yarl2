@@ -1474,7 +1474,7 @@ class DialogueInterpreter
     Item item = gift.Gift switch
     {
       "MINOR_GIFT" => Treasure.MinorGift(gs.ObjDb, gs.Rng),
-      "SORCERESS_ITEM" => History.JewelledKey(gs.ObjDb),
+      "SORCERESS_ITEM" => History.JewelledKey(gs),
       "WIDOWER_REWARD" => ItemFactory.Get(ItemNames.SCROLL_ENCHANTING, gs.ObjDb),
       _ => throw new Exception($"Unknown variable: {gift.Gift}"),
     };

@@ -198,15 +198,6 @@ class DebugCommand(GameState gs)
     else if (txt == "quest3")
     {
       _gs.Player.Stats[Attribute.MainQuestState] = new Stat(3);
-
-      Loc towerGate = Loc.Nowhere;
-      if (_gs.FactDb.FactCheck("Tower Gate") is LocationFact lf)
-      {
-        towerGate = lf.Loc;
-      }
-
-      Map wilderness = _gs.Campaign.Dungeons[0].LevelMaps[0];
-      wilderness.SetTile(towerGate.Row, towerGate.Col, TileFactory.Get(TileType.StoneFloor));
       return "";
     }
     else if (txt == "set end game")
