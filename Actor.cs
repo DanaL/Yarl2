@@ -699,7 +699,7 @@ abstract class Actor : GameObj, IZLevel
   {
     // Maybe I should come up with a formal/better way to differentiate 
     // between real in-game actions and things like opening inventory or
-    // looking athelp, etc?
+    // looking at help, etc?
     if (baseCost == 0)
       return 0;
 

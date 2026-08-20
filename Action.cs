@@ -657,7 +657,7 @@ class ShriekAction(GameState gs, Actor actor, int radius) : Action(gs, actor)
           if (mob.HasTrait<SleepingTrait>())
           {
             mob.Traits = [..mob.Traits.Where(t => t is not SleepingTrait)];
-            if (mob.VisibleTo(GameState.Player))
+            if (mob.VisibleTo(GameState.Player) && GameState.LastPlayerFoV.ContainsKey(mob.Loc))
             {
               string n = MsgFactory.CalcName(mob, GameState.Player);
               GameState.UIRef().AlertPlayer($"{n.Capitalize()} {Grammar.Conjugate(mob, "wake")} up.");
