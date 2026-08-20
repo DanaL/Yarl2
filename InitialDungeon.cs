@@ -26,7 +26,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       _dungeonDepth = 5;
     else
       _dungeonDepth = 10;
-    bool generateCellar = gs.FactDb.FactCheck("BarredGateUnlocked") is not null;
+    bool generateCellar = gs.FactDb.FactCheck("BarredGateUnlocked") is null;
     
     Dungeon dungeon = new(DungeonId, "the Old Ruins", arrivalMessage, true) { Permanent = false };
     DungeonMap mapper = new(gs.Rng);
@@ -154,8 +154,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       IdolAltarMaker.MakeAltar(DungeonId, levels, gs.ObjDb, gs.FactDb, gs.Rng, altarLevel);
     }
     
-    int mainQuestState = gs.Player.Stats[Attribute.MainQuestState].Curr;
-    if (mainQuestState < 2) 
+    if (generateCellar) 
     {
       SetPuzzle(dungeon, gs.ObjDb, gs.FactDb, gs.Rng);
     }
