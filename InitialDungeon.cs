@@ -12,7 +12,7 @@
 namespace Yarl2;
 
 class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccupant) : DungeonBuilder
-{  
+{
   const int HEIGHT = 30;
   const int WIDTH = 70;
   int DungeonId { get; set; } = dungeonId;
@@ -21,13 +21,17 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
   int _dungeonDepth;
 
   public Dungeon Generate(string arrivalMessage, GameState gs)
-  {    
+  {
+    bool generateCellar = gs.FactDb.FactCheck("BarredGateUnlocked") is null;
     if (gs.MainQuestState < 3)
       _dungeonDepth = 5;
-    else
+    else if (!generateCellar)
       _dungeonDepth = 10;
-    bool generateCellar = gs.FactDb.FactCheck("BarredGateUnlocked") is null;
     
+    // Generate a level we'll overwrite with the cellar level, if needed
+    if (generateCellar)
+      ++_dungeonDepth;
+        
     Dungeon dungeon = new(DungeonId, "the Old Ruins", arrivalMessage, true) { Permanent = false };
     DungeonMap mapper = new(gs.Rng);
     Map[] levels = new Map[_dungeonDepth];
@@ -41,6 +45,8 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
       AddSecretDoors(levels[levelNum], gs.Rng);
     }
+
+    // This is where we insert the cellar if needed
 
     AddRooms(levels, gs.ObjDb, gs.FactDb, gs.Rng);
       
