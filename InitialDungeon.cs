@@ -15,6 +15,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 {
   const int HEIGHT = 30;
   const int WIDTH = 70;
+  const int CELLAR_LEVEL = 5;
   int DungeonId { get; set; } = dungeonId;
   (int, int) Entrance { get; set; } = entrance;
   string MainOccupant { get; set; } = mainOccupant;
@@ -47,6 +48,10 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     }
 
     // This is where we insert the cellar if needed
+    if (generateCellar)
+    {
+      dungeon.LevelMaps[CELLAR_LEVEL - 1].Features |= MapFeatures.UndiggableFloor;
+    }
 
     AddRooms(levels, gs.ObjDb, gs.FactDb, gs.Rng);
       
@@ -55,13 +60,18 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     List<(int, TileType)> riverLevels = [];
     for (int levelNum = 0; levelNum < _dungeonDepth; levelNum++)
     {
+      if (generateCellar && levelNum == CELLAR_LEVEL)
+        continue;
+
       // Maybe add a river/chasm to the level?
       if (gs.Rng.Next(4) == 0)
       {
         Map? nextLevel = null;
         RiverConfig riverConfig;
         TileType riverType = TileType.DeepWater;
-        if (levelNum < _dungeonDepth - 1 && gs.Rng.Next(3) == 0)
+        bool chasm = gs.Rng.Next(3) == 0;
+        
+        if (chasm && levelNum < _dungeonDepth - 1 && !(generateCellar && levelNum == CELLAR_LEVEL -1))
         {
           riverConfig = new(TileType.Chasm, false, false);
           nextLevel = levels[levelNum + 1];
