@@ -88,8 +88,18 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
     TidyOrphanedDoors(levels);
 
-    SetStairs(DungeonId, levels, Entrance, dungeon.Descending, gs.Rng);
-
+    // If we need to generate the cellar level, we need to skip it when
+    // generating the stairs
+    if (generateCellar)
+    {
+      Map[] upperLevels = [..levels.Take(CELLAR_LEVEL)];
+      SetStairs(DungeonId, levels, Entrance, dungeon.Descending, gs.Rng);
+    }
+    else
+    {
+      SetStairs(DungeonId, levels, Entrance, dungeon.Descending, gs.Rng);
+    }
+    
     foreach ((int levelNum, TileType riverType) in riverLevels)
     {
       RiverQoLCheck(levels[levelNum], DungeonId, levelNum, gs.ObjDb, gs.Rng);
@@ -699,17 +709,12 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
   static void SetPuzzle(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
-    int puzzleLevel = dungeon.LevelMaps.Count - 1;
-    Map map = dungeon.LevelMaps[puzzleLevel];
+    Map map = dungeon.LevelMaps[CELLAR_LEVEL];
     List<PathInfo> paths = LightPuzzleSetup.FindPotential(map);
-
-    // If there are no valid paths I'll probably want to redraw the bottom level
 
     if (paths.Count != 0)
     {
-      Loc targetLoc = LightPuzzleSetup.Create(map, paths, objDb, dungeon.ID, puzzleLevel, rng);
-      factDb.Add(new SimpleFact() { Name = "QuestPuzzle1", Value = puzzleLevel.ToString() });
-
+      Loc targetLoc = LightPuzzleSetup.Create(map, paths, objDb, dungeon.ID, CELLAR_LEVEL, rng);
       CreateCellar(targetLoc, dungeon, objDb, rng);
     }
   }
