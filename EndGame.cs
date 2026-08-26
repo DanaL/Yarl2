@@ -679,7 +679,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
 
     CreateStairwayStacked(DungeonId, [.. levels[..^1]], 1, (secondFloorUpLoc.Row, secondFloorUpLoc.Col), true, gs.Rng);
 
-    PopulateDungeon(dungeon, gs.Rng, gs.ObjDb);
+    PopulateDungeon(dungeon, gs.Rng, gs.ObjDb, []);
     List<Loc> lvlOneIslands = [.. IslandLocs];
     lvlOneIslands.Shuffle(gs.Rng);
     int count = 0;

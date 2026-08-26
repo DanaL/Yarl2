@@ -250,10 +250,13 @@ abstract class DungeonBuilder
     };
   }
 
-  protected void PopulateDungeon(Dungeon dungeon, Rng rng, GameObjectDB objDb)
+  protected void PopulateDungeon(Dungeon dungeon, Rng rng, GameObjectDB objDb, HashSet<int> skipLevels)
   {
     for (int lvl = 0; lvl < dungeon.LevelMaps.Count; lvl++)
     {
+      if (skipLevels.Contains(lvl))
+        continue;
+        
       for (int j = 0; j < rng.Next(dungeon.PopulationLow, dungeon.PopulationHigh + 1); j++)
       {
         int monsterLvl = lvl;

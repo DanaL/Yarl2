@@ -457,7 +457,7 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
     levels[2].Features |= MapFeatures.UndiggableFloor;
     SetRoguelikeStairs(DungeonId, levels, new Loc(0, 0, entranceRow, entranceCol), rng);
 
-    PopulateDungeon(dungeon, rng, objDb);
+    PopulateDungeon(dungeon, rng, objDb, []);
 
     AddTreasure(DungeonId, levels, objDb, rng);
 

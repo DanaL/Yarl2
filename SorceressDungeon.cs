@@ -432,7 +432,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
       AddTreasure(objDb, floorSqs, lvl, rng);
     }
 
-    PopulateDungeon(towerDungeon, rng, objDb);
+    PopulateDungeon(towerDungeon, rng, objDb, []);
     
     return (towerDungeon, entrance);
   }

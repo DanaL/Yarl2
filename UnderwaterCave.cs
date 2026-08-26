@@ -303,7 +303,7 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
     cave.AddMap(MidLevel(objDb, rng));
     cave.AddMap(BottomLevel(objDb, rng));
 
-    PopulateDungeon(cave, rng, objDb);
+    PopulateDungeon(cave, rng, objDb, []);
     SeedTreasure(cave, objDb, rng);
 
     if (rng.Next(3) == 0)
@@ -349,7 +349,7 @@ class LostTempleBuilder(int dungeonId) : DungeonBuilder
     templeFloors.Remove(ExitLoc);
     temple.ExitLoc = new(DungeonId, 0, ExitLoc.Item1, ExitLoc.Item2);
 
-    PopulateDungeon(temple, rng, objDb);
+    PopulateDungeon(temple, rng, objDb, []);
     AddDagon(templeFloors, objDb, rng);
 
     // Add a bit of treasure

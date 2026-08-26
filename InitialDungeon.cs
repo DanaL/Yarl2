@@ -93,7 +93,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     if (generateCellar)
     {
       Map[] upperLevels = [..levels.Take(CELLAR_LEVEL)];
-      SetStairs(DungeonId, levels, Entrance, dungeon.Descending, gs.Rng);
+      SetStairs(DungeonId, upperLevels, Entrance, dungeon.Descending, gs.Rng);
     }
     else
     {
@@ -162,7 +162,10 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
     AddDecorations(levels, gs.ObjDb, gs.FactDb, gs.Rng);
 
-    PopulateDungeon(dungeon, gs.Rng, gs.ObjDb);
+    HashSet<int> skipPopulating = [];
+    if (generateCellar)
+      skipPopulating.Add(CELLAR_LEVEL);
+    PopulateDungeon(dungeon, gs.Rng, gs.ObjDb, skipPopulating);
 
     if (gs.FactDb.FactCheck("WidowerTalismanFound") is null)
     {
@@ -182,7 +185,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     
     if (generateCellar) 
     {
-      SetPuzzle(dungeon, gs.ObjDb, gs.FactDb, gs.Rng);
+      SetPuzzle(dungeon, gs.ObjDb, gs.Rng);
     }
 
     if (gs.Rng.Next(3) == 0)
@@ -707,14 +710,14 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     }
   }
 
-  static void SetPuzzle(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, Rng rng)
+  static void SetPuzzle(Dungeon dungeon, GameObjectDB objDb, Rng rng)
   {
-    Map map = dungeon.LevelMaps[CELLAR_LEVEL];
+    Map map = dungeon.LevelMaps[CELLAR_LEVEL - 1];
     List<PathInfo> paths = LightPuzzleSetup.FindPotential(map);
 
     if (paths.Count != 0)
     {
-      Loc targetLoc = LightPuzzleSetup.Create(map, paths, objDb, dungeon.ID, CELLAR_LEVEL, rng);
+      Loc targetLoc = LightPuzzleSetup.Create(map, paths, objDb, dungeon.ID, CELLAR_LEVEL - 1, rng);
       CreateCellar(targetLoc, dungeon, objDb, rng);
     }
   }
@@ -723,8 +726,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
   {
     int cellarHeight = HEIGHT + 2;
     int cellarWidth = WIDTH + 2;
-    int levelNum = stairsLoc.Level + 1;
-
+    
     Map cellar = new(cellarWidth, cellarHeight) 
     { 
       Features = MapFeatures.UndiggableFloor | MapFeatures.NoRandomEncounters 
@@ -761,11 +763,11 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       for (int c = roomCenterCol - 2; c <= roomCenterCol + 2; c++)
       {
         cellar.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
-        floors.Add(new Loc(dungeon.ID, levelNum, r, c));
+        floors.Add(new Loc(dungeon.ID, CELLAR_LEVEL, r, c));
       }
     }
     
-    Loc loc = new(dungeon.ID, levelNum, roomCenterRow, roomCenterCol);
+    Loc loc = new(dungeon.ID, CELLAR_LEVEL, roomCenterRow, roomCenterCol);
     cellar.SetTile(roomCenterRow, roomCenterCol, TileFactory.Get(TileType.BarredStairway));
     
     foreach (Loc adj in Util.Adj8Locs(loc))
@@ -813,7 +815,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     Upstairs upStairs = new("") { Destination = stairsLoc };
     cellar.SetTile(stairsLoc.Row, stairsLoc.Col, upStairs);
 
-    dungeon.AddMap(cellar);
+    dungeon.LevelMaps[CELLAR_LEVEL] = cellar;
     
     void SetStatue(int row, int col)
     {
@@ -827,7 +829,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
   static void SetBoss(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, string earlyDenizen, Rng rng)
   {
-    int bossLevelNum = dungeon.LevelMaps.Count - 1;
+    int bossLevelNum = CELLAR_LEVEL - 1;
     Map bossLevel = dungeon.LevelMaps[bossLevelNum];
 
     if (earlyDenizen == "kobold")
