@@ -214,7 +214,43 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       SmithQuest.Setup(dungeon, MainOccupant, gs);  
     }
     
+    // If we have generated the lower floors, we need to add entrances to the
+    // dungeon branches
+    if (_dungeonDepth > CELLAR_LEVEL + 1)
+    {
+     SetBranchEntrances(levels, gs.ObjDb, gs.FactDb, gs.Rng);
+    }
+
     return dungeon;
+  }
+
+  static void SetBranchEntrances(Map[] levelMaps, GameObjectDB objDb, FactDb factDb, Rng rng)
+  {
+    int rogueLevel;
+    if (factDb.FactCheck("RogueBranchLevel") is not SimpleFact rl)
+      throw new Exception("The level for the Rogue Branch should have been generated in GameSetup!");
+    rogueLevel = int.Parse(rl.Value);
+
+    int templeLevel;
+    if (factDb.FactCheck("TempleBranchLevel") is not SimpleFact tl)
+      throw new Exception("The level for the Temple/Underwater cave should have been generated in GameSetup!");
+    templeLevel = int.Parse(tl.Value);
+    
+    // I'm assuming there will always be some available floor tiles on which
+    // to place the branch entrances...
+    Map rogueMap = levelMaps[rogueLevel];
+    List<Loc> floors = rogueMap.ClearFloors(0, rogueLevel, objDb);
+    Loc rogueEntranceLoc = floors[rng.Next(floors.Count)];
+    int rogueDungeonId;
+    if (factDb.FactCheck("RogueBranchDungeonId") is not SimpleFact rdId)
+    {
+      // need to generate the rogue dungeon and set rogueDungeonId to the
+      // resulting dungeonId (and save the fact!)
+    }
+    else
+    {
+      rogueDungeonId = int.Parse(rdId.Value);
+    }
   }
 
   static void AddRealtorGoblin(Map map, int dungeonId, int level, Rng rng, GameObjectDB objDb)

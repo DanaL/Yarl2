@@ -501,15 +501,6 @@ class CampaignCreator(UserInterface ui)
 
         SorceressQuest.Setup(wildernessMap, town, objDb, factDb, campaign, rng);
 
-        // Old create Rogue dungeon code
-        // RoguelikeDungeonBuilder rlb = new(campaign.Dungeons.Count);
-        // (Dungeon rld, Loc stairsLoc) = rlb.Generate(rle.Loc.Row, rle.Loc.Col, objDb, rng);
-        // Downstairs rlEntrance = new("") { Destination = stairsLoc };
-        // wildernessMap.SetTile(rle.Loc.Row, rle.Loc.Col, rlEntrance);
-        // rld.ExitLoc = rle.Loc;
-          
-        // smallRegions
-
         Loc ringCentre = Wilderness.PlaceStoneRing(wildernessMap, town, objDb, factDb, rng);
 
         UnderwaterCave.SetupUnderwaterCave(campaign, ringCentre.Row, ringCentre.Col, objDb, factDb, rng);
