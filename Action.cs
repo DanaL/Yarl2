@@ -1125,7 +1125,7 @@ abstract class PortalAction(GameState gs) : Action(gs)
       if (GameState.FactDb.FactCheck("EarlyDenizen") is not SimpleFact earlyOccupant)
         throw new Exception("Early denizen fact must exist.");
 
-      InitialDungeonBuilder db = new(1, (entranceLoc.Row, entranceLoc.Col), earlyOccupant.Value);
+      InitialDungeonBuilder db = new((entranceLoc.Row, entranceLoc.Col), earlyOccupant.Value);
 
       var sw = System.Diagnostics.Stopwatch.StartNew();
       Dungeon dungeon = db.Generate("Musty smells. A distant clang. Danger.", GameState);

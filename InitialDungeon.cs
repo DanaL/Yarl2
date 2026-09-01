@@ -11,12 +11,12 @@
 
 namespace Yarl2;
 
-class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccupant) : DungeonBuilder
+class InitialDungeonBuilder((int, int) entrance, string mainOccupant) : DungeonBuilder
 {
   const int HEIGHT = 30;
   const int WIDTH = 70;
   const int CELLAR_LEVEL = 5;
-  int DungeonId { get; set; } = dungeonId;
+  int DungeonId { get; set; } = Constants.MAIN_DUNGEON_ID;
   (int, int) Entrance { get; set; } = entrance;
   string MainOccupant { get; set; } = mainOccupant;
   int _dungeonDepth;
@@ -218,39 +218,44 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     // dungeon branches
     if (_dungeonDepth > CELLAR_LEVEL + 1)
     {
-     SetBranchEntrances(levels, gs.ObjDb, gs.FactDb, gs.Rng);
+     SetBranchEntrances(levels, gs);
     }
 
     return dungeon;
   }
 
-  static void SetBranchEntrances(Map[] levelMaps, GameObjectDB objDb, FactDb factDb, Rng rng)
+  static void SetBranchEntrances(Map[] levelMaps, GameState gs)
   {
     int rogueLevel;
-    if (factDb.FactCheck("RogueBranchLevel") is not SimpleFact rl)
+    if (gs.FactDb.FactCheck("RogueBranchLevel") is not SimpleFact rl)
       throw new Exception("The level for the Rogue Branch should have been generated in GameSetup!");
     rogueLevel = int.Parse(rl.Value);
 
     int templeLevel;
-    if (factDb.FactCheck("TempleBranchLevel") is not SimpleFact tl)
+    if (gs.FactDb.FactCheck("TempleBranchLevel") is not SimpleFact tl)
       throw new Exception("The level for the Temple/Underwater cave should have been generated in GameSetup!");
     templeLevel = int.Parse(tl.Value);
     
     // I'm assuming there will always be some available floor tiles on which
     // to place the branch entrances...
     Map rogueMap = levelMaps[rogueLevel];
-    List<Loc> floors = rogueMap.ClearFloors(0, rogueLevel, objDb);
-    Loc rogueEntranceLoc = floors[rng.Next(floors.Count)];
-    int rogueDungeonId;
-    if (factDb.FactCheck("RogueBranchDungeonId") is not SimpleFact rdId)
+    List<Loc> floors = rogueMap.ClearFloors(0, rogueLevel, gs.ObjDb);
+    Loc rogueEntranceLoc = floors[gs.Rng.Next(floors.Count)];
+    if (gs.FactDb.FactCheck("RogueBranchCreated") is not FlagFact)
     {
-      // need to generate the rogue dungeon and set rogueDungeonId to the
-      // resulting dungeonId (and save the fact!)
+      RoguelikeDungeonBuilder rldb = new(Constants.RL_DUNGEON_ID);
+      var rlDungeon = rldb.Generate(rogueEntranceLoc, gs);
+      gs.Campaign.AddDungeon(rlDungeon, Constants.RL_DUNGEON_ID);
+
+      Downstairs rogueStairs = new("") { Destination = rlDungeon.ExitLoc };
+      rogueMap.SetTile(rogueEntranceLoc.Row, rogueEntranceLoc.Col, rogueStairs);
+      gs.FactDb.Add(new FlagFact() { Name = "RogueBranchDungeonId"});
     }
     else
     {
-      rogueDungeonId = int.Parse(rdId.Value);
-    }
+      Downstairs rogueStairs = new("") { Destination = gs.Campaign.Dungeons[Constants.RL_DUNGEON_ID].ExitLoc };
+      rogueMap.SetTile(rogueEntranceLoc.Row, rogueEntranceLoc.Col, rogueStairs);
+    }    
   }
 
   static void AddRealtorGoblin(Map map, int dungeonId, int level, Rng rng, GameObjectDB objDb)

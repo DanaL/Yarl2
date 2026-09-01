@@ -270,6 +270,17 @@ static class Constants
   public const char ARROW_SE = '\u2198';
   public const char ARROW_SW = '\u2199';
   public const char PASS = '\u2205';
+
+  public const int OVERWORLD_DUNGEON_ID = 0;
+  public const int MAIN_DUNGEON_ID = 1;
+  public const int TOWER_DUNGEON_ID = 2;
+  public const int RL_DUNGEON_ID = 3;
+  public const int UNDERWATER_CAVE_DUNGEON_ID = 4;
+  public const int CK_TEMPLE_DUNGEON_ID = 5;
+  public const int END_GAME_DUNGEON_ID = 6;
+  public const int WUMPUS_DUNGEON_ID = 7;
+  public const int VAMP_DUNGEON_ID = 8;
+  public const int LOST_TEMPLE_DUNGEON_ID = 9;
 }
 
 static class Util

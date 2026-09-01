@@ -759,9 +759,9 @@ class EndGame
         gs.Wilderness.SetTile(loc, TileFactory.Get(TileType.Dirt));
     }
 
-    EndGameDungeonBuilder db = new (gs.Campaign.Dungeons.Count, finalDungeonLoc);
+    EndGameDungeonBuilder db = new (Constants.END_GAME_DUNGEON_ID, finalDungeonLoc);
     Dungeon dungeon = db.Generate(gs);
-    gs.Campaign.AddDungeon(dungeon);
+    gs.Campaign.AddDungeon(dungeon, Constants.END_GAME_DUNGEON_ID);
 
     Portal portal = new("A smouldering arch covered in profane sigils.", TileType.ProfanePortal)
     {

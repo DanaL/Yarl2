@@ -431,23 +431,23 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
     objDb.SetToLoc(bellLoc, bell);
   }
 
-  public (Dungeon, Loc) Generate(int entranceRow, int entranceCol, GameObjectDB objDb, Rng rng)
+  public Dungeon Generate(Loc entrance, GameState gs)
   {
     Dungeon dungeon = new(DungeonId, "a Forgotten Dungeon", "", true)
     {
       PopulationLow = 6,
       PopulationHigh = 10,
-      MonsterDecks = DeckBuilder.ReadDeck("lost_dungeon", rng)
+      MonsterDecks = DeckBuilder.ReadDeck("lost_dungeon", gs.Rng)
     };
 
     int maxLevels = 3; // for 0.5.0, I'm going to just do 3 levels, at least until I have enough content
     for (int lvl = 0; lvl < maxLevels; lvl++)
     {
-      (Map map, List<(int, int)> roomSqs) = RLLevelMaker.MakeLevel(rng);
+      (Map map, List<(int, int)> roomSqs) = RLLevelMaker.MakeLevel(gs.Rng);
 
       if (lvl == maxLevels - 1)
       {
-        SetBell(roomSqs, lvl, objDb, rng);
+        SetBell(roomSqs, lvl, gs.ObjDb, gs.Rng);
       }
 
       dungeon.AddMap(map);
@@ -455,12 +455,12 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
 
     Map[] levels = [.. dungeon.LevelMaps.Values];
     levels[2].Features |= MapFeatures.UndiggableFloor;
-    SetRoguelikeStairs(DungeonId, levels, new Loc(0, 0, entranceRow, entranceCol), rng);
+    SetRoguelikeStairs(DungeonId, levels, entrance, gs.Rng);
 
-    PopulateDungeon(dungeon, rng, objDb, []);
+    PopulateDungeon(dungeon, gs.Rng, gs.ObjDb, []);
 
-    AddTreasure(DungeonId, levels, objDb, rng);
-
-    return (dungeon, new Loc(DungeonId, 0, ExitLoc.Item1, ExitLoc.Item2));
+    AddTreasure(DungeonId, levels, gs.ObjDb, gs.Rng);
+    dungeon.ExitLoc = new Loc(DungeonId, 0, ExitLoc.Item1, ExitLoc.Item2); 
+    return dungeon;
   }
 }

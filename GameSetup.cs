@@ -373,7 +373,7 @@ class CampaignCreator(UserInterface ui)
       {
         objDb = new GameObjectDB();
         campaign = new Campaign();
-        wilderness = new Dungeon(0, "the Wilderness", "You draw a deep breath of fresh air.", true);
+        wilderness = new Dungeon(Constants.OVERWORLD_DUNGEON_ID, "the Wilderness", "You draw a deep breath of fresh air.", true);
         Wilderness wildernessGenerator = new(rng, wildernessWidth);
         wildernessMap = wildernessGenerator.DrawLevel();
         wildernessMap.Features |= MapFeatures.Unmappable | MapFeatures.NoRandomEncounters;
@@ -414,11 +414,7 @@ class CampaignCreator(UserInterface ui)
           ItemFactory.CreateTimedLight(2, 20, 0, Colours.BLACK, Colours.DIM_ORANGE, objDb, new Loc(0, 0, signRow, signCol));
         
         wilderness.AddMap(wildernessMap);
-        campaign.AddDungeon(wilderness);
-
-        // Add a placeholder dungeon to fill up the main dungeon's slot (which
-        // is actually generated when the player enters it)
-        campaign.AddDungeon(new Dungeon(1, "Placeholder", "", true), 1);
+        campaign.AddDungeon(wilderness, Constants.OVERWORLD_DUNGEON_ID);
 
         // find the 'hidden valleys' that may be among the mountains
         RegionFinder regionFinder = new(new WildernessPassable());
@@ -503,7 +499,7 @@ class CampaignCreator(UserInterface ui)
 
         Loc ringCentre = Wilderness.PlaceStoneRing(wildernessMap, town, objDb, factDb, rng);
 
-        UnderwaterCave.SetupUnderwaterCave(campaign, ringCentre.Row, ringCentre.Col, objDb, factDb, rng);
+        //UnderwaterCave.SetupUnderwaterCave(campaign, ringCentre.Row, ringCentre.Col, objDb, factDb, rng);
 
         var moonDaughterCleric = MoonDaughter.Cleric(rng, objDb);
         factDb.Add(new SimpleFact() { Name = "MDClericID", Value = moonDaughterCleric.ID.ToString() });

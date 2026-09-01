@@ -415,8 +415,7 @@ abstract class DungeonBuilder
       (int upstairsR, int upstairsC) = currFloorSqs[rng.Next(currFloorSqs.Count)];
       levelMaps[lvl].SetTile(upstairsR, upstairsC, arrivalStairs);
 
-      if (exitStairs is not null)
-        exitStairs.Destination = new(dungeonId, lvl, upstairsR, upstairsC);
+      exitStairs?.Destination = new(dungeonId, lvl, upstairsR, upstairsC);
 
       if (lvl == 0)
         ExitLoc = (upstairsR, upstairsC);

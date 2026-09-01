@@ -13,20 +13,20 @@ namespace Yarl2;
 
 class UnderwaterCave
 {
-  public static void SetupUnderwaterCave(Campaign campaign, int entranceRow, int entranceCol, GameObjectDB objDb, FactDb factDb, Rng rng)
+  public static void SetupUnderwaterCave(Campaign campaign, Loc mainDungeonStairs, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
-    UnderwaterCaveDungeon caveBuilder = new(campaign.Dungeons.Count, 30, 70);
-    Dungeon cave = caveBuilder.Generate(entranceRow, entranceCol, objDb, rng);
-    cave.ExitLoc = new(0, 0, entranceRow, entranceCol);
+    UnderwaterCaveDungeon caveBuilder = new(Constants.UNDERWATER_CAVE_DUNGEON_ID, 30, 70);
+    Dungeon cave = caveBuilder.Generate(mainDungeonStairs.Row, mainDungeonStairs.Col, objDb, rng);
+    cave.ExitLoc = mainDungeonStairs;
 
-    campaign.AddDungeon(cave);
+    campaign.AddDungeon(cave, Constants.UNDERWATER_CAVE_DUNGEON_ID);
 
     Loc caveEntrance = new(cave.ID, 0, caveBuilder.ExitLoc.Item1, caveBuilder.ExitLoc.Item2);
     factDb.Add(new LocationFact() { Desc = "UnderwaterCaveEntrance", Loc = caveEntrance });
 
-    LostTempleBuilder templeBuider = new(campaign.Dungeons.Count);
-    Dungeon temple = templeBuider.Generate(objDb, rng);
-    campaign.AddDungeon(temple);
+    LostTempleBuilder templeBuilder = new();
+    Dungeon temple = templeBuilder.Generate(objDb, rng);
+    campaign.AddDungeon(temple, Constants.LOST_TEMPLE_DUNGEON_ID);
    
     Upstairs upstairs = new("") { Destination = temple.ExitLoc };
 
@@ -315,9 +315,9 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
   }
 }
 
-class LostTempleBuilder(int dungeonId) : DungeonBuilder
+class LostTempleBuilder : DungeonBuilder
 {
-  int DungeonId { get; set; } = dungeonId;
+  int DungeonId { get; set; } = Constants.LOST_TEMPLE_DUNGEON_ID;
 
   void AddDagon(List<(int, int)> floorSqs, GameObjectDB objDb, Rng rng)
   {

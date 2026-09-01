@@ -111,14 +111,13 @@ class SorceressQuest
     MessageAtLoc pal = new(msgLoc, "A portcullis scored with glowing, arcane runes bars the entrance to this tower.");
     objDb.ConditionalEvents.Add(pal);
 
-    int dungeonId = campaign.Dungeons.Keys.Max() + 1;
-    SorceressDungeonBuilder sdb = new(dungeonId, 21, 36);
+    SorceressDungeonBuilder sdb = new(Constants.TOWER_DUNGEON_ID, 21, 36);
     (Dungeon sorceressTower, Loc towerExit) = sdb.Generate(row, col, objDb, rng);
     sorceressTower.ExitLoc = new(0, 0, row, col);
-    campaign.AddDungeon(sorceressTower);
+    campaign.AddDungeon(sorceressTower, Constants.TOWER_DUNGEON_ID);
 
     // Set the decoy mirrors.
-    (Dungeon wumpus, Loc wumpusLoc) = SorceressDungeonBuilder.WumpusDungeon(sdb.DecoyMirror1, dungeonId + 1, objDb, rng);
+    (Dungeon wumpus, Loc wumpusLoc) = SorceressDungeonBuilder.WumpusDungeon(sdb.DecoyMirror1, Constants.WUMPUS_DUNGEON_ID, objDb, rng);
     Map mirrorLevel = sorceressTower.LevelMaps[sdb.DecoyMirror1.Level];
     if (mirrorLevel.TileAt(sdb.DecoyMirror1.Row, sdb.DecoyMirror1.Col) is MysteriousMirror mirror)
     {
@@ -130,7 +129,7 @@ class SorceressQuest
     }
     campaign.Dungeons.Add(wumpus.ID, wumpus);
 
-    (Dungeon vampyArea, Loc vampyLoc) = SorceressDungeonBuilder.VampyDungeon(sdb.DecoyMirror2, dungeonId + 2, objDb, rng);
+    (Dungeon vampyArea, Loc vampyLoc) = SorceressDungeonBuilder.VampyDungeon(sdb.DecoyMirror2, Constants.VAMP_DUNGEON_ID, objDb, rng);
     mirrorLevel = sorceressTower.LevelMaps[sdb.DecoyMirror2.Level];
     if (mirrorLevel.TileAt(sdb.DecoyMirror2.Row, sdb.DecoyMirror2.Col) is MysteriousMirror mirror2)
     {
@@ -150,7 +149,7 @@ class SorceressQuest
 
     int tl = sorceressTower.LevelMaps.Count - 1;
     Map topLevel = sorceressTower.LevelMaps[tl];
-    SetupSorceress(topLevel, tl, dungeonId, objDb, rng);
+    SetupSorceress(topLevel, tl, Constants.TOWER_DUNGEON_ID, objDb, rng);
   }
 }
 
@@ -447,7 +446,7 @@ class CKShrine
 
   public static void Setup(Campaign campaign, Loc start, Map wilderness, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
-    Dungeon dungeon = new(campaign.Dungeons.Count, "the Red Shrine", "A musty shrine. There is a metallic tang in the air.", true);
+    Dungeon dungeon = new(Constants.CK_TEMPLE_DUNGEON_ID, "the Red Shrine", "A musty shrine. There is a metallic tang in the air.", true);
     Map map = new(15, 17, TileType.PermWall) 
     { 
       Features = MapFeatures.UndiggableFloor | MapFeatures.NoRandomEncounters | MapFeatures.NoExplore
@@ -471,7 +470,7 @@ class CKShrine
 
     List<Loc> mountains = FindMountains(start, wilderness);
     Loc shrineLoc = mountains[rng.Next(mountains.Count)];
-    Portal entrance = new("", TileType.CKShrineEntrance) { Destination = new(dungeon.ID, 0, 1, 7) };
+    Portal entrance = new("", TileType.CKShrineEntrance) { Destination = new(Constants.CK_TEMPLE_DUNGEON_ID, 0, 1, 7) };
     wilderness.SetTile(shrineLoc.Row, shrineLoc.Col, entrance);
 
     List<Loc> nearBy = [];
@@ -517,14 +516,14 @@ class CKShrine
     factDb.Add(new LocationFact() { Desc = "CrimsonKingAltar", Loc = new (dungeon.ID, 0, 9, 7) });
 
     dungeon.AddMap(map);
-    campaign.AddDungeon(dungeon);
+    campaign.AddDungeon(dungeon, Constants.CK_TEMPLE_DUNGEON_ID);
 
     void Statue(int row, int col)
     {
       Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
       statue.Glyph = statue.Glyph with { Lit = Colours.BRIGHT_RED, Unlit = Colours.DULL_RED };
       statue.Traits.Add(new DescriptionTrait("a statue of a fur-clad warrior, leaning on a massive sword."));
-      objDb.SetToLoc(new(dungeon.ID, 0, row, col), statue);
+      objDb.SetToLoc(new(Constants.CK_TEMPLE_DUNGEON_ID, 0, row, col), statue);
     }
   }
 }
