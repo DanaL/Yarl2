@@ -499,8 +499,6 @@ class CampaignCreator(UserInterface ui)
 
         Loc ringCentre = Wilderness.PlaceStoneRing(wildernessMap, town, objDb, factDb, rng);
 
-        //UnderwaterCave.SetupUnderwaterCave(campaign, ringCentre.Row, ringCentre.Col, objDb, factDb, rng);
-
         var moonDaughterCleric = MoonDaughter.Cleric(rng, objDb);
         factDb.Add(new SimpleFact() { Name = "MDClericID", Value = moonDaughterCleric.ID.ToString() });
 

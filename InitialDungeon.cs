@@ -231,15 +231,10 @@ class InitialDungeonBuilder((int, int) entrance, string mainOccupant) : DungeonB
       throw new Exception("The level for the Rogue Branch should have been generated in GameSetup!");
     rogueLevel = int.Parse(rl.Value);
 
-    int templeLevel;
-    if (gs.FactDb.FactCheck("TempleBranchLevel") is not SimpleFact tl)
-      throw new Exception("The level for the Temple/Underwater cave should have been generated in GameSetup!");
-    templeLevel = int.Parse(tl.Value);
-    
     // I'm assuming there will always be some available floor tiles on which
     // to place the branch entrances...
-    Map rogueMap = levelMaps[rogueLevel];
-    List<Loc> floors = rogueMap.ClearFloors(0, rogueLevel, gs.ObjDb);
+    Map rogueFloorMap = levelMaps[rogueLevel];
+    List<Loc> floors = rogueFloorMap.ClearFloors(Constants.MAIN_DUNGEON_ID, rogueLevel, gs.ObjDb);
     Loc rogueEntranceLoc = floors[gs.Rng.Next(floors.Count)];
     if (gs.FactDb.FactCheck("RogueBranchCreated") is not FlagFact)
     {
@@ -248,14 +243,30 @@ class InitialDungeonBuilder((int, int) entrance, string mainOccupant) : DungeonB
       gs.Campaign.AddDungeon(rlDungeon, Constants.RL_DUNGEON_ID);
 
       Downstairs rogueStairs = new("") { Destination = rlDungeon.ExitLoc };
-      rogueMap.SetTile(rogueEntranceLoc.Row, rogueEntranceLoc.Col, rogueStairs);
-      gs.FactDb.Add(new FlagFact() { Name = "RogueBranchDungeonId"});
+      rogueFloorMap.SetTile(rogueEntranceLoc.Row, rogueEntranceLoc.Col, rogueStairs);
+      gs.FactDb.Add(new FlagFact() { Name = "RogueBranchCreated"});
     }
     else
     {
       Downstairs rogueStairs = new("") { Destination = gs.Campaign.Dungeons[Constants.RL_DUNGEON_ID].ExitLoc };
-      rogueMap.SetTile(rogueEntranceLoc.Row, rogueEntranceLoc.Col, rogueStairs);
-    }    
+      rogueFloorMap.SetTile(rogueEntranceLoc.Row, rogueEntranceLoc.Col, rogueStairs);
+    }
+
+    int templeLevel;
+    if (gs.FactDb.FactCheck("TempleBranchLevel") is not SimpleFact tl)
+      throw new Exception("The level for the Temple/Underwater cave should have been generated in GameSetup!");
+    templeLevel = int.Parse(tl.Value);
+    Map templeFloorMap = levelMaps[templeLevel];
+    floors = templeFloorMap.ClearFloors(Constants.MAIN_DUNGEON_ID, templeLevel, gs.ObjDb);
+    Loc templeEntranceLoc = floors[gs.Rng.Next(floors.Count)];
+    if (gs.FactDb.FactCheck("TempleBranchCreated") is not FlagFact)
+    {
+      UnderwaterCave.SetupUnderwaterCave(gs.Campaign, templeEntranceLoc, gs.ObjDb, gs.FactDb, gs.Rng);
+      gs.FactDb.Add(new FlagFact() { Name = "TempleBranchCreated"});      
+    }
+
+    Downstairs caveStairs = new("") { Destination = gs.Campaign.Dungeons[Constants.UNDERWATER_CAVE_DUNGEON_ID].ExitLoc };
+    templeFloorMap.SetTile(templeEntranceLoc.Row, templeEntranceLoc.Col, caveStairs);
   }
 
   static void AddRealtorGoblin(Map map, int dungeonId, int level, Rng rng, GameObjectDB objDb)

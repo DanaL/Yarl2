@@ -17,12 +17,10 @@ class UnderwaterCave
   {
     UnderwaterCaveDungeon caveBuilder = new(Constants.UNDERWATER_CAVE_DUNGEON_ID, 30, 70);
     Dungeon cave = caveBuilder.Generate(mainDungeonStairs.Row, mainDungeonStairs.Col, objDb, rng);
-    cave.ExitLoc = mainDungeonStairs;
-
+    
     campaign.AddDungeon(cave, Constants.UNDERWATER_CAVE_DUNGEON_ID);
-
-    Loc caveEntrance = new(cave.ID, 0, caveBuilder.ExitLoc.Item1, caveBuilder.ExitLoc.Item2);
-    factDb.Add(new LocationFact() { Desc = "UnderwaterCaveEntrance", Loc = caveEntrance });
+    Loc caveEntrance = new(Constants.UNDERWATER_CAVE_DUNGEON_ID, 0, caveBuilder.ExitLoc.Item1, caveBuilder.ExitLoc.Item2);
+    cave.ExitLoc = caveEntrance;
 
     LostTempleBuilder templeBuilder = new();
     Dungeon temple = templeBuilder.Generate(objDb, rng);
@@ -33,7 +31,7 @@ class UnderwaterCave
     Map bottomCave = cave.LevelMaps[cave.LevelMaps.Count - 1];
     List<(int, int)> caveFloors = bottomCave.SqsOfType(TileType.DungeonFloor);
     var sq = caveFloors[rng.Next(caveFloors.Count)];
-    Loc caveExit = new(cave.ID, cave.LevelMaps.Count - 1, sq.Item1, sq.Item2);
+    Loc caveExit = new(Constants.UNDERWATER_CAVE_DUNGEON_ID, cave.LevelMaps.Count - 1, sq.Item1, sq.Item2);
     Downstairs downstairs = new("") { Destination = caveExit };
     temple.LevelMaps[0].SetTile(temple.ExitLoc.Row, temple.ExitLoc.Col, downstairs);
     bottomCave.SetTile(caveExit.Row, caveExit.Col, upstairs);
