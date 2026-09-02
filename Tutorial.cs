@@ -103,7 +103,7 @@ class Tutorial(UserInterface ui)
     Campaign campaign = new();
     Dungeon dungeon = new(1, "The Tutorial", "", true);
     dungeon.AddMap(tutorialMap);
-    campaign.AddDungeon(new Dungeon(1, "The Tutorial", "", true), 1);
+    campaign.AddDungeon(dungeon, 1);
 
     return campaign;
   }
