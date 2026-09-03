@@ -188,7 +188,14 @@ class InitialDungeonBuilder((int, int) entrance, string mainOccupant) : DungeonB
     
     if (generateCellar) 
     {
-      SetPuzzle(dungeon, gs.ObjDb, gs.Rng);
+      Map puzzleLvlMap = dungeon.LevelMaps[CELLAR_LEVEL - 1];
+      List<PathInfo> paths = LightPuzzleSetup.FindPotential(puzzleLvlMap);
+
+      if (paths.Count != 0)
+      {
+        Loc targetLoc = LightPuzzleSetup.Create(puzzleLvlMap, paths, gs.ObjDb, dungeon.ID, CELLAR_LEVEL - 1, gs.Rng);
+        CreateCellar(targetLoc, dungeon, gs.ObjDb, gs.Rng);
+      }
     }
 
     if (gs.Rng.Next(3) == 0)
@@ -762,18 +769,6 @@ class InitialDungeonBuilder((int, int) entrance, string mainOccupant) : DungeonB
     {
       Loc loc = floors[rng.Next(floors.Count)];
       objDb.SetToLoc(loc, item);
-    }
-  }
-
-  static void SetPuzzle(Dungeon dungeon, GameObjectDB objDb, Rng rng)
-  {
-    Map map = dungeon.LevelMaps[CELLAR_LEVEL - 1];
-    List<PathInfo> paths = LightPuzzleSetup.FindPotential(map);
-
-    if (paths.Count != 0)
-    {
-      Loc targetLoc = LightPuzzleSetup.Create(map, paths, objDb, dungeon.ID, CELLAR_LEVEL - 1, rng);
-      CreateCellar(targetLoc, dungeon, objDb, rng);
     }
   }
 
