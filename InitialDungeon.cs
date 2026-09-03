@@ -109,6 +109,9 @@ class InitialDungeonBuilder((int, int) entrance, string mainOccupant) : DungeonB
 
     for (int levelNum = 0; levelNum < levels.Length; levelNum++)
     {
+      if (generateCellar && levelNum == CELLAR_LEVEL)
+        continue;
+
       Map map = levels[levelNum];
 
       SetTraps(map, DungeonId, levelNum, _dungeonDepth, gs.Rng);
@@ -153,10 +156,10 @@ class InitialDungeonBuilder((int, int) entrance, string mainOccupant) : DungeonB
       }
     }
 
-    // If the prisoner hasn't previously been freed, 1 in 3 dungeons have a captive
+    // If the prisoner hasn't previously been freed, 1 in 5 dungeons have a captive
     if (gs.FactDb.FactCheck("prisoner-freed") is null && gs.Rng.Next(5) == 0)
     {
-      int captiveLevel = gs.Rng.Next(1, _dungeonDepth);
+      int captiveLevel = gs.Rng.Next(1, CELLAR_LEVEL);
       CaptiveFeature.Create(DungeonId, captiveLevel, levels[captiveLevel], gs.ObjDb, gs.FactDb, gs.Rng);
     }
 
@@ -169,7 +172,7 @@ class InitialDungeonBuilder((int, int) entrance, string mainOccupant) : DungeonB
 
     if (gs.FactDb.FactCheck("WidowerTalismanFound") is null)
     {
-      int fallenAdventurer = gs.Rng.Next(1, _dungeonDepth);
+      int fallenAdventurer = gs.Rng.Next(1, CELLAR_LEVEL);
       AddWidowerBeau(gs.ObjDb, levels[fallenAdventurer], fallenAdventurer, gs.FactDb, gs.Rng);  
     }
     
@@ -179,7 +182,7 @@ class InitialDungeonBuilder((int, int) entrance, string mainOccupant) : DungeonB
     
     if (gs.FactDb.FactCheck("IdolAltarVisited") is null)
     {
-      int altarLevel = gs.Rng.Next(0, _dungeonDepth);
+      int altarLevel = gs.Rng.Next(0, CELLAR_LEVEL);
       IdolAltarMaker.MakeAltar(DungeonId, levels, gs.ObjDb, gs.FactDb, gs.Rng, altarLevel);
     }
     
