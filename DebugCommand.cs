@@ -331,12 +331,23 @@ class DebugCommand(GameState gs)
   }
 
   string AddItem(string action, string name)
-  {
+  {    
     bool illusion = false;
     if (name.EndsWith("illusion"))
     {
       illusion = true;
       name = name[..name.LastIndexOf(' ')];
+    }
+
+    if (name == "jewelled key")
+    {
+      if (action == "give")
+        _gs.Player.Inventory.Add(History.JewelledKey(gs), _gs.Player.ID);
+      else
+        _gs.ObjDb.SetToLoc(_gs.Player.Loc, History.JewelledKey(gs));
+      _gs.PrepareFieldOfView();
+
+      return "";
     }
 
     if (ItemMap.TryGetValue(name, out var itemEnum))
@@ -376,7 +387,7 @@ class DebugCommand(GameState gs)
 
       _gs.PrepareFieldOfView();
 
-      return "";   
+      return "";
     }
 
     return $"Unknown item: {name}";
