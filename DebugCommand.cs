@@ -296,9 +296,33 @@ class DebugCommand(GameState gs)
       case "timeskip":
         _gs.Turn += ulong.Parse(parts[1]);
         return "";
+      case "levelport":
+        Levelport(parts[1]);
+        return "";
       default:
         return "Unknown debug command";
     }
+  }
+
+  void Levelport(string lvl)
+  {
+    if (!int.TryParse(lvl, out int destLevel))
+      return;
+
+    Dungeon currDungeon = _gs.CurrentDungeon;
+    if (destLevel >= currDungeon.LevelMaps.Count)
+      return;
+
+    Map destMap = currDungeon.LevelMaps[destLevel];
+    var floors = destMap.ClearFloors(currDungeon.ID, destLevel, _gs.ObjDb);
+    if (floors.Count == 0)
+      return;
+    Loc dest = floors[_gs.Rng.Next(floors.Count)];
+
+    _gs.ActorEntersLevel(_gs.Player, currDungeon.ID, destLevel);
+    _gs.ResolveActorMove(_gs.Player, _gs.Player.Loc, dest);
+    _gs.FlushPerformers();
+    _gs.PrepareFieldOfView();
   }
 
   void MakeMirror(GameState gs, string dirStr)
