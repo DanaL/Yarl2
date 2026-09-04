@@ -924,6 +924,9 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     if (vaultKey)
       return UseVaultKey(item);
 
+    if (jewelledKey)
+      return UseJewelledKey(item);
+      
     List<Trait> useableTraits = [.. item.Traits.Where(t => t is IUSeable)];
     if (useableTraits.Count != 0 || item.HasTrait<CanApplyTrait>())
     {

@@ -402,6 +402,7 @@ class History(Rng rng)
       Glyph = new Glyph(';', Colours.ICE_BLUE, Colours.BLUE, Colours.BLACK, false)
     };
     key.Traits.Add(new JewelledKeyTrait());
+    key.Traits.Add(new CanApplyTrait());
     gs.ObjDb.Add(key);
 
     if (gs.Player.Stats[Attribute.MainQuestState].Curr < 3)

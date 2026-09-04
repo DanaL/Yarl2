@@ -346,7 +346,8 @@ class DebugCommand(GameState gs)
       else
         _gs.ObjDb.SetToLoc(_gs.Player.Loc, History.JewelledKey(gs));
       _gs.PrepareFieldOfView();
-
+      _gs.Player.Stats[Attribute.MainQuestState] = new Stat(4);
+      
       return "";
     }
 

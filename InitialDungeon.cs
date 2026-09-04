@@ -26,7 +26,7 @@ class InitialDungeonBuilder((int, int) entrance, string mainOccupant) : DungeonB
     bool generateCellar = gs.FactDb.FactCheck("BarredGateUnlocked") is null;
     if (gs.MainQuestState < 3)
       _dungeonDepth = 5;
-    else if (!generateCellar)
+    else
       _dungeonDepth = 10;
     
     // Generate a level we'll overwrite with the cellar level, if needed
