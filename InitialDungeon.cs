@@ -24,6 +24,8 @@ class InitialDungeonBuilder((int, int) entrance, string mainOccupant) : DungeonB
   public Dungeon Generate(string arrivalMessage, GameState gs)
   {
     bool generateCellar = gs.FactDb.FactCheck("BarredGateUnlocked") is null;
+    bool generateLightPuzzle = gs.FactDb.FactCheck("LightPuzzle1Solved") is null;
+
     if (gs.MainQuestState < 3)
       _dungeonDepth = 5;
     else
@@ -50,7 +52,7 @@ class InitialDungeonBuilder((int, int) entrance, string mainOccupant) : DungeonB
     // This is where we insert the cellar if needed
     if (generateCellar)
     {
-      dungeon.LevelMaps[CELLAR_LEVEL - 1].Features |= MapFeatures.UndiggableFloor;
+      dungeon.LevelMaps[CELLAR_LEVEL - 1].Features |= MapFeatures.UndiggableFloor | MapFeatures.NoRandomEncounters;
     }
 
     AddRooms(levels, gs.ObjDb, gs.FactDb, gs.Rng);
@@ -90,7 +92,7 @@ class InitialDungeonBuilder((int, int) entrance, string mainOccupant) : DungeonB
 
     // If we need to generate the cellar level, we need to skip it when
     // generating the stairs
-    if (generateCellar)
+    if (generateLightPuzzle)
     {
       Map[] upperLevels = [..levels.Take(CELLAR_LEVEL)];
       SetStairs(DungeonId, upperLevels, Entrance, dungeon.Descending, gs.Rng);
@@ -186,7 +188,9 @@ class InitialDungeonBuilder((int, int) entrance, string mainOccupant) : DungeonB
       IdolAltarMaker.MakeAltar(DungeonId, levels, gs.ObjDb, gs.FactDb, gs.Rng, altarLevel);
     }
     
-    if (generateCellar) 
+    var stairsToCellar = levels[CELLAR_LEVEL - 1].SqsOfType(TileType.Downstairs).FirstOrDefault();
+    Loc cellarStairsLoc = new(Constants.MAIN_DUNGEON_ID, CELLAR_LEVEL - 1, stairsToCellar.Item1, stairsToCellar.Item2);
+    if (generateLightPuzzle) 
     {
       Map puzzleLvlMap = dungeon.LevelMaps[CELLAR_LEVEL - 1];
       List<PathInfo> paths = LightPuzzleSetup.FindPotential(puzzleLvlMap);
@@ -194,8 +198,12 @@ class InitialDungeonBuilder((int, int) entrance, string mainOccupant) : DungeonB
       if (paths.Count != 0)
       {
         Loc targetLoc = LightPuzzleSetup.Create(puzzleLvlMap, paths, gs.ObjDb, dungeon.ID, CELLAR_LEVEL - 1, gs.Rng);
-        CreateCellar(targetLoc, dungeon, gs.ObjDb, gs.Rng);
+        cellarStairsLoc = targetLoc;
       }
+    }
+    if (generateCellar)
+    {
+      CreateCellar(cellarStairsLoc, dungeon, gs.ObjDb, gs.Rng);
     }
 
     if (gs.Rng.Next(3) == 0)

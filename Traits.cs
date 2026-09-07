@@ -3649,6 +3649,7 @@ class LightBeamTrait : Trait, IGameEventListener
 
     gs.ObjDb.RemoveItemFromGame(block.Loc, block);
 
+    gs.FactDb.Add(new FlagFact() { Name = "LightPuzzle1Solved" });
     Loc dest = block.Loc with { Level = block.Loc.Level + 1 };
     Downstairs stairs = new("")
     {
