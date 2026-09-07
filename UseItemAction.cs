@@ -765,6 +765,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
 
   double UseJewelledKey(Item key)
   {
+    Loc loc = Actor!.Loc;
     Loc gateLoc = Loc.Nowhere;
     foreach (var adj in Util.Adj8Locs(Actor!.Loc))
     {
@@ -786,8 +787,17 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
     
     Actor.Inventory.RemoveByID(key.ID, GameState);
-    GameState.ObjDb.RemoveItemFromGame(Actor.Loc, key);
+    GameState.ObjDb.RemoveItemFromGame(loc, key);
 
+    // find a spot for the stairs to the second section of dungeon
+    Map nextLvl = GameState.CurrentDungeon.LevelMaps[loc.Level + 1];
+    var floors = nextLvl.ClearFloors(loc.DungeonID, loc.Level + 1, GameState.ObjDb);
+    Loc destLoc = floors[GameState.Rng.Next(floors.Count)];
+    var downStairs = new Downstairs("") { Destination = destLoc };
+    GameState.CurrentMap.SetTile(gateLoc.Row, gateLoc.Col, downStairs);
+    var destStairs = new Upstairs("") { Destination = gateLoc };
+    nextLvl.SetTile(destLoc.Row, destLoc.Col, destStairs);
+    
     return 1.0;
   }
 
