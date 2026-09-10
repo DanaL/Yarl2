@@ -90,17 +90,20 @@ class InitialDungeonBuilder((int, int) entrance, string mainOccupant) : DungeonB
 
     TidyOrphanedDoors(levels);
 
+    List<(int, int)> stairs = [(0, 1), (1, 2), (2, 3), (3, 4)];
+    SetStairs(stairs, Constants.MAIN_DUNGEON_ID, levels, true, gs.Rng);
+    
     // If we need to generate the cellar level, we need to skip it when
     // generating the stairs
-    if (generateLightPuzzle)
-    {
-      Map[] upperLevels = [..levels.Take(CELLAR_LEVEL)];
-      SetStairs(DungeonId, upperLevels, Entrance, dungeon.Descending, gs.Rng);
-    }
-    else
-    {
-      SetStairs(DungeonId, levels, Entrance, dungeon.Descending, gs.Rng);
-    }
+    // if (generateLightPuzzle)
+    // {
+    //   Map[] upperLevels = [..levels.Take(CELLAR_LEVEL)];
+    //   SetStairs(DungeonId, upperLevels, Entrance, dungeon.Descending, gs.Rng);
+    // }
+    // else
+    // {
+    //   SetStairs(DungeonId, levels, Entrance, dungeon.Descending, gs.Rng);
+    // }
     
     foreach ((int levelNum, TileType riverType) in riverLevels)
     {

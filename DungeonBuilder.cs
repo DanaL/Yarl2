@@ -384,6 +384,86 @@ abstract class DungeonBuilder
     }
   }
 
+  protected void SetStairs(List<(int, int)> pairs, int dungeonId, Map[] levels, bool stacked, Rng rng)
+  {
+    foreach (var pair in pairs)
+    {
+      int downStairsLevel = pair.Item1;
+      int upStairsLevel = pair.Item2;
+      Map downStairsMap = levels[downStairsLevel];
+      Map upStairsMap = levels[upStairsLevel];
+
+      HashSet<(int, int)> lockedVaultSqs = [];    
+      foreach (var room in upStairsMap.FindRooms(9))
+      {
+        if (Rooms.IsLockedVault(upStairsMap, room))
+        {
+          lockedVaultSqs = [.. lockedVaultSqs.Union(room)];
+        }
+      }
+
+      // existing stairs?
+      int[,]? costs = null;
+      var existingStairs = downStairsMap.SqsOfTypes([TileType.Upstairs, TileType.Downstairs]);
+      if (existingStairs.Count > 0)
+      {
+        DijkstraMap dijkstra = new(downStairsMap, [], downStairsMap.Height, downStairsMap.Width, false);
+        dijkstra.Generate(StairsPathsCosts, existingStairs[0], int.MaxValue);
+        costs = dijkstra.Sqrs;
+      }
+
+      List<(int, int, int)> floors = [];
+      int sumOfCosts = 0;
+      for (int r = 1; r < downStairsMap.Height - 1; r++)
+      {
+        for (int c = 1; c < downStairsMap.Width - 1; c++)
+        {
+          Tile tileBelow = upStairsMap.TileAt(r, c);
+          Tile tile = downStairsMap.TileAt(r, c);
+          if (tile.Type == TileType.DungeonFloor && tileBelow.Type == TileType.DungeonFloor && !lockedVaultSqs.Contains((r, c)))
+          {
+            int cost = 1;
+            if (costs is not null) 
+            {
+              cost = costs[r, c] * 2;
+            }
+
+            if (cost < int.MaxValue)
+            {
+              floors.Add((r, c, cost));
+              sumOfCosts += cost;
+            }
+          }
+        }
+      }
+
+      floors = [.. floors.OrderByDescending(i => i.Item3)];    
+      if (sumOfCosts < 0)
+      {
+        // We'll bail and regenerate the wilderness completely because it's too 
+        // messy figuring out if we have to move already placed stairs on earlier
+        // levels, etc.
+        throw new CampaignCreationException("Unable to place stairs in initial dungeon");
+      }
+
+      int n = rng.Next(sumOfCosts);
+      int j = floors[0].Item3, i = 0;
+      while (j < n)
+      {
+        j += floors[i++].Item3;
+      }
+
+      (int stairsR, int stairsC) = (floors[i].Item1, floors[i].Item2);    
+      Loc downStairsLoc = new(dungeonId, downStairsLevel, stairsR, stairsC);
+      Loc upStairsLoc = new(dungeonId, upStairsLevel, stairsR, stairsC);
+      Downstairs downStairs = new("") { Destination = upStairsLoc };
+      Upstairs upstairs = new("") { Destination = downStairsLoc };
+
+      downStairsMap.SetTile(downStairsLoc.Row, downStairsLoc.Col, downStairs);
+      upStairsMap.SetTile(upStairsLoc.Row, upStairsLoc.Col, upstairs);    
+    }
+  }
+
   protected void SetStairs(int dungeonId, Map[] levels, (int, int) entrance, bool desc, Rng rng)
   {
     List<(int, int)> floors = levels[0].SqsOfType(TileType.DungeonFloor);
