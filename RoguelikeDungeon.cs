@@ -460,7 +460,7 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
     PopulateDungeon(dungeon, gs.Rng, gs.ObjDb, []);
 
     AddTreasure(DungeonId, levels, gs.ObjDb, gs.Rng);
-    dungeon.ExitLoc = new Loc(DungeonId, 0, ExitLoc.Item1, ExitLoc.Item2); 
+    dungeon.ArrivalLoc = new Loc(DungeonId, 0, ExitLoc.Item1, ExitLoc.Item2); 
     return dungeon;
   }
 }

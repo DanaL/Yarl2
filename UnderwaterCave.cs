@@ -20,20 +20,20 @@ class UnderwaterCave
     
     campaign.AddDungeon(cave, Constants.UNDERWATER_CAVE_DUNGEON_ID);
     Loc caveEntrance = new(Constants.UNDERWATER_CAVE_DUNGEON_ID, 0, caveBuilder.ExitLoc.Item1, caveBuilder.ExitLoc.Item2);
-    cave.ExitLoc = caveEntrance;
+    cave.ArrivalLoc = caveEntrance;
 
     LostTempleBuilder templeBuilder = new();
     Dungeon temple = templeBuilder.Generate(objDb, rng);
     campaign.AddDungeon(temple, Constants.LOST_TEMPLE_DUNGEON_ID);
    
-    Upstairs upstairs = new("") { Destination = temple.ExitLoc };
+    Upstairs upstairs = new("") { Destination = temple.ArrivalLoc };
 
     Map bottomCave = cave.LevelMaps[cave.LevelMaps.Count - 1];
     List<(int, int)> caveFloors = bottomCave.SqsOfType(TileType.DungeonFloor);
     var sq = caveFloors[rng.Next(caveFloors.Count)];
     Loc caveExit = new(Constants.UNDERWATER_CAVE_DUNGEON_ID, cave.LevelMaps.Count - 1, sq.Item1, sq.Item2);
     Downstairs downstairs = new("") { Destination = caveExit };
-    temple.LevelMaps[0].SetTile(temple.ExitLoc.Row, temple.ExitLoc.Col, downstairs);
+    temple.LevelMaps[0].SetTile(temple.ArrivalLoc.Row, temple.ArrivalLoc.Col, downstairs);
     bottomCave.SetTile(caveExit.Row, caveExit.Col, upstairs);
   }
 }
@@ -345,7 +345,7 @@ class LostTempleBuilder : DungeonBuilder
     
     ExitLoc = templeFloors[rng.Next(templeFloors.Count)];
     templeFloors.Remove(ExitLoc);
-    temple.ExitLoc = new(DungeonId, 0, ExitLoc.Item1, ExitLoc.Item2);
+    temple.ArrivalLoc = new(DungeonId, 0, ExitLoc.Item1, ExitLoc.Item2);
 
     PopulateDungeon(temple, rng, objDb, []);
     AddDagon(templeFloors, objDb, rng);

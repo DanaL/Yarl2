@@ -113,7 +113,7 @@ class SorceressQuest
 
     SorceressDungeonBuilder sdb = new(Constants.TOWER_DUNGEON_ID, 21, 36);
     (Dungeon sorceressTower, Loc towerExit) = sdb.Generate(row, col, objDb, rng);
-    sorceressTower.ExitLoc = new(0, 0, row, col);
+    sorceressTower.ArrivalLoc = new(0, 0, row, col);
     campaign.AddDungeon(sorceressTower, Constants.TOWER_DUNGEON_ID);
 
     // Set the decoy mirrors.
@@ -125,7 +125,7 @@ class SorceressQuest
 
       List<Loc> adjToMirror = [.. Util.Adj8Locs(sdb.DecoyMirror1)
                                     .Where(l => mirrorLevel.TileAt(l.Row, l.Col).Type == TileType.DungeonFloor)];
-      wumpus.ExitLoc = adjToMirror[rng.Next(adjToMirror.Count)];
+      wumpus.ArrivalLoc = adjToMirror[rng.Next(adjToMirror.Count)];
     }
     campaign.Dungeons.Add(wumpus.ID, wumpus);
 
@@ -137,7 +137,7 @@ class SorceressQuest
 
       List<Loc> adjToMirror = [.. Util.Adj8Locs(sdb.DecoyMirror2)
                                     .Where(l => mirrorLevel.TileAt(l.Row, l.Col).Type == TileType.DungeonFloor)];
-      vampyArea.ExitLoc = adjToMirror[rng.Next(adjToMirror.Count)];
+      vampyArea.ArrivalLoc = adjToMirror[rng.Next(adjToMirror.Count)];
     }
     campaign.Dungeons.Add(vampyArea.ID, vampyArea);
 
@@ -255,7 +255,7 @@ class WitchQuest
   {
     int id = gs.Campaign.Dungeons.Keys.Max() + 1;
     Dungeon dungeon = new(id, "a Mysterious Cave", "You shudder. Not from cold, but from sensing something unnatural within this cave.", true);
-    dungeon.ExitLoc = entrance;
+    dungeon.ArrivalLoc = entrance;
     MonsterDeck deck = new();
     deck.Monsters.AddRange(["skeleton", "skeleton", "zombie", "zombie", "dire bat"]);
     dungeon.MonsterDecks.Add(deck);

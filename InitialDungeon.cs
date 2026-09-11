@@ -11,13 +11,13 @@
 
 namespace Yarl2;
 
-class InitialDungeonBuilder((int, int) entrance, string mainOccupant) : DungeonBuilder
+class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
 {
   const int HEIGHT = 30;
   const int WIDTH = 70;
   const int CELLAR_LEVEL = 5;
   int DungeonId { get; set; } = Constants.MAIN_DUNGEON_ID;
-  (int, int) Entrance { get; set; } = entrance;
+  Loc ExitDest { get; set; } = exitDest;
   string MainOccupant { get; set; } = mainOccupant;
   int _dungeonDepth;
 
@@ -92,7 +92,12 @@ class InitialDungeonBuilder((int, int) entrance, string mainOccupant) : DungeonB
 
     List<(int, int)> stairs = [(0, 1), (1, 2), (2, 3), (3, 4)];
     SetStairs(stairs, Constants.MAIN_DUNGEON_ID, levels, true, gs.Rng);
-    
+    var level0Floors = levels[0].ClearFloors(Constants.MAIN_DUNGEON_ID, 0, gs.ObjDb);
+    Loc arrivalLoc = level0Floors[gs.Rng.Next(level0Floors.Count)];
+    Upstairs exitStairs = new("") { Destination = ExitDest };
+    levels[0].SetTile(arrivalLoc.Row, arrivalLoc.Col, exitStairs);
+    dungeon.ArrivalLoc = arrivalLoc;
+
     // If we need to generate the cellar level, we need to skip it when
     // generating the stairs
     // if (generateLightPuzzle)
@@ -263,13 +268,13 @@ class InitialDungeonBuilder((int, int) entrance, string mainOccupant) : DungeonB
       var rlDungeon = rldb.Generate(rogueEntranceLoc, gs);
       gs.Campaign.AddDungeon(rlDungeon, Constants.RL_DUNGEON_ID);
 
-      Downstairs rogueStairs = new("") { Destination = rlDungeon.ExitLoc };
+      Downstairs rogueStairs = new("") { Destination = rlDungeon.ArrivalLoc };
       rogueFloorMap.SetTile(rogueEntranceLoc.Row, rogueEntranceLoc.Col, rogueStairs);
       gs.FactDb.Add(new FlagFact() { Name = "RogueBranchCreated"});
     }
     else
     {
-      Downstairs rogueStairs = new("") { Destination = gs.Campaign.Dungeons[Constants.RL_DUNGEON_ID].ExitLoc };
+      Downstairs rogueStairs = new("") { Destination = gs.Campaign.Dungeons[Constants.RL_DUNGEON_ID].ArrivalLoc };
       rogueFloorMap.SetTile(rogueEntranceLoc.Row, rogueEntranceLoc.Col, rogueStairs);
     }
 
@@ -286,7 +291,7 @@ class InitialDungeonBuilder((int, int) entrance, string mainOccupant) : DungeonB
       gs.FactDb.Add(new FlagFact() { Name = "TempleBranchCreated"});      
     }
 
-    Downstairs caveStairs = new("") { Destination = gs.Campaign.Dungeons[Constants.UNDERWATER_CAVE_DUNGEON_ID].ExitLoc };
+    Downstairs caveStairs = new("") { Destination = gs.Campaign.Dungeons[Constants.UNDERWATER_CAVE_DUNGEON_ID].ArrivalLoc };
     templeFloorMap.SetTile(templeEntranceLoc.Row, templeEntranceLoc.Col, caveStairs);
   }
 

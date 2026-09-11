@@ -1115,26 +1115,24 @@ abstract class PortalAction(GameState gs) : Action(gs)
 
     // Do we need to regenerate the dungeon?
     // (todo: remove magic numbers for main dungeon ID...)
-    if (dungeonId == 1 && start.DungeonID != 1)
+    if (dungeonId == 1 && start.DungeonID != Constants.MAIN_DUNGEON_ID)
     {
       GameState.ObjDb.FlushObjectsInDungeon(dungeonId);
 
       if (GameState.FactDb.FactCheck("Dungeon Entrance") is not LocationFact entranceFact)
         throw new Exception("Entrance location fact must exist.");
-      Loc entranceLoc = entranceFact.Loc;
       if (GameState.FactDb.FactCheck("EarlyDenizen") is not SimpleFact earlyOccupant)
         throw new Exception("Early denizen fact must exist.");
 
-      InitialDungeonBuilder db = new((entranceLoc.Row, entranceLoc.Col), earlyOccupant.Value);
+      InitialDungeonBuilder db = new(entranceFact.Loc, earlyOccupant.Value);
 
       var sw = System.Diagnostics.Stopwatch.StartNew();
       Dungeon dungeon = db.Generate("Musty smells. A distant clang. Danger.", GameState);
       sw.Stop();
       Console.WriteLine($"db.Generate() took {sw.ElapsedMilliseconds}ms");
-      dungeon.ExitLoc = entranceLoc;
-      GameState.Campaign.AddDungeon(dungeon, 1);
+      GameState.Campaign.AddDungeon(dungeon, Constants.MAIN_DUNGEON_ID);
 
-      portal.Destination = new(1, 0, db.ExitLoc.Item1, db.ExitLoc.Item2);
+      portal.Destination = dungeon.ArrivalLoc;
     }
 
     GameState.ActorEntersLevel(GameState.Player, dungeonId, level);
