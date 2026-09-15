@@ -258,7 +258,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       }
     }
 
-
     foreach (Loc puddleLoc in tiles)
     {
       Tile tile = TileAt(puddleLoc);
@@ -1128,7 +1127,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     // I'm not sure yet what a good monster gen rate is, and what in-game
     // conditions should affect it
-    if (CurrentMap.HasFeature(MapFeatures.NoRandomEncounters) && Rng.Next(60) == 0)
+    if (!CurrentMap.HasFeature(MapFeatures.NoRandomEncounters) && Rng.Next(60) == 0)
     {
       MonsterSpawner.Spawn(CurrentDungeon, ObjDb, Rng, CurrDungeonID, CurrLevel, CurrentMap, LastPlayerFoV);
     }
