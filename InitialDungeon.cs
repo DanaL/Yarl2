@@ -91,6 +91,15 @@ class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
     TidyOrphanedDoors(levels);
 
     List<(int, int)> stairs = [(0, 1), (1, 2), (2, 3), (3, 4)];
+    if (levels.Length > CELLAR_LEVEL)
+    {
+      if (!generateLightPuzzle)
+        stairs.Add((CELLAR_LEVEL - 1, CELLAR_LEVEL));
+      int lowerLvls = generateCellar ? CELLAR_LEVEL + 1  : CELLAR_LEVEL;
+      for (int j = lowerLvls; j < lowerLvls - 1; j++)
+        stairs.Add((j, j + 1));
+    }
+    
     SetStairs(stairs, Constants.MAIN_DUNGEON_ID, levels, true, gs.Rng);
     var level0Floors = levels[0].ClearFloors(Constants.MAIN_DUNGEON_ID, 0, gs.ObjDb);
     Loc arrivalLoc = level0Floors[gs.Rng.Next(level0Floors.Count)];
