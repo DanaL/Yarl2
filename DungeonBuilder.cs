@@ -464,21 +464,6 @@ abstract class DungeonBuilder
     }
   }
 
-  protected void SetStairs(int dungeonId, Map[] levels, (int, int) entrance, bool desc, Rng rng)
-  {
-    List<(int, int)> floors = levels[0].SqsOfType(TileType.DungeonFloor);
-
-    // so first set the exit stairs on the first floor
-    // (Exit is outwards, ie., stairs that lead oout of the dungeon)
-    ExitLoc = floors[rng.Next(floors.Count)];
-    Tile exitStairs = desc ? new Upstairs("") { Destination = new Loc(0, 0, entrance.Item1, entrance.Item2) }
-                           : new Downstairs("") { Destination = new Loc(0, 0, entrance.Item1, entrance.Item2) };
-
-    levels[0].SetTile(ExitLoc, exitStairs);
-
-    CreateStairwayStacked(dungeonId, levels, 0, ExitLoc, desc, rng);
-  }
-
   public void SetRoguelikeStairs(int dungeonId, Map[] levelMaps, Loc prevDest, Rng rng)
   {
     Downstairs? exitStairs = null;
@@ -540,91 +525,6 @@ abstract class DungeonBuilder
 
       prevDest = new Loc(dungeonId, lvl, exitR, exitC);
     }   
-  }
-
-  // Create stairways where dungeon levels are nearly stacked on top of one
-  // another. Ie., if you go down stairs at (13, 20) on one level, you'll 
-  // arrive at (13, 20) on the next level. Contrasted with classic rogue 
-  // dungeons.
-  protected static void CreateStairwayStacked(int dungeonId, Map[] levelMaps, int levelNum, (int, int) arrivalStairs, bool desc, Rng rng)
-  {
-    Map currLvl = levelMaps[levelNum];
-    Map nextLvl = levelMaps[levelNum + 1];
-    DijkstraMap dijkstra = new(currLvl, [], currLvl.Height, currLvl.Width, false);
-    dijkstra.Generate(StairsPathsCosts, arrivalStairs, int.MaxValue);
-
-    // We want to avoid placing stairs in a vault the player has potentially
-    // no way to open. I can probably skip this check if I'm adding a second
-    // staircase to a level?
-    HashSet<(int, int)> lockedVaultSqs = [];    
-    foreach (var room in nextLvl.FindRooms(9))
-    {
-      if (Rooms.IsLockedVault(nextLvl, room))
-      {
-        lockedVaultSqs = [.. lockedVaultSqs.Union(room)];
-      }
-    }
-    
-    List<(int, int, int)> floors = [];
-    int sumOfCosts = 0;
-    for (int r = 1; r < currLvl.Height - 1; r++)
-    {
-      for (int c = 1; c < currLvl.Width - 1; c++)
-      {
-        Tile tileBelow = nextLvl.TileAt(r, c);
-        Tile tile = currLvl.TileAt(r, c);
-        if (tile.Type == TileType.DungeonFloor && tileBelow.Type == TileType.DungeonFloor && !lockedVaultSqs.Contains((r, c)))
-        {
-          int cost = dijkstra.Sqrs[r, c] * 2;
-          if (cost < int.MaxValue)
-          {
-            floors.Add((r, c, cost));
-            sumOfCosts += cost;
-          }
-        }
-      }
-    }
-
-    floors = [.. floors.OrderByDescending(i => i.Item3)];
-
-    if (sumOfCosts < 0)
-    {
-      // We'll bail and regenerate the wilderness completely because it's too 
-      // messy figuring out if we have to move already placed stairs on earlier
-      // levels, etc.
-      throw new CampaignCreationException("Unable to place stairs in initial dungeon");
-    }
-
-    int n = rng.Next(sumOfCosts);
-    int j = floors[0].Item3, i = 0;
-    while (j < n)
-    {
-      j += floors[i++].Item3;
-    }
-
-    (int stairsR, int stairsC) = (floors[i].Item1, floors[i].Item2);
-    Loc exitDest = new(dungeonId, levelNum + 1, stairsR, stairsC);
-    Loc nextArrivalDest = new(dungeonId, levelNum, stairsR, stairsC);
-
-    if (desc)
-    {
-      Downstairs exitStairs = new("") { Destination = exitDest };
-      Upstairs nextArrivalStairs = new("") {  Destination = nextArrivalDest };
-      currLvl.SetTile(stairsR, stairsC, exitStairs);
-      nextLvl.SetTile(stairsR, stairsC, nextArrivalStairs);
-    }
-    else
-    {
-      Upstairs exitStairs = new("") { Destination = exitDest };
-      Downstairs nextArrivalStairs = new("") { Destination = nextArrivalDest };
-      currLvl.SetTile(stairsR, stairsC, exitStairs);
-      nextLvl.SetTile(stairsR, stairsC, nextArrivalStairs);
-    }
-
-    if (levelNum < levelMaps.Length - 2)
-    {
-      CreateStairwayStacked(dungeonId, levelMaps, levelNum + 1, (stairsR, stairsC) , desc, rng);
-    }
   }
 
   static int StairsPathsCosts(Tile tile)

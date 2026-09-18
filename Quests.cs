@@ -67,7 +67,7 @@ class SorceressQuest
   }
 
   public static void Setup(Map wilderness, Town town, GameObjectDB objDb, FactDb factDb, Campaign campaign, Rng rng)
-  {    
+  {
     // First, pick a spot in the wilderness for the tower and draw it
     List<(int, int)> options = [];
     for (int r = 3; r < wilderness.Height - 13; r++)
@@ -112,9 +112,14 @@ class SorceressQuest
     objDb.ConditionalEvents.Add(pal);
 
     SorceressDungeonBuilder sdb = new(Constants.TOWER_DUNGEON_ID, 21, 36);
-    (Dungeon sorceressTower, Loc towerExit) = sdb.Generate(row, col, objDb, rng);
-    sorceressTower.ArrivalLoc = new(0, 0, row, col);
+    (Dungeon sorceressTower, Loc towerExit) = sdb.Generate(objDb, rng);
+    var towerFloors = sorceressTower.LevelMaps[0].ClearFloors(Constants.TOWER_DUNGEON_ID, 0, objDb);
+    Loc towerEntrance = towerFloors[rng.Next(towerFloors.Count)];
+    Downstairs towerEntranceStairs = new("") { Destination = new(0, 0, row, col) };
+    sorceressTower.LevelMaps[0].SetTile(towerEntrance.Row, towerEntrance.Col, towerEntranceStairs);    
     campaign.AddDungeon(sorceressTower, Constants.TOWER_DUNGEON_ID);
+    Upstairs towerStairs = new("") { Destination = towerEntrance };
+    wilderness.SetTile(row, col, towerStairs);
 
     // Set the decoy mirrors.
     (Dungeon wumpus, Loc wumpusLoc) = SorceressDungeonBuilder.WumpusDungeon(sdb.DecoyMirror1, Constants.WUMPUS_DUNGEON_ID, objDb, rng);
@@ -140,12 +145,6 @@ class SorceressQuest
       vampyArea.ArrivalLoc = adjToMirror[rng.Next(adjToMirror.Count)];
     }
     campaign.Dungeons.Add(vampyArea.ID, vampyArea);
-
-    Upstairs entrance = new("")
-    {
-      Destination = towerExit
-    };
-    wilderness.SetTile(row, col, entrance);
 
     int tl = sorceressTower.LevelMaps.Count - 1;
     Map topLevel = sorceressTower.LevelMaps[tl];

@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Reflection.Metadata;
+
 namespace Yarl2;
 
 class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBuilder
@@ -327,7 +329,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
     }
   }
 
-  public (Dungeon, Loc) Generate(int entranceRow, int entranceCol, GameObjectDB objDb, Rng rng)
+  public (Dungeon, Loc) Generate(GameObjectDB objDb, Rng rng)
   {
     Dungeon towerDungeon = new(DungeonId, "a Musty Tower", "Ancient halls that smell of dust and magic.", false)
     {
@@ -341,7 +343,10 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
     Tower towerBuilder = new(Height, Width, 5);
     Map[] floors = [..towerBuilder.BuildLevels(numOfLevels, rng)];
 
-    SetStairs(DungeonId, floors, (entranceRow, entranceCol), false, rng);
+    List<(int, int)> stairs = [];
+    for (int j = numOfLevels - 1; j > 1; j--)
+      stairs.Add((j, j - 1));
+    SetStairs(stairs, Constants.TOWER_DUNGEON_ID, floors, true, rng);
 
     // Because it's a sorcerous tower, replace the final stairs with a 
     // Mysterious Mirror

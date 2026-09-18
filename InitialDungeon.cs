@@ -107,18 +107,6 @@ class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
     levels[0].SetTile(arrivalLoc.Row, arrivalLoc.Col, exitStairs);
     dungeon.ArrivalLoc = arrivalLoc;
 
-    // If we need to generate the cellar level, we need to skip it when
-    // generating the stairs
-    // if (generateLightPuzzle)
-    // {
-    //   Map[] upperLevels = [..levels.Take(CELLAR_LEVEL)];
-    //   SetStairs(DungeonId, upperLevels, Entrance, dungeon.Descending, gs.Rng);
-    // }
-    // else
-    // {
-    //   SetStairs(DungeonId, levels, Entrance, dungeon.Descending, gs.Rng);
-    // }
-    
     foreach ((int levelNum, TileType riverType) in riverLevels)
     {
       RiverQoLCheck(levels[levelNum], DungeonId, levelNum, gs.ObjDb, gs.Rng);

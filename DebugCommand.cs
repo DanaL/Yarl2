@@ -366,9 +366,9 @@ class DebugCommand(GameState gs)
     if (name == "jewelled key")
     {
       if (action == "give")
-        _gs.Player.Inventory.Add(History.JewelledKey(gs), _gs.Player.ID);
+        _gs.Player.Inventory.Add(History.JewelledKey(_gs), _gs.Player.ID);
       else
-        _gs.ObjDb.SetToLoc(_gs.Player.Loc, History.JewelledKey(gs));
+        _gs.ObjDb.SetToLoc(_gs.Player.Loc, History.JewelledKey(_gs));
       _gs.PrepareFieldOfView();
       _gs.Player.Stats[Attribute.MainQuestState] = new Stat(4);
       
