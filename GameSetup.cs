@@ -488,8 +488,6 @@ class CampaignCreator(UserInterface ui)
         factDb.Add(new SimpleFact() { Name = "RogueBranchLevel", Value = rng.Next(6, 10).ToString() });
         factDb.Add(new SimpleFact() { Name = "TempleBranchLevel", Value = rng.Next(8, 12).ToString() });
 
-        // This will be moved to UsePortalAction probably
-        factDb.Add(new DungeonGenerationFact(1, 0));
         campaign.FactDb = factDb;
 
         Village.Populate(wildernessMap, town, objDb, factDb, rng);

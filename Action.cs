@@ -1113,9 +1113,8 @@ abstract class PortalAction(GameState gs) : Action(gs)
 
     bool trip = level > start.Level && GameState.Player.HasTrait<TipsyTrait>() && GameState.Rng.NextDouble() < 0.33;
 
-    // Do we need to regenerate the dungeon?
-    // (todo: remove magic numbers for main dungeon ID...)
-    if (dungeonId == 1 && start.DungeonID != Constants.MAIN_DUNGEON_ID)
+    // Time to regenerate the dungeon?
+    if (dungeonId == Constants.MAIN_DUNGEON_ID && start.DungeonID != Constants.MAIN_DUNGEON_ID)
     {
       GameState.ObjDb.FlushObjectsInDungeon(dungeonId);
 
@@ -1133,6 +1132,8 @@ abstract class PortalAction(GameState gs) : Action(gs)
       GameState.Campaign.AddDungeon(dungeon, Constants.MAIN_DUNGEON_ID);
 
       portal.Destination = dungeon.ArrivalLoc;
+
+      GameState.FactDb.Add(new DungeonGenerationFact(Constants.MAIN_DUNGEON_ID, GameState.Turn));
     }
 
     GameState.ActorEntersLevel(GameState.Player, dungeonId, level);
