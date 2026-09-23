@@ -1114,8 +1114,10 @@ abstract class PortalAction(GameState gs) : Action(gs)
     bool trip = level > start.Level && GameState.Player.HasTrait<TipsyTrait>() && GameState.Rng.NextDouble() < 0.33;
 
     // Time to regenerate the dungeon?
-    if (dungeonId == Constants.MAIN_DUNGEON_ID && start.DungeonID != Constants.MAIN_DUNGEON_ID)
-    {
+    ulong lastGen = GameState.FactDb.LastGenerationTime(Constants.MAIN_DUNGEON_ID);
+    bool regen = lastGen == 0 || (GameState.Turn - lastGen > Constants.MAIN_DUNGEON_REFRESH);
+    if (dungeonId == Constants.MAIN_DUNGEON_ID && start.DungeonID != Constants.MAIN_DUNGEON_ID && regen)
+    {      
       GameState.ObjDb.FlushObjectsInDungeon(dungeonId);
 
       if (GameState.FactDb.FactCheck("Dungeon Entrance") is not LocationFact entranceFact)

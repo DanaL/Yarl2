@@ -281,6 +281,8 @@ static class Constants
   public const int WUMPUS_DUNGEON_ID = 7;
   public const int VAMP_DUNGEON_ID = 8;
   public const int LOST_TEMPLE_DUNGEON_ID = 9;
+
+  public const ulong MAIN_DUNGEON_REFRESH = 1500;
 }
 
 static class Util
