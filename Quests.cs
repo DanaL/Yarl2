@@ -506,7 +506,7 @@ class CKShrine
     blade.Traits.Add(new NamedTrait());
     blade.Traits.Add(new ArtifactTrait());
     blade.Traits.Add(new RustProofTrait());
-    blade.Traits.Add(new GrantsTrait() { TraitsGranted = [ "ReaverBlessing#0#0" ]});
+    blade.Traits.Add(new GrantsTrait() { TraitsGranted = [ "ReaverBlessing#0#0", "StatBuff#0#max#HP#25#item" ]});
     blade.Traits.Add(new WeaponBonusTrait() { Bonus = 1 });
     blade.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Blunt });
     blade.Traits.Add(new DescriptionTrait("This weapon is the vessel of the Crimson King. When you hold it, your mind is filled visions of battles and war. Be forewarned: this blade's power and fury is fueled by your very [BRIGHTRED life force]."));
