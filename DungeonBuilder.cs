@@ -443,6 +443,8 @@ abstract class DungeonBuilder
         // We'll bail and regenerate the wilderness completely because it's too 
         // messy figuring out if we have to move already placed stairs on earlier
         // levels, etc.
+        downStairsMap.Dump();
+        upStairsMap.Dump();
         throw new CampaignCreationException("Unable to place stairs in initial dungeon");
       }
 
