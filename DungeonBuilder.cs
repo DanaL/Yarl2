@@ -384,10 +384,10 @@ abstract class DungeonBuilder
     }
   }
 
-  protected void SetStairs(List<(int, int)> pairs, int dungeonId, Map[] levels, bool stacked, Rng rng)
+  protected static void SetStairs(List<(int, int)> pairs, int dungeonId, Map[] levels, bool stacked, Rng rng)
   {
     foreach (var pair in pairs)
-    {
+    {      
       int downStairsLevel = pair.Item1;
       int upStairsLevel = pair.Item2;
       Map downStairsMap = levels[downStairsLevel];
@@ -397,9 +397,7 @@ abstract class DungeonBuilder
       foreach (var room in upStairsMap.FindRooms(9))
       {
         if (Rooms.IsLockedVault(upStairsMap, room))
-        {
-          lockedVaultSqs = [.. lockedVaultSqs.Union(room)];
-        }
+          lockedVaultSqs = [.. lockedVaultSqs.Union(room)];        
       }
 
       // existing stairs?
@@ -425,7 +423,8 @@ abstract class DungeonBuilder
             int cost = 1;
             if (costs is not null) 
             {
-              cost = costs[r, c] * 2;
+              // If sqr passable, add it up. The * 2 is to give more wait to further-away sqs
+              cost = costs[r, c] == int.MaxValue ? int.MaxValue : costs[r, c] * 2;
             }
 
             if (cost < int.MaxValue)
@@ -445,7 +444,7 @@ abstract class DungeonBuilder
         // levels, etc.
         downStairsMap.Dump();
         upStairsMap.Dump();
-        throw new CampaignCreationException("Unable to place stairs in initial dungeon");
+        throw new DungeonGenerationException("Unable to place stairs in initial dungeon");
       }
 
       int n = rng.Next(sumOfCosts);

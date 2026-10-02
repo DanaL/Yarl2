@@ -1124,17 +1124,26 @@ abstract class PortalAction(GameState gs) : Action(gs)
         throw new Exception("Entrance location fact must exist.");
       if (GameState.FactDb.FactCheck("EarlyDenizen") is not SimpleFact earlyOccupant)
         throw new Exception("Early denizen fact must exist.");
+      
+      do
+      {
+        InitialDungeonBuilder db = new(entranceFact.Loc, earlyOccupant.Value);
 
-      InitialDungeonBuilder db = new(entranceFact.Loc, earlyOccupant.Value);
-
-      var sw = System.Diagnostics.Stopwatch.StartNew();
-      Dungeon dungeon = db.Generate("Musty smells. A distant clang. Danger.", GameState);
-      sw.Stop();
-      Console.WriteLine($"db.Generate() took {sw.ElapsedMilliseconds}ms");
-      GameState.Campaign.AddDungeon(dungeon, Constants.MAIN_DUNGEON_ID);
-
-      portal.Destination = dungeon.ArrivalLoc;
-
+        Dungeon dungeon; 
+        try
+        {
+          dungeon = db.Generate("Musty smells. A distant clang. Danger.", GameState);
+          GameState.Campaign.AddDungeon(dungeon, Constants.MAIN_DUNGEON_ID); 
+          portal.Destination = dungeon.ArrivalLoc;
+          break;
+        }
+        catch (DungeonGenerationException)
+        {
+          Console.WriteLine("Failure building Main Dungeon. Retrying.");
+        }
+      }
+      while (true);
+      
       GameState.FactDb.Add(new DungeonGenerationFact(Constants.MAIN_DUNGEON_ID, GameState.Turn));
     }
 

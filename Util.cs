@@ -1348,6 +1348,7 @@ class MapUtils
 
 class InvalidRoomException : Exception { }
 class CampaignCreationException(string msg) : Exception(msg) { }
+class DungeonGenerationException(string msg) : Exception(msg) { }
 
 class AbnormalMovement(Loc dest) : Exception
 {
