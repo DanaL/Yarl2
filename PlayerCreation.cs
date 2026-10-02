@@ -32,7 +32,7 @@ class PlayerCreator
       ID = Constants.PLAYER_ID,
       Stats = new Dictionary<Attribute, Stat>()
       {
-        { Attribute.BaseHP, new Stat(12) },
+        { Attribute.BaseHP, new Stat(22) },
         { Attribute.HP, new Stat(1) }
       }
     };
