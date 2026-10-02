@@ -4077,7 +4077,17 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
     var (equipResult, conflict, swapped) = ((Player)Actor).Inventory.ToggleEquipStatus(Choice);
     string s;
     switch (equipResult)
-    {      
+    {
+      case EquipingResult.Equipped:
+        s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "ready")} {item.FullName.DefArticle()}.";
+        GameState.UIRef().AlertPlayer(s);
+        energyCost = 1.0;
+        break;
+      case EquipingResult.StackEquipped:
+        s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "ready")} {item.FullName.DefArticle().Pluralize()}.";
+        GameState.UIRef().AlertPlayer(s);
+        energyCost = 1.0;
+        break;
       case EquipingResult.Unequipped:
         s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "unequip")} {item.FullName.DefArticle()}.";
         GameState.UIRef().AlertPlayer(s);
