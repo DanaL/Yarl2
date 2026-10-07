@@ -60,10 +60,11 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   public Dictionary<VisitedLevel, bool> VisitedLevels = [];
 
   public void ActorEntersLevel(Actor actor, int dungeonId, int level)
-  {
+  {    
     if (actor is not Yarl2.Player)
       return;
 
+    int prevDungeon = CurrDungeonID;
     Map prevMap = CurrentMap;
     if (prevMap.HasFeature(MapFeatures.Foggy))
       UI.ClearFoggyAnimation();
@@ -97,6 +98,13 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     }
 
     VisitedLevel visit = new(dungeonId, level);
+
+    // Reset the player's hit points when they enter a dungoen level they haven't yet visited
+    if (prevDungeon != Constants.OVERWORLD_DUNGEON_ID && dungeonId != Constants.OVERWORLD_DUNGEON_ID && !VisitedLevels.ContainsKey(visit))
+    {
+      Player.Stats[Attribute.HP].Change(int.MaxValue);
+    }
+
     // You don't get exploration credit for some levels
     bool visited = (CurrentMap.Features & MapFeatures.NoExplore) == MapFeatures.NoExplore;
     VisitedLevels.TryAdd(visit, visited);    

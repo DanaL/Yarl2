@@ -1120,6 +1120,11 @@ abstract class PortalAction(GameState gs) : Action(gs)
     {      
       GameState.ObjDb.FlushObjectsInDungeon(dungeonId);
 
+      // Clear out the visited levels from the memory when we regenerate the 
+      // main dungeon because the player regains HP upon entering a new level
+      foreach (var key in GameState.VisitedLevels.Keys.Where(v => v.DungeonId == dungeonId))
+        GameState.VisitedLevels.Remove(key);
+
       if (GameState.FactDb.FactCheck("Dungeon Entrance") is not LocationFact entranceFact)
         throw new Exception("Entrance location fact must exist.");
       if (GameState.FactDb.FactCheck("EarlyDenizen") is not SimpleFact earlyOccupant)
@@ -3486,7 +3491,7 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice) : Action
     else
     {
       for (int j = 0; j < _healDice; j++)
-        hp += GameState!.Rng.Next(_healDie) + 1;
+        hp += GameState.Rng.Next(_healDie) + 1;
     }
     hpStat.Change(hp);
     int delta = hpStat.Curr - hpBefore;
