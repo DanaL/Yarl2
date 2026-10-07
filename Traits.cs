@@ -3400,7 +3400,7 @@ class RecordDeathTrait : Trait, IGameEventListener
 
   public string Name { get; set; } = "";
 
-  public override string AsText() => $"RecordDeath#{Name}";
+  public override string AsText() => $"RecordDeath#{SourceId}#{Name}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
