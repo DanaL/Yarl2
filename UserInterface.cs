@@ -323,18 +323,6 @@ abstract class UserInterface
     }
   }
 
-  static int FindSplit(string txt)
-  {
-    int start = int.Min(txt.Length - 1, SideBarWidth);
-    for (int j = start; j > 0; j--)
-    {
-      if (txt[j] == ' ')
-        return j;
-    }
-
-    return -1;
-  }
-
   readonly (Colour, string) _sbSpacer = (Colours.WHITE, "│ ");
   int WriteSideBarLine(Colour colour, string text, int row)
   {
@@ -344,44 +332,30 @@ abstract class UserInterface
     return row + 1;
   }
 
-  int WriteSideBarLine(Span<(Colour, string)> line, int row)
+  int WriteSideBarLine((Colour, string)[] line, int row)
   {
-    int lineWidth = 0;
-    foreach (var item in line)
-      lineWidth += item.Item2.Length;
+    List<(Colour, string)> pieces = [];
+    int width = 0;
 
-    if (lineWidth < SideBarWidth)
+    foreach (var piece in line)
     {
-      WriteText(line, row++, ViewWidth);
-    }
-    else
-    {
-      // Split the line if it's too wide for the sidebar. Currently handling
-      // only the simplest possible case. This won't work if the message sent
-      // has to go across 3 lines, or there are no spaces in the text
-      List<(Colour, string)> pieces = [];
-      int width = 0;
-
-      foreach (var piece in line)
+      if (piece.Item2.Length + width < SideBarWidth)
       {
-        if (piece.Item2.Length + width < SideBarWidth)
-        {
-          pieces.Add(piece);
-          width += piece.Item2.Length;
-        }
-        else
-        {
-          int pos = FindSplit(piece.Item2);
-          string part1 = piece.Item2[..pos];
-          string part2 = "│  " + piece.Item2[pos..];
-          pieces.Add((piece.Item1, part1));
-          WriteText(pieces.ToArray(), row++, ViewWidth);
-          WriteText([(piece.Item1, part2)], row++, ViewWidth);
-          width = 0;
-          pieces.Clear();
-        }
+        pieces.Add(piece);
+        width += piece.Item2.Length;
+      }
+      else
+      {
+        WriteText([.. pieces], row++, ViewWidth);
+        pieces.Clear();
+        pieces.Add((Colours.WHITE, "│   "));
+        pieces.Add(piece);
+        width = piece.Item2.Length + 4;
       }
     }
+
+    if (pieces.Count > 1)
+      WriteText([.. pieces], row++, ViewWidth);
 
     return row;
   }
@@ -414,13 +388,15 @@ abstract class UserInterface
 
     var weapon = gs.Player.Inventory.ReadiedWeapon();
     if (weapon is not null)
-    {
+    {      
       string weaponName = MsgFactory.CalcName(weapon, gs.Player, Article.InDef);
-      (Colour, string)[] weaponLine;
+      LineScanner ls;
       if (weapon.HasTrait<TwoHandedTrait>() || (weapon.HasTrait<VersatileTrait>() && !gs.Player.Inventory.ShieldEquipped()))
-        weaponLine = [_sbSpacer, (weapon.Glyph.Lit, weapon.Glyph.Ch.ToString()), (Colours.WHITE, $" {weaponName} (in hands)")];
+        ls = new($"_{weaponName} (in hands)");
       else
-        weaponLine = [_sbSpacer, (weapon.Glyph.Lit, weapon.Glyph.Ch.ToString()), (Colours.WHITE, $" {weaponName} (in hand)")];
+        ls = new($"_{weaponName} (in hand)");
+      var weaponNameWords = ls.Scan();
+      (Colour, string)[] weaponLine = [_sbSpacer, (weapon.Glyph.Lit, weapon.Glyph.Ch.ToString()), .. weaponNameWords];     
       row = WriteSideBarLine(weaponLine, row);
     }
     var bow = gs.Player.Inventory.ReadiedBow();
