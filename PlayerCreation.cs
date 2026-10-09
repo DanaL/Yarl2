@@ -62,6 +62,7 @@ class PlayerCreator
         player.Stats[Attribute.Strength].ChangeMax(1);
         player.Stats[Attribute.Strength].Reset();
         player.Traits.Add(new RageTrait(player));
+        player.Traits.Add(new ExtraHPTrait() { HP = 5 });
         break;
       case PlayerLineage.Elf:
         player.Stats[Attribute.Dexterity].ChangeMax(1);
@@ -102,6 +103,8 @@ class PlayerCreator
     player.Stats[Attribute.Dexterity] = new Stat(_basicStatArray[rng.Next(_basicStatArray.Length)]);
     player.Stats[Attribute.Will] = new Stat(_basicStatArray[rng.Next(_basicStatArray.Length - 2)]);
 
+    player.Traits.Add(new ExtraHPTrait() { HP = 5 });
+    
     char slot;
     Item leather = ItemFactory.Get(ItemNames.LEATHER_ARMOUR, gs.ObjDb);
     leather.Traits.Add(new AdjectiveTrait("battered"));

@@ -212,11 +212,8 @@ sealed class Player : Actor
   public int CalcMaxHP()
   {
     int baseHP = Stats[Attribute.BaseHP].Curr;
-    if (Lineage == PlayerLineage.Orc)
-      baseHP += 5;
-    if (Background == PlayerBackground.Warrior)
-      baseHP += 5;
-
+    baseHP += Traits.OfType<ExtraHPTrait>().Sum(t => t.HP);
+    
     if (Stats.TryGetValue(Attribute.Constitution, out var con))
     {
       baseHP += con.Max >= 0 ? con.Curr * 5 : con.Curr;

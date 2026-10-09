@@ -109,10 +109,16 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       Player.Stats[Attribute.HP].Change(int.MaxValue);
     }
 
-    if (VisitedLevels.ContainsKey(visit))
+    bool previouslyBeenOnLevel = VisitedLevels.ContainsKey(visit);
+    if (previouslyBeenOnLevel)
       VisitedLevels[visit] = !noExplore;
-    else
+    else 
       VisitedLevels.Add(visit, !noExplore);
+
+    // if (!previouslyBeenOnLevel && !(visit.DungeonId == Constants.MAIN_DUNGEON_ID && visit.Level == 0))
+    // {
+    //   Player.Stats[Attribute.HP].Change(int.MaxValue);
+    // }
   }
 
   void RefreshOverworld()

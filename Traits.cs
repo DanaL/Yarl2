@@ -2568,6 +2568,13 @@ class ExplosiveTrait : Trait
   public override string AsText() => $"Explosive#{Fuse}#{DmgDie}#{NumOfDice}";
 }
 
+class ExtraHPTrait : Trait
+{
+  public int HP { get; set; }
+
+  public override string AsText() => $"ExtraHP#{HP}";
+}
+
 class NauseaTrait : TemporaryTrait
 {
   public override string AsText() => $"Nausea#{OwnerID}#{ExpiresOn}";
@@ -4286,6 +4293,7 @@ class TraitFactory
     { "Equipable", (pieces, gameObj) => new EquipableTrait() },
     { "Exhausted", (pieces, gameObj) =>  new ExhaustedTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "Explosive", (pieces, GameObj) => new ExplosiveTrait() { Fuse = int.Parse(pieces[1]), DmgDie = int.Parse(pieces[2]), NumOfDice = int.Parse(pieces[3]) }},
+    { "ExtraHP", (pieces, GameObj) => new ExtraHPTrait() { HP = int.Parse(pieces[1]) } },
     { "ExplosionCountdown", (pieces, GameObj) => new ExplosionCountdownTrait()
       { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]),
         Fuse = int.Parse(pieces[3]), DmgDie = int.Parse(pieces[4]), NumOfDice = int.Parse(pieces[5])
