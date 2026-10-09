@@ -1123,7 +1123,7 @@ abstract class PortalAction(GameState gs) : Action(gs)
       // Clear out the visited levels from the memory when we regenerate the 
       // main dungeon because the player regains HP upon entering a new level
       foreach (var key in GameState.VisitedLevels.Keys.Where(v => v.DungeonId == dungeonId))
-        GameState.VisitedLevels.Remove(key);
+        GameState.VisitedLevels[key] = false;
 
       if (GameState.FactDb.FactCheck("Dungeon Entrance") is not LocationFact entranceFact)
         throw new Exception("Entrance location fact must exist.");
@@ -3503,10 +3503,10 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice) : Action
       txt = $"{Actor.FullName.Capitalize()} is healed.";
     else
       txt = "";
-    GameState!.UIRef().AlertPlayer(txt, GameState, Actor.Loc);
+    GameState.UIRef().AlertPlayer(txt, GameState, Actor.Loc);
 
     SqAnimation healAnim = new(GameState!, Actor.Loc, Colours.WHITE, Colours.PURPLE, '\u2665');
-    GameState!.UIRef().RegisterAnimation(healAnim);
+    GameState.UIRef().RegisterAnimation(healAnim);
 
     if (Actor.Traits.OfType<LameTrait>().FirstOrDefault() is LameTrait lame)
     {

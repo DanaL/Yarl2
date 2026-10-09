@@ -99,15 +99,20 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     VisitedLevel visit = new(dungeonId, level);
 
-    // Reset the player's hit points when they enter a dungoen level they haven't yet visited
-    if (prevDungeon != Constants.OVERWORLD_DUNGEON_ID && dungeonId != Constants.OVERWORLD_DUNGEON_ID && !VisitedLevels.ContainsKey(visit))
+    // You don't get credit for visiting some levels
+    bool noExplore = (CurrentMap.Features & MapFeatures.NoExplore) == MapFeatures.NoExplore;
+
+    // Reset the player's hit points when they enter a dungoen level they haven't yet visited    
+    bool resetHP = !noExplore && (!VisitedLevels.ContainsKey(visit) || !VisitedLevels[visit]);
+    if (prevDungeon != Constants.OVERWORLD_DUNGEON_ID && dungeonId != Constants.OVERWORLD_DUNGEON_ID && resetHP)
     {
       Player.Stats[Attribute.HP].Change(int.MaxValue);
     }
 
-    // You don't get exploration credit for some levels
-    bool visited = (CurrentMap.Features & MapFeatures.NoExplore) == MapFeatures.NoExplore;
-    VisitedLevels.TryAdd(visit, visited);    
+    if (VisitedLevels.ContainsKey(visit))
+      VisitedLevels[visit] = !noExplore;
+    else
+      VisitedLevels.Add(visit, !noExplore);
   }
 
   void RefreshOverworld()
