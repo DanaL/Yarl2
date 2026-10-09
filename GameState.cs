@@ -106,7 +106,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     bool resetHP = !noExplore && (!VisitedLevels.ContainsKey(visit) || !VisitedLevels[visit]);
     if (prevDungeon != Constants.OVERWORLD_DUNGEON_ID && dungeonId != Constants.OVERWORLD_DUNGEON_ID && resetHP)
     {
-      Player.Stats[Attribute.HP].Change(int.MaxValue);
+      Player.Stats[Attribute.HP].Change(50);
     }
 
     bool previouslyBeenOnLevel = VisitedLevels.ContainsKey(visit);
