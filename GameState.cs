@@ -115,10 +115,12 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     else 
       VisitedLevels.Add(visit, !noExplore);
 
-    // if (!previouslyBeenOnLevel && !(visit.DungeonId == Constants.MAIN_DUNGEON_ID && visit.Level == 0))
-    // {
-    //   Player.Stats[Attribute.HP].Change(int.MaxValue);
-    // }
+    if (!noExplore && !previouslyBeenOnLevel && !(visit.DungeonId == Constants.MAIN_DUNGEON_ID && visit.Level == 0))
+    {
+      Player.Traits.Add(new ExtraHPTrait() { HP = 2 });
+      Player.CalcHP();
+      Player.Stats[Attribute.HP].Change(2);
+    }
   }
 
   void RefreshOverworld()
