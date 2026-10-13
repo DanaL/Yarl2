@@ -358,7 +358,7 @@
     "Name": "POTION_HEALING",
     "DescriptiveName": "potion of healing",
     "Type": "Potion",
-    "Value": 15,
+    "Value": 10,
     "Glyph": "!,lightblue,blue,black,false",
     "Traits": [
       "UseSimple#minorheal",
