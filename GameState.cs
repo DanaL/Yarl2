@@ -295,7 +295,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         case TileType.DeepWater:
         case TileType.FrozenDeepWater:
           Item chasm = ItemFactory.Chasm(this);
-          ObjDb.SetToLoc(puddleLoc, chasm);
+          ObjDb.SetItemToLoc(puddleLoc, chasm);
           ChasmCreated(puddleLoc);
           break;
         default:
@@ -408,7 +408,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       }
     }
 
-    ObjDb.SetToLoc(loc, item);
+    ObjDb.SetItemToLoc(loc, item);
     string msg = ThingTouchesFloor(loc);
     UI.AlertPlayer(msg);
 

@@ -78,7 +78,7 @@ class Faiths
       case 2:
         msg = "Step through shadows, draw not the attention of your foes.";
         Item potion = ItemFactory.Get(ItemNames.POTION_OBSCURITY, gs.ObjDb);
-        gs.ObjDb.SetToLoc(gs.Player.Loc, potion);
+        gs.ObjDb.SetItemToLoc(gs.Player.Loc, potion);
         gs.UIRef().AlertPlayer("Some shadows coalesce into a potion.");
         break;
       default:

@@ -387,15 +387,15 @@ class IdolAltarMaker
                                   .Where(l => !objDb.HazardsAtLoc(l))];
       Loc idolLoc = floors[rng.Next(floors.Count)];
       objDb.Add(idol);
-      objDb.SetToLoc(idolLoc, idol);
+      objDb.SetItemToLoc(idolLoc, idol);
 
       Loc prizeLoc = new(dungeonID, level, closetR, closetC);
 
       Item prize = PickPrize(objDb, rng);
-      objDb.SetToLoc(prizeLoc, prize);
+      objDb.SetItemToLoc(prizeLoc, prize);
 
       prize = Treasure.MinorGift(objDb, rng);
-      objDb.SetToLoc(prizeLoc, prize);
+      objDb.SetItemToLoc(prizeLoc, prize);
 
       Tile altar = new IdolAltar(altarDesc)
       {
@@ -558,7 +558,7 @@ class CaptiveFeature
       Item altar = ItemFactory.Get(ItemNames.STONE_ALTAR, objDb);
       altar.Glyph = new Glyph('∆', Colours.DULL_RED, Colours.BROWN, Colours.BLACK, false);
       altar.Traits.Add(new MolochAltarTrait());
-      objDb.SetToLoc(altarLoc, altar);
+      objDb.SetItemToLoc(altarLoc, altar);
     }
   }
 
@@ -775,7 +775,7 @@ class TunnelCarver
     int i = rng.Next(tunnel.Count);
     Loc loc = new(dungeonID, level, tunnel[i].Item1, tunnel[i].Item2);
     Item rubble = ItemFactory.Get(ItemNames.RUBBLE, objDb);
-    objDb.SetToLoc(loc, rubble);
+    objDb.SetItemToLoc(loc, rubble);
     tunnel.RemoveAt(i);
 
     // Add some treasure to first location
@@ -789,24 +789,24 @@ class TunnelCarver
         _ => Treasure.TreasureByQuality(TreasureQuality.Good, objDb, rng)
       };
       foreach (var treasure in treasures)
-        objDb.SetToLoc(loc, treasure);
+        objDb.SetItemToLoc(loc, treasure);
     }
 
     if (rng.Next(5) == 0)
     {
-      objDb.SetToLoc(loc, ItemFactory.Get(ItemNames.WOOL_CLOAK, objDb));
+      objDb.SetItemToLoc(loc, ItemFactory.Get(ItemNames.WOOL_CLOAK, objDb));
     }
     
     if (rng.Next(5) == 0)
     {
-      objDb.SetToLoc(loc, ItemFactory.Get(ItemNames.LEATHER_BOOTS, objDb));
+      objDb.SetItemToLoc(loc, ItemFactory.Get(ItemNames.LEATHER_BOOTS, objDb));
     }
 
     // Maybe a skull (or eventually other remains?)
     if (rng.Next(3) == 0)
     {
       Item skull = ItemFactory.Get(ItemNames.SKULL, objDb);
-      objDb.SetToLoc(loc, skull);
+      objDb.SetItemToLoc(loc, skull);
     }
 
     for (i = 0; i < tunnel.Count; i++)
@@ -815,7 +815,7 @@ class TunnelCarver
       {
         loc = new(dungeonID, level, tunnel[0].Item1, tunnel[0].Item2);
         rubble = ItemFactory.Get(ItemNames.RUBBLE, objDb);
-        objDb.SetToLoc(loc, rubble);
+        objDb.SetItemToLoc(loc, rubble);
       }
       tunnel.RemoveAt(0);
     }

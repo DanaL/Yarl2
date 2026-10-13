@@ -298,15 +298,15 @@ class WitchQuest
     floors.RemoveAt(i);
     Loc loc = new(id, 0, sq.Item1, sq.Item2);
     Item skull = ItemFactory.Get(ItemNames.SKULL, gs.ObjDb);
-    gs.ObjDb.SetToLoc(loc, skull);
+    gs.ObjDb.SetItemToLoc(loc, skull);
     ItemNames itemName = gs.Rng.NextDouble() < 0.8 ? ItemNames.DAGGER : ItemNames.SILVER_DAGGER;
     Item dagger = ItemFactory.Get(itemName, gs.ObjDb);
-    gs.ObjDb.SetToLoc(loc, dagger);
+    gs.ObjDb.SetItemToLoc(loc, dagger);
     
     sq = floors[gs.Rng.Next(floors.Count)];
     loc = new Loc(id, 0, sq.Item1, sq.Item2);
     Item crystal = ItemFactory.Get(ItemNames.MEDITATION_CRYSTAL, gs.ObjDb);
-    gs.ObjDb.SetToLoc(loc, crystal);
+    gs.ObjDb.SetItemToLoc(loc, crystal);
 
     // Add a few monsters to the cave
     int numOfMonsters = gs.Rng.Next(3, 6);
@@ -510,7 +510,7 @@ class CKShrine
     blade.Traits.Add(new WeaponBonusTrait() { Bonus = 1 });
     blade.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Blunt });
     blade.Traits.Add(new DescriptionTrait("This weapon is the vessel of the Crimson King. When you hold it, your mind is filled visions of battles and war. Be forewarned: this blade's power and fury is fueled by your very [BRIGHTRED life force]."));
-    objDb.SetToLoc(new (dungeon.ID, 0, 9, 7), blade);
+    objDb.SetItemToLoc(new (dungeon.ID, 0, 9, 7), blade);
     factDb.Add(new SimpleFact() { Name = "CrimsonKingBladeId", Value = blade.ID.ToString() });
     factDb.Add(new LocationFact() { Desc = "CrimsonKingAltar", Loc = new (dungeon.ID, 0, 9, 7) });
 
@@ -522,7 +522,7 @@ class CKShrine
       Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
       statue.Glyph = statue.Glyph with { Lit = Colours.BRIGHT_RED, Unlit = Colours.DULL_RED };
       statue.Traits.Add(new DescriptionTrait("a statue of a fur-clad warrior, leaning on a massive sword."));
-      objDb.SetToLoc(new(Constants.CK_TEMPLE_DUNGEON_ID, 0, row, col), statue);
+      objDb.SetItemToLoc(new(Constants.CK_TEMPLE_DUNGEON_ID, 0, row, col), statue);
     }
   }
 }

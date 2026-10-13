@@ -964,7 +964,7 @@ class GameObjDBSave
       if (obj.Loc != Loc.Nowhere && obj.Loc != Loc.Zero)
       {
         if (obj is Item item)
-          objDb.SetToLoc(obj.Loc, item);
+          objDb.SetItemToLoc(obj.Loc, item);
         else
           objDb.SetActorToLoc(obj.Loc, obj.ID);
       }

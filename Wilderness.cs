@@ -483,7 +483,7 @@ class Wilderness(Rng rng, int length)
     {
       Item column = ItemFactory.Get(ItemNames.COLUMN, objDb);
       column.Traits.Add(new DescriptionTrait("an ancient, weathered column"));
-      objDb.SetToLoc(new Loc(0, 0, row, col), column);
+      objDb.SetItemToLoc(new Loc(0, 0, row, col), column);
     }
 
     bool IsValidSpotForRing(int row, int col)

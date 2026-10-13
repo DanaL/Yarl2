@@ -64,7 +64,7 @@ class InfernalBoons
         txt = "\"Those in my service shall not want for lucre!\"\n\nA pile of [YELLOW coins] appears on the altar!";
         Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, gs.ObjDb);
         zorkmids.Value = 100;
-        gs.ObjDb.SetToLoc(altarLoc, zorkmids);
+        gs.ObjDb.SetItemToLoc(altarLoc, zorkmids);
         break;
       case 2:
         txt = "\"I shall ward you from the assaults of those who would stand in our way!\"\n\nYou are surrounded by a shimmering aura.";

@@ -89,7 +89,7 @@ class Vaults
       var sq = floors[rng.Next(floors.Count)];
       Loc loc = new(dungeonID, level, sq.Item1, sq.Item2);
       objDb.Add(artifactWeapon);
-      objDb.SetToLoc(loc, artifactWeapon);
+      objDb.SetItemToLoc(loc, artifactWeapon);
     }
   }
 
@@ -167,7 +167,7 @@ class Vaults
     Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
     statue.Traits.Add(new DescriptionTrait(statueDesc));
     statue.Glyph = statue.Glyph with { Ch = ch };
-    objDb.SetToLoc(statueLoc, statue);
+    objDb.SetItemToLoc(statueLoc, statue);
 
     List<(int, int)> adj = [.. Util.Adj4Sqs(loc.Item1, loc.Item2).Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor)];
     if (adj.Count == 0) 
@@ -181,7 +181,7 @@ class Vaults
         skull.Traits.Add(new AdjectiveTrait(skullType));
       (int skullRow, int skullCol) = adj[rng.Next(adj.Count)];
       Loc skullLoc = new(dungeonID, level, skullRow, skullCol);
-      objDb.SetToLoc(skullLoc, skull);
+      objDb.SetItemToLoc(skullLoc, skull);
     }
   }
 
@@ -273,7 +273,7 @@ class Vaults
       Loc loc = locs[i];
       locs.RemoveAt(i);
       foreach (var item in Treasure.TreasureByQuality(quality, objDb, rng))
-        objDb.SetToLoc(loc, item);
+        objDb.SetItemToLoc(loc, item);
     }
 
     NameGenerator ng = new(rng, Util.NamesFile);
@@ -357,7 +357,7 @@ class Vaults
     var (keyRow, keyCol) = sqs[rng.Next(sqs.Count)];
     Loc keyLoc = new(dungeonID, level, keyRow, keyCol);
     objDb.Add(key);
-    objDb.SetToLoc(keyLoc, key);
+    objDb.SetItemToLoc(keyLoc, key);
   }
 
   static void SetPortcullis(Map map, int dungeonID, int level, HashSet<(int, int)> room, int doorRow, int doorCol, GameObjectDB objDb, Rng rng)
@@ -612,18 +612,18 @@ class Rooms
     objDb.LocListeners.Add(triggerLoc);
 
     Item bait = Treasure.TreasureByQuality(TreasureQuality.Good, objDb, rng).First();
-    objDb.SetToLoc(triggerLoc, bait);
+    objDb.SetItemToLoc(triggerLoc, bait);
     if (bait.Type != ItemType.Zorkmid)
     {
       bait = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
       bait.Value = rng.Next(20, 51);
-      objDb.SetToLoc(triggerLoc, bait);
+      objDb.SetItemToLoc(triggerLoc, bait);
     }
 
     if (rng.Next(5) == 0)
     {
       Item ore = ItemFactory.Get(ItemNames.MITHRIL_ORE, objDb);
-      objDb.SetToLoc(triggerLoc, ore);
+      objDb.SetItemToLoc(triggerLoc, ore);
     }
   }
 
@@ -676,7 +676,7 @@ class Rooms
       map.SetTile(candidates[j], TileFactory.Get(TileType.DungeonFloor));
       Loc loc = new(dungeonId, level, candidates[j].Item1, candidates[j].Item2);
       foreach (var item in Treasure.TreasureByQuality(TreasureQuality.Good, objDb, rng))
-        objDb.SetToLoc(loc, item);
+        objDb.SetItemToLoc(loc, item);
     }
   }
   
@@ -729,19 +729,19 @@ class Rooms
       var sq = floors[rng.Next(floors.Count)];
       Loc potionLoc = new(dungeonID, level, sq.Item1, sq.Item2);
       Item potion = ItemFactory.Get(ItemNames.POTION_OF_LEVITATION, objDb);
-      objDb.SetToLoc(potionLoc, potion);
+      objDb.SetItemToLoc(potionLoc, potion);
     }
 
     (int, int) treasureSq = info.IslandSqs[rng.Next(info.IslandSqs.Count)];
     Loc treasureLoc = new(dungeonID, level, treasureSq.Item1, treasureSq.Item2);
     TreasureQuality quality = level < 2 ? TreasureQuality.Uncommon : TreasureQuality.Good;
     foreach (var treasure in Treasure.TreasureByQuality(quality, objDb, rng))
-      objDb.SetToLoc(treasureLoc, treasure);
+      objDb.SetItemToLoc(treasureLoc, treasure);
 
     if (rng.Next(5) == 0)
     {
       Item ore = ItemFactory.Get(ItemNames.MITHRIL_ORE, objDb);
-      objDb.SetToLoc(treasureLoc, ore);
+      objDb.SetItemToLoc(treasureLoc, ore);
     }
   }
 
@@ -767,7 +767,7 @@ class Rooms
       Loc treasureLoc = new(dungeonID, level, treasureSq.Item1, treasureSq.Item2);
       TreasureQuality quality = rng.NextDouble() < 05 ? TreasureQuality.Uncommon : TreasureQuality.Good;
       foreach (var treasure in Treasure.TreasureByQuality(quality, objDb, rng))
-        objDb.SetToLoc(treasureLoc, treasure);
+        objDb.SetItemToLoc(treasureLoc, treasure);
     }
   }
 
@@ -899,7 +899,7 @@ class Rooms
     (int, int) fireSq = room[rng.Next(room.Count)];
     Loc fireLoc = new(dungeonID, level, fireSq.Item1, fireSq.Item2);
     Item fire = ItemFactory.Get(ItemNames.CAMPFIRE, objDb);
-    objDb.SetToLoc(fireLoc, fire);
+    objDb.SetItemToLoc(fireLoc, fire);
 
     List<Loc> spotsNearFire = [..room.Where(sq => Util.Distance(sq.Item1, sq.Item2, fireSq.Item1, fireSq.Item2) <= 3)
                                   .Select(sq => new Loc(dungeonID, level, sq.Item1, sq.Item2))
@@ -916,7 +916,7 @@ class Rooms
 
       Loc itemSq = spotsNearFire[rng.Next(spotsNearFire.Count)];
       foreach (var item in Treasure.TreasureByQuality(quality, objDb, rng))
-        objDb.SetToLoc(itemSq, item);
+        objDb.SetItemToLoc(itemSq, item);
     }
 
     Actor boss;
@@ -996,7 +996,7 @@ class Rooms
       FgColour = Colours.YELLOW,
       BgColour = Colours.TORCH_ORANGE
     });
-    objDb.SetToLoc(statueLoc, statue);
+    objDb.SetItemToLoc(statueLoc, statue);
 
     AuraMessageTrait auraMsg = new()
     {
@@ -1056,7 +1056,7 @@ class Rooms
           objDb.AddNewActor(MonsterFactory.Mimic(true, rng), new(dungeonId, level, nearby[1].Item1, nearby[1].Item2));
         else
           foreach (var item in Treasure.TreasureByQuality(TreasureQuality.Good, objDb, rng))
-            objDb.SetToLoc(new(dungeonId, level, nearby[1].Item1, nearby[1].Item2), item);
+            objDb.SetItemToLoc(new(dungeonId, level, nearby[1].Item1, nearby[1].Item2), item);
       }
     }
     
@@ -1079,7 +1079,7 @@ class Rooms
         if (adjTile == TileType.DungeonFloor && rng.NextDouble() < 0.01)
         {
           Item rubble = ItemFactory.Get(ItemNames.RUBBLE, objDb);
-          objDb.SetToLoc(new Loc(dungeonId, level, adj.Item1, adj.Item2), rubble);
+          objDb.SetItemToLoc(new Loc(dungeonId, level, adj.Item1, adj.Item2), rubble);
         }
 
         // Mine rooms won't have doors
@@ -1128,28 +1128,28 @@ class Rooms
       Loc loc = itemSpots[rng.Next(itemSpots.Count)];
       Item gold = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
       gold.Value = rng.Next(20, 51);
-      objDb.SetToLoc(loc, gold);
+      objDb.SetItemToLoc(loc, gold);
     }
 
     if (rng.NextDouble() <= 0.2)
     {
       Loc loc = itemSpots[rng.Next(itemSpots.Count)];
       Item pickAxe = ItemFactory.Get(ItemNames.PICKAXE, objDb);
-      objDb.SetToLoc(loc, pickAxe);
+      objDb.SetItemToLoc(loc, pickAxe);
     }
 
     if (rng.NextDouble() <= 0.2)
     {
       Loc loc = itemSpots[rng.Next(itemSpots.Count)];
       Item mithril = ItemFactory.Get(ItemNames.MITHRIL_ORE, objDb);
-      objDb.SetToLoc(loc, mithril);
+      objDb.SetItemToLoc(loc, mithril);
     }
 
     if (level >= 4 && rng.NextDouble() <= 0.2)
     {
       Loc loc = itemSpots[rng.Next(itemSpots.Count)];
       Item mithril = ItemFactory.Get(ItemNames.MITHRIL_ORE, objDb);
-      objDb.SetToLoc(loc, mithril);
+      objDb.SetItemToLoc(loc, mithril);
     }
 
     // Add some monsters

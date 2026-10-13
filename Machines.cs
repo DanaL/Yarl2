@@ -82,7 +82,7 @@ class LightPuzzleSetup
       lampSq = path.Start;
     }
     Loc lampLoc = new(dungeonId, level, lampSq.Item1, lampSq.Item2);
-    objDb.SetToLoc(lampLoc, lamp);
+    objDb.SetItemToLoc(lampLoc, lamp);
 
     Item target = ItemFactory.BeamTarget(objDb);
     (int, int) targetSq;
@@ -107,7 +107,7 @@ class LightPuzzleSetup
     }
     
     Loc targetLoc = new(dungeonId, level, targetSq.Item1, targetSq.Item2);
-    objDb.SetToLoc(targetLoc, target);
+    objDb.SetItemToLoc(targetLoc, target);
 
     List<Loc> clearLocs = map.ClearFloors(dungeonId, level, objDb);
     for (int j = 0; j < path.Corners.Count; j++)
@@ -115,7 +115,7 @@ class LightPuzzleSetup
       int mId = rng.Next(clearLocs.Count);
       Loc loc = clearLocs[mId];
       Item mirror = ItemFactory.Mirror(objDb, rng.Next(2) == 0);
-      objDb.SetToLoc(loc, mirror);
+      objDb.SetItemToLoc(loc, mirror);
       clearLocs.RemoveAt(mId);
     }
 

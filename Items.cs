@@ -503,7 +503,7 @@ sealed class ItemFactory
     light.Traits.Add(tl);
 
     objDb.Add(light);
-    objDb.SetToLoc(loc, light);
+    objDb.SetItemToLoc(loc, light);
   }
 
   public static Item Lamp(GameObjectDB objDb, Dir dir)

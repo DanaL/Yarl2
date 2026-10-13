@@ -434,7 +434,7 @@ class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
         altar.Traits.Add(new DesecratedTrait());
         string fluid = rng.NextDouble() < 0.5 ? "blood" : "excrement";
         altar.Traits.Add(new DescriptionTrait($"This altar, once holy, has been desecrated by vile symbols drawn in {fluid}."));
-        objDb.SetToLoc(altarLoc, altar);
+        objDb.SetItemToLoc(altarLoc, altar);
         chanceOfDesecratedAltar = 0.25;
       }
       else
@@ -458,7 +458,7 @@ class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
 
     Item mdt = ItemFactory.MoonDaughterTile();
     objDb.Add(mdt);
-    objDb.SetToLoc(loc, mdt);
+    objDb.SetItemToLoc(loc, mdt);
 
     foreach (Loc adj in Util.Adj8Locs(loc))
     {
@@ -466,7 +466,7 @@ class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
       {
         Item dark = ItemFactory.Darkness();
         objDb.Add(dark);
-        objDb.SetToLoc(adj, dark);
+        objDb.SetItemToLoc(adj, dark);
       }
     }
   }
@@ -488,13 +488,13 @@ class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
     Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
     statue.Glyph = statue.Glyph with { Lit = Colours.BRIGHT_RED, Unlit = Colours.DULL_RED };
     statue.Traits.Add(new DescriptionTrait("a figure in plate armour, gesturing with a broadsword."));
-    objDb.SetToLoc(statueLoc, statue);
+    objDb.SetItemToLoc(statueLoc, statue);
 
     room.Remove((statueR, statueC));
     var (itemR, itemC) = room[rng.Next(room.Count)];
     Loc itemLoc = new(dungeonId, level, itemR, itemC);
     foreach (var item in Treasure.TreasureByQuality(TreasureQuality.Good, objDb, rng))
-      objDb.SetToLoc(itemLoc, item);
+      objDb.SetItemToLoc(itemLoc, item);
 
     Actor sword = MonsterFactory.Get("dancing sword", objDb, rng);
     sword.Traits.Add(new RegenerationTrait() { Rate = 1, ExpiresOn = ulong.MaxValue, OwnerID = sword.ID, SourceId = sword.ID });
@@ -533,7 +533,7 @@ class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
         Loc loc = candidates[rng.Next(candidates.Count)];
         Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
         statue.Traits.Add(new DescriptionTrait(decoration.Desc));
-        objDb.SetToLoc(loc, statue);
+        objDb.SetItemToLoc(loc, statue);
       }
       else if (decoration.Type == DecorationType.Mosaic)
       {
@@ -644,13 +644,13 @@ class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
         {
           var name = Spells.ComponentName(component);
           var c = ItemFactory.Get(name, objDb);
-          objDb.SetToLoc(loc, c);
+          objDb.SetItemToLoc(loc, c);
         }
       }  
     }
 
     Item skull = ItemFactory.Get(ItemNames.SKULL, objDb);
-    objDb.SetToLoc(loc, skull);
+    objDb.SetItemToLoc(loc, skull);
   }
 
   static void PlaceFresco(Map map, List<Loc> floors, string frescoText, Rng rng)
@@ -691,7 +691,7 @@ class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
 
     Loc loc = floors[rng.Next(floors.Count)];
     objDb.Add(doc);
-    objDb.SetToLoc(loc, doc);
+    objDb.SetItemToLoc(loc, doc);
   }
 
   // This is probably overly complicated...
@@ -781,7 +781,7 @@ class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
     void PlaceItem(Item item)
     {
       Loc loc = floors[rng.Next(floors.Count)];
-      objDb.SetToLoc(loc, item);
+      objDb.SetItemToLoc(loc, item);
     }
   }
 
@@ -886,7 +886,7 @@ class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
       statue.Traits.Add(new DescriptionTrait("a statue depicting a demonic form."));
       int levelNum = stairsLoc.Level + 1;
       Loc loc = new(dungeon.ID, levelNum, row, col);
-      objDb.SetToLoc(loc, statue);
+      objDb.SetItemToLoc(loc, statue);
     }
   }
 
@@ -948,22 +948,22 @@ class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
     for (int j = 0; j < 3; j++)
     {
       Item torch = ItemFactory.Get(ItemNames.TORCH, objDb);
-      objDb.SetToLoc(loc, torch);
+      objDb.SetItemToLoc(loc, torch);
     }
     if (rng.NextDouble() < 0.25)
     {
       Item poh = ItemFactory.Get(ItemNames.POTION_HEALING, objDb);
-      objDb.SetToLoc(loc, poh);
+      objDb.SetItemToLoc(loc, poh);
     }
     if (rng.NextDouble() < 0.25)
     {
       Item antidote = ItemFactory.Get(ItemNames.ANTIDOTE, objDb);
-      objDb.SetToLoc(loc, antidote);
+      objDb.SetItemToLoc(loc, antidote);
     }
     if (rng.NextDouble() < 0.25)
     {
       Item blink = ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb);
-      objDb.SetToLoc(loc, blink);
+      objDb.SetItemToLoc(loc, blink);
     }
 
     // add trinket
@@ -984,7 +984,7 @@ class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
     trinket.Traits.Add(buff);
 
     objDb.Add(trinket);
-    objDb.SetToLoc(loc, trinket);
+    objDb.SetItemToLoc(loc, trinket);
 
     string text = "Scratched into the stone: if only I'd managed to level up.";
     Landmark tile = new(text);
@@ -1068,7 +1068,7 @@ class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
       flyer.Traits.Add(rt);
 
       Loc loc = floors[rng.Next(floors.Count)];      
-      objDb.SetToLoc(loc, flyer);
+      objDb.SetItemToLoc(loc, flyer);
     }
   }
 }

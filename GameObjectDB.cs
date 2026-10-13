@@ -489,7 +489,7 @@ class GameObjectDB
 
   public void SetActorToLoc(Loc loc, ulong id) => _actorLocs[loc] = id;
   
-  public void SetToLoc(Loc loc, Item item)
+  public void SetItemToLoc(Loc loc, Item item)
   {
     item.Loc = loc;
     if (!_itemLocs.TryGetValue(loc, out var stack))

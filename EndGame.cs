@@ -567,7 +567,7 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
       };
       Loc loc = new(DungeonId, level, floors[j].Item1, floors[j].Item2);
       foreach (var item in Treasure.TreasureByQuality(quality, objDb, rng))
-        objDb.SetToLoc(loc, item);
+        objDb.SetItemToLoc(loc, item);
     }
   }
 

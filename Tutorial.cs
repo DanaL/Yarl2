@@ -58,9 +58,9 @@ class Tutorial(UserInterface ui)
     player.CalcHP();
 
     Item sword = ItemFactory.Get(ItemNames.SHORTSHORD, objDb);
-    objDb.SetToLoc(new Loc(1, 0, 1, 8), sword);    
+    objDb.SetItemToLoc(new Loc(1, 0, 1, 8), sword);    
     Item armour = ItemFactory.Get(ItemNames.LEATHER_ARMOUR, objDb);
-    objDb.SetToLoc(new Loc(1, 0, 2, 8), armour);
+    objDb.SetItemToLoc(new Loc(1, 0, 2, 8), armour);
   
     player.Stats[Attribute.HP].Reset();
     
@@ -193,7 +193,7 @@ class Tutorial(UserInterface ui)
     Loc zloc = new(1, 0, 12, 22);
     Item coins = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
     coins.Value = 25;
-    objDb.SetToLoc(zloc, coins);
+    objDb.SetItemToLoc(zloc, coins);
     txt = @"Treasure! Zorkmids are the coinage of the land. They aren't much use in the Tutorial but will come in rather handy in the game itself!";
     var pal = new MessageAtLoc(zloc, txt);
     objDb.ConditionalEvents.Add(pal);

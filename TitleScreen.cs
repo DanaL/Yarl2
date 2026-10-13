@@ -372,7 +372,7 @@ class TitleScreen(UserInterface ui)
       i = rng.Next(floors.Count);
       var (r,  c) = floors[i];
       Item z = ItemFactory.Get(ItemNames.ZORKMIDS, ObjDb);
-      ObjDb.SetToLoc(new Loc(1, 0, r, c), z);
+      ObjDb.SetItemToLoc(new Loc(1, 0, r, c), z);
       floors.RemoveAt(i);
     }
 

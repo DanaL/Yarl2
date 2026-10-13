@@ -307,7 +307,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
       foreach (var item in Treasure.TreasureByQuality(quality, objDb, rng))
       {
         objDb.Add(item);
-        objDb.SetToLoc(loc, item);
+        objDb.SetItemToLoc(loc, item);
       }
     }
 
@@ -317,7 +317,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
       var sq = floorsInChambers[rng.Next(floorsInChambers.Count)];
       Loc loc = new(dungeonId, 0, sq.Item1, sq.Item2);
       objDb.Add(item);
-      objDb.SetToLoc(loc, item);
+      objDb.SetItemToLoc(loc, item);
     }
 
     return (dungeon, arrival);
@@ -481,7 +481,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
     void PlaceItem(Item item)
     {
       Loc loc = floors[rng.Next(floors.Count)];
-      objDb.SetToLoc(loc, item);
+      objDb.SetItemToLoc(loc, item);
     }
   }
 }

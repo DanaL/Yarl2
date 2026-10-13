@@ -434,7 +434,7 @@ class Effects
     if (fireStarted)
     {
       var fire = ItemFactory.Fire(gs);
-      gs.ObjDb.SetToLoc(loc, fire);
+      gs.ObjDb.SetItemToLoc(loc, fire);
 
       if (tile.Type == TileType.Grass)
       {

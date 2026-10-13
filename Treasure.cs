@@ -182,7 +182,7 @@ class Treasure
     }
 
     Loc loc = candidates[rng.Next(candidates.Count)];
-    objDb.SetToLoc(loc, item);
+    objDb.SetItemToLoc(loc, item);
   }
 
   public static List<Item> TreasureByQuality(TreasureQuality quality, GameObjectDB objDb, Rng rng)

@@ -402,7 +402,7 @@ class CampaignCreator(UserInterface ui)
             int x = rng.Next(shoreSqs.Count);
             Loc loc = new(0, 0, shoreSqs[x].Item1, shoreSqs[x].Item2);
             Item pearl = ItemFactory.Get(ItemNames.BLACK_PEARL, objDb);
-            objDb.SetToLoc(loc, pearl);
+            objDb.SetItemToLoc(loc, pearl);
           }  
         }
         

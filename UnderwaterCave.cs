@@ -222,7 +222,7 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
     {
       Item seeweed = ItemFactory.Get(ItemNames.SEEWEED, objDb);
       Loc loc = lakes[rng.Next(lakes.Count)];
-      objDb.SetToLoc(loc, seeweed);
+      objDb.SetItemToLoc(loc, seeweed);
     }
 
     return topLevel;
@@ -283,7 +283,7 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
         TreasureQuality quality = rng.Next(5) == 0 ? TreasureQuality.Rare : TreasureQuality.Good;
         Loc loc = floors[j];
         foreach (var item in Treasure.TreasureByQuality(quality, objDb, rng))
-          objDb.SetToLoc(loc, item);
+          objDb.SetItemToLoc(loc, item);
       }
     }
   }
@@ -360,7 +360,7 @@ class LostTempleBuilder : DungeonBuilder
       foreach (var item in Treasure.TreasureByQuality(quality, objDb, rng))
       {
         objDb.Add(item);
-        objDb.SetToLoc(loc, item);
+        objDb.SetItemToLoc(loc, item);
       }
     }
 
@@ -376,7 +376,7 @@ class LostTempleBuilder : DungeonBuilder
       var statueSq = templeFloors[rng.Next(templeFloors.Count)];
       templeFloors.Remove(statueSq);
       Loc statueLoc = new(DungeonId, 0, statueSq.Item1, statueSq.Item2);
-      objDb.SetToLoc(statueLoc, statue);
+      objDb.SetItemToLoc(statueLoc, statue);
     }
   }
 }

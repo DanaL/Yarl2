@@ -604,7 +604,7 @@ class ReleaseSporesAction(GameState gs, Actor actor, int radius) : Action(gs, ac
         {
           Item mold = ItemFactory.YellowMold();
           GameState.ObjDb.Add(mold);
-          GameState.ObjDb.SetToLoc(loc, mold);
+          GameState.ObjDb.SetItemToLoc(loc, mold);
         }
       }
     }
@@ -2783,7 +2783,7 @@ class InkCloudAction(GameState gs, Actor caster) : Action(gs, caster)
       var timer = ink.Traits.OfType<CountdownTrait>().First();
       gs.RegisterForEvent(GameEventType.EndOfRound, timer);
       gs.ObjDb.Add(ink);
-      gs.ObjDb.SetToLoc(loc, ink);
+      gs.ObjDb.SetItemToLoc(loc, ink);
     }
 
     // We need to do this here because it changes the player's FOV and we want
@@ -3222,7 +3222,7 @@ class DescentAction(GameState gs, Actor actor) : Action(gs, actor)
         msg = "A whirlpool forms!";
       GameState.UIRef().AlertPlayer(msg, GameState, loc);
       Item chasm = ItemFactory.Chasm(GameState);
-      GameState.ObjDb.SetToLoc(loc, chasm);
+      GameState.ObjDb.SetItemToLoc(loc, chasm);
       GameState.ChasmCreated(loc, water);
     }
 

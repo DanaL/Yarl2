@@ -90,7 +90,7 @@ abstract class DungeonBuilder
       foreach (var sq in sqs.Take(rng.Next(1, 4)))
       {
         Item weed = ItemFactory.Get(ItemNames.SEEWEED, objDb);
-        objDb.SetToLoc(new(dungeonId, level, sq.Item1, sq.Item2), weed);
+        objDb.SetItemToLoc(new(dungeonId, level, sq.Item1, sq.Item2), weed);
       }
     }
     
@@ -100,7 +100,7 @@ abstract class DungeonBuilder
       foreach (var sq in sqs.Take(rng.Next(1, 3)))
       {
         Item pearl = ItemFactory.Get(ItemNames.BLACK_PEARL, objDb);
-        objDb.SetToLoc(new(dungeonId, level, sq.Item1, sq.Item2), pearl);
+        objDb.SetItemToLoc(new(dungeonId, level, sq.Item1, sq.Item2), pearl);
       }
     }    
   }
@@ -156,7 +156,7 @@ abstract class DungeonBuilder
       {
         objDb.RemoveItemFromLoc(loc, item);
         Loc newLoc = floors[rng.Next(floors.Count)];
-        objDb.SetToLoc(newLoc, item);
+        objDb.SetItemToLoc(newLoc, item);
       }
     }
 
@@ -204,7 +204,7 @@ abstract class DungeonBuilder
     List<Loc> opts = [.. contiguous.Select(s => new Loc(dungeonId, level, s.Item1, s.Item2))];
     Loc loc = opts[rng.Next(opts.Count)];
     Item potion = ItemFactory.Get(ItemNames.POTION_OF_LEVITATION, objDb);
-    objDb.SetToLoc(loc, potion);
+    objDb.SetItemToLoc(loc, potion);
   }
 
   // Tidy up useless doors. Sometimes chasm generate will result in orphaned doors like:
@@ -835,7 +835,7 @@ abstract class DungeonBuilder
       _ => ItemNames.SCROLL_PROTECTION
     };
     Item bait = ItemFactory.Illusion(itemName, objDb);
-    objDb.SetToLoc(loc, bait);
+    objDb.SetItemToLoc(loc, bait);
   }
 
   protected static void AddRiverToLevel(RiverConfig riverConfig, Map map, Map? mapBelow, int height, int width, Rng rng)
@@ -875,7 +875,7 @@ abstract class DungeonBuilder
     Loc loc = openFloors[rng.Next(openFloors.Count)];
     Item mold = ItemFactory.YellowMold();
     objDb.Add(mold);
-    objDb.SetToLoc(loc, mold);
+    objDb.SetItemToLoc(loc, mold);
 
     List<Loc> moldySpots = [loc];
     foreach (Loc adj in Util.Adj8Locs(loc))
@@ -884,7 +884,7 @@ abstract class DungeonBuilder
       {
         mold = ItemFactory.YellowMold();
         objDb.Add(mold);
-        objDb.SetToLoc(adj, mold);
+        objDb.SetItemToLoc(adj, mold);
       }
     }
   }

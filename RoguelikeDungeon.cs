@@ -409,7 +409,7 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
 
         Loc loc = floors[rng.Next(floors.Count)];
         foreach (var item in items)
-          objDb.SetToLoc(loc, item);
+          objDb.SetItemToLoc(loc, item);
       }
 
       for (int j = 0; j < rng.Next(2, 5); j++)
@@ -418,7 +418,7 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
         zorkmids.Value = rng.Next(10, 36);
 
         Loc loc = floors[rng.Next(floors.Count)];
-        objDb.SetToLoc(loc, zorkmids);
+        objDb.SetItemToLoc(loc, zorkmids);
       }
     }
   }
@@ -428,7 +428,7 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
     (int r, int c) = floorSqs[rng.Next(floorSqs.Count)];
     Loc bellLoc = new(DungeonId, levelNum, r, c);
     Item bell = History.AbjurationBell(objDb);
-    objDb.SetToLoc(bellLoc, bell);
+    objDb.SetItemToLoc(bellLoc, bell);
   }
 
   public Dungeon Generate(Loc entrance, GameState gs)

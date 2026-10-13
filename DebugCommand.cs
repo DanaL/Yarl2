@@ -250,7 +250,7 @@ class DebugCommand(GameState gs)
         Loc loc = opt[_gs.Rng.Next(opt.Count)];
         Item mold = ItemFactory.YellowMold();
         _gs.ObjDb.Add(mold);
-        _gs.ObjDb.SetToLoc(loc, mold);
+        _gs.ObjDb.SetItemToLoc(loc, mold);
       }
 
       return "";
@@ -329,14 +329,14 @@ class DebugCommand(GameState gs)
   {
     bool left = dirStr == "left";
     Item mirror = ItemFactory.Mirror(gs.ObjDb, left);
-    _gs.ObjDb.SetToLoc(_gs.Player.Loc, mirror);
+    _gs.ObjDb.SetItemToLoc(_gs.Player.Loc, mirror);
   }
 
   void MakeLamp(GameState gs, string dirStr)
   {
     Enum.TryParse(dirStr, out Dir dir);
     Item lamp = ItemFactory.Lamp(gs.ObjDb, dir);
-    _gs.ObjDb.SetToLoc(_gs.Player.Loc, lamp);
+    _gs.ObjDb.SetItemToLoc(_gs.Player.Loc, lamp);
   }
 
   string GiveZorkminds(string amount)
@@ -368,7 +368,7 @@ class DebugCommand(GameState gs)
       if (action == "give")
         _gs.Player.Inventory.Add(History.JewelledKey(_gs), _gs.Player.ID);
       else
-        _gs.ObjDb.SetToLoc(_gs.Player.Loc, History.JewelledKey(_gs));
+        _gs.ObjDb.SetItemToLoc(_gs.Player.Loc, History.JewelledKey(_gs));
       _gs.PrepareFieldOfView();
       _gs.Player.Stats[Attribute.MainQuestState] = new Stat(4);
       
@@ -403,12 +403,12 @@ class DebugCommand(GameState gs)
           return "No open spot to add item";
 
         loc = adjSpots[_gs.Rng.Next(adjSpots.Count)];
-        _gs.ObjDb.SetToLoc(loc, item);
+        _gs.ObjDb.SetItemToLoc(loc, item);
       }
       else if (action == "give" && !illusion)
         _gs.Player.Inventory.Add(item, _gs.Player.ID);
       else
-        _gs.ObjDb.SetToLoc(loc, item);
+        _gs.ObjDb.SetItemToLoc(loc, item);
 
       _gs.PrepareFieldOfView();
 

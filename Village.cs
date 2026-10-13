@@ -193,7 +193,7 @@ class Village
     Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
     Loc statueLoc = new(0, 0, statueR, statueC);
     statue.Traits.Add(new DescriptionTrait($"a statue of a mysterious figure gazing warmly out at {town.Name}"));
-    objDb.SetToLoc(statueLoc, statue);
+    objDb.SetItemToLoc(statueLoc, statue);
     
     factDb.Add(new SimpleFact() { Name = "PriestId", Value = cleric.ID.ToString() });
 

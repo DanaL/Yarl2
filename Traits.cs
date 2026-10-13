@@ -3626,7 +3626,7 @@ class LightBeamTrait : Trait, IGameEventListener
       if (!photonFound)
       {
         Item photon = ItemFactory.Photon(gs, lamp.ID);
-        gs.ObjDb.SetToLoc(sq, photon);
+        gs.ObjDb.SetItemToLoc(sq, photon);
         foundPhotons.Add(photon.ID);
       }
     }
