@@ -185,6 +185,8 @@ class GameObjectDB
   public Dictionary<Loc, List<Item>> _itemLocs = [];
   public Dictionary<Loc, ulong> _actorLocs = [];
   public Dictionary<ulong, GameObj> Objs = [];
+  Dictionary<(int, int), HashSet<ulong>> _levelIndexActors = [];
+  Dictionary<(int, int), HashSet<ulong>> _levelIndexItems = [];
 
   // This might (probably will) expand into a hashtable of
   // UIEventType mapped to a list of listeners
@@ -390,6 +392,8 @@ class GameObjectDB
     Objs.Remove(actor.ID);
     if (_actorLocs.TryGetValue(actor.Loc, out ulong id) && id == actor.ID)
       _actorLocs.Remove(actor.Loc);
+    if (_levelIndexActors.TryGetValue((actor.Loc.DungeonID, actor.Loc.Level), out var set))
+      set.Remove(actor.ID);
 
     foreach (Trait t in actor.Traits.Where(t => t is IGameEventListener))
     {
@@ -425,24 +429,21 @@ class GameObjectDB
     return val;
   }
 
-  // If this ever becomes too slow, I guess I can add indexing for items/actors
-  // on a level?
   public List<GameObj> ObjectsOnLevel(int dungeonID, int level)
   {
     List<GameObj> objs = [];
 
-    foreach (Loc loc in _actorLocs.Keys)
+    (int, int) k = (dungeonID, level);
+    foreach (ulong actorId in _levelIndexActors[k])
     {
-      if (loc.DungeonID == dungeonID && loc.Level == level)
-        objs.Add(Objs[_actorLocs[loc]]);
+      if (Objs[actorId] is GameObj o)
+        objs.Add(o);        
     }
 
-    foreach (Loc loc in _itemLocs.Keys)
+    foreach (ulong itemId in _levelIndexItems[k])
     {
-      if (loc.DungeonID == dungeonID && loc.Level == level && _itemLocs.TryGetValue(loc, out var itemStack) && itemStack.Count > 0) 
-      {
-        objs.AddRange(itemStack);
-      }
+      if (Objs[itemId] is GameObj o)
+        objs.Add(o);   
     }
 
     return objs;
@@ -456,14 +457,12 @@ class GameObjectDB
     }
 
     List<Actor> actors = [];
-    foreach (var actorLoc in _actorLocs.Keys)
+    foreach (ulong actorId in _levelIndexActors[(loc.DungeonID, loc.Level)])
     {
-      if (InRange(loc, actorLoc, range) && Objs[_actorLocs[actorLoc]] is Actor actor)
-      {
+      if (Objs[actorId] is Actor actor && InRange(loc, actor.Loc, range))
         actors.Add(actor);
-      }
-    }
-
+    }      
+    
     return actors;
   }
 
@@ -485,9 +484,22 @@ class GameObjectDB
 
   public void Add(GameObj obj) => Objs[obj.ID] = obj;
 
-  public void ClearActorLoc(Loc loc) => _actorLocs.Remove(loc);
-
-  public void SetActorToLoc(Loc loc, ulong id) => _actorLocs[loc] = id;
+  public void ClearActorLoc(Loc loc)
+  {
+    if (_actorLocs.TryGetValue(loc, out ulong id) && _levelIndexActors.TryGetValue((loc.DungeonID, loc.Level), out var set))
+        set.Remove(id);
+    _actorLocs.Remove(loc);
+  }
+ 
+  public void SetActorToLoc(Loc loc, ulong id) 
+  { 
+    (int, int) k = (loc.DungeonID, loc.Level);
+    if (!_levelIndexActors.TryGetValue(k, out var set))
+        _levelIndexActors[k] = set = [];
+    set.Add(id);
+      
+    _actorLocs[loc] = id; 
+  }
   
   public void SetItemToLoc(Loc loc, Item item)
   {
@@ -509,7 +521,12 @@ class GameObjectDB
         }
       }
     }
-    
+
+    (int, int) k = (loc.DungeonID, loc.Level);
+    if (!_levelIndexItems.TryGetValue(k, out var set))
+      _levelIndexItems[k] = set = [];
+    set.Add(item.ID);
+
     // I could have made _items Stack<Item> instead of a list, but there
     // are times when I want to iterate over the items in a location,
     // and sometimes the player will want to remove an item from the middle.
@@ -583,12 +600,17 @@ class GameObjectDB
     return v;
   }
 
-  public HashSet<Loc> OccupantsOnLevel(int dungeonID, int level) => 
-    [.. _actorLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level)];
+  public HashSet<Loc> OccupantsOnLevel(int dungeonID, int level)
+  {
+    if (!_levelIndexActors.TryGetValue((dungeonID, level), out var set))
+      return [];
+
+    return [.. set.Select(id => ((Actor)Objs[id]).Loc)];
+  }
 
   public int LevelCensus(int dungeonID, int level) =>
-    _actorLocs.Keys.Count(k => k.DungeonID == dungeonID && k.Level == level);
-
+    _levelIndexActors.TryGetValue((dungeonID, level), out var set) ? set.Count : 0;
+    
   public void RemoveItemFromLoc(Loc loc, Item item)
   {
     if (_itemLocs.TryGetValue(loc, out var stack))
@@ -597,6 +619,10 @@ class GameObjectDB
       if (idx >= 0)
         stack.RemoveAt(idx);
     }
+
+    if (_levelIndexItems.TryGetValue((loc.DungeonID, loc.Level), out var set))
+      set.Remove(item.ID);
+
     item.Loc = Loc.Nowhere;
   }
 
@@ -609,6 +635,9 @@ class GameObjectDB
 
     if (_itemLocs.TryGetValue(item.Loc, out var items))
       _itemLocs[item.Loc] = [.. items.Where(i => i.ID != item.ID)];
+
+    if (_levelIndexItems.TryGetValue((loc.DungeonID, loc.Level), out var set))
+      set.Remove(item.ID);
 
     foreach (Trait t in item.Traits.Where(t => t is IGameEventListener))
     {
@@ -623,13 +652,15 @@ class GameObjectDB
   public void StashActor(Actor a)
   {
     _actorLocs.Remove(a.Loc);
+    if (_levelIndexActors.TryGetValue((a.Loc.DungeonID, a.Loc.Level), out var set))
+      set.Remove(a.ID);
     a.Loc = Loc.Nowhere;
   }
 
   public void ActorMoved(Actor a, Loc from, Loc to)
   {
     _actorLocs.Remove(from);
-    _actorLocs[to] = a.ID;
+    SetActorToLoc(to, a.ID);
     a.Loc = to;
   }
 
@@ -637,11 +668,14 @@ class GameObjectDB
   {
     List<Actor> performers = [];
 
-    foreach (Loc loc in _actorLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level))
+    if (_levelIndexActors.TryGetValue((dungeonID, level), out var set))
     {
-      if (Objs[_actorLocs[loc]] is Actor actor)
+      foreach (ulong id in set)
       {
-        performers.Add(actor);
+        if (Objs[id] is Actor actor)
+        {
+          performers.Add(actor);
+        }
       }
     }
     

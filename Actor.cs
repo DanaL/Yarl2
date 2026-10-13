@@ -1136,7 +1136,7 @@ class MonsterFactory
   }
 }
 
-// Class for traicking powers/abilities monsters have access to
+// Class for tracking powers/abilities monsters have access to
 enum PowerType { Attack, Passive, Movement }
 class Power
 {
