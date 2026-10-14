@@ -832,3 +832,6 @@ Instructions for the phase door spell, a favourite of wizards who feel walking i
 #
 spellbook of ersatz elevator
 A tome featuring the rare Ersatz Elevator spell, magic that allows the caster to move up or down between dungeon floors. Components needed are the [lightblue Blood Moss] and [lightblue Spider Silk] common to magical transportation as well as [lightblue Sulphurous Ash] to create a beacon above or below you to move toward.
+#
+patch of bloodwort
+A plant famous for its healing spores.

@@ -519,6 +519,11 @@ class BloodDrainTrait : Trait
   public override string AsText() => "BloodDrain";
 }
 
+sealed class BloodwortTrait : Trait
+{
+  public override string AsText() => "Bloodwort";
+}
+
 class ConstructTrait : Trait
 {
   public override string AsText() => "Construct";
@@ -1376,6 +1381,77 @@ class TwoHandedTrait : Trait
   public override string AsText() => "TwoHanded";
 }
 
+sealed class VapourEmitterTrait : TemporaryTrait
+{
+  public const int HEALING = 0;
+
+  public ulong Start { get; set; }
+  public int Type { get; set; } = HEALING;
+  public Loc Loc { get; set; }
+  public int Radius { get; set; } = 0;
+
+  public override string AsText() => $"VapourEmitter#{Loc}#{OwnerID}#{Start}#{ExpiresOn}#{Type}#{Radius}";
+
+  public override List<string> Apply(GameObj source, GameState gs) => [];
+
+  public override void Remove(GameState gs)
+  {
+    gs.RemoveListener(this);
+
+    if (gs.ObjDb.GetObj(OwnerID) is Item obj)
+    {
+      gs.ObjDb.RemoveItemFromGame(obj.Loc, obj);
+    }
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (eventType == GameEventType.EndOfRound && gs.Turn > ExpiresOn)
+    {
+      Remove(gs);
+      return;
+    }
+    
+    List<Loc> locs = Radius == 0 ? [ Loc ]
+                                 : [.. gs.Flood(Loc, Radius, true).Where(s => Util.Distance(s, Loc) == Radius)];
+    ++Radius;
+
+    foreach (Loc sq in locs)
+    {
+      if (Util.Distance(sq, loc) < Radius || !gs.TileAt(sq).PassableByFlight())
+        continue;
+
+      string n = Type switch
+      {
+        _ => "healing vapour"
+      };
+
+      if (gs.ObjDb.EnvironmentsAt(sq).Any(e => e.Name == n))
+        continue;
+
+      Item vapour = new()
+      {
+        Name = n, Type = ItemType.Environment, Value = 0,
+        Glyph = new(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
+      };
+      vapour.SetZ(-100);
+
+      vapour.Traits.Add(new LightSourceTrait()
+      {
+        Radius = 0, OwnerID = vapour.ID,
+        FgColour = Colours.BLACK, BgColour = Colours.BRIGHT_RED
+      });
+
+      HealingVapourTrait hv = new() { OwnerID = vapour.ID, ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(5, 8)};
+      gs.ObjDb.RegisterListener(GameEventType.EndOfRound, hv);
+      vapour.Traits.Add(hv);
+
+      gs.ObjDb.Add(vapour);
+      gs.ObjDb.SetItemToLoc(sq, vapour);
+    }
+  }
+}
+
 class VaultKeyTrait(Loc loc) : Trait
 {
   public Loc VaultLoc { get; set; } = loc;
@@ -2103,24 +2179,68 @@ class GrapplingTrait : Trait
   }
 }
 
-class HeavyTrait : Trait
+sealed class HealingVapourTrait : TemporaryTrait
+{    
+  public override string AsText() => $"HealingVapour#{OwnerID}#{ExpiresOn}";
+
+  public override List<string> Apply(GameObj source, GameState gs) => [];
+
+  public override void Remove(GameState gs)
+  {
+    gs.RemoveListener(this);
+
+    if (gs.ObjDb.GetObj(OwnerID) is Item obj)
+    {
+      gs.ObjDb.RemoveItemFromGame(obj.Loc, obj);
+    }
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {    
+    if (eventType == GameEventType.EndOfRound && gs.Turn > ExpiresOn)
+    {
+      Remove(gs);
+      return;
+    }
+
+    if (gs.ObjDb.GetObj(OwnerID) is not Item vapour)
+      return;
+
+    ulong remaining = ExpiresOn - gs.Turn;
+    if (remaining <= 2)
+      ChangeColour(Colours.DULL_RED, vapour);
+    else if (remaining <= 4)
+      ChangeColour(Colours.SOFT_RED, vapour);
+  }
+
+  static void ChangeColour(Colour colour, Item v)
+  {
+    foreach (Trait t in v.Traits)
+      {
+        if (t is LightSourceTrait ls)
+          ls.BgColour = colour;
+      }
+  }
+}
+
+sealed class HeavyTrait : Trait
 {
   public override string AsText() => "Heavy";
 }
 
-class ParalyzingGazeTrait : BasicTrait
+sealed class ParalyzingGazeTrait : BasicTrait
 {
   public int DC { get; set; }
 
   public override string AsText() => $"ParalyzingGaze#{DC}";
 }
 
-class PassiveTrait : Trait
+sealed class PassiveTrait : Trait
 {
   public override string AsText() => $"Passive";
 }
 
-class BoolTrait : Trait
+sealed class BoolTrait : Trait
 {
   public string Name { get; set; } = "";
   public bool Value { get; set; }
@@ -2128,7 +2248,7 @@ class BoolTrait : Trait
   public override string AsText() => $"Bool#{Name}#{Value}";
 }
 
-class BookTrait : Trait
+sealed class BookTrait : Trait
 {
   public override string AsText() => $"Book";
 }
@@ -4195,6 +4315,7 @@ class TraitFactory
       }
     },
     { "Block", (pieces, gameObj) => new BlockTrait() },
+    { "Bloodwort", (pieces, gameObj) => new BloodwortTrait() },
     { "Book", (pieces, gameObj) => new BookTrait() },
     { "Bool", (pieces, gameObj) => new BoolTrait() { Name = pieces[1], Value = bool.Parse(pieces[2]) }},
     { "BoostMaxStat", (pieces, gameObj) => {
@@ -4343,6 +4464,9 @@ class TraitFactory
     { "Grappled", (pieces, gameObj) => new GrappledTrait() { VictimID = ulong.Parse(pieces[1]), GrapplerID = ulong.Parse(pieces[2]), DC = int.Parse(pieces[3]) } },
     { "Grappler", (pieces, gameObj) => new GrapplerTrait { DC = int.Parse(pieces[1]) }},
     { "Grappling", (pieces, gameObj) => new GrapplingTrait { VictimId = ulong.Parse(pieces[1]) }},
+    { "HealingVapour", (pieces, gameObj) => new HealingVapourTrait() 
+      { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2])} 
+    },
     { "Heavy", (pieces, gameObj) => new HeavyTrait() },
     { "Heroism", (pieces, gameObj) => new HeroismTrait()
       {
@@ -4598,15 +4722,22 @@ class TraitFactory
     { "TwoHanded", (pieces, gameObj) => new TwoHandedTrait() },
     { "Undead", (pieces, gameObj) => new UndeadTrait() },
     { "UseSimple", (pieces, gameObj) => new UseSimpleTrait(pieces[1]) },
+    { "VapourEmitter", (pieces, gameObj) => new VapourEmitterTrait()
+      {
+        Loc = Loc.FromStr(pieces[1]), OwnerID = ulong.Parse(pieces[2]), Start = ulong.Parse(pieces[3]),
+        ExpiresOn = ulong.Parse(pieces[4]), Type = int.Parse(pieces[5]), Radius = int.Parse(pieces[6])
+      }
+    },
     { "VaultKey", (pieces, GameObj) => new VaultKeyTrait(Loc.FromStr(pieces[1])) },
     { "Versatile", (pieces, GameObject) =>
-    {
-      Enum.TryParse(pieces[4], out DamageType dt);
-      DamageTrait oneHanded = new DamageTrait() { DamageDie = int.Parse(pieces[2]), NumOfDie = int.Parse(pieces[3]), DamageType = dt };
-      Enum.TryParse(pieces[9], out dt);
-      DamageTrait twoHanded = new DamageTrait() { DamageDie = int.Parse(pieces[7]), NumOfDie = int.Parse(pieces[8]), DamageType = dt };
-      return new VersatileTrait(oneHanded, twoHanded);
-    } },
+      {
+        Enum.TryParse(pieces[4], out DamageType dt);
+        DamageTrait oneHanded = new DamageTrait() { DamageDie = int.Parse(pieces[2]), NumOfDie = int.Parse(pieces[3]), DamageType = dt };
+        Enum.TryParse(pieces[9], out dt);
+        DamageTrait twoHanded = new DamageTrait() { DamageDie = int.Parse(pieces[7]), NumOfDie = int.Parse(pieces[8]), DamageType = dt };
+        return new VersatileTrait(oneHanded, twoHanded);
+      }
+    },
     { "Vicious", (pieces, gameObj) => new ViciousTrait() { Scale = Util.ToDouble(pieces[1]) }},
     { "Villager", (pieces, gameObj) => new VillagerTrait() },
     { "Vulnerable", (pieces, gameObj) =>

@@ -68,7 +68,7 @@ static class Colours
   public static readonly Colour SOPHIE_GREEN = new(138, 195, 171, 255);
   public static readonly Colour GHOSTLY_AURA = new(0, 71, 49, 100);
   public static readonly Colour MYSTIC_AURA = new(40, 254, 253, 50);
-  public static readonly Colour RED_AURA = new(208, 28, 31, 75);
+  public static readonly Colour RED_AURA = new(110, 0, 0, 75);
   public static readonly Colour BLUE_AURA = new(0, 0, 200, 75);
   public static readonly Colour HOLY_AURA = WHITE with { Alpha = 100 };
   public static readonly Colour UNDERWATER = new(0, 118, 190, 255);

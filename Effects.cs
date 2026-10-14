@@ -18,6 +18,31 @@ namespace Yarl2;
 // I think it makes sense to have the effects code in one place.
 class Effects
 {
+  public static void Bloodwort(GameState gs, Item bloodwort, Loc loc)
+  {
+    gs.UIRef().AlertPlayer($"The bloodwort bursts in a cloud of spores!", gs, loc);
+    gs.ObjDb.RemoveItemFromGame(loc, bloodwort);
+
+    Item source = new()
+    {
+      Name = "vapour source",
+      Type = ItemType.Environment,
+      Value = 0,
+      Glyph = new(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
+    };
+    source.SetZ(-100);
+
+    VapourEmitterTrait vapour = new()
+    {
+      OwnerID = source.ID, Start = gs.Turn, ExpiresOn = gs.Turn + 4,
+      Type = VapourEmitterTrait.HEALING, Loc = loc
+    };
+    gs.ObjDb.RegisterListener(GameEventType.EndOfRound, vapour);
+
+    gs.ObjDb.Add(source);
+    gs.ObjDb.SetItemToLoc(loc, source);
+  }
+
   public static void MoldSpores(GameState gs, Item spores, Loc loc)
   {
     gs.UIRef().AlertPlayer($"{spores.Name.DefArticle().Capitalize()} explodes in a cloud of spores!", gs, loc);

@@ -255,6 +255,20 @@ class DebugCommand(GameState gs)
 
       return "";
     }
+    else if (txt == "bloodwort")
+    {
+      List<Loc> opt = [.. Util.Adj8Locs(_gs.Player.Loc).Where(loc => _gs.CurrentMap.TileAt(loc.Row, loc.Col).Passable())];
+
+      if (opt.Count > 0)
+      {
+        Loc loc = opt[_gs.Rng.Next(opt.Count)];
+        Item bw = ItemFactory.Bloodwort();
+        _gs.ObjDb.Add(bw);
+        _gs.ObjDb.SetItemToLoc(loc, bw);
+      }
+
+      return "";
+    }
     else if (txt == "disease")
     {
       DiseasedTrait disease = new() { SourceId = 1_000_000 };

@@ -161,6 +161,11 @@ class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
       {
         AddMoldPatch(map, floors, gs.ObjDb, gs.Rng);
       }
+
+      if (levelNum == 0)
+      {
+        // temp add bloodwort
+      }
     }
 
     // If the prisoner hasn't previously been freed, 1 in 5 dungeons have a captive

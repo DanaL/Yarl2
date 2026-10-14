@@ -1496,7 +1496,12 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       if (item.HasTrait<MoldSporesTrait>())
       {
         Effects.MoldSpores(this, item, loc);
-      }     
+      }
+
+      if (item.HasTrait<BloodwortTrait>())
+      {
+        Effects.Bloodwort(this, item, loc);
+      }
     }
 
     return messages.Count > 0 ? string.Join(" ", messages) : "";

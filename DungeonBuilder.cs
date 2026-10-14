@@ -865,7 +865,7 @@ abstract class DungeonBuilder
       _ => false,
     };
   }
-
+  
   protected static void AddMoldPatch(Map map, List<Loc> floors, GameObjectDB objDb, Rng rng)
   {
     List<Loc> openFloors = [.. floors.Where(l => !objDb.AreBlockersAtLoc(l))];

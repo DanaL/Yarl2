@@ -425,6 +425,21 @@ sealed class ItemFactory
     return mold;
   }
 
+  public static Item Bloodwort()
+  {
+    Item bloodwort = new()
+    {
+      Name = "patch of bloodwort", Type = ItemType.Environment, Value = 0,
+      Glyph = new Glyph('%', Colours.LIGHT_PURPLE, Colours.PURPLE, Colours.RED_AURA, false)
+    };
+
+    bloodwort.Traits.Add(new AffixedTrait());
+    bloodwort.Traits.Add(new FlammableTrait());
+    bloodwort.Traits.Add(new BloodwortTrait());
+    
+    return bloodwort;
+  }
+
   public static Item Ink(GameState gs)
   {
     Item ink = new()
