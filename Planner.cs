@@ -230,13 +230,13 @@ class Planner
     plan.Add(new Sequence([new HasTrait<FrightenedTrait>(), new TryToEscape()]) { Label = "scared" });
 
     plan.Add(new Sequence([new HasTrait<PassiveTrait>(), 
-      new Sequence([new Selector(actions), new RandomMove() { Label = "passive" }])
-    ]));
+      new Sequence([new Selector(actions), new RandomMove()])
+    ]) { Label = "passive" });
 
     plan.Add(new Sequence([new HasTrait<ImmobileTrait>(), new PassTurn()]) { Label = "immobile" });
 
     // Finally, try to attack the player or move toward them.
-    if (!mob.HasTrait<ImmobileTrait>())
+    if (!immobile)
     {
       actions.Add(new KeepDistance());
       actions.Add(new ChaseTarget());

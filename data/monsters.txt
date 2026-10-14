@@ -38,7 +38,7 @@ troll               |T|limegreen    |darkgreen   |13|40|8| 1.0|18|10|MeleeSlashi
 creeping coins      |$|yellow       |yelloworange|14|25|6| 1.0|14|12|MeleePiercing#1#1#4#2#0#0#Attack|Poisoner#14#2#15,Brainless,Aggressive|Coins#20#30
 phantom             |p|iceblue      |lightblue   |15|20|5| 1.0|10|14|MeleeNecrotic#1#1#5#2#0#0#Attack|Invisible#owner#false#max,SilverAllergy,Undead,Flying,Immunity#Poison|
 dire goat           |q|lightgrey    |grey        |13|25|6| 1.0|13|10|MeleeBlunt#1#1#4#2#0#0#Attack|KnockBack,AttackVerb#butt|
-shrieker            |F|brightred    |dullred     |10|25|0| 1.0|10|10|Shriek#0#10#0#0#0#3#Passive|Plant,Immunity#Confusion,Immobile,Brainless|
+shrieker            |F|brightred    |dullred     |10|25|0| 1.0|10|10|Shriek#0#10#0#0#0#3#Passive|Plant,Immunity#Confusion,Immobile,Brainless,Passive|
 ghoul               |z|pink         |faintpink   |13|25|5| 1.0|10|10|MeleeSlashing#1#1#6#1#0#0#Attack|NauseousAura#owner#10,Undead,Aggressive|
 haunted crypt       |▮|iceblue      |lightblue   |15|50|0| 1.0|10|10|SummonUndead#0#0#0#0#0#25#Passive,SummonUndead#1#7#0#0#0#3#Attack|Undead,Immunity#Confusion,Construct,Immobile,Immunity#Poison,Brainless|GoodMagic
 giant beetle        |a|lightgrey    |grey        |15|25|3| 1.0|12|12|MeleePiercing#1#1#8#1#0#0#Attack|Drop#beetle_carapace#33|
