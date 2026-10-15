@@ -20,13 +20,15 @@ class Effects
 {
   public static void Heal(GameState gs, Actor actor, int hp)
   {
+    LameTrait? lame = null;
     foreach (Trait t in actor.Traits)
     {
       if (t is PlantTrait || t is ConstructTrait || t is UndeadTrait)
         return;
-      else if (t is LameTrait lame)
-        lame.Remove(gs);
+      else if (t is LameTrait lt)
+        lame = lt;
     }
+    lame?.Remove(gs);
 
     if (!actor.Stats.TryGetValue(Attribute.HP, out var hpStat))
       return;
