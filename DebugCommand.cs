@@ -179,7 +179,7 @@ class DebugCommand(GameState gs)
     }
     else if (txt == "heal")
     {
-      _gs.Player.Stats[Attribute.HP].Reset();
+      Effects.Heal(_gs, _gs.Player, int.MaxValue);
       return "";
     }
     else if (txt == "pit")
