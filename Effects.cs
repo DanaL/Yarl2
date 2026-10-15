@@ -20,6 +20,14 @@ class Effects
 {
   public static void Heal(GameState gs, Actor actor, int hp)
   {
+    foreach (Trait t in actor.Traits)
+    {
+      if (t is PlantTrait || t is ConstructTrait || t is UndeadTrait)
+        return;
+      else if (t is LameTrait lame)
+        lame.Remove(gs);
+    }
+
     if (!actor.Stats.TryGetValue(Attribute.HP, out var hpStat))
       return;
 
@@ -27,21 +35,13 @@ class Effects
     hpStat.Change(hp);
     int delta = hpStat.Curr - hpBefore;
 
-    string txt;
-    if (delta > 0 && actor is Player)
-      txt = $"You are healed for {delta} HP.";
-    else if (delta > 0)
-      txt = $"{actor.FullName.Capitalize()} is healed.";
-    else
-      txt = "";
-    gs.UIRef().AlertPlayer(txt, gs, actor.Loc);
-
-    SqAnimation healAnim = new(gs, actor.Loc, Colours.WHITE, Colours.PURPLE, '\u2665');
-    gs.UIRef().RegisterAnimation(healAnim);
-
-    if (actor.Traits.OfType<LameTrait>().FirstOrDefault() is LameTrait lame)
+    if (delta > 0)
     {
-      lame.Remove(gs, actor);
+      string txt = actor is Player ? $"You are healed for {delta} HP." 
+                                  : $"{actor.FullName.Capitalize()} is healed.";
+      gs.UIRef().AlertPlayer(txt, gs, actor.Loc);
+      SqAnimation healAnim = new(gs, actor.Loc, Colours.WHITE, Colours.PURPLE, '\u2665');
+      gs.UIRef().RegisterAnimation(healAnim);      
     }
   }
 

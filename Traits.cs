@@ -2211,15 +2211,20 @@ sealed class HealingVapourTrait : TemporaryTrait
       ChangeColour(Colours.DULL_RED, vapour);
     else if (remaining <= 4)
       ChangeColour(Colours.SOFT_RED, vapour);
+
+    if (gs.ObjDb.Occupant(vapour.Loc) is Actor actor)
+    {      
+      Effects.Heal(gs, actor, gs.Rng.Next(4, 9));
+    }
   }
 
   static void ChangeColour(Colour colour, Item v)
   {
     foreach (Trait t in v.Traits)
-      {
-        if (t is LightSourceTrait ls)
-          ls.BgColour = colour;
-      }
+    {
+      if (t is LightSourceTrait ls)
+        ls.BgColour = colour;
+    }
   }
 }
 

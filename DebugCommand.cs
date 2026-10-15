@@ -168,8 +168,8 @@ class DebugCommand(GameState gs)
     }    
     else if (txt == "genocide")
     {
-      List<Actor> toRremove = [.. _gs.ObjDb.AllActors().Where(a => a is not Player && a.Loc.DungeonID == _gs.CurrDungeonID && a.Loc.Level == _gs.CurrLevel)];
-      foreach (Actor a in toRremove)
+      List<Actor> toRemove = [.. _gs.ObjDb.AllActors().Where(a => a is not Player && a.Loc.DungeonID == _gs.CurrDungeonID && a.Loc.Level == _gs.CurrLevel)];
+      foreach (Actor a in toRemove)
       {
         _gs.ObjDb.RemoveActor(a);
       }
