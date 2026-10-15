@@ -598,7 +598,7 @@ sealed class TryToEscape : BehaviourNode
         {
           (int, int) sq = (obj.Loc.Row, obj.Loc.Col);
           extraLocCosts[sq] = extraLocCosts.GetValueOrDefault(sq, 0) + 5;
-        }
+        }        
       }
     }
 

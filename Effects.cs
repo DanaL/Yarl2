@@ -46,7 +46,7 @@ class Effects
   }
 
   public static void Bloodwort(GameState gs, Item bloodwort, Loc loc)
-  {
+  {    
     gs.UIRef().AlertPlayer($"The bloodwort bursts in a cloud of spores!", gs, loc);
     gs.ObjDb.RemoveItemFromGame(loc, bloodwort);
 

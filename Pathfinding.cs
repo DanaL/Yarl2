@@ -287,7 +287,8 @@ class AStar
     Dictionary<Loc, int> costs = [];
     costs[start] = 0;
     Loc goal = Loc.Nowhere;
-
+    Dictionary<Loc, int> extraCosts = [];
+    
     while (q.Count > 0)
     {
       Loc curr = q.Dequeue();
@@ -307,7 +308,28 @@ class AStar
           continue;
         else if (objDb.Occupied(adj))
           travel *= 5;
+        
+        if (extraCosts.TryGetValue(adj, out int extraCost))
+          travel += extraCost;
+        else
+        {
+          extraCost = 0;
+          foreach (var env in objDb.EnvironmentsAt(adj))
+          {
+            foreach (Trait t in env.Traits)
+            {
+              if (t is MoldSporesTrait)
+                extraCost += 10;
+              else if (t is BloodwortTrait)
+                extraCost += 25; // mercifully, we'll have the monsters avoid 
+                              // trudging over bloodwort and setting it off
+            }
+          }
 
+          extraCosts.Add(adj, extraCost);
+          travel += extraCost;
+        }
+        
         int newCost = costs[curr] + travel;
         if (!costs.TryGetValue(adj, out int value) || newCost < value)
         {
