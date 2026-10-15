@@ -162,9 +162,9 @@ class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
         AddMoldPatch(map, floors, gs.ObjDb, gs.Rng);
       }
 
-      if (levelNum == 0)
+      if (gs.Rng.Next(4) == 0)
       {
-        // temp add bloodwort
+        AddBloodwort(map, floors, gs.ObjDb, gs.Rng);
       }
     }
 

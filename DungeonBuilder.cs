@@ -888,4 +888,23 @@ abstract class DungeonBuilder
       }
     }
   }
+
+  protected static void AddBloodwort(Map map, List<Loc> floors, GameObjectDB objDb, Rng rng)
+  {
+    List<Loc> openFloors = [.. floors.Where(l => !objDb.AreBlockersAtLoc(l))];
+    openFloors.Shuffle(rng);
+    if (openFloors.Count == 0)
+      return;
+
+    foreach (Loc loc in openFloors)
+    {
+      if (map.TilesNearSq(TileType.DungeonFloor, loc.Row, loc.Col, 1).Count > 3)
+      {
+        Item bw = ItemFactory.Bloodwort();
+        objDb.Add(bw);
+        objDb.SetItemToLoc(loc, bw);
+        return;
+      }
+    }
+  }
 }
