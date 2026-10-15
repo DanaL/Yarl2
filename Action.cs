@@ -3475,44 +3475,25 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice) : Action
   {
     base.Execute();
 
-    if (!Actor!.Stats.ContainsKey(Attribute.HP))
+    if (!Actor!.Stats.TryGetValue(Attribute.HP, out Stat? hpStat))
     {
       GameState!.UIRef().AlertPlayer("The spell seems to fizzle.", GameState, Actor.Loc);
       return 1.0;
     }
 
-    Stat hpStat = Actor!.Stats[Attribute.HP];
-    int hpBefore = hpStat.Curr;
-
     int hp = 0;
-
-    if (_healDice == -1)
+    if (_healDice == -1) 
+    {
       hp = _healDie;
+    }
     else
     {
       for (int j = 0; j < _healDice; j++)
         hp += GameState.Rng.Next(_healDie) + 1;
     }
-    hpStat.Change(hp);
-    int delta = hpStat.Curr - hpBefore;
 
-    string txt;
-    if (delta > 0 && Actor is Player)
-      txt = $"You are healed for {delta} HP.";
-    else if (delta > 0)
-      txt = $"{Actor.FullName.Capitalize()} is healed.";
-    else
-      txt = "";
-    GameState.UIRef().AlertPlayer(txt, GameState, Actor.Loc);
-
-    SqAnimation healAnim = new(GameState!, Actor.Loc, Colours.WHITE, Colours.PURPLE, '\u2665');
-    GameState.UIRef().RegisterAnimation(healAnim);
-
-    if (Actor.Traits.OfType<LameTrait>().FirstOrDefault() is LameTrait lame)
-    {
-      lame.Remove(GameState, Actor);
-    }
-
+    Effects.Heal(GameState, Actor, hp);
+    
     return 1.0;
   }
 }

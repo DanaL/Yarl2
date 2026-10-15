@@ -18,6 +18,33 @@ namespace Yarl2;
 // I think it makes sense to have the effects code in one place.
 class Effects
 {
+  public static void Heal(GameState gs, Actor actor, int hp)
+  {
+    if (!actor.Stats.TryGetValue(Attribute.HP, out var hpStat))
+      return;
+
+    int hpBefore = hpStat.Curr;    
+    hpStat.Change(hp);
+    int delta = hpStat.Curr - hpBefore;
+
+    string txt;
+    if (delta > 0 && actor is Player)
+      txt = $"You are healed for {delta} HP.";
+    else if (delta > 0)
+      txt = $"{actor.FullName.Capitalize()} is healed.";
+    else
+      txt = "";
+    gs.UIRef().AlertPlayer(txt, gs, actor.Loc);
+
+    SqAnimation healAnim = new(gs, actor.Loc, Colours.WHITE, Colours.PURPLE, '\u2665');
+    gs.UIRef().RegisterAnimation(healAnim);
+
+    if (actor.Traits.OfType<LameTrait>().FirstOrDefault() is LameTrait lame)
+    {
+      lame.Remove(gs, actor);
+    }
+  }
+
   public static void Bloodwort(GameState gs, Item bloodwort, Loc loc)
   {
     gs.UIRef().AlertPlayer($"The bloodwort bursts in a cloud of spores!", gs, loc);
