@@ -220,7 +220,7 @@ abstract class Actor : GameObj, IZLevel
 
   public virtual (int, string, int) ReceiveDmg(IEnumerable<(int, DamageType)> damages, int bonusDamage, GameState gs, GameObj? src, double scale)
   {
-    string msg = "";
+    List<string> messages = [];
 
     if (!Stats.TryGetValue(Attribute.HP, out var currHP))
       return (0, "", 0);
@@ -252,6 +252,7 @@ abstract class Actor : GameObj, IZLevel
     HashSet<DamageType> resistances = [];
     HashSet<DamageType> immunities = [];
     HashSet<DamageType> vulnerabilities = [];
+    bool undead = false;
     foreach (Trait t in Traits)
     {
       if (t is ResistanceTrait res)
@@ -260,6 +261,8 @@ abstract class Actor : GameObj, IZLevel
         immunities.Add(imm.Type);
       else if (t is VulnerableTrait vul)
         vulnerabilities.Add(vul.Type);
+      else if (t is UndeadTrait)
+        undead = true;
     }
 
     int total = 0;
@@ -278,17 +281,23 @@ abstract class Actor : GameObj, IZLevel
       {
         d = 0;
         bonusDamage = 0;
-        msg = MsgFactory.CalcResistanceMessage(dmg.Item2, true);
+        messages.Add(MsgFactory.CalcResistanceMessage(dmg.Item2, true));
       }
       else if (resistances.Contains(dmg.Item2))
       {
         d /= 2;
-        msg = MsgFactory.CalcResistanceMessage(dmg.Item2, false);
+        messages.Add(MsgFactory.CalcResistanceMessage(dmg.Item2, false));
       }
       else if (vulnerabilities.Contains(dmg.Item2))
       {
         d *= 2;
-        msg = $"{FullName.Capitalize()} {Grammar.Conjugate(this, "is")} in agony!";
+        messages.Add($"{FullName.Capitalize()} {Grammar.Conjugate(this, "is")} in agony!");
+      }
+      else if (undead && dmg.Item2 == DamageType.Holy && src is Actor att && att.Inventory.ReadiedWeapon() is Item weapon)
+      {
+        d *= 2;
+        string n = MsgFactory.CalcName(weapon, gs.Player).Capitalize();
+        messages.Add($"{n} burns {FullName}!");
       }
 
       if (d > 0)
@@ -353,7 +362,7 @@ abstract class Actor : GameObj, IZLevel
       if (silverWeapon is not null)
       {
         total += gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7);
-        msg += $" {silverWeapon.FullName.DefArticle().Capitalize()} sears {FullName}!";
+        messages.Add($"{silverWeapon.FullName.DefArticle().Capitalize()} sears {FullName}!");
       }
     }
     
@@ -361,7 +370,7 @@ abstract class Actor : GameObj, IZLevel
     {
       string s = Inventory.ApplyEffectToInv(DamageType.Fire, gs, Loc);
       if (s != "")
-        msg += $" {s}";
+        messages.Add(s);
     }
 
     if (total > 0)
@@ -388,12 +397,12 @@ abstract class Actor : GameObj, IZLevel
       aura.HP -= total;
       if (aura.HP > 0)
       {
-        msg += "The shimmering aura cracks.";
+        messages.Add("The shimmering aura cracks.");
         total = 0;
       }
       else
       {
-        msg += "The shimmering aura shatters into glitter and sparks!";
+        messages.Add("The shimmering aura shatters into glitter and sparks!");
         total = -1 * aura.HP;
         Traits.Remove(aura);
       }
@@ -476,11 +485,12 @@ abstract class Actor : GameObj, IZLevel
         float odds = (float)currHP.Curr / maxHP;
         if (gs.Rng.NextDouble() < odds)
         {
-          msg += BecomeFrightened(gs);
+          messages.Add(BecomeFrightened(gs));
         }
       }
     }
 
+    string msg = string.Join(" ", messages);
     return (Stats[Attribute.HP].Curr, msg.Trim(), total);
   }
 
