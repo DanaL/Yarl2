@@ -1828,7 +1828,7 @@
   {
     "Name": "BLESSED_OIL",
     "DescriptiveName": "blessed oil",
-    "Type": "Potion",
+    "Type": "Tool",
     "Value": 10,
     "Glyph": "!,white,lightgrey,black,false",
     "Traits": [
