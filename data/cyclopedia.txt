@@ -835,3 +835,6 @@ A tome featuring the rare Ersatz Elevator spell, magic that allows the caster to
 #
 patch of bloodwort
 A plant famous for its healing spores.
+#
+blessed oil
+Oil prepared by clerics to briefly imbue a weapon with holy power. It's meant to be given to paladins and then like, but sometimes a temple needs a little extra cash and will sell blessed oil to adventurers.

@@ -1874,6 +1874,9 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "protection" => new UseResult(new ApplyTraitAction(gs, user,
                         new AuraOfProtectionTrait() { HP = 40 })),
     "bang" => new UseResult(new LoudBangAction(gs, user)),
+    "blessweapon" => new UseResult(new InventoryChoiceAction(gs, user,
+          new InventoryOptions() { Title = "Apply it to which item?" },
+          new BlessWeaponAction(gs, user, item))),
     "blindness" => new UseResult(new ApplyTraitAction(gs, user, BuildBlindTrait(user, gs))),
     "buffstrength" => new UseResult(new ApplyTraitAction(gs, user,
                         new StatBuffTrait()
@@ -1979,6 +1982,50 @@ class ArmourTrait : Trait
   public int Bonus { set; get; }
 
   public override string AsText() => $"Armour#{Part}#{ArmourMod}#{Bonus}";  
+}
+
+// SourceId should the be ID of the object (probably blessed oil) that provided
+// the blessing. OwnerId is the item it is applied to.
+class BlessedWeaponTrait : TemporaryTrait, IDesc
+{
+  public string Desc() => "(blessed)";
+
+  public override void Remove(GameState gs)
+  {
+    base.Remove(gs);
+
+    if (gs.ObjDb.GetObj(OwnerID) is Item item)
+    {
+      item.Traits = [.. item.Traits.Where(t => t.SourceId != SourceId)];
+
+      Loc loc = item.Loc;
+      if (item.ContainedBy > 0 && gs.ObjDb.GetObj(item.ContainedBy) is Actor owner)
+      {
+        loc = owner.Loc;
+      }
+      string n = MsgFactory.CalcName(item, gs.Player);
+      gs.UIRef().AlertPlayer($"The blessing on {n} fades.", gs, loc);
+    }    
+  }
+
+  public override List<string> Apply(GameObj target, GameState gs)
+  {
+    OwnerID = target.ID;
+
+    target.Traits.Add(this);
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);    
+    
+    ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(75, 126);
+
+    string n = MsgFactory.CalcName(target, gs.Player).Capitalize();
+    string s = $"{n} {Grammar.Conjugate(target, "glow")} with holy light!";
+
+    target.Traits.Add(new DamageTrait() { DamageType = DamageType.Holy, NumOfDie = 1, DamageDie = 8, SourceId = SourceId });
+
+    return [s];
+  }
+
+  public override string AsText() => $"BlessedWeapon#{SourceId}#{OwnerID}#{ExpiresOn}";
 }
 
 class CurseTrait : TemporaryTrait

@@ -3894,6 +3894,42 @@ class ApplyPoisonAction(GameState gs, Actor actor, Item? item) : Action(gs, acto
   public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
 }
 
+class BlessWeaponAction(GameState gs, Actor actor, Item? item) : Action(gs, actor)
+{
+  public char Choice { get; set; }
+  Item? SourceItem { get; set; } = item;
+
+  public override double Execute()
+  {
+    base.Execute();
+
+    GameState.ClearMenu();
+
+    var (item, _) = Actor!.Inventory.ItemAt(Choice);
+    if (item is null)
+    {
+      GameState.UIRef().AlertPlayer("Hmm?");
+      return 0.0;
+    }
+
+    if (item.Type != ItemType.Weapon && item.Type != ItemType.Arrow)
+    {
+      GameState.UIRef().AlertPlayer("That doesn't seem to accomplish anything.");
+      return 1.0;
+    }
+
+    BlessedWeaponTrait bwt = new() { SourceId = item.ID };
+    foreach (string s in bwt.Apply(item, GameState))
+    {
+      GameState.UIRef().AlertPlayer(s);
+    }
+    
+    return 1.0;
+  }
+
+  public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
+}
+
 class ConsumeAlchemicalCompound(GameState gs, Actor actor, Item item) : Action(gs, actor)
 {
   Item SourceItem { get; set; } = item;

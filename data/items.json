@@ -1824,5 +1824,17 @@
       "Flammable",
       "UseSimple#learnelevator"      
     ]
+  },
+  {
+    "Name": "BLESSED_OIL",
+    "DescriptiveName": "blessed oil",
+    "Type": "Potion",
+    "Value": 10,
+    "Glyph": "!,white,lightgrey,black,false",
+    "Traits": [
+      "UseSimple#blessweapon",
+      "Consumable",
+      "Stackable"
+    ]
   }
 ]

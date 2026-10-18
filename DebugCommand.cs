@@ -151,7 +151,8 @@ class DebugCommand(GameState gs)
     {"wand of sleep", ItemNames.WAND_SLEEP },
     {"gnome gnoisemaker", ItemNames.GNOME_GNOISEMAKER },
     {"spellbook phase door", ItemNames.SPELLBOOK_PHASE_DOOR },
-    {"spellbook elevator", ItemNames.SPELLBOOK_ERSATZ_ELEVATOR }
+    {"spellbook elevator", ItemNames.SPELLBOOK_ERSATZ_ELEVATOR },
+    {"blessed oil", ItemNames.BLESSED_OIL }
   };
 
   public string DoCommand(string txt)
