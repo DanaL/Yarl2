@@ -35,7 +35,7 @@ class Treasure
       (ItemNames.POTION_HEROISM, 1), (ItemNames.POTION_DESCENT, 1), (ItemNames.SCROLL_STAINLESS, 1),
       (ItemNames.POTION_FORGETFULNESS, 1), (ItemNames.EMERGENCY_DOOR, 1), (ItemNames.KNOCKBACK_ARROW, 3), (ItemNames.LONGBOW, 1),
       (ItemNames.ARROW_BANISHMENT, 3), (ItemNames.SPIDER_ARROW, 3), (ItemNames.SILVER_ARROW, 3), (ItemNames.YENDORIAN_SODA, 1),
-      (ItemNames.WAND_SUMMONING, 1), (ItemNames.BLINDFOLD, 1), (ItemNames.WOOL_CLOAK, 1)
+      (ItemNames.WAND_SUMMONING, 1), (ItemNames.BLINDFOLD, 1), (ItemNames.WOOL_CLOAK, 1), (ItemNames.BLESSED_OIL, 1)
   ];
 
   static readonly List<(ItemNames, int)> GoodItems = [
@@ -59,7 +59,7 @@ class Treasure
       (ItemNames.SNOWBURST_ARROW, 3), (ItemNames.FIREBURST_ARROW,3), (ItemNames.LONGBOW, 1), (ItemNames.ARROW_BANISHMENT, 3),
       (ItemNames.GLOVES_OF_ARCHERY, 1), (ItemNames.SPIDER_ARROW, 3), (ItemNames.SILVER_ARROW, 3), (ItemNames.PHALANX_PHOLIO_2, 1),
       (ItemNames.HALFLING_CUPCAKE, 1), (ItemNames.YENDORIAN_SODA, 1), (ItemNames.GINGERBREAD_MAN, 1), (ItemNames.SPELLBOOK_MAGE_ARMOUR, 1),
-      (ItemNames.SPELLBOOK_PHASE_DOOR, 1)
+      (ItemNames.SPELLBOOK_PHASE_DOOR, 1), (ItemNames.BLESSED_OIL, 1)
   ];
 
   static readonly List<(ItemNames, int)> RareItems = [
@@ -74,7 +74,7 @@ class Treasure
       (ItemNames.LESSER_HEALTH_CHARM, 1), (ItemNames.SMOULDERING_CHARM, 1), (ItemNames.TALISMAN_OF_CIRCUMSPECTION, 1),
       (ItemNames.TROLL_BROOCH, 1), (ItemNames.RUNE_OF_LASHING, 1), (ItemNames.FEARFUL_RUNE, 1), (ItemNames.RUNE_OF_PARRYING, 1),
       (ItemNames.MOON_MANTLE, 1), (ItemNames.MOON_LYRE, 1), (ItemNames.PHALANX_PHOLIO_2, 1), (ItemNames.HALFLING_CUPCAKE, 1),
-      (ItemNames.VIAL_SPRITE_BLOOD, 1), (ItemNames.SPELLBOOK_ERSATZ_ELEVATOR, 1)
+      (ItemNames.VIAL_SPRITE_BLOOD, 1), (ItemNames.SPELLBOOK_ERSATZ_ELEVATOR, 1), (ItemNames.BLESSED_OIL, 1)
   ];
 
   public static readonly List<ItemNames> Consumables = [
@@ -104,7 +104,8 @@ class Treasure
     ItemNames.POTION_FORGETFULNESS,
     ItemNames.EMERGENCY_DOOR,
     ItemNames.YENDORIAN_SODA,
-    ItemNames.GINGERBREAD_MAN
+    ItemNames.GINGERBREAD_MAN,
+    ItemNames.BLESSED_OIL
   ];
 
   public static Item GoodMagicItem(Rng rng, GameObjectDB objDb)
