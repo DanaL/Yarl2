@@ -624,6 +624,8 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       else if (desc.Contains(" poison"))
         desc = desc.Replace(" poison", " [GREEN poison]");
       desc = desc.Replace(" holy water", " [ICEBLUE holy water]");
+      desc = desc.Replace(" blessed oil", " [ICEBLUE blessed oil]");
+      desc = desc.Replace(" (blessed)", " ([ICEBLUE blessed])");
       desc = desc.Replace(" (lit)", " ([YELLOWORANGE lit][BROWN )]");
 
       lines.Add($"{s}) [{PickColour(item)} {desc}]");
