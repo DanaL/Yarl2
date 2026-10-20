@@ -1844,7 +1844,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "decoy" => new UseResult(new SummonDecoyAction(gs, user)),
     "curedisease" => new UseResult(new CureDisease(gs, user)),
     "disarm" => new UseResult(new DisarmAction(gs, user, user.Loc)),
-    "minorheal" => new UseResult(new HealAction(gs, user, 4, 4)),
+    "minorheal" => new UseResult(new HealAction(gs, user, 6, 4)),
     "learnmagearmour" => new UseResult(new LearnSpellAction(gs, user, "mage armour")),
     "learnphasedoor" => new UseResult(new LearnSpellAction(gs, user, "phase door")),
     "learnelevator" => new UseResult(new LearnSpellAction(gs, user, "ersatz elevator")),
