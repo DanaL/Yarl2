@@ -429,7 +429,7 @@ class ChampionBlessingTrait : HuntokarBlessingTrait
 
   public override string Description(Actor owner)
   {
-    string s = $"You have the [iceblue Champion Blessing]. It grants";
+    string s = $"You have the [iceblue Champion Blessing], marking you as a servant of Huntokar. It grants";
 
     StatBuffTrait? sbt = owner.Traits.OfType<StatBuffTrait>()
                               .FirstOrDefault(t => t.SourceId == SourceId);
@@ -581,7 +581,7 @@ class ReaverBlessingTrait : CrimsonKingBlessingTrait
 
   public override string Description(Actor owner)
   {
-    string s = "You have the [iceblue Reaver Blessing]. It grants";
+    string s = "You have the [iceblue Reaver Blessing], branding you a zealot of the Crimson King. It grants";
 
     MeleeDamageModTrait? dmg = owner.Traits.OfType<MeleeDamageModTrait>()
                                            .FirstOrDefault(t => t.SourceId == SourceId);
