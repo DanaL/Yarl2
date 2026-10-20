@@ -567,15 +567,17 @@ class AssumeDisguiseAction(GameState gs, Actor actor) : Action(gs, actor)
   }
 }
 
-class ApplyTraitAction : Action
+class ApplyTraitAction : ItemAction
 {
   List<TemporaryTrait> Traits { get; set; }
 
-  public ApplyTraitAction(GameState gs, Actor actor, List<TemporaryTrait> traits) : base(gs, actor) => Traits = traits;
-  public ApplyTraitAction(GameState gs, Actor actor, TemporaryTrait trait) : base(gs, actor) => Traits = [trait];
+  public ApplyTraitAction(GameState gs, Actor actor, List<TemporaryTrait> traits, Item? item = null) : base(gs, actor, item) => Traits = traits;
+  public ApplyTraitAction(GameState gs, Actor actor, TemporaryTrait trait, Item? item = null) : base(gs, actor, item) => Traits = [trait];
 
   public override double Execute()
   {
+    Consume();
+
     UserInterface ui = GameState.UIRef();
 
     if (Actor is not null)
@@ -3325,10 +3327,12 @@ class BindSpellAction(GameState gs, Actor caster) : Action(gs, caster)
   }
 }
 
-class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
+class BlinkAction(GameState gs, Actor caster, Item? item = null) : ItemAction(gs, caster, item)
 {
   public override double Execute()
-  {    
+  {
+    Consume();
+
     // If the caster is currently swallowed, we want to remove the swallwed 
     // trait before resolving the blink so that we're blinking to a loc in the
     // real level. (This might have problems with weird interactions were, like,
@@ -3392,23 +3396,25 @@ class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
   }
 }
 
-class AntidoteAction(GameState gs, Actor target) : Action(gs, target)
+class AntidoteAction(GameState gs, Actor target, Item? item) : ItemAction(gs, target, item)
 {
   public override double Execute()
   {
+    Consume();
+
     if (Actor is Player && !Actor.HasTrait<PoisonedTrait>())
     {
-      GameState!.UIRef().AlertPlayer("That tasted not bad.");
+      GameState.UIRef().AlertPlayer("That tasted not bad.");
       return 1.0;
     }
 
     foreach (var t in Actor!.Traits.OfType<PoisonedTrait>())
     {
-      GameState!.StopListening(GameEventType.EndOfRound, t);
+      GameState.StopListening(GameEventType.EndOfRound, t);
     }
     Actor.Traits = [..Actor.Traits.Where(t => t is not PoisonedTrait)];
     string msg = $"That makes {Actor.FullName} {Grammar.Conjugate(Actor, "feel")} better.";
-    GameState!.UIRef().AlertPlayer(msg);
+    GameState.UIRef().AlertPlayer(msg);
 
     return 1.0;
   }

@@ -1790,7 +1790,8 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     return new UseResult(
       new ApplyTraitAction(gs, user,
         [ new HeroismTrait() { OwnerID = user.ID, ExpiresOn = expires, SourceId = item.ID},
-          new StatBuffTrait() { Attr = Attribute.HP, Amt = 25, OwnerID = user.ID, ExpiresOn = expires, SourceId = item.ID, MaxHP = true } ]
+          new StatBuffTrait() { Attr = Attribute.HP, Amt = 25, OwnerID = user.ID, ExpiresOn = expires, SourceId = item.ID, MaxHP = true } ],
+        item
     ));
   }
 
@@ -1837,10 +1838,10 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
   public UseResult Use(Actor user, GameState gs, int row, int col, Item? item) => Spell switch
   {
     "amnesia" => new UseResult(new ForgetAction(gs, user, item)),
-    "antidote" => new UseResult(new AntidoteAction(gs, user)),
-    "blink" => new UseResult(new BlinkAction(gs, user)),
+    "antidote" => new UseResult(new AntidoteAction(gs, user, item)),
+    "blink" => new UseResult(new BlinkAction(gs, user, item)),
     "booze" => new UseResult(new DrinkBoozeAction(gs, user)),
-    "celerity" => new UseResult(new ApplyTraitAction(gs, user, new CelerityTrait())),
+    "celerity" => new UseResult(new ApplyTraitAction(gs, user, new CelerityTrait(), item)),
     "decoy" => new UseResult(new SummonDecoyAction(gs, user)),
     "curedisease" => new UseResult(new CureDisease(gs, user)),
     "disarm" => new UseResult(new DisarmAction(gs, user, user.Loc)),
@@ -1851,40 +1852,40 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "restoremana" => new UseResult(new RestoreMana(gs, user)),
     "maxheal" => new UseResult(new HealAction(gs, user, int.MaxValue, -1, item)),
     "trivialheal" => new UseResult(new HealAction(gs, user, 1, 1, item)),    
-    "telepathy" => new UseResult(new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 })),
+    "telepathy" => new UseResult(new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 }, item)),
     "magicmap" => new UseResult(new MagicMapAction(gs, user)),
     "detecttreasure" => new UseResult(new DetectTreasureAction(gs, user)),
     "detecttraps" => new UseResult(new DetectTrapsAction(gs, user)),
     "scatter" => new UseResult(new ScatterAction(gs, user)),
     "resistfire" => new UseResult(new ApplyTraitAction(gs, user,
-                        new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200 })),
+                        new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200 }, item)),
     "resistcold" => new UseResult(new ApplyTraitAction(gs, user,
-                        new ResistanceTrait() { Type = DamageType.Cold, ExpiresOn = gs.Turn + 200 })),
+                        new ResistanceTrait() { Type = DamageType.Cold, ExpiresOn = gs.Turn + 200 }, item)),
     "resistsleep" => new UseResult(new ApplyTraitAction(gs, user,
-                        new ResistanceTrait() { Type = DamageType.Sleep, ExpiresOn = gs.Turn + 300 })),
+                        new ResistanceTrait() { Type = DamageType.Sleep, ExpiresOn = gs.Turn + 300 }, item)),
     "recall" => new UseResult(new EscapeDungeonAction(gs)),
     "levitation" => new UseResult(new ApplyTraitAction(gs, user, new LevitationTrait()
-    { ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(30, 75) })),
+    { ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(30, 75) }, item)),
     "knock" => new UseResult(new KnockAction(gs, user)),
     "applypoison" => new UseResult(new InventoryChoiceAction(gs, user,
           new InventoryOptions() { Title = "Apply it to which item?" },
           new ApplyPoisonAction(gs, user, item))),
     "seeinvisible" => new UseResult(new ApplyTraitAction(gs, user, new SeeInvisibleTrait()
-    { ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(30, 75) })),
+    { ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(30, 75) }, item)),
     "protection" => new UseResult(new ApplyTraitAction(gs, user,
-                        new AuraOfProtectionTrait() { HP = 40 })),
+                        new AuraOfProtectionTrait() { HP = 40 }, item)),
     "bang" => new UseResult(new LoudBangAction(gs, user)),
     "blessweapon" => new UseResult(new InventoryChoiceAction(gs, user,
           new InventoryOptions() { Title = "Apply it to which item?" },
           new BlessWeaponAction(gs, user, item))),
-    "blindness" => new UseResult(new ApplyTraitAction(gs, user, BuildBlindTrait(user, gs))),
+    "blindness" => new UseResult(new ApplyTraitAction(gs, user, BuildBlindTrait(user, gs), item)),
     "buffstrength" => new UseResult(new ApplyTraitAction(gs, user,
                         new StatBuffTrait()
                         {
                           Attr = Attribute.Strength, Amt = 2, OwnerID = user.ID, ExpiresOn = gs.Turn + 50, SourceId = item!.ID
-                        })),
+                        }, item)),
     "heroism" => BuildHeroism(user, gs, item!),
-    "nondescript" => new UseResult(new ApplyTraitAction(gs, user, new NondescriptTrait())),
+    "nondescript" => new UseResult(new ApplyTraitAction(gs, user, new NondescriptTrait(), item)),
     "descent" => new UseResult(new DescentAction(gs, user)),
     "stainless" => new UseResult(new InventoryChoiceAction(gs, user,
           new InventoryOptions() { Title = "Cast on which item?" },
