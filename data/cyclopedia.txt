@@ -813,7 +813,7 @@ umber hulk
 An enormous bipedal insectoid creature whose claws are mighty enough to tunnel through stone walls to get to prey (ie., you). Also of note are its razor-shape mandibles.
 #
 gnome gnoisemaker
-A prank device created by gnomes that creates a loud bang when set off. Very annoying at gnome parties, but also can frighten monsters in the dungeon.
+A prank device created by gnomes that creates a loud bang when set off. Very annoying at gnome parties, but also can frighten monsters.
 #
 black pearl
 An important spell component in spells where magic must be sent in a specific direction.

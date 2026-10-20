@@ -1874,7 +1874,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     { ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(30, 75) }, item)),
     "protection" => new UseResult(new ApplyTraitAction(gs, user,
                         new AuraOfProtectionTrait() { HP = 40 }, item)),
-    "bang" => new UseResult(new LoudBangAction(gs, user)),
+    "bang" => new UseResult(new LoudBangAction(gs, user, item)),
     "blessweapon" => new UseResult(new InventoryChoiceAction(gs, user,
           new InventoryOptions() { Title = "Apply it to which item?" },
           new BlessWeaponAction(gs, user, item))),

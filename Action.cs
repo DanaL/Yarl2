@@ -3160,7 +3160,7 @@ class EscapeDungeonAction(GameState gs) : Action(gs, gs.Player)
   }
 };
 
-class LoudBangAction(GameState gs, Actor actor) : Action(gs, actor)
+class LoudBangAction(GameState gs, Actor actor, Item? src) : ItemAction(gs, actor, src)
 {
   public override double Execute()
   {
@@ -3184,6 +3184,8 @@ class LoudBangAction(GameState gs, Actor actor) : Action(gs, actor)
       }
     }
 
+    Consume();
+    
     return 1.0;
   }
 }

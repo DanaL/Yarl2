@@ -1705,7 +1705,8 @@
     "Glyph": "(,brightred,dullred,black,false",
     "Traits": [
       "Stackable",
-      "UseSimple#bang"
+      "UseSimple#bang",
+      "Consumable"
     ]
   },
   {
