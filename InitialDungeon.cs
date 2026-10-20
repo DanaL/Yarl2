@@ -18,6 +18,7 @@ class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
   const int CELLAR_LEVEL = 5;
   int DungeonId { get; set; } = Constants.MAIN_DUNGEON_ID;
   Loc ExitDest { get; set; } = exitDest;
+  public Loc EntranceLoc { get; set; }
   string MainOccupant { get; set; } = mainOccupant;
   int _dungeonDepth;
 
@@ -105,7 +106,8 @@ class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
     Loc arrivalLoc = level0Floors[gs.Rng.Next(level0Floors.Count)];
     Upstairs exitStairs = new("") { Destination = ExitDest };
     levels[0].SetTile(arrivalLoc.Row, arrivalLoc.Col, exitStairs);
-    dungeon.ArrivalLoc = arrivalLoc;
+    dungeon.ExitDest = ExitDest;
+    EntranceLoc = new(Constants.MAIN_DUNGEON_ID, 0, arrivalLoc.Row, arrivalLoc.Col);
 
     foreach ((int levelNum, TileType riverType) in riverLevels)
     {
@@ -270,13 +272,13 @@ class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
       var rlDungeon = rldb.Generate(rogueEntranceLoc, gs);
       gs.Campaign.AddDungeon(rlDungeon, Constants.RL_DUNGEON_ID);
 
-      Downstairs rogueStairs = new("") { Destination = rlDungeon.ArrivalLoc };
+      Downstairs rogueStairs = new("") { Destination = rlDungeon.ExitDest };
       rogueFloorMap.SetTile(rogueEntranceLoc.Row, rogueEntranceLoc.Col, rogueStairs);
       gs.FactDb.Add(new FlagFact() { Name = "RogueBranchCreated"});
     }
     else
     {
-      Downstairs rogueStairs = new("") { Destination = gs.Campaign.Dungeons[Constants.RL_DUNGEON_ID].ArrivalLoc };
+      Downstairs rogueStairs = new("") { Destination = gs.Campaign.Dungeons[Constants.RL_DUNGEON_ID].ExitDest };
       rogueFloorMap.SetTile(rogueEntranceLoc.Row, rogueEntranceLoc.Col, rogueStairs);
     }
 
@@ -293,7 +295,7 @@ class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
       gs.FactDb.Add(new FlagFact() { Name = "TempleBranchCreated"});      
     }
 
-    Downstairs caveStairs = new("") { Destination = gs.Campaign.Dungeons[Constants.UNDERWATER_CAVE_DUNGEON_ID].ArrivalLoc };
+    Downstairs caveStairs = new("") { Destination = gs.Campaign.Dungeons[Constants.UNDERWATER_CAVE_DUNGEON_ID].ExitDest };
     templeFloorMap.SetTile(templeEntranceLoc.Row, templeEntranceLoc.Col, caveStairs);
   }
 

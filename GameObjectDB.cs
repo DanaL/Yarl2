@@ -727,7 +727,7 @@ class Dungeon(int ID, string name, string arrivalMessage, bool desc)
   public string ArrivalMessage { get; } = arrivalMessage;
   public List<MonsterDeck> MonsterDecks { get; set; } = [];
   public bool Descending { get; set; } = desc;
-  public Loc ArrivalLoc { get; set; }
+  public Loc ExitDest { get; set; }
   public string Name { get; set; } = name;
   public int PopulationLow { get; set; } = 8;
   public int PopulationHigh { get; set; } = 12;

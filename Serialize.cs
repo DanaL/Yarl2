@@ -392,7 +392,7 @@ sealed class DungeonSaver
       Descending = dungeon.Descending,
       RememberedLocs = [],
       MonsterDecks = [.. dungeon.MonsterDecks.Select(deck => deck.ToString())],
-      ExitLoc = dungeon.ArrivalLoc.ToString(),
+      ExitLoc = dungeon.ExitDest.ToString(),
       Name = dungeon.Name,
       PopulationLow = dungeon.PopulationLow,
       PopulationHigh = dungeon.PopulationHigh,
@@ -418,7 +418,7 @@ sealed class DungeonSaver
   {
     Dungeon d = new(sd.ID, sd.Name, sd.ArrivalMessage ?? "", sd.Descending)
     {
-      ArrivalLoc = Loc.FromStr(sd.ExitLoc),
+      ExitDest = Loc.FromStr(sd.ExitLoc),
       PopulationLow = sd.PopulationLow,
       PopulationHigh = sd.PopulationHigh,
       PocketDimension = sd.PocketDimension,

@@ -130,7 +130,7 @@ class SorceressQuest
 
       List<Loc> adjToMirror = [.. Util.Adj8Locs(sdb.DecoyMirror1)
                                     .Where(l => mirrorLevel.TileAt(l.Row, l.Col).Type == TileType.DungeonFloor)];
-      wumpus.ArrivalLoc = adjToMirror[rng.Next(adjToMirror.Count)];
+      wumpus.ExitDest = adjToMirror[rng.Next(adjToMirror.Count)];
     }
     campaign.Dungeons.Add(wumpus.ID, wumpus);
 
@@ -142,7 +142,7 @@ class SorceressQuest
 
       List<Loc> adjToMirror = [.. Util.Adj8Locs(sdb.DecoyMirror2)
                                     .Where(l => mirrorLevel.TileAt(l.Row, l.Col).Type == TileType.DungeonFloor)];
-      vampyArea.ArrivalLoc = adjToMirror[rng.Next(adjToMirror.Count)];
+      vampyArea.ExitDest = adjToMirror[rng.Next(adjToMirror.Count)];
     }
     campaign.Dungeons.Add(vampyArea.ID, vampyArea);
 
@@ -254,7 +254,7 @@ class WitchQuest
   {
     int id = gs.Campaign.Dungeons.Keys.Max() + 1;
     Dungeon dungeon = new(id, "a Mysterious Cave", "You shudder. Not from cold, but from sensing something unnatural within this cave.", true);
-    dungeon.ArrivalLoc = entrance;
+    dungeon.ExitDest = entrance;
     MonsterDeck deck = new();
     deck.Monsters.AddRange(["skeleton", "skeleton", "zombie", "zombie", "dire bat"]);
     dungeon.MonsterDecks.Add(deck);

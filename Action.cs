@@ -1163,7 +1163,7 @@ abstract class PortalAction(GameState gs) : Action(gs)
         {
           dungeon = db.Generate("Musty smells. A distant clang. Danger.", GameState);
           GameState.Campaign.AddDungeon(dungeon, Constants.MAIN_DUNGEON_ID); 
-          portal.Destination = dungeon.ArrivalLoc;
+          portal.Destination = db.EntranceLoc;
           break;
         }
         catch (DungeonGenerationException)
@@ -3162,11 +3162,7 @@ class EscapeDungeonAction(GameState gs, Item? src) : ItemAction(gs, gs.Player, s
     }
 
     ulong happensOn = GameState.Turn + (ulong) GameState.Rng.Next(1, 6);
-    var recall = new RecallTrait()
-    {
-      ExpiresOn = happensOn,
-      ObjId = GameState.Player.ID
-    };
+    var recall = new RecallTrait() { ExpiresOn = happensOn, ObjId = GameState.Player.ID };
 
     GameState.RegisterForEvent(GameEventType.EndOfRound, recall);
     GameState.Player.Traits.Add(recall);
@@ -3566,7 +3562,7 @@ class LearnSpellAction(GameState gs, Actor target, string spellName, Item? src) 
     }
 
     Consume();
-    
+
     return 1.0;
   }
 }

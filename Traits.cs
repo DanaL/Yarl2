@@ -3551,7 +3551,7 @@ class RecallTrait : BasicTrait, IGameEventListener
       }
     }
 
-    Loc exitPoint = gs.CurrentDungeon.ArrivalLoc;    
+    Loc exitPoint = gs.CurrentDungeon.ExitDest;    
     Loc start = player.Loc;
     gs.ResolveActorMove(player, start, exitPoint);
     gs.ActorEntersLevel(player, exitPoint.DungeonID, exitPoint.Level);

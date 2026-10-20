@@ -632,9 +632,9 @@ class EndGameDungeonBuilder(int dungeonId, Loc entrance) : DungeonBuilder
     Map firstLevel = FirstLevelMap(gs);
     Map bottom = BottomLevel(gs);
     
-    dungeon.ArrivalLoc = FindArrivalLoc(firstLevel, gs.Rng);
+    dungeon.ExitDest = FindArrivalLoc(firstLevel, gs.Rng);
     Upstairs arrival = new("") { Destination = Entrance };
-    firstLevel.SetTile(dungeon.ArrivalLoc.Row, dungeon.ArrivalLoc.Col, arrival);
+    firstLevel.SetTile(dungeon.ExitDest.Row, dungeon.ExitDest.Col, arrival);
     levels[0] = firstLevel;
 
     for (int levelNum = 1; levelNum <= 3; levelNum++)
@@ -765,7 +765,7 @@ class EndGame
 
     Portal portal = new("A smouldering arch covered in profane sigils.", TileType.ProfanePortal)
     {
-      Destination = dungeon.ArrivalLoc
+      Destination = dungeon.ExitDest
     };
 
     gs.Wilderness.SetTile(finalDungeonLoc.Row, finalDungeonLoc.Col, portal);
