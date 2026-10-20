@@ -3913,10 +3913,9 @@ class ApplyPoisonAction(GameState gs, Actor actor, Item? item) : ItemAction(gs, 
   public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
 }
 
-class BlessWeaponAction(GameState gs, Actor actor, Item? item) : Action(gs, actor)
+class BlessWeaponAction(GameState gs, Actor actor, Item? item) : ItemAction(gs, actor, item)
 {
   public char Choice { get; set; }
-  Item? SourceItem { get; set; } = item;
 
   public override double Execute()
   {
@@ -3931,11 +3930,13 @@ class BlessWeaponAction(GameState gs, Actor actor, Item? item) : Action(gs, acto
       return 0.0;
     }
 
-    if (item.Type != ItemType.Weapon && item.Type != ItemType.Arrow)
+    if (item.Type != ItemType.Weapon)
     {
-      GameState.UIRef().AlertPlayer("That doesn't seem to accomplish anything.");
+      GameState.UIRef().AlertPlayer("That wouldn't accomplish anything.");
       return 1.0;
     }
+
+    Consume();
 
     BlessedWeaponTrait bwt = new() { SourceId = item.ID };
     foreach (string s in bwt.Apply(item, GameState))
