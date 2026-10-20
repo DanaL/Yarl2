@@ -106,6 +106,7 @@ abstract class Actor : GameObj, IZLevel
   public virtual int SpellDC => 12;
 
   public void QueueAction(Action action) => ActionQ.Enqueue(action);
+  public void FlushActionQueue<T>() => ActionQ = new Queue<Action>(ActionQ.Where(t => t is not T));
 
   public bool IsDisguised()
   {

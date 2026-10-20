@@ -3494,8 +3494,12 @@ class RecallTrait : BasicTrait, IGameEventListener
 
     Expired = true;
 
-    Player player = gs.Player;
+    Player player = gs.Player;    
     player.Traits.Remove(this);
+
+    // this is to prevent a 'race condition' when player has autopickup 
+    // for gold enabled
+    player.FlushActionQueue<PickupItemAction>();
 
     Actor? swallower = null;
     if (player.Traits.OfType<SwallowedTrait>().FirstOrDefault() is SwallowedTrait swallow)
