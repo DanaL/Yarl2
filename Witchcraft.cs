@@ -581,7 +581,7 @@ class CastMirrorImage(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     base.Execute();
     
     if (CheckCost(2, "mirror image"))
-      GameState.Player.QueueAction(new SummonDecoyAction(GameState, Actor!));
+      GameState.Player.QueueAction(new SummonDecoyAction(GameState, Actor!, null));
     
     return 0.0;
   }

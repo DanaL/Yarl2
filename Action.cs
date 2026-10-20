@@ -992,14 +992,14 @@ class BashAction(GameState gs, Actor actor) : Action(gs, actor)
   }
 }
 
-class DisarmAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
+class DisarmAction(GameState gs, Actor actor, Loc loc, Item? src) : ItemAction(gs, actor, src)
 {
   Loc Origin { get; set; } = loc;
 
   public override double Execute()
   {
     base.Execute();
-    UserInterface ui = GameState!.UIRef();
+    UserInterface ui = GameState.UIRef();
 
     Map map = GameState.CurrentMap;
     int trapCount = 0;
@@ -1025,6 +1025,8 @@ class DisarmAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
 
     if (trapCount == 0)
       ui.AlertPlayer("The spell doesn't seem to do anything at all.");
+    
+    Consume();
     
     return 1.0;
   }
@@ -2271,11 +2273,12 @@ class MinorSummonAction(GameState gs, Actor actor) : Action(gs, actor)
   }
 }
 
-sealed class SummonDecoyAction(GameState gs, Actor actor) : Action(gs, actor)
+sealed class SummonDecoyAction(GameState gs, Actor actor, Item? src) : ItemAction(gs, actor, src)
 {
   public override double Execute()
   {
     base.Execute();
+    Consume();
 
     Loc loc = Util.NearestUnoccupiedLoc(GameState, Actor!.Loc);
 
@@ -3132,16 +3135,16 @@ class WebAction(GameState gs, Loc target) : Action(gs)
   }
 }
 
-class EscapeDungeonAction(GameState gs) : Action(gs, gs.Player)
+class EscapeDungeonAction(GameState gs, Item? src) : ItemAction(gs, gs.Player, src)
 {
   public override double Execute()
   {
     base.Execute();
+    Consume();
 
-    var player = GameState!.Player;
-    if (player.HasTrait<RecallTrait>() || GameState.InWilderness)
+    if (GameState.Player.HasTrait<RecallTrait>() || GameState.InWilderness)
     {
-      GameState!.UIRef().AlertPlayer("You shudder for a moment.");
+      GameState.UIRef().AlertPlayer("You shudder for a moment.");
       return 1.0;
     }
 
@@ -3149,7 +3152,7 @@ class EscapeDungeonAction(GameState gs) : Action(gs, gs.Player)
     var recall = new RecallTrait()
     {
       ExpiresOn = happensOn,
-      ObjId = player.ID
+      ObjId = GameState.Player.ID
     };
 
     GameState.RegisterForEvent(GameEventType.EndOfRound, recall);
@@ -3422,7 +3425,7 @@ class AntidoteAction(GameState gs, Actor target, Item? item) : ItemAction(gs, ta
   }
 }
 
-class CureDisease(GameState gs, Actor target) : Action(gs, target)
+class CureDisease(GameState gs, Actor target, Item? src) : ItemAction(gs, target, src)
 {
   public override double Execute()
   {
@@ -3438,14 +3441,16 @@ class CureDisease(GameState gs, Actor target) : Action(gs, target)
     if (wasIll)
     {
       string msg = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "have")} been cured!";
-      GameState!.UIRef().AlertPlayer(msg);
+      GameState.UIRef().AlertPlayer(msg);
     }
+
+    Consume();
 
     return 1.0;
   }
 }
 
-class DrinkBoozeAction(GameState gs, Actor target) : Action(gs, target)
+class DrinkBoozeAction(GameState gs, Actor target, Item? src) : ItemAction(gs, target, src)
 {
   public override double Execute()
   {
@@ -3461,11 +3466,13 @@ class DrinkBoozeAction(GameState gs, Actor target) : Action(gs, target)
 
     Effects.HandleTipsy(Actor, GameState);
 
+    Consume();
+
     return 1.0;
   }
 }
 
-class RestoreMana(GameState gs, Actor target) : Action(gs, target)
+class RestoreMana(GameState gs, Actor target, Item? src) : ItemAction(gs, target, src)
 {
   public override double Execute()
   {
@@ -3479,10 +3486,12 @@ class RestoreMana(GameState gs, Actor target) : Action(gs, target)
     if (Actor!.Stats.TryGetValue(Attribute.MagicPoints, out var mp))
     {
       mp.Change(GameState.Rng.Next(1, 6));
-      SqAnimation anim = new(GameState!, Actor!.Loc, Colours.WHITE, Colours.PURPLE, '★');
+      SqAnimation anim = new(GameState, Actor!.Loc, Colours.WHITE, Colours.PURPLE, '★');
       GameState.UIRef().RegisterAnimation(anim);  
     }
     
+    Consume();
+
     return 1.0;
   }
 }
