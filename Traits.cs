@@ -4358,6 +4358,7 @@ class TraitFactory
       "Berzerk", (pieces, gameObj) => pieces.Length == 1 ? new BerzerkTrait() : new BerzerkTrait() { SourceId = ulong.Parse(pieces[1])}
     },
     { "Binding", (pieces, gameObj) => new BindingTrait() { SourceId = ulong.Parse(pieces[1]), Lit = bool.Parse(pieces[2]), Fuel = int.Parse(pieces[3])}},
+    { "BlessedWeapon", (pieces, gameObj) => new BlessedWeaponTrait() { SourceId = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) } },
     { "Blind", (pieces, gameObj) =>
       new BlindTrait()
       {
