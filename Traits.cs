@@ -1836,7 +1836,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
 
   public UseResult Use(Actor user, GameState gs, int row, int col, Item? item) => Spell switch
   {
-    "amnesia" => new UseResult(new ForgetAction(gs, user)),
+    "amnesia" => new UseResult(new ForgetAction(gs, user, item)),
     "antidote" => new UseResult(new AntidoteAction(gs, user)),
     "blink" => new UseResult(new BlinkAction(gs, user)),
     "booze" => new UseResult(new DrinkBoozeAction(gs, user)),
@@ -1844,13 +1844,13 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "decoy" => new UseResult(new SummonDecoyAction(gs, user)),
     "curedisease" => new UseResult(new CureDisease(gs, user)),
     "disarm" => new UseResult(new DisarmAction(gs, user, user.Loc)),
-    "minorheal" => new UseResult(new HealAction(gs, user, 6, 4)),
+    "minorheal" => new UseResult(new HealAction(gs, user, 6, 4, item)),
     "learnmagearmour" => new UseResult(new LearnSpellAction(gs, user, "mage armour")),
     "learnphasedoor" => new UseResult(new LearnSpellAction(gs, user, "phase door")),
     "learnelevator" => new UseResult(new LearnSpellAction(gs, user, "ersatz elevator")),
     "restoremana" => new UseResult(new RestoreMana(gs, user)),
-    "maxheal" => new UseResult(new HealAction(gs, user, int.MaxValue, -1)),
-    "trivialheal" => new UseResult(new HealAction(gs, user, 1, 1)),    
+    "maxheal" => new UseResult(new HealAction(gs, user, int.MaxValue, -1, item)),
+    "trivialheal" => new UseResult(new HealAction(gs, user, 1, 1, item)),    
     "telepathy" => new UseResult(new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 })),
     "magicmap" => new UseResult(new MagicMapAction(gs, user)),
     "detecttreasure" => new UseResult(new DetectTreasureAction(gs, user)),

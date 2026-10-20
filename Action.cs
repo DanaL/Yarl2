@@ -41,6 +41,19 @@ abstract class Action
   public virtual void ReceiveUIResult(UIResult result) { }
 }
 
+abstract class ItemAction(GameState gs, Actor actor, Item? item) : Action(gs, actor)
+{
+  protected Item? SourceItem { get; set; } = item;
+
+  protected void Consume()
+  {
+    if (Actor is not null && SourceItem is not null && SourceItem.HasTrait<ConsumableTrait>())
+    {
+      Actor.Inventory.ConsumeItem(SourceItem, Actor, GameState);
+    }
+  }
+}
+
 class MeleeAttackAction(GameState gs, Actor actor, Loc target) : Action(gs, actor)
 {
   public Trait? AttackEffect { get; set; } = null;
@@ -3466,8 +3479,8 @@ class RestoreMana(GameState gs, Actor target) : Action(gs, target)
   }
 }
 
-class HealAction(GameState gs, Actor target, int healDie, int healDice) : Action(gs, target)
-{
+class HealAction(GameState gs, Actor target, int healDie, int healDice, Item? sourceItem) : ItemAction(gs, target, sourceItem)
+{  
   readonly int _healDie = healDie;
   readonly int _healDice = healDice;
   
@@ -3494,6 +3507,8 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice) : Action
 
     Effects.Heal(GameState, Actor, hp);
     
+    Consume();
+
     return 1.0;
   }
 }
@@ -3564,7 +3579,7 @@ class ClarityAction(GameState gs, Actor target) : Action(gs, target)
   }
 }
 
-class ForgetAction(GameState gs, Actor actor) : Action(gs, actor)
+class ForgetAction(GameState gs, Actor actor, Item? item) : ItemAction(gs, actor, item)
 {
   public override double Execute()
   {
@@ -3584,6 +3599,8 @@ class ForgetAction(GameState gs, Actor actor) : Action(gs, actor)
     {
       t.Remove(GameState!);
     }
+
+    Consume();
 
     return 1.0;
   }
@@ -3856,10 +3873,9 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
   public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
 }
 
-class ApplyPoisonAction(GameState gs, Actor actor, Item? item) : Action(gs, actor)
+class ApplyPoisonAction(GameState gs, Actor actor, Item? item) : ItemAction(gs, actor, item)
 {
   public char Choice { get; set; }
-  Item? SourceItem { get; set; } = item;
 
   public override double Execute()
   {
@@ -3882,10 +3898,7 @@ class ApplyPoisonAction(GameState gs, Actor actor, Item? item) : Action(gs, acto
       string s = $"{name} {verb} some poison on {objName}.";
       GameState.UIRef().AlertPlayer(s);
 
-      if (SourceItem is not null && SourceItem.HasTrait<ConsumableTrait>())
-      {
-        Actor.Inventory.ConsumeItem(SourceItem, Actor, GameState);
-      }
+      Consume();
     }
 
     return 1.0;
@@ -4708,7 +4721,7 @@ class CastHealMonster(GameState gs, Actor actor, Trait src) : Action(gs, actor)
       }
       else
       {
-        Actor!.QueueAction(new HealAction(GameState, target, 6, 2));
+        Actor!.QueueAction(new HealAction(GameState, target, 6, 2, null));
         energyCost = 0.0;
       }
 

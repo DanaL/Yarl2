@@ -496,7 +496,7 @@ class HealAlliesPower(Power power) : UsePower(power)
         gs.UIRef().AlertPlayer(castText);
       }
 
-      mob.ExecuteAction(new HealAction(gs, candidates[i], 4, 4));
+      mob.ExecuteAction(new HealAction(gs, candidates[i], 4, 4, null));
       return PlanStatus.Success;
     }
 

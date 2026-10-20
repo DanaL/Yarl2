@@ -1024,9 +1024,6 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
           GameState.UIRef().AlertPlayer(s);        
       }
 
-      if (item.HasTrait<ConsumableTrait>()) 
-        Actor.Inventory.ConsumeItem(item, Actor, GameState);
-
       if (Actor is Player)
       {
         Animation anim;
