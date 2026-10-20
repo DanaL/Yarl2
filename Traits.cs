@@ -1795,7 +1795,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     ));
   }
 
-  static UseResult SetupDragonBreath(Actor user, GameState gs)
+  static UseResult SetupDragonBreath(Actor user, GameState gs, Item? item)
   {
     string desc;
     DamageType dt;
@@ -1831,7 +1831,8 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
         break;
     }
 
-    AimAction action = new(gs, user, new BreathWeaponAction(gs, user, dt, desc, dmgDie, numOfDie, 5, colours));
+    AimAction action = new(gs, user, new BreathWeaponAction(gs, user, dt, desc, dmgDie, numOfDie, 5, colours, item));
+
     return new UseResult(action);
   }
 
@@ -1846,16 +1847,16 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "curedisease" => new UseResult(new CureDisease(gs, user, item)),
     "disarm" => new UseResult(new DisarmAction(gs, user, user.Loc, item)),
     "minorheal" => new UseResult(new HealAction(gs, user, 6, 4, item)),
-    "learnmagearmour" => new UseResult(new LearnSpellAction(gs, user, "mage armour")),
-    "learnphasedoor" => new UseResult(new LearnSpellAction(gs, user, "phase door")),
-    "learnelevator" => new UseResult(new LearnSpellAction(gs, user, "ersatz elevator")),
+    "learnmagearmour" => new UseResult(new LearnSpellAction(gs, user, "mage armour", item)),
+    "learnphasedoor" => new UseResult(new LearnSpellAction(gs, user, "phase door", item)),
+    "learnelevator" => new UseResult(new LearnSpellAction(gs, user, "ersatz elevator", item)),
     "restoremana" => new UseResult(new RestoreMana(gs, user, item)),
     "maxheal" => new UseResult(new HealAction(gs, user, int.MaxValue, -1, item)),
     "trivialheal" => new UseResult(new HealAction(gs, user, 1, 1, item)),    
     "telepathy" => new UseResult(new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 }, item)),
-    "magicmap" => new UseResult(new MagicMapAction(gs, user)),
-    "detecttreasure" => new UseResult(new DetectTreasureAction(gs, user)),
-    "detecttraps" => new UseResult(new DetectTrapsAction(gs, user)),
+    "magicmap" => new UseResult(new MagicMapAction(gs, user, item)),
+    "detecttreasure" => new UseResult(new DetectTreasureAction(gs, user, item)),
+    "detecttraps" => new UseResult(new DetectTrapsAction(gs, user, item)),
     "scatter" => new UseResult(new ScatterAction(gs, user)),
     "resistfire" => new UseResult(new ApplyTraitAction(gs, user,
                         new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200 }, item)),
@@ -1866,7 +1867,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "recall" => new UseResult(new EscapeDungeonAction(gs, item)),
     "levitation" => new UseResult(new ApplyTraitAction(gs, user, new LevitationTrait()
     { ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(30, 75) }, item)),
-    "knock" => new UseResult(new KnockAction(gs, user)),
+    "knock" => new UseResult(new KnockAction(gs, user, item)),
     "applypoison" => new UseResult(new InventoryChoiceAction(gs, user,
           new InventoryOptions() { Title = "Apply it to which item?" },
           new ApplyPoisonAction(gs, user, item))),
@@ -1886,19 +1887,19 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
                         }, item)),
     "heroism" => BuildHeroism(user, gs, item!),
     "nondescript" => new UseResult(new ApplyTraitAction(gs, user, new NondescriptTrait(), item)),
-    "descent" => new UseResult(new DescentAction(gs, user)),
+    "descent" => new UseResult(new DescentAction(gs, user, item)),
     "stainless" => new UseResult(new InventoryChoiceAction(gs, user,
           new InventoryOptions() { Title = "Cast on which item?" },
           new ApplyStainlessnessAction(gs, user, item))),
-    "alchemicalcompound" => new UseResult(new ConsumeAlchemicalCompound(gs, user, item!)),
+    "alchemicalcompound" => new UseResult(new ConsumeAlchemicalCompound(gs, user, item)),
     "refreshbinding" => new UseResult(new BindSpellAction(gs, gs.Player)),
     "enchant" => new UseResult(new InventoryChoiceAction(gs, user,
           new InventoryOptions() { Title = "Use on which item?" },
-              new EnchantItemAction(gs, user, item!)    
+              new EnchantItemAction(gs, user, item!)
       )),
-    "dragonbreath" => SetupDragonBreath(user, gs),
+    "dragonbreath" => SetupDragonBreath(user, gs, item),
     "castsleep" => new UseResult(new SleepSpellAction(gs, user, 4, 14)),
-    "clarity" => new UseResult(new ClarityAction(gs, user)),
+    "clarity" => new UseResult(new ClarityAction(gs, user, item)),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 }

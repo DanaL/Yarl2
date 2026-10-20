@@ -818,7 +818,7 @@ class RumBreathAction(GameState gs, Actor actor, Loc target, int range) : Action
   }
 }
 
-class BreathWeaponAction(GameState gs, Actor actor, DamageType dmgType, string desc, int dmgDie, int numOfDice, int range, ExplosionColours colours) : DirectionalAction(gs, actor)
+class BreathWeaponAction(GameState gs, Actor actor, DamageType dmgType, string desc, int dmgDie, int numOfDice, int range, ExplosionColours colours, Item? item) : DirectionalAction(gs, actor)
 {
   readonly DamageType _damageType = dmgType;
   readonly string _desc = desc;
@@ -826,10 +826,17 @@ class BreathWeaponAction(GameState gs, Actor actor, DamageType dmgType, string d
   readonly int _numOfDice = numOfDice;
   readonly int _range = range;
   readonly ExplosionColours _colours = colours;
+  readonly Item? SourceItem = item;
 
   public override double Execute()
   {
     base.Execute();
+
+    // Copied from ItemAction but this class was already inheriting from DirectionalAction
+    if (Actor is not null && SourceItem is not null && SourceItem.HasTrait<ConsumableTrait>())
+    {
+      Actor.Inventory.ConsumeItem(SourceItem, Actor, GameState);
+    }
 
     if (GameState.LastPlayerFoV.ContainsKey(Actor!.Loc))
     {
@@ -1027,7 +1034,7 @@ class DisarmAction(GameState gs, Actor actor, Loc loc, Item? src) : ItemAction(g
       ui.AlertPlayer("The spell doesn't seem to do anything at all.");
     
     Consume();
-    
+
     return 1.0;
   }
 }
@@ -2526,20 +2533,22 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
   }
 }
 
-class DetectTrapsAction(GameState gs, Actor caster) : Action(gs, caster)
+class DetectTrapsAction(GameState gs, Actor caster, Item? src) : ItemAction(gs, caster, src)
 {
   public override double Execute()
   {
     base.Execute();
 
-    if (Actor is Player player)
+    Consume();
+
+    if (Actor is Player)
     {
       Loc playerLoc = GameState!.Player.Loc;
       
       int topScreenRow = playerLoc.Row - UserInterface.ViewHeight / 2;
       int topScreenCol = playerLoc.Col - UserInterface.ViewWidth / 2;
       int trapsFound = 0;
-      for (int r = 1; r < GameState!.CurrentMap.Height - 1; r++)
+      for (int r = 1; r < GameState.CurrentMap.Height - 1; r++)
       {
         for (int c = 1; c < GameState.CurrentMap.Width - 1; c++)
         {
@@ -2571,11 +2580,13 @@ class DetectTrapsAction(GameState gs, Actor caster) : Action(gs, caster)
   }
 }
 
-class DetectTreasureAction(GameState gs, Actor caster) : Action(gs, caster)
+class DetectTreasureAction(GameState gs, Actor caster, Item? src) : ItemAction(gs, caster, src)
 {
   public override double Execute()
   {
     base.Execute();
+
+    Consume();
 
     if (Actor is Player)
     {
@@ -2584,7 +2595,7 @@ class DetectTreasureAction(GameState gs, Actor caster) : Action(gs, caster)
       int topScreenRow = playerLoc.Row - UserInterface.ViewHeight / 2;
       int topScreenCol = playerLoc.Col - UserInterface.ViewWidth / 2;
       int itemsFound = 0;
-      for (int r = 1; r < GameState!.CurrentMap.Height - 1; r++)
+      for (int r = 1; r < GameState.CurrentMap.Height - 1; r++)
       {
         for (int c = 1; c < GameState.CurrentMap.Width - 1; c++)
         {
@@ -2614,7 +2625,7 @@ class DetectTreasureAction(GameState gs, Actor caster) : Action(gs, caster)
   }
 }
 
-class MagicMapAction(GameState gs, Actor caster) : Action(gs, caster)
+class MagicMapAction(GameState gs, Actor caster, Item? src) : ItemAction(gs, caster, src)
 {
   // Essentially we want to flood fill out and mark all reachable squares as 
   // remembered, ignoreable Passable() or not but stopping at walls. This will
@@ -2669,7 +2680,7 @@ class MagicMapAction(GameState gs, Actor caster) : Action(gs, caster)
   public override double Execute()
   {
     base.Execute();
-
+    
     // It's probably a bug if a monster invokes this action??
     if (Actor is Player player)
     {
@@ -2683,6 +2694,8 @@ class MagicMapAction(GameState gs, Actor caster) : Action(gs, caster)
         FloodFillMap(GameState, player.Loc);
       }      
     }
+
+    Consume();
 
     return 1.0;
   }
@@ -3193,7 +3206,7 @@ class LoudBangAction(GameState gs, Actor actor, Item? src) : ItemAction(gs, acto
   }
 }
 
-class KnockAction(GameState gs, Actor caster) : Action(gs, caster)
+class KnockAction(GameState gs, Actor caster, Item? src) : ItemAction(gs, caster, src)
 {  
   public override double Execute()
   {
@@ -3218,11 +3231,13 @@ class KnockAction(GameState gs, Actor caster) : Action(gs, caster)
       GameState.UIRef().RegisterAnimation(anim);
     }
     
+    Consume();
+
     return 1.0;
   }
 }
 
-class DescentAction(GameState gs, Actor actor) : Action(gs, actor)
+class DescentAction(GameState gs, Actor actor, Item? src) : ItemAction(gs, actor, src)
 {
   public override double Execute()
   {
@@ -3245,6 +3260,8 @@ class DescentAction(GameState gs, Actor actor) : Action(gs, actor)
       GameState.ObjDb.SetItemToLoc(loc, chasm);
       GameState.ChasmCreated(loc, water);
     }
+
+    Consume();
 
     return 1.0;
   }
@@ -3530,7 +3547,7 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice, Item? so
   }
 }
 
-class LearnSpellAction(GameState gs, Actor target, string spellName) : Action(gs, target)
+class LearnSpellAction(GameState gs, Actor target, string spellName, Item? src) : ItemAction(gs, target, src)
 {
   string _spellName = spellName;
 
@@ -3548,11 +3565,13 @@ class LearnSpellAction(GameState gs, Actor target, string spellName) : Action(gs
       GameState.UIRef().AlertPlayer($"You learn {_spellName}!");
     }
 
+    Consume();
+    
     return 1.0;
   }
 }
 
-class ClarityAction(GameState gs, Actor target) : Action(gs, target)
+class ClarityAction(GameState gs, Actor target, Item? src) : ItemAction(gs, target, src)
 {
   public override double Execute()
   {
@@ -3592,6 +3611,8 @@ class ClarityAction(GameState gs, Actor target) : Action(gs, target)
       GameState!.UIRef().AlertPlayer(msg, GameState, Actor.Loc);
     }
     
+    Consume();
+
     return 1.0;
   }
 }
@@ -3961,16 +3982,15 @@ class BlessWeaponAction(GameState gs, Actor actor, Item? item) : ItemAction(gs, 
   public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
 }
 
-class ConsumeAlchemicalCompound(GameState gs, Actor actor, Item item) : Action(gs, actor)
+class ConsumeAlchemicalCompound(GameState gs, Actor actor, Item? item) : ItemAction(gs, actor, item)
 {
-  Item SourceItem { get; set; } = item;
-
   public override double Execute()
   {
     base.Execute();
 
     List<string> messages = ["You hold your nose and consume the noisome substance."];
-    Actor!.Inventory.ConsumeItem(SourceItem, Actor, GameState!);
+    
+    Consume();
 
     Attribute boosted = GameState.Rng.Next(3) switch
     {
@@ -3979,7 +3999,7 @@ class ConsumeAlchemicalCompound(GameState gs, Actor actor, Item item) : Action(g
       _ => Attribute.Constitution
     };
     BoostMaxStatTrait b = new() { Stat = boosted, Amount = 2 };
-    messages.AddRange(b.Apply(Actor, GameState));
+    messages.AddRange(b.Apply(Actor!, GameState));
 
     int roll = GameState.Rng.Next(10);
     switch (roll)
@@ -3991,12 +4011,12 @@ class ConsumeAlchemicalCompound(GameState gs, Actor actor, Item item) : Action(g
           Strength = 2,
           Duration = GameState.Rng.Next(10, 21)
         };
-        messages.AddRange(poison.Apply(Actor, GameState));
+        messages.AddRange(poison.Apply(Actor!, GameState));
         break;
       case 1:
         messages.Add("Oof -- this burns!");
         int acidDmg = GameState.Rng.Next(10, 21);
-        var (hpLeft, _, _) = Actor.ReceiveDmg([(acidDmg, DamageType.Acid)], 0, GameState, SourceItem, 1.0);
+        var (hpLeft, _, _) = Actor!.ReceiveDmg([(acidDmg, DamageType.Acid)], 0, GameState, SourceItem, 1.0);
         if (hpLeft < 1)
         {
           foreach (string s in messages)
@@ -4008,21 +4028,21 @@ class ConsumeAlchemicalCompound(GameState gs, Actor actor, Item item) : Action(g
         messages.Add("Mmm tastes like molasses.");
         ExhaustedTrait exhausted = new()
         {
-          OwnerID = Actor.ID,
+          OwnerID = Actor!.ID,
           ExpiresOn = GameState.Turn + (ulong)GameState.Rng.Next(50, 100)
         };
         messages.AddRange(exhausted.Apply(Actor, GameState));
         break;
       case 3:
-        messages.Add($"{Grammar.Possessive(Actor)} skin turns transparent!");
+        messages.Add($"{Grammar.Possessive(Actor!)} skin turns transparent!");
         InvisibleTrait invis = new() { ExpiresOn = GameState.Turn + (ulong)GameState.Rng.Next(50, 100) };
-        messages.AddRange(invis.Apply(Actor, GameState));
+        messages.AddRange(invis.Apply(Actor!, GameState));
         break;
       default:
         messages.Add("You feel dizzy!");
         GameState.UIRef().AlertPlayer("You feel dizzy!");
         ConfusedTrait confused = new() { DC = 15 };
-        messages.AddRange(confused.Apply(Actor, GameState));
+        messages.AddRange(confused.Apply(Actor!, GameState));
         break;
     }
     
@@ -4033,10 +4053,9 @@ class ConsumeAlchemicalCompound(GameState gs, Actor actor, Item item) : Action(g
   }
 }
 
-class EnchantItemAction(GameState gs, Actor actor, Item item) : Action(gs, actor)
+class EnchantItemAction(GameState gs, Actor actor, Item item) : ItemAction(gs, actor, item)
 {
   public char Choice { get; set; }
-  Item SourceItem { get; set; } = item;
 
   public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
 
@@ -4049,18 +4068,19 @@ class EnchantItemAction(GameState gs, Actor actor, Item item) : Action(gs, actor
     var (item, _) = Actor!.Inventory.ItemAt(Choice);
     if (item != null)
     {
-      var (_, msg) = Alchemy.UpgradeItem(item, SourceItem, Actor, GameState);
+      var (_, msg) = Alchemy.UpgradeItem(item, SourceItem!, Actor, GameState);
       GameState.UIRef().AlertPlayer(msg);
     }
+
+    Consume();
 
     return 1.0;
   }
 }
 
-class ApplyStainlessnessAction(GameState gs, Actor actor, Item? item) : Action(gs, actor)
+class ApplyStainlessnessAction(GameState gs, Actor actor, Item? item) : ItemAction(gs, actor, item)
 {
   public char Choice { get; set; }
-  Item? SourceItem { get; set; } = item;
 
   public override double Execute()
   {
@@ -4094,10 +4114,7 @@ class ApplyStainlessnessAction(GameState gs, Actor actor, Item? item) : Action(g
         GameState.UIRef().AlertPlayer($"{objName.Capitalize()} looks as good as new!");
       }
 
-      if (SourceItem is not null && SourceItem.HasTrait<ConsumableTrait>())
-      {
-        Actor.Inventory.ConsumeItem(SourceItem, Actor, GameState);
-      }
+      Consume();
     }
 
     return 1.0;
