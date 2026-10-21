@@ -1199,19 +1199,6 @@
     ]
   },
   {
-    "Name": "MUSHROOM_STEW",
-    "DescriptiveName": "mushroom stew",
-    "Type": "Food",
-    "Value": 5,
-    "Glyph": ",,lightbrown,brown,black,false",
-    "Traits": [
-      "Edible",
-      "Consumable",
-      "Stackable",
-      "Delicious"
-    ]
-  },
-  {
     "Name": "HEARTY_SOUP",
     "DescriptiveName": "hearty soup",
     "Type": "Food",
