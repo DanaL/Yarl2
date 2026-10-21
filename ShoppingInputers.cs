@@ -350,7 +350,7 @@ class InnkeeperInputer : Inputer
   public override UIResult GetResult() => new ServiceResult()
   {
     Service = Selection,
-    Zorkminds = Zorkmids
+    Zorkmids = Zorkmids
   };
 }
 
@@ -1023,7 +1023,7 @@ class WitchDialogue : Inputer
   {
     return new ServiceResult()
     {
-      Zorkminds = Invoice,
+      Zorkmids = Invoice,
       Service = Service
     };
   }
@@ -1084,7 +1084,7 @@ class PriestInputer : Inputer
   {
     return new ServiceResult()
     {
-      Zorkminds = 50,
+      Zorkmids = 50,
       Service = Service
     };
   }
@@ -1112,6 +1112,6 @@ class UpgradeItemUIResult : UIResult
 
 class ServiceResult : UIResult
 {
-  public int Zorkminds { get; set; } = 0;
+  public int Zorkmids { get; set; } = 0;
   public string Service { get; set; } = "";
 }

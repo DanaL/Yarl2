@@ -1450,7 +1450,7 @@ sealed class InnkeeperServiceAction(GameState gs, Mob innkeeper) : Action(gs)
   public override void ReceiveUIResult(UIResult result)
   {
     var serviceResult = (ServiceResult)result;
-    _invoice = serviceResult.Zorkminds;
+    _invoice = serviceResult.Zorkmids;
     _service = serviceResult.Service;
   }
 }
@@ -1484,7 +1484,7 @@ class PriestServiceAction(GameState gs, Mob priest) : Action(gs)
   public override void ReceiveUIResult(UIResult result)
   {
     var serviceResult = (ServiceResult) result;
-    Invoice = serviceResult.Zorkminds;
+    Invoice = serviceResult.Zorkmids;
     Service = serviceResult.Service;
   }
 }
@@ -1543,7 +1543,7 @@ class WitchServiceAction(GameState gs, Mob witch) : Action(gs, witch)
   public override void ReceiveUIResult(UIResult result)
   {
     var serviceResult = (ServiceResult)result;
-    Invoice = serviceResult.Zorkminds;
+    Invoice = serviceResult.Zorkmids;
     Service = serviceResult.Service;
   }
 }
