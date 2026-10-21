@@ -37,65 +37,66 @@ class FactDb(RulerInfo ruler)
   public IReadOnlyList<Nation> Nations => _nations;
   readonly List<Fact> _historicalEvents = [];
   public IReadOnlyList<Fact> HistoricalEvents => _historicalEvents;
-  readonly List<Fact> _facts = [];
-  public IReadOnlyList<Fact> Facts => _facts;
   public RulerInfo Ruler { get; init; } = ruler;
+  readonly Dictionary<string, Fact> _facts = [];
 
   public void Add(Fact fact)
   {
-    if (fact is Nation nation)
+    if (fact is Nation nation) 
+    {
       _nations.Add(nation);
+    }
     else if (fact is Invasion || fact is Disaster)
+    {
       _historicalEvents.Add(fact);
+    }
     else if (fact is DungeonGenerationFact dgf)
+    {
       SetDungeonGenTime(dgf);
-    else
-      _facts.Add(fact);
-  }
-
-  void SetDungeonGenTime(DungeonGenerationFact dgf)
-  {
-    foreach (var fact in _facts)
-    {
-      if (fact is DungeonGenerationFact existing && existing.DungeonId == dgf.DungeonId)
-      {
-        existing.GenTime = dgf.GenTime;
-        return;
-      }
     }
-
-    _facts.Add(dgf);
-  }
-
-  public void ClearFact(Fact fact) => _facts.Remove(fact);
-
-  public Fact? FactCheck(string name)
-  {
-    foreach (var fact in _facts)
+    else 
     {
-      if (fact is SimpleFact sf && sf.Name == name)
-        return fact;
-      else if (fact is FlagFact ff && ff.Name == name)
-        return fact;
-      else if (fact is DeathFact df && df.Name == name)
-        return fact;
-      else if (fact is LocationFact lf && lf.Desc == name)
-        return fact;
+      string k = fact switch 
+      {  
+         SimpleFact sf => sf.Name,
+         FlagFact ff => ff.Name,
+         DeathFact df => df.Name,
+         LocationFact lf => lf.Desc,
+         _ => ""    
+      };
+      _facts[k] = fact;
     }
-
-    return null;
   }
+
+  void SetDungeonGenTime(DungeonGenerationFact dgf) => _facts[$"DungeonGen#{dgf.DungeonId}"] = dgf;
+
+  public void ClearFact(Fact fact)
+  {
+    string k = fact switch 
+    {  
+        SimpleFact sf => sf.Name,
+        FlagFact ff => ff.Name,
+        DeathFact df => df.Name,
+        LocationFact lf => lf.Desc,
+        DungeonGenerationFact dgf => $"DungeonGen#{dgf.DungeonId}",
+        _ => ""    
+    };
+
+    _facts.Remove(k);
+  }
+
+  public Fact? FactCheck(string name) => _facts.TryGetValue(name, out var value) ? value : null;
 
   public ulong LastGenerationTime(int dungeonId)
   {
-    foreach (var fact in _facts)
-    {
-      if (fact is DungeonGenerationFact f && f.DungeonId == dungeonId)
-        return f.GenTime;
-    }
-
-    return 0;
+    string k = $"DungeonGen#{dungeonId}";
+    if (_facts.TryGetValue(k, out var f) && f is DungeonGenerationFact dgf)
+      return dgf.GenTime;
+    else
+      return 0;    
   }
+
+  public List<string> AsList() => [.. _facts.Values.Select(f => f.ToString()!)];
 }
 
 class Fact

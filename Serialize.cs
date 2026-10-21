@@ -291,13 +291,13 @@ class CampaignSaver
       throw new Exception("FactDb is null!");
     }
 
-    List<string?> wtf = [.. c.FactDb!.Facts.Select(f => f.ToString())];
-
+    var wtf = c.FactDb.AsList();
+    
     CampaignSaver sc = new()
     {
       Town = town,
-      Facts = [.. c.FactDb!.Facts.Select(f => f.ToString()!)],
-      HistoricalEvents = [.. c.FactDb!.HistoricalEvents.Select(he => he.ToString()!)], 
+      Facts = c.FactDb.AsList(),
+      HistoricalEvents = [.. c.FactDb.HistoricalEvents.Select(he => he.ToString()!)], 
       Nations = [.. c.FactDb!.Nations.Select(n => n.ToString())],  
       RulerInfo = c.FactDb!.Ruler.ToString(),     
     };
