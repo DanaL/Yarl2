@@ -3131,12 +3131,12 @@ class OnPickupTrait : Trait
   public override string AsText() => $"OnPickup#{Clear}#{Event}";
 }
 
-class RepugnantTrait : Trait
+sealed class RepugnantTrait : Trait
 {
   public override string AsText() => $"Repugnant#{SourceId}";
 }
 
-class RetributionTrait : Trait
+sealed class RetributionTrait : Trait
 {
   public DamageType Type {  get; set; }
   public int DmgDie { get; set; }
@@ -3145,12 +3145,12 @@ class RetributionTrait : Trait
   public override string AsText() => $"Retribution#{Type}#{DmgDie}#{NumOfDice}#{Radius}";
 }
 
-class ShunnedTrait : Trait
+sealed class ShunnedTrait : Trait
 {
   public override string AsText() => "Shunned";
 }
 
-class VersatileTrait(DamageTrait oneHanded, DamageTrait twoHanded) : Trait
+sealed class VersatileTrait(DamageTrait oneHanded, DamageTrait twoHanded) : Trait
 {
   public DamageTrait OneHanded { get; set; } = oneHanded;
   public DamageTrait TwoHanded { get; set; } = twoHanded;
@@ -3167,14 +3167,14 @@ sealed class WeakenTrait : BasicTrait
   public override string AsText() => $"Weaken#{DC}#{Amt}";
 }
 
-class WeaponSpeedTrait : Trait
+sealed class WeaponSpeedTrait : Trait
 {
   public double Cost { get; set; }
 
   public override string AsText() => $"WeaponSpeed#{Cost}";
 }
 
-class WearAndTearTrait : Trait
+sealed class WearAndTearTrait : Trait
 {
   public int Wear { get; set; }
 
@@ -3186,7 +3186,7 @@ sealed class WebBurstTrait : Trait
   public override string AsText() => "WebBurst";
 }
 
-class StatBuffTrait : TemporaryTrait
+sealed class StatBuffTrait : TemporaryTrait
 {
   public Attribute Attr { get; set; }
   public int Amt { get; set; }
@@ -3332,7 +3332,7 @@ class StatBuffTrait : TemporaryTrait
   }
 }
 
-class StatDebuffTrait : TemporaryTrait
+sealed class StatDebuffTrait : TemporaryTrait
 {
   public int DC { get; set; } = 10;
   public Attribute Attr { get; set; }
@@ -3423,7 +3423,7 @@ class StatDebuffTrait : TemporaryTrait
   }
 }
 
-class BlindTrait : TemporaryTrait
+sealed class BlindTrait : TemporaryTrait
 {
   protected override string ExpiryMsg => "You can see again!";
 
@@ -3460,7 +3460,7 @@ class BlindTrait : TemporaryTrait
   public override string AsText() => $"Blind#{OwnerID}#{ExpiresOn}#{SourceId}";
 }
 
-class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
+sealed class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
 {
   public ulong OwnerID { get; set; }
   readonly string _text = text;
@@ -3478,7 +3478,7 @@ class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
 }
 
 // I am making the assumption it will only be the Player who uses Recall.
-class RecallTrait : BasicTrait, IGameEventListener
+sealed class RecallTrait : BasicTrait, IGameEventListener
 {
   public bool Expired { get; set; } = false;
   public bool Listening => true;
