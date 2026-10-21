@@ -4467,7 +4467,6 @@ class TraitFactory
     { "Drowning", (pieces, gameObj) => new DrowningTrait() },
     { "Edible", (pieces, gameObj) => new EdibleTrait() },
     { "Electrocutes", (pieces, gameObj) => new ElectrocutesTrait() { DC = int.Parse(pieces[1]), Duration = int.Parse(pieces[2]) }},
-    { "EmberBlessing", (pieces, gameObj) => new EmberBlessingTrait() { SourceId = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) }},
     { "EmergencyDoor", (pieces, gameObj) => new EmergencyDoorTrait() },
     { "EndGameTrigger", (pieces, gameObj) => new EndGameTriggerTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) }},
     { "Equipable", (pieces, gameObj) => new EquipableTrait() },

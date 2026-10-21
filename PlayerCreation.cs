@@ -496,43 +496,6 @@ class DragonCultBlessingTrait : BlessingTrait
   public override string AsText() => $"DragonCultBlessing#{OwnerID}";
 }
 
-class EmberBlessingTrait : BlessingTrait
-{
-  public override void Apply(GameObj granter, GameState gs)
-  {
-    ResistanceTrait resist = new()
-    {
-      SourceId = granter.ID,
-      OwnerID = gs.Player.ID,
-      ExpiresOn = ulong.MaxValue,
-      Type = DamageType.Fire
-    };
-    // I'm not calling the Apply() method here because I don't want a separate listener
-    // registered for the ResistanceTrait. This trait will be removed when 
-    // EmberBlessingTrait is removed.
-    gs.Player.Traits.Add(resist);
-
-    DamageTrait dt = new()
-    {
-      SourceId = granter.ID,
-      DamageType = DamageType.Fire,
-      DamageDie = 6,
-      NumOfDie = 1
-    };
-    gs.Player.Traits.Add(dt);
-
-    FireRebukeTrait rebuke = new() { SourceId = granter.ID };
-    gs.Player.Traits.Add(rebuke);
-
-    gs.Player.Traits.Add(this);
-  }
-
-  public override string AsText() => $"EmberBlessing#{SourceId}#{OwnerID}";
-  public override string Description(Actor owner) => "Ember blessing";
-
-  public override void Remove(GameState gs) => throw new NotImplementedException();
-}
-
 class PaladinBlessingTrait : HuntokarBlessingTrait
 {  
   public override void Apply(GameObj granter, GameState gs)

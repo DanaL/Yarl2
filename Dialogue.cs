@@ -23,7 +23,7 @@ enum TokenType
   TRUE, FALSE,
   OPTION, SPEND, END, DEF, APPEND,
   BLESSINGS, GRANT_CHAMP_BLESSING, GRANT_PALADIN_BLESSING,
-  GRANT_EMBER_BLESSING, GRANT_TRICKSTER_BLESSSING, GRANT_WINTER_BLESSING,
+  GRANT_TRICKSTER_BLESSSING, GRANT_WINTER_BLESSING,
   SHOP_MENU, SHOP_SELECTION, DRAGON_CULT_QUEST, SELL_MENU,
   CHECK_MD_CLERIC,
   EOF
@@ -133,7 +133,6 @@ class ScriptScanner(string src)
       "append" => TokenType.APPEND,
       "blessings-options" => TokenType.BLESSINGS,
       "grant-champion-blessing" => TokenType.GRANT_CHAMP_BLESSING,
-      "ember-blessing" => TokenType.GRANT_EMBER_BLESSING,
       "trickster-blessing" => TokenType.GRANT_TRICKSTER_BLESSSING,
       "winter-blessing" => TokenType.GRANT_WINTER_BLESSING,
       "shop-menu" => TokenType.SHOP_MENU,
@@ -240,8 +239,7 @@ class ScriptParser(List<ScriptToken> tokens)
       TokenType.OPTION => OptionExpr(),
       TokenType.BLESSINGS => BlessingsExpr(),
       TokenType.GRANT_CHAMP_BLESSING => GrantChampionBlessingExpr(),
-      TokenType.GRANT_PALADIN_BLESSING => GrantPaladinBlessingExpr(),
-      TokenType.GRANT_EMBER_BLESSING => GrantEmberBlessingExpr(),
+      TokenType.GRANT_PALADIN_BLESSING => GrantPaladinBlessingExpr(),      
       TokenType.GRANT_TRICKSTER_BLESSSING => GrantTricksterBlessingExpr(),
       TokenType.GRANT_WINTER_BLESSING => GrantWinterBlessing(),
       TokenType.SHOP_MENU => ShopMenuExpr(),
@@ -359,14 +357,6 @@ class ScriptParser(List<ScriptToken> tokens)
     Consume(TokenType.GRANT_PALADIN_BLESSING);
     Consume(TokenType.RIGHT_PAREN);
     return new ScriptPaladinBlessing();
-  }
-
-  ScriptEmberBlessing GrantEmberBlessingExpr()
-  {
-    Consume(TokenType.GRANT_EMBER_BLESSING);
-    Consume(TokenType.RIGHT_PAREN);
-
-    return new ScriptEmberBlessing();
   }
 
   ScriptTricksterBlessing GrantTricksterBlessingExpr()
@@ -739,7 +729,6 @@ record class ScriptSellSelection(char Choice) : ScriptExpr;
 record class ScriptSpend(int Amount) : ScriptExpr;
 record class ScriptChampionBlessing : ScriptExpr;
 record class ScriptPaladinBlessing : ScriptExpr;
-record class ScriptEmberBlessing : ScriptExpr;
 record class ScriptTricksterBlessing : ScriptExpr;
 record class ScriptWinterBlessing : ScriptExpr;
 record class ScriptBuyHolyWater : ScriptExpr;
@@ -1114,10 +1103,6 @@ class DialogueInterpreter
     else if (Expr is ScriptPaladinBlessing)
     {
       EvalPaladinBlessing(mob, gs);
-    }
-    else if (Expr is ScriptEmberBlessing)
-    {
-      EvalEmberBlessing(mob, gs);
     }
     else if (Expr is ScriptTricksterBlessing)
     {
@@ -1768,8 +1753,6 @@ class DialogueInterpreter
       Sb.Append("\n\nYou go forth with Huntokar's blessing and aid. Seek out and defeat the evil that is plauging our town!");
     }
     
-    //Options.Add(new DialogueOption("The [ICEBLUE Blessing of Embers]: Huntokar will surround you in holy fire and immolate evil you face!", opt++, new ScriptEmberBlessing()));
-    
     int lastHWPurchase = mob.Stats[Attribute.ShopMenu].Curr;
     int currTurn = (int)(gs.Turn % int.MaxValue);
     if (gs.Player.Inventory.Zorkmids >= HOLY_WATER_PRICE && currTurn - lastHWPurchase > 1750)
@@ -1801,14 +1784,6 @@ class DialogueInterpreter
 
     PaladinBlessingTrait blessing = new() { SourceId = mob.ID, OwnerID = gs.Player.ID };
     blessing.Apply(mob, gs);
-    
-    throw new ConversationEnded("You are bathed in holy light!");
-  }
-
-  static void EvalEmberBlessing(Actor mob, GameState gs)
-  {
-    EmberBlessingTrait ember = new() { SourceId = mob.ID, OwnerID = gs.Player.ID };
-    ember.Apply(mob, gs);
     
     throw new ConversationEnded("You are bathed in holy light!");
   }
