@@ -197,7 +197,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
         gs.ObjDb.AddNewActor(spook, spookLoc);
       }
 
-      gs.UIRef().AlertPlayer("The grave's occuptant was still at home!");
+      gs.UIRef().AlertPlayer("The grave's occupant was still at home!");
       s += "\n\nYou feel unclean.";
 
       if (!digger.HasActiveTrait<ShunnedTrait>())
