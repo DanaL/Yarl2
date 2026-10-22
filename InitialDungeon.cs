@@ -230,16 +230,16 @@ class InitialDungeonBuilder(Loc exitDest, string mainOccupant) : DungeonBuilder
       SetQuestStateAtLoc ce = new(loc, 1, "");
       gs.ObjDb.ConditionalEvents.Add(ce);
     }
-        
-    Loc hammerLoc = Loc.Nowhere;
+    
+    bool hammerAvailable = false;
     if (gs.FactDb.FactCheck("SmithHammerId") is SimpleFact shid)
     {
       ulong hammerId = ulong.Parse(shid.Value);
-      if (gs.ObjDb.GetObj(hammerId) is Item hammer)
-        hammerLoc = hammer.Loc;
+      hammerAvailable = gs.ObjDb.GetObj(hammerId) is Item hammer && 
+                          (hammer.Loc.DungeonID != 1 || hammer.ContainedBy == gs.Player.ID);
     }
     
-    if (gs.FactDb.FactCheck("SmithHammerReturned") is null || hammerLoc.DungeonID == 1)
+    if (gs.FactDb.FactCheck("SmithHammerReturned") is null && !hammerAvailable)
     {
       SmithQuest.Setup(dungeon, MainOccupant, gs);  
     }
