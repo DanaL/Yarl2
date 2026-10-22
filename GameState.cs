@@ -1183,7 +1183,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     var (hour, minute) = CurrTime();
     if (hour == 20 && minute == 0)
     {
-      PlaceMoonDaughterCleric();
+      SetMoonDaughterCleric();
     }
 
     ObjDb.ConditionalEvents = [.. ObjDb.ConditionalEvents.Where(ce => !ce.Complete)];
@@ -1201,7 +1201,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     }
   }
 
-  public void PlaceMoonDaughterCleric()
+  public void SetMoonDaughterCleric()
   {
     if (!(Player.Religion == "Moon Daughter" || FactDb.FactCheck("MD_CURIOUS") is not null))
       return;

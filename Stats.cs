@@ -53,7 +53,8 @@ enum Attribute
   KoboldCultLevel,
   MainQuestState,
   LastVisit,
-  CrimsonKingSacrifice
+  CrimsonKingSacrifice,
+  HuntokarPiety
 }
 
 class Stat

@@ -456,6 +456,20 @@ class ChampionBlessingTrait : HuntokarBlessingTrait
 
     return s;
   }
+
+  public void Boost(GameState gs)
+  {
+    if (gs.ObjDb.GetObj(OwnerID) is not Actor owner)
+      return;
+
+    foreach (Trait t in owner.Traits)
+    {
+      if (t.SourceId == SourceId && t is ACModTrait ac)
+        ac.ArmourMod += 1;
+      else if (t.SourceId == SourceId && t is AttackModTrait at)
+        at.Amt += 1;
+    }
+  }
 }
 
 class DragonCultBlessingTrait : BlessingTrait

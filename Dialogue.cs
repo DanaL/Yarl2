@@ -1808,14 +1808,25 @@ class DialogueInterpreter
 
   static void EvalTurnInSkull(Actor mob, GameState gs)
   {
-    List<Item> skulls = [.. gs.Player.Inventory.Items().Where(i => i.Name == "skull")];
-    if (skulls.Count > 0)
-    {
-      Item skull = skulls[0];
-      gs.Player.Inventory.RemoveByID(skull.ID, gs);
-      gs.ObjDb.RemoveItemFromGame(Loc.Nowhere, skull);
-    }
+    Item skull = gs.Player.Inventory.Items().First(i => i.Name == "skull");
+    gs.Player.Inventory.RemoveByID(skull.ID, gs);
+    gs.ObjDb.RemoveItemFromGame(Loc.Nowhere, skull);
 
+    if (gs.Player.Religion == "Huntokar")
+    {
+      if (gs.Player.Stats.TryGetValue(Attribute.HuntokarPiety, out var piety))
+        piety.SetMax(piety.Curr + 1);
+      else
+        gs.Player.Stats[Attribute.HuntokarPiety] = new Stat(1);
+
+      if (gs.Player.Stats[Attribute.HuntokarPiety].Curr % 2 == 0)
+      {
+        gs.UIRef().AlertPlayer("Your faithfulness has strengthened your blessing!");
+        ChampionBlessingTrait cbt = gs.Player.Traits.OfType<ChampionBlessingTrait>().First();
+        cbt.Boost(gs);
+      }
+    }
+    
     throw new ConversationEnded("I'll see to it that these remains are sanctified and given a proper burial.");
   }
 
@@ -1848,7 +1859,7 @@ class DialogueInterpreter
     var (hour, _) = gs.CurrTime();
     if ((hour >= 20 && hour <= 23) || (hour >= 0 && hour < 4))
     {
-      gs.PlaceMoonDaughterCleric();
+      gs.SetMoonDaughterCleric();
     }    
   }
 }

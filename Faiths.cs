@@ -134,12 +134,12 @@ class Faiths
     else if (totalSacrifices == 50)
     {
       gs.UIRef().SetPopup(new Popup("A voice booms:\n\nMy Blade shall now cast your foes aside!", "", -1, -1));
-      if (!gs.Player.Traits.Any(t => t is KnockBackTrait && t.SourceId == blade.ID))      
+      if (!gs.Player.Traits.Any(t => t is KnockBackTrait && t.SourceId == blade.ID))
         gs.Player.Traits.Add(new KnockBackTrait() { SourceId = blade.ID });      
     }
     else if (totalSacrifices == 75)
     {
-      gs.UIRef().SetPopup(new Popup("A voice booms:\n\nMortal, the path of destruction thou has carved pleases me!", "", -1, -1));
+      gs.UIRef().SetPopup(new Popup("A voice booms:\n\nMortal, the path of destruction thou hast carved pleases me!", "", -1, -1));
       
       blade.Traits.Add(new ViciousTrait() { Scale = 1.25 });
       gs.UIRef().AlertPlayer("The Blade shudders and grows more keen.");
